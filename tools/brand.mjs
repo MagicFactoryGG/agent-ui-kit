@@ -2,10 +2,11 @@
 // The protected Brand layer: a party's registered marks, logos and provider buttons, which nobody draws but the
 // registered component. brand.json (in the design repo) names each asset: its package and component, an example
 // call (the playground's Brand page), and the words that belong to it ("Authenticate with …"). Only `register` writes
-// it, from a Distiller record that shows the party proved ownership (authenticated, its domain checked), so no one
+// it, from a Distiller record that shows the party proved ownership; an asset's `also` names the brand's own places
+// that may draw or say it (its proof app), (authenticated, its domain checked), so no one
 // registers someone else's brand. brand.lock keeps the registry's hash and each asset drawing's fingerprints.
 //
-//   bun tools/brand.mjs register <design dir> --record <distiller record.json> --brand <brand.json draft>
+//   bun tools/brand.mjs register <design dir> --record <run>/ownership.json --brand brand.draft.json
 //   bun tools/brand.mjs check <dir> [--design <design dir>]     any app or the design repo; exit 1 on a finding
 //   bun tools/brand.mjs icon <design dir> <name> <file>:<line>  register a drawing that is not a brand asset
 //
@@ -77,25 +78,31 @@ function lockOf(design, brand) {
 }
 
 function register(design, recordPath, draftPath) {
+  // The Distiller run's ownership record (distill.mjs writes <run>/ownership.json): the doors it passed.
   const record = readJson(recordPath);
   const draft = readJson(draftPath);
-  const o = record.ownership ?? {};
-  const domain = String(record.party?.domain ?? '').toLowerCase();
+  const domain = String(draft.owner?.domain ?? '').toLowerCase();
   const refuse = (why) => {
     console.error(`${RULE}: ${why}`);
     process.exit(1);
   };
-  // Section 14: the party authenticated and proved its domain; the registry is that party's and that domain's only.
-  if (o.authenticated !== true) refuse('the Distiller record does not show the party authenticated');
-  if (!o.domainChecked || String(o.domain ?? '').toLowerCase() !== domain || !domain) refuse('the Distiller record does not show the party proved its domain');
-  if (String(draft.owner?.domain ?? '').toLowerCase() !== domain) refuse(`the registry's owner (${draft.owner?.domain}) is not the proved party (${domain})`);
+  const doors = record.doors ?? {};
+  const checks = doors.checks ?? [];
+  // Section 14: the party proved the domain. provider: authenticated and the domain proved at the provider; dns-txt:
+  // the domain's TXT record; first-party: the operator's own brand, on its own list. A guest draft never registers.
+  const proved =
+    (doors.mode === 'provider' && checks.some((c) => c.door === 'domain' && c.domain === domain)) ||
+    (doors.mode === 'dns-txt' && checks.some((c) => c.door === 'dns-txt' && c.domain === domain)) ||
+    (doors.mode === 'first-party' && checks.some((c) => c.door === 'first-party' && (c.domains ?? []).includes(domain)));
+  if (!domain) refuse('the registry names no owner domain');
+  if (!proved) refuse(`the Distiller record ${record.id ?? '(no id)'} does not prove ${domain} (doors: ${doors.mode ?? 'none'})`);
   for (const a of draft.assets ?? []) {
     if (!componentDrawings(resolve(design, a.dir), a.component)) refuse(`${a.id}: no component ${a.component} in ${a.dir}`);
   }
-  const brand = { ...draft, owner: { ...draft.owner, proof: record.id } };
+  const brand = { ...draft, owner: { ...draft.owner, proof: { record: record.id, mode: doors.mode, at: record.at } } };
   writeFileSync(join(design, 'brand.json'), `${JSON.stringify(brand, null, 2)}\n`);
   writeFileSync(join(design, 'brand.lock'), `${JSON.stringify(lockOf(design, brand), null, 2)}\n`);
-  console.log(`brand: registered ${brand.assets.length} assets for ${domain} (record ${record.id})`);
+  console.log(`brand: registered ${brand.assets.length} assets for ${domain} (Distiller record ${record.id}, ${doors.mode})`);
 }
 
 export function check(dir, design = dir) {
@@ -112,7 +119,8 @@ export function check(dir, design = dir) {
   const icons = existsSync(iconsFile) ? readJson(iconsFile) : {};
   const iconPrints = new Set(Object.values(icons));
   const own = new Map(); // fingerprint → asset id
-  const registeredDirs = [...brand.assets, ...pending].map((a) => resolve(design, a.dir));
+  // An asset's package, and the brand's own places it names in `also` (its proof app, say).
+  const registeredDirs = [...brand.assets, ...pending].flatMap((a) => [a.dir, ...(a.also ?? [])]).map((d) => resolve(design, d));
   if (existsSync(brandFile)) {
     const lockFile = join(design, 'brand.lock');
     if (!existsSync(lockFile)) say(relative(dir, brandFile) || 'brand.json', 'has no brand.lock: only `brand.mjs register` writes the registry');
@@ -143,7 +151,7 @@ export function check(dir, design = dir) {
     const lines = text.split('\n');
     for (const [w, a] of words) {
       // The words on a line that calls the registered component are that asset's own label.
-      const at = lines.findIndex((l) => l.includes(w) && !l.includes(`${a.component.toLowerCase()}(`));
+      const at = lines.findIndex((l) => l.includes(w) && !l.trim().startsWith('//') && !l.includes(`${a.component.toLowerCase()}(`));
       if (at >= 0) say(`${rel}:${at + 1}`, `says "${w}", the words of the registered ${a.id}: use ${a.component} from ${a.package}`);
     }
   }

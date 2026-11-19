@@ -334,7 +334,7 @@ export function generate(designDir, playDir) {
   if (brandSet?.assets?.length) {
     pages.push('brand');
     nav.push(`            option "Brand" value="brand"`);
-    view.push(`      if page == "brand"`, `        Page(title="Brand", note=${quote(brandFile.endsWith('draft.json') ? `${brandSet.owner?.name ?? ''}: pending registration by the Distiller` : `${brandSet.owner?.name ?? ''}: registered (record ${brandSet.owner?.proof ?? ''})`)})`);
+    view.push(`      if page == "brand"`, `        Page(title="Brand", note=${quote(brandFile.endsWith('draft.json') ? `${brandSet.owner?.name ?? ''}: pending registration by the Distiller` : `${brandSet.owner?.name ?? ''}: registered (${brandSet.owner?.proof?.mode ?? ''} record ${brandSet.owner?.proof?.record ?? ''})`)})`);
     for (const a of brandSet.assets) {
       view.push(`          MatrixRow(label=${quote(a.id)}, testId=${quote(`brand-${a.id}`)})`);
       for (const scheme of ['light', 'dark']) {
