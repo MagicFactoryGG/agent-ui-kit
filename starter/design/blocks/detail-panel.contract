@@ -1,15 +1,16 @@
-// The detail of one record, alone or beside its list: a header (the title, a status tag, up to two actions), the
-// record's facts as label-value rows, a notes paragraph, and its activity at the end. States: `data` one record,
-// loading, failed, and long content; `agent` none, changed (a changed value carries the kit's mark with
-// `changedNote`, the ledger's "did" sentence) and waiting (`waitingNote`, its "asks" sentence, is the calm line the
-// person must answer, under the title). While loading every group keeps its place and its label, each holding
-// quiet bars that claim nothing (Picture keeps its fill while loading; the sentence stays, for a voice). A fact's
-// short value sits at the end of its line; a long one reads as prose under its label. The failed card carries the
-// error's own border. The header's actions are the app's in every state, and so is their `interaction` (busy while
-// its write is in flight, disabled when it means to refuse them): a record that failed gets its retry from the
-// app, as an action like any other (mechanisms, not opinions). At phone width the groups stack; wide, the facts
-// and notes sit beside the activity (columns that wrap at a named minimum, Exact's "columns that wrap on a
-// phone"). Every word is a prop; rows arrive by shape (Fact, Event).
+// The detail of one record, alone or inside a screen's column: a header (the title, its status tag, up to two
+// actions), the record's facts as label-value rows, a notes paragraph, and its activity at the end. The panel keeps
+// one measure (`blocks.detail-max`) so its rows and its prose read at one rhythm at every width; a phone stacks the
+// same groups unchanged. States: `data` one record, loading, failed and long content; `agent` none, changed (a
+// changed value carries the kit's mark with `changedNote`, the ledger's "did" sentence, under the title) and waiting
+// (`waitingNote`, its "asks" sentence, is the calm line the person must answer). While loading every group keeps its
+// place and its label, quiet bars standing in for rows where a short fact's label and value sit, and a status line
+// says `loadingText`, for a voice as much as for an eye. The record that failed keeps the same groups' shape: the
+// facts card's body says `failedText` and offers the way on, `retryLabel` naming it and `retryPress` being the
+// app's own action; notes and activity belong to the record that did not arrive. The header's actions are the
+// app's in every state, and so is their `interaction` (busy while a write is in flight, with the platform's own
+// progress turning beside the buttons; disabled when it means to refuse them). A fact's short value sits at the end
+// of its line; a long one reads as prose under its label. Every word is a prop; rows arrive by shape (Fact, Event).
 use Swatch from "__SCOPE__/theme"
 use Words, ActionButton, Tag from "__SCOPE__/components"
 
@@ -41,8 +42,11 @@ component DetailPanel
     secondaryLabel: string
     secondaryPress: action
     interaction: enum<"idle", "busy", "disabled">
+    busyNote: string
     changedNote: string
     waitingNote: string
+    retryLabel: string
+    retryPress: action
     factsTitle: string
     facts: Fact[]
     factsEmptyText: string
@@ -59,90 +63,92 @@ component DetailPanel
     column testId=testId width="100%" max-width="blocks.detail-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.xl"
       row flex-wrap="wrap" align-items="flex-start" gap="theme.space.md"
         column flex=1 min-width="blocks.header-min" box-sizing="border-box" gap="theme.space.xs"
-          row flex-wrap="wrap" align-items="baseline" gap="theme.space.sm"
-            Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
-            if statusLabel != ""
-              Tag(text=statusLabel, outcome=status)
-          if agent == "changed" or agent == "waiting"
-            row gap="theme.space.sm" padding-left="theme.space.sm" border-left-width="components.mark-line" border-left-style="solid" border-left-color=(agent == "waiting" ? "theme.color.caution" : "theme.color.accent")
-              text (agent == "waiting" ? waitingNote : changedNote) testId=`${testId}-agent` font="theme.type.caption" color=(agent == "waiting" ? "theme.color.caution-text" : "theme.color.accent")
+          Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+          if statusLabel != "" or agent == "changed" or agent == "waiting"
+            row flex-wrap="wrap" align-items="center" gap="theme.space.sm"
+              if statusLabel != ""
+                Tag(text=statusLabel, outcome=status)
+              if agent == "changed" or agent == "waiting"
+                row min-width=0 gap="theme.space.sm" padding-left="theme.space.sm" border-left-width="components.mark-line" border-left-style="solid" border-left-color=(agent == "waiting" ? "theme.color.caution" : "theme.color.accent")
+                  text (agent == "waiting" ? waitingNote : changedNote) testId=`${testId}-agent` font="theme.type.caption" color=(agent == "waiting" ? "theme.color.caution-text" : "theme.color.accent")
         if primaryLabel != "" or secondaryLabel != ""
           row flex-wrap="wrap" align-items="center" gap="theme.space.sm"
+            if interaction == "busy" and busyNote != ""
+              progress aria-label=busyNote testId=`${testId}-busy`
+              text busyNote testId=`${testId}-busy-note` font="theme.type.caption" color="theme.color.ink-muted"
             if secondaryLabel != ""
               ActionButton(label=secondaryLabel, kind="plain", interaction=interaction, outcome="none", press=secondaryPress, testId=`${testId}-secondary`)
             if primaryLabel != ""
               ActionButton(label=primaryLabel, kind="primary", interaction=interaction, outcome="none", press=primaryPress, testId=`${testId}-primary`)
       if data == "failed"
-        column testId=`${testId}-failed` role="alert" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical"
-          Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed-text`)
+        column gap="theme.space.sm"
+          if factsTitle != ""
+            column padding-left="theme.space.lg" padding-right="theme.space.lg"
+              Words(text=factsTitle, kind="heading", outcome="none", level=3, testId=`${testId}-facts-title`)
+          column testId=`${testId}-failed` role="alert" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical"
+            Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed-text`)
+            if retryLabel != ""
+              ActionButton(label=retryLabel, kind="primary", interaction=interaction, outcome="none", press=retryPress, testId=`${testId}-retry`)
       else
-        row flex-wrap="wrap" align-items="flex-start" gap="theme.space.xl"
-          column flex=1 min-width="blocks.detail-min" box-sizing="border-box" gap="theme.space.xl"
+        if data == "loading"
+          row role="status" testId=`${testId}-loading` padding-left="theme.space.lg" padding-right="theme.space.lg"
+            Words(text=loadingText, kind="caption", outcome="none", level=0, testId=`${testId}-loading-text`)
+        column gap="theme.space.sm"
+          if factsTitle != ""
+            column padding-left="theme.space.lg" padding-right="theme.space.lg"
+              Words(text=factsTitle, kind="heading", outcome="none", level=3, testId=`${testId}-facts-title`)
+          column testId=`${testId}-facts` role=(data == "loading" ? "none" : facts.length == 0 ? "status" : "list") background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
             if data == "loading"
-              column testId=`${testId}-loading` role="status" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
-                Words(text=loadingText, kind="body", outcome="cancelled", level=0, testId=`${testId}-loading-text`)
-              column gap="theme.space.sm"
-                if factsTitle != ""
-                  column padding-left="theme.space.lg" padding-right="theme.space.lg"
-                    Words(text=factsTitle, kind="heading", outcome="none", level=3, testId=`${testId}-facts-title`)
-                column testId=`${testId}-facts` background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
-                  for n in [1, 2, 3, 4] key=n
-                    row aria-hidden=true min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" align-items="center" gap="theme.space.md" border-top-width=(n > 1 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                      box height="theme.space.md" flex=1 background-color="theme.color.fill" border-radius="theme.radius.pill"
-                      box height="theme.space.md" flex=1 background-color="theme.color.fill" border-radius="theme.radius.pill"
-              if notesTitle != ""
-                column gap="theme.space.sm"
-                  column padding-left="theme.space.lg" padding-right="theme.space.lg"
-                    Words(text=notesTitle, kind="heading", outcome="none", level=3, testId=`${testId}-notes-title`)
-                  column aria-hidden=true padding-left="theme.space.lg" padding-right="theme.space.lg" gap="theme.space.sm"
-                    box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
-                    box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
-                    box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
+              // The bars stand where a short fact's label and value sit, so the card keeps the shape of its rows.
+              for n in [1, 2, 3, 4] key=n
+                row aria-hidden=true min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" align-items="center" gap="theme.space.md" border-top-width=(n > 1 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                  box height="theme.space.md" flex=1 background-color="theme.color.fill" border-radius="theme.radius.pill"
+                  box flex=1
+                  box height="theme.space.md" flex=1 background-color="theme.color.fill" border-radius="theme.radius.pill"
             else
-              column gap="theme.space.sm"
-                if factsTitle != ""
-                  column padding-left="theme.space.lg" padding-right="theme.space.lg"
-                    Words(text=factsTitle, kind="heading", outcome="none", level=3, testId=`${testId}-facts-title`)
-                column testId=`${testId}-facts` role=(facts.length == 0 ? "status" : "list") background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
-                  if facts.length == 0
-                    text factsEmptyText testId=`${testId}-facts-empty` padding="theme.space.lg" font="theme.type.body" color="theme.color.ink-muted"
-                  // A short pair shares the line, label to value, each wrapping in its half; a value without a share
-                  // of the flex is squeezed to one word a line, so a long one stacks under its label instead.
-                  for f, i in facts key=f.key
-                    if factStacks(f.value)
-                      column role="listitem" justify-content="center" gap="theme.space.xs" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                        text f.label testId=`${testId}-fact-${f.key}` font="theme.type.body" color="theme.color.ink"
-                        text f.value font="theme.type.body" color="theme.color.ink"
-                    else
-                      row role="listitem" align-items="baseline" gap="theme.space.md" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                        text f.label testId=`${testId}-fact-${f.key}` flex=1 min-width=0 font="theme.type.body" color="theme.color.ink"
-                        text f.value flex=1 min-width=0 font="theme.type.body" color="theme.color.ink" text-align="end"
-              if notes != ""
-                column gap="theme.space.sm"
-                  if notesTitle != ""
-                    column padding-left="theme.space.lg" padding-right="theme.space.lg"
-                      Words(text=notesTitle, kind="heading", outcome="none", level=3, testId=`${testId}-notes-title`)
-                  column padding-left="theme.space.lg" padding-right="theme.space.lg"
-                    text notes testId=`${testId}-notes` font="theme.type.body" color="theme.color.ink"
-          column flex=1 min-width="blocks.detail-min" box-sizing="border-box"
-            column gap="theme.space.sm"
-              if activityTitle != ""
-                column padding-left="theme.space.lg" padding-right="theme.space.lg"
-                  Words(text=activityTitle, kind="heading", outcome="none", level=3, testId=`${testId}-activity-title`)
-              if data == "loading"
-                column testId=`${testId}-activity` background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
-                  for n in [1, 2, 3] key=n
-                    row aria-hidden=true min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" align-items="center" border-top-width=(n > 1 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                      column flex=1 gap="theme.space.xs"
-                        box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
-                        box height="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.pill"
-              else
-                column testId=`${testId}-activity` role=(events.length == 0 ? "status" : "list") background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
-                  if events.length == 0
-                    text activityEmptyText testId=`${testId}-activity-empty` padding="theme.space.lg" font="theme.type.body" color="theme.color.ink-muted"
-                  for e, i in events key=e.key
-                    row role="listitem" align-items="baseline" gap="theme.space.md" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                      column flex=1 min-width=0 gap="theme.space.xs"
-                        text e.what testId=`${testId}-event-${e.key}` font="theme.type.body" color="theme.color.ink"
-                        text e.who font="theme.type.caption" color="theme.color.ink-muted"
-                      text e.when font="theme.type.caption" color="theme.color.ink-muted" text-align="end" flex-shrink=0
+              if facts.length == 0
+                text factsEmptyText testId=`${testId}-facts-empty` padding="theme.space.lg" font="theme.type.body" color="theme.color.ink-muted"
+              // A short pair shares the line, label to value, each wrapping in its half; a value without a share
+              // of the flex is squeezed to one word a line, so a long one stacks under its label instead.
+              for f, i in facts key=f.key
+                if factStacks(f.value)
+                  column role="listitem" justify-content="center" gap="theme.space.xs" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                    text f.label testId=`${testId}-fact-${f.key}` font="theme.type.body" color="theme.color.ink"
+                    text f.value font="theme.type.body" color="theme.color.ink"
+                else
+                  row role="listitem" align-items="baseline" gap="theme.space.md" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                    text f.label testId=`${testId}-fact-${f.key}` flex=1 min-width=0 font="theme.type.body" color="theme.color.ink"
+                    text f.value flex=1 min-width=0 font="theme.type.body" color="theme.color.ink" text-align="end"
+        if notes != ""
+          column gap="theme.space.sm"
+            if notesTitle != ""
+              column padding-left="theme.space.lg" padding-right="theme.space.lg"
+                Words(text=notesTitle, kind="heading", outcome="none", level=3, testId=`${testId}-notes-title`)
+            if data == "loading"
+              column aria-hidden=true padding-left="theme.space.lg" padding-right="theme.space.lg" gap="theme.space.sm"
+                box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
+                box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
+                box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
+            else
+              column padding-left="theme.space.lg" padding-right="theme.space.lg"
+                text notes testId=`${testId}-notes` font="theme.type.body" color="theme.color.ink"
+        column gap="theme.space.sm"
+          if activityTitle != ""
+            column padding-left="theme.space.lg" padding-right="theme.space.lg"
+              Words(text=activityTitle, kind="heading", outcome="none", level=3, testId=`${testId}-activity-title`)
+          column testId=`${testId}-activity` role=(data == "loading" ? "none" : events.length == 0 ? "status" : "list") background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+            if data == "loading"
+              for n in [1, 2, 3] key=n
+                row aria-hidden=true min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" align-items="center" border-top-width=(n > 1 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                  column flex=1 gap="theme.space.xs"
+                    box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
+                    box height="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.pill"
+            else
+              if events.length == 0
+                text activityEmptyText testId=`${testId}-activity-empty` padding="theme.space.lg" font="theme.type.body" color="theme.color.ink-muted"
+              for e, i in events key=e.key
+                row role="listitem" align-items="baseline" gap="theme.space.md" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                  column flex=1 min-width=0 gap="theme.space.xs"
+                    text e.what testId=`${testId}-event-${e.key}` font="theme.type.body" color="theme.color.ink"
+                    text e.who font="theme.type.caption" color="theme.color.ink-muted"
+                  text e.when font="theme.type.caption" color="theme.color.ink-muted" text-align="end" flex-shrink=0
