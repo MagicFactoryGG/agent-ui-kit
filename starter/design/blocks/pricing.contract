@@ -3,8 +3,8 @@
 // order — the plan's name (with a small tag on the featured one), its price large with its period beside it in the
 // muted ink, the line that says who it is for, its points as a list of rows each led by a drawn tick, and its one
 // action at the card's foot. The feet line up across the row (a spacer takes the slack), so the three actions
-// read as one line on a desktop. The featured plan is raised: the raised ground, a heavier accent edge and its tag
-// — the edge, not the fill, carries it, since a theme may give page and surface one colour — and its action is the
+// read as one line on a desktop. The featured plan is raised: the raised ground, an accent edge drawn twice as heavy (a ring
+// outside its hairline, so its words keep the other cards' grid) and its tag — the edge, not the fill, carries it, since a theme may give page and surface one colour — and its action is the
 // section's one filled control. Every other plan's action is plain.
 //
 // Width, with no breakpoint (Exact has no media query): the cards share a wrapping row, each flex=1 from a named
@@ -22,18 +22,18 @@
 // - interaction idle|busy: the chosen plan's action (`chosenKey`) keeps its words, is busy and cannot be pressed.
 // - outcome none|success|error: one line under the chosen plan's action, `outcomeText` in the outcome's ink on the
 //   card's own ground (status words never sit on a tint).
-// - agent none|proposed|changed|waiting, always about the chosen plan, whose card carries the mark at its start
-//   edge (accent for proposed and changed, caution while waiting) and one sentence beside a dot of the same ink
-//   above its foot, the way LinkRow and SettingsGroup mark an agent's act. Proposed: the sentence
-//   (`proposalText`) and the two answer words in the card's foot in place of its action (`rejectLabel` plain,
-//   `acceptLabel` the state's one filled control, so the featured action steps down to plain while the person is
-//   asked); changed: `changedText` and `undoLabel`, a plain button that reaches `undo`; waiting: `waitingText`,
-//   that the act waits for the person.
+// - agent none|proposed|changed|waiting, always about the chosen plan: its card's foot holds the agent's act in
+//   place of its action — the kit's Proposal look drawn small (a box edged in the act's ink, accent for proposed
+//   and changed, caution while waiting, on the card's own ground), one sentence beside a dot of that ink, then its
+//   answers. Proposed: `proposalText`, `rejectLabel` plain and `acceptLabel` filled; changed: `changedText` and
+//   `undoLabel`, a plain button that reaches `undo` (the plan is already the person's, so its own action would
+//   say nothing); waiting: `waitingText`, then the plan's own action, filled, for the person to take. While the
+//   agent asks or waits, its answer is the state's one filled control and the featured action steps down to plain.
 // Both doors reach the same actions: a plan's button calls `choose` with the plan's key, as an agent's tool does.
 // The kit's Proposal and EntryChoice live inline in this package's index.contract, which imports this file back,
-// so a plan card and the ask are drawn here from the same components (Words, ActionButton, Tag); StatePanel has
-// its own file and is used as it is. Every word is the app's; every value a Theme token or a blocks.* size.
-use Words, ActionButton, Tag from "__SCOPE__/components"
+// so a plan card and the ask are drawn here from the same components (Words, ActionButton); StatePanel has its
+// own file and is used as it is. A lone plan's action is filled: it is the section's way on. Every word is the app's; every value a Theme token or a blocks.* size.
+use Words, ActionButton from "__SCOPE__/components"
 use StatePanel from "./state-panel.contract"
 
 // One plan: its key, its name, its price and the period that price is for ("" for none), the line that says who
@@ -55,6 +55,15 @@ keyframes plan-breathe
 // The ink of an agent's mark: the accent for an ask or a change, caution while it waits for the person.
 fn markInk(a: string): string = a == "waiting" ? "theme.color.caution" : "theme.color.accent"
 fn markWords(a: string): string = a == "waiting" ? "theme.color.caution-text" : "theme.color.accent"
+
+// The featured plan's tag: a few words in the accent on the card's own ground, a hairline of the same ink. The
+// kit's Tag draws a pill, whose round ends bulge once its words wrap; this keeps the control's corner so a long
+// tag holds as a small box.
+component PlanTag
+  props
+    text: string
+  view
+    text text min-width=0 font="theme.type.caption" color="theme.color.accent" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent"
 
 // One point a plan includes: a drawn tick, then its words, which wrap under themselves.
 component PlanPoint
@@ -124,7 +133,9 @@ component Pricing
     reject: action
     undo: action
     testId: string
-  derive asking = agent == "proposed" and plans.filter(p => p.key == chosenKey).length > 0
+  derive lone = plans.length == 1
+  // While the agent asks or waits for the person, its answer is the section's one filled control.
+  derive asks = agent == "proposed" or agent == "waiting"
   // One door for the person's press; an agent's tool calls the app's same `choose` with the same key.
   action pick(key: string)
     choose(key)
@@ -152,13 +163,13 @@ component Pricing
       else
         row role="list" flex-wrap="wrap" justify-content="center" align-items="stretch" gap="theme.space.lg"
           for p in plans key=p.key
-            column role="listitem" testId=`${testId}-plan-${p.key}` aria-label=p.name flex=1 min-width="blocks.plan-min" max-width="blocks.plan-max" box-sizing="border-box" gap="theme.space.lg" padding="theme.space.xl" background-color=(p.featured ? "theme.color.raised" : "theme.color.surface") border-radius="theme.radius.card" border-style="solid" border-width=(p.featured ? "blocks.featured-line" : "theme.line.width") border-color=(p.featured ? "theme.color.accent" : "theme.color.line") border-left-width=(p.key == chosenKey and agent != "none" ? "blocks.mark-line" : p.featured ? "blocks.featured-line" : "theme.line.width") border-left-color=(p.key == chosenKey and agent != "none" ? markInk(agent) : p.featured ? "theme.color.accent" : "theme.color.line")
+            column role="listitem" testId=`${testId}-plan-${p.key}` aria-label=p.name flex=1 min-width="blocks.plan-min" max-width="blocks.plan-max" box-sizing="border-box" gap="theme.space.lg" padding="theme.space.xl" background-color=(p.featured ? "theme.color.raised" : "theme.color.surface") border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(p.featured ? "theme.color.accent" : "theme.color.line") box-shadow=(p.featured ? "0 0 0 1px theme.color.accent" : "none")
               column gap="theme.space.sm"
                 row flex-wrap="wrap" align-items="center" column-gap="theme.space.sm" row-gap="theme.space.xs"
                   text p.name testId=`${testId}-name-${p.key}` role="heading" aria-level=3 flex=1 min-width=0 font="theme.type.label" color="theme.color.ink"
                   if p.featured and tagLabel != ""
-                    Tag(text=tagLabel, outcome="none")
-                row flex-wrap="wrap" align-items="baseline" column-gap="theme.space.xs"
+                    PlanTag(text=tagLabel)
+                row flex-wrap="wrap" align-items="baseline" column-gap="theme.space.xs" row-gap="theme.space.xs"
                   text p.price testId=`${testId}-price-${p.key}` min-width=0 font="theme.type.title" color="theme.color.ink" font-variant-numeric="tabular-nums"
                   if p.period != ""
                     text p.period min-width=0 font="theme.type.caption" color="theme.color.ink-muted"
@@ -171,18 +182,23 @@ component Pricing
               column flex=1
               column gap="theme.space.md"
                 if p.key == chosenKey and agent != "none"
-                  row testId=`${testId}-agent` role="status" align-items="baseline" gap="theme.space.sm"
-                    box width="blocks.agent-dot" height="blocks.agent-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color=markInk(agent) aria-hidden=true
-                    text (agent == "proposed" ? proposalText : agent == "changed" ? changedText : waitingText) flex=1 min-width=0 font="theme.type.caption" color=markWords(agent)
-                if p.key == chosenKey and agent == "proposed"
-                  row flex-wrap="wrap" gap="theme.space.sm"
-                    column flex=1
-                      ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
-                    column flex=1
-                      ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+                  // The agent's act on this plan, the kit's Proposal look inside the card: one sentence beside a dot
+                  // of its ink, then its answers in place of the plan's action.
+                  column testId=`${testId}-agent` role="status" gap="theme.space.md" padding="theme.space.md" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color=markInk(agent) background-color="theme.color.surface"
+                    row align-items="baseline" gap="theme.space.sm"
+                      box width="blocks.agent-dot" height="blocks.agent-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color=markInk(agent) aria-hidden=true
+                      text (agent == "proposed" ? proposalText : agent == "changed" ? changedText : waitingText) testId=`${testId}-agent-text` flex=1 min-width=0 font="theme.type.caption" color=markWords(agent)
+                    if agent == "proposed"
+                      row flex-wrap="wrap" gap="theme.space.sm"
+                        column flex=1
+                          ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+                        column flex=1
+                          ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+                    else if agent == "changed"
+                      ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+                    else
+                      ActionButton(label=p.action, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=pick(p.key), testId=`${testId}-choose-${p.key}`)
                 else
-                  ActionButton(label=p.action, kind=(p.featured and not asking ? "primary" : "plain"), interaction=(p.key == chosenKey and interaction == "busy" ? "busy" : "idle"), outcome="none", press=pick(p.key), testId=`${testId}-choose-${p.key}`)
-                if p.key == chosenKey and agent == "changed" and undoLabel != ""
-                  ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+                  ActionButton(label=p.action, kind=((p.featured or lone) and not asks ? "primary" : "plain"), interaction=(p.key == chosenKey and interaction == "busy" ? "busy" : "idle"), outcome="none", press=pick(p.key), testId=`${testId}-choose-${p.key}`)
                 if p.key == chosenKey and outcome != "none"
                   text outcomeText testId=`${testId}-outcome` role=(outcome == "error" ? "alert" : "status") font="theme.type.caption" color=(outcome == "error" ? "theme.color.critical-text" : "theme.color.positive-text")

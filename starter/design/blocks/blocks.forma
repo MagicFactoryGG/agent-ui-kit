@@ -80,7 +80,6 @@ theme
   blocks.plan-min: length = 256px
   blocks.plan-max: length = 400px
   blocks.lead-max: length = 560px
-  blocks.featured-line: length = 2px
   blocks.point-line: length = 21px  // one body line's own height (15px at 1.4), so the tick sits level with a point's first line
   blocks.point-tick: length = 14px
   blocks.ghost-line: length = 12px
