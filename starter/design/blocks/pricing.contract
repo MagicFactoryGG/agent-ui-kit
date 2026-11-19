@@ -3,9 +3,10 @@
 // order — the plan's name (with a small tag on the featured one), its price large with its period beside it in the
 // muted ink, the line that says who it is for, its points as a list of rows each led by a drawn tick, and its one
 // action at the card's foot. The feet line up across the row (a spacer takes the slack), so the three actions
-// read as one line on a desktop. The featured plan is raised: the raised ground, an accent edge drawn twice as heavy (a ring
-// outside its hairline, so its words keep the other cards' grid) and its tag — the edge, not the fill, carries it, since a theme may give page and surface one colour — and its action is the
-// section's one filled control. Every other plan's action is plain.
+// read as one line on a desktop. The featured plan is raised: the raised ground, an accent edge drawn
+// twice as heavy (a ring outside its hairline, so its words keep the other cards' grid) and its tag — the edge,
+// not the fill, carries it, since a theme may give page and surface one colour — and its action is the section's
+// one filled control. Every other plan's action is plain.
 //
 // Width, with no breakpoint (Exact has no media query): the cards share a wrapping row, each flex=1 from a named
 // least width (blocks.plan-min) up to a named most (blocks.plan-max), border-box, centred; the section caps at
@@ -32,7 +33,8 @@
 // Both doors reach the same actions: a plan's button calls `choose` with the plan's key, as an agent's tool does.
 // The kit's Proposal and EntryChoice live inline in this package's index.contract, which imports this file back,
 // so a plan card and the ask are drawn here from the same components (Words, ActionButton); StatePanel has its
-// own file and is used as it is. A lone plan's action is filled: it is the section's way on. Every word is the app's; every value a Theme token or a blocks.* size.
+// own file and is used as it is. A lone plan's action is filled: it is the section's way on. Every word is the
+// app's; every value a Theme token or a blocks.* size.
 use Words, ActionButton from "__SCOPE__/components"
 use StatePanel from "./state-panel.contract"
 
@@ -64,6 +66,9 @@ component PlanTag
     text: string
   view
     text text min-width=0 font="theme.type.caption" color="theme.color.accent" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent"
+
+// Every card's name row holds the tag's height (blocks.plan-head), tagged or not, so the prices across the row
+// share one line.
 
 // One point a plan includes: a drawn tick, then its words, which wrap under themselves.
 component PlanPoint
@@ -165,7 +170,7 @@ component Pricing
           for p in plans key=p.key
             column role="listitem" testId=`${testId}-plan-${p.key}` aria-label=p.name flex=1 min-width="blocks.plan-min" max-width="blocks.plan-max" box-sizing="border-box" gap="theme.space.lg" padding="theme.space.xl" background-color=(p.featured ? "theme.color.raised" : "theme.color.surface") border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(p.featured ? "theme.color.accent" : "theme.color.line") box-shadow=(p.featured ? "0 0 0 1px theme.color.accent" : "none")
               column gap="theme.space.sm"
-                row flex-wrap="wrap" align-items="center" column-gap="theme.space.sm" row-gap="theme.space.xs"
+                row flex-wrap="wrap" align-items="center" min-height="blocks.plan-head" column-gap="theme.space.sm" row-gap="theme.space.xs"
                   text p.name testId=`${testId}-name-${p.key}` role="heading" aria-level=3 flex=1 min-width=0 font="theme.type.label" color="theme.color.ink"
                   if p.featured and tagLabel != ""
                     PlanTag(text=tagLabel)

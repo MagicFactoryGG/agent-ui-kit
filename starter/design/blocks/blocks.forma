@@ -82,5 +82,6 @@ theme
   blocks.lead-max: length = 560px
   blocks.point-line: length = 21px  // one body line's own height (15px at 1.4), so the tick sits level with a point's first line
   blocks.point-tick: length = 14px
+  blocks.plan-head: length = 28px  // the tag's own height: a caption line, its xs paddings and hairlines
   blocks.ghost-line: length = 12px
   blocks.ghost-price: length = 24px
