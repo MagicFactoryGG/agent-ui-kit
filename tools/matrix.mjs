@@ -177,7 +177,13 @@ function value(prop, cell, ctx) {
   if (t === 'number') return prop.name === 'level' ? '0' : '1';
   if (t === 'bool') return 'false';
   // An action prop the piece calls with an argument (`choose(o.key)`) is bound to one that takes it.
-  if (t === 'action') return new RegExp(`\\b${prop.name}\\(\\s*[^)\\s]`).test(ctx.body ?? '') ? 'noopWith' : 'noop';
+  if (t === 'action') {
+    if (!new RegExp(`\\b${prop.name}\\(\\s*[^)\\s]`).test(ctx.body ?? '')) return 'noop';
+    // One no-op per piece and prop: Exact infers an untyped parameter's type from its use (a key, a number).
+    const name = `noop_${ctx.piece}_${prop.name}`;
+    ctx.needs.add(`action:${name}`);
+    return name;
+  }
   const list = /^(\w+)\[\]$/.exec(t);
   if (list) {
     ctx.needs.add(`${list[1]}:${cell.data ?? 'many'}`);
@@ -193,7 +199,7 @@ function value(prop, cell, ctx) {
 }
 
 function placement(piece, cell, testId, ctx, indent) {
-  const args = piece.props.map((p) => `${p.name}=${value(p, cell, { ...ctx, testId, body: piece.body, given: ctx.props?.[`props:${piece.name}`] })}`).join(', ');
+  const args = piece.props.map((p) => `${p.name}=${value(p, cell, { ...ctx, testId, body: piece.body, piece: piece.name, given: ctx.props?.[`props:${piece.name}`] })}`).join(', ');
   const lines = [`${indent}${piece.name}(${args})`];
   if (piece.slot) lines.push(`${indent}  Words(text=${quote(cell.data === 'long' ? LONG : 'What the slot holds')}, kind="body", outcome="none", level=0, testId=${quote(`${testId}-slot`)})`);
   return lines;
@@ -317,7 +323,8 @@ export function generate(designDir, playDir) {
     }
   }
 
-  const resources = [...ctx.needs].sort().map((n) => {
+  const argActions = [...ctx.needs].filter((n) => n.startsWith('action:')).sort().flatMap((n) => [`  action ${n.slice(7)}(v)`, '    find = find']);
+  const resources = [...ctx.needs].filter((n) => !n.startsWith('action:')).sort().map((n) => {
     const [shape, data, one] = n.split(':');
     return one
       ? `  resource o_${shape}_${data} = one${shape}(${quote(data)}) as shape ${shape}`
@@ -339,7 +346,7 @@ export function generate(designDir, playDir) {
     '  action show(p: string)',
     '    page = p',
     '  action noop',
-    '  action noopWith(v: string)',
+    ...argActions,
     '  action setFind(v: string)',
     '    find = v',
     ...(presetNames.length > 1 ? ['  action pickPreset(p: string)', '    preset = p', '    setMode("preset", p)'] : []),
