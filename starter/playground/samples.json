@@ -12,6 +12,8 @@
     "failedText": "This week's numbers could not be read.",
     "retryLabel": "Try again",
     "agentKey": "revenue",
-    "agentNote": "Your assistant set Revenue to $52,000."
+    "agentNote": "Your assistant suggests setting Revenue to $52,000.",
+    "yesLabel": "Accept",
+    "noLabel": "Reject"
   }
 }
