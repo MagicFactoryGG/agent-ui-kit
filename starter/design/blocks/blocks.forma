@@ -9,4 +9,5 @@ theme
   blocks.shape-full: length = 56px
   blocks.shape-compact: length = 40px
   blocks.bone: length = 12px
+  blocks.note-dot: length = 6px
   blocks.measure: length = 320px
