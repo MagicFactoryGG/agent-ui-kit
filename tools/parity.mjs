@@ -133,7 +133,7 @@ function main(argv) {
   if (!cells.length) { console.error('parity: no cells match'); return 2; }
 
   // 1. Which nodes each cell has (the web's tree; both hosts draw the same plan).
-  const shown = (c) => [`tap ${c.nav}`, `type find ${c.id}`, 'clock data', 'clock settle'];
+  const shown = (c) => [`type page ${c.page}`, `type find ${c.id}`, 'clock data', 'clock settle'];
   const trees = agent(dir, 'web', ['clock data', ...cells.flatMap((c) => [...shown(c), `tree ${c.id}`])]).filter((r) => r.nodes);
   cells.forEach((c, i) => {
     const ids = (trees[i]?.nodes ?? []).map((n) => n.props?.testId).filter(Boolean);

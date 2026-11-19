@@ -87,7 +87,9 @@ async function live(hosts) {
   if (!gen()) return 1;
   // Exact's dev loop listens on 127.0.0.1 only (its --lan binds every interface; not used here).
   const port = process.env.PLAY_PORT ?? '7750';
-  const web = spawn('bun', ['exact.mjs', 'web', '--port', port], { cwd: HERE, stdio: ['ignore', 'pipe', 'inherit'], detached: true });
+  // PLAY_ALLOW_HOST: a name the dev loop also answers to, when a tunnel serves it (tailscale serve, for a phone).
+  const allow = process.env.PLAY_ALLOW_HOST ? ['--allow-host', process.env.PLAY_ALLOW_HOST] : [];
+  const web = spawn('bun', ['exact.mjs', 'web', '--port', port, ...allow], { cwd: HERE, stdio: ['ignore', 'pipe', 'inherit'], detached: true });
   remember(web);
   const url = await new Promise((done) => {
     web.stdout.on('data', (b) => {

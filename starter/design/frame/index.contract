@@ -2,25 +2,34 @@
 // playground's app by hand. Its look is neutral on purpose: only the cells show the Theme.
 use Swatch from "__SCOPE__/theme"
 
-// The window: the navigation beside the page, both in the slot.
+// The window: the controls across the top, the page below. The bar wraps, so a phone keeps the page's full width.
 component Shell
   props
     title: string
   slot
   view
-    row testId="playground" position="absolute" inset=0 background-color="frame.ground" color="frame.ink" aria-label=title
+    column testId="playground" position="absolute" inset=0 background-color="frame.ground" color="frame.ink" aria-label=title
       children
 
-// The list of pages on the left.
+// The controls across the top: the title, then each control in a NavField; it wraps on a narrow window.
 component NavList
   props
     title: string
   slot
   view
-    scroll width="frame.nav-width" flex-shrink=0 overflow-x="hidden" scrollbar-width="none" background-color="frame.panel" border-right-width=1 border-right-style="solid" border-right-color="frame.line"
-      column padding="frame.pad" gap="frame.small"
-        text title role="heading" aria-level=1 font="frame.type-head" color="frame.ink" padding-bottom="frame.gap"
-        children
+    row flex-shrink=0 flex-wrap="wrap" align-items="flex-end" gap="frame.gap" padding="frame.pad" background-color="frame.panel" border-bottom-width=1 border-bottom-style="solid" border-bottom-color="frame.line"
+      text title role="heading" aria-level=1 font="frame.type-head" color="frame.ink" padding-bottom="frame.small" white-space="nowrap"
+      children
+
+// One control in the bar, with its label above it.
+component NavField
+  props
+    label: string
+  slot
+  view
+    column gap="frame.small" width="frame.field-width"
+      text label font="frame.type-small" color="frame.ink-muted" white-space="nowrap"
+      children
 
 // One page in the list: a group's heading when `press` is never needed is a NavHeading.
 component NavItem
@@ -48,7 +57,7 @@ component Page
     note: string
   slot
   view
-    scroll flex=1 min-width=0 scrollbar-width="none"
+    scroll flex=1 min-height=0 scrollbar-width="none"
       column padding="frame.pad" gap="frame.gap"
         text title role="heading" aria-level=2 font="frame.type-title" color="frame.ink"
         text note font="frame.type-small" color="frame.ink-muted"

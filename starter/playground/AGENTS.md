@@ -3,6 +3,8 @@
 Where __TITLE__'s components, blocks and screens are designed and tried, live, on the web and macOS side by side
 (iOS on demand), in light and dark. Nothing ships from here.
 
+UI comes from the design repo. Something new is made in the playground first.
+
 - **Start it:** `bun play.mjs` (the web page and the Mac app, both reloading on every save); `bun play.mjs ios`
   adds iOS once; `bun play.mjs stop` ends them. Stop it when you are not looking.
 - **The app is generated.** `app.contract`, `app.ts`, `app.forma` and `app.test.contract` are written by `play.mjs` from the design

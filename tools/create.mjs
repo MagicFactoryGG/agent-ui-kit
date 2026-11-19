@@ -117,6 +117,10 @@ function main() {
     run('bun', [join(exact, 'scripts/exact.mjs'), 'new', play, '--name', `${o.title} playground`, '--bundle-id', id, '--with', 'mac'], KIT);
   }
   lay(join(STARTER, 'playground'), play, fill, { into: true });
+  // `exact new` wrote its own AGENTS.md; the playground's rules go below it (the guard's lines among them).
+  const rules = fill(readFileSync(join(STARTER, 'playground', 'AGENTS.md'), 'utf8'));
+  const agents = join(play, 'AGENTS.md');
+  if (!readFileSync(agents, 'utf8').includes(rules.split('\n')[0])) writeFileSync(agents, `${readFileSync(agents, 'utf8').trimEnd()}\n\n${rules}`);
   const pkgFile = join(play, 'package.json');
   const pkg = JSON.parse(readFileSync(pkgFile, 'utf8'));
   pkg.dependencies = { ...(pkg.dependencies ?? {}) };

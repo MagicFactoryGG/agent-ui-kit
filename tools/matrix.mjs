@@ -72,7 +72,9 @@ export function pieces(pkgDir) {
         if (p) props.push({ name: p[1], type: p[2] });
       }
       const at = `${relative(process.cwd(), join(pkgDir, file))}:${i + 1}`;
-      out.push({ name: c[1], pkg: pkg.name, layer: pkg.layer, at, props, slot });
+      let end = i + 1;
+      while (end < lines.length && !/^\S/.test(lines[end])) end++;
+      out.push({ name: c[1], pkg: pkg.name, layer: pkg.layer, at, props, slot, body: lines.slice(i, end).join('\n') });
     });
   }
   for (const p of out) p.shapes = shapes;
@@ -157,6 +159,9 @@ const id = (s) => s.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLower
 // A prop's value in one cell: its state, else a sample by its name and type (long text when the data axis says so).
 function value(prop, cell, ctx) {
   if (prop.name in cell) return prop.type === 'bool' ? String(cell[prop.name]) : quote(cell[prop.name]);
+  // samples.json may give a piece's words ("props:ProfileSelector": {"label": "Profile", …}); data only.
+  const given = ctx.given?.[prop.name];
+  if (given !== undefined && (prop.type === 'string' || prop.type === 'number' || prop.type === 'bool')) return prop.type === 'string' ? quote(cell.data === 'long' && typeof given === 'string' && given.length > 0 ? `${given} ${LONG}`.slice(0, 160) : given) : String(given);
   const t = prop.type;
   const long = cell.data === 'long';
   if (t === 'string') {
@@ -171,7 +176,8 @@ function value(prop, cell, ctx) {
   }
   if (t === 'number') return prop.name === 'level' ? '0' : '1';
   if (t === 'bool') return 'false';
-  if (t === 'action') return 'noop';
+  // An action prop the piece calls with an argument (`choose(o.key)`) is bound to one that takes it.
+  if (t === 'action') return new RegExp(`\\b${prop.name}\\(\\s*[^)\\s]`).test(ctx.body ?? '') ? 'noopWith' : 'noop';
   const list = /^(\w+)\[\]$/.exec(t);
   if (list) {
     ctx.needs.add(`${list[1]}:${cell.data ?? 'many'}`);
@@ -187,7 +193,7 @@ function value(prop, cell, ctx) {
 }
 
 function placement(piece, cell, testId, ctx, indent) {
-  const args = piece.props.map((p) => `${p.name}=${value(p, cell, { ...ctx, testId })}`).join(', ');
+  const args = piece.props.map((p) => `${p.name}=${value(p, cell, { ...ctx, testId, body: piece.body, given: ctx.props?.[`props:${piece.name}`] })}`).join(', ');
   const lines = [`${indent}${piece.name}(${args})`];
   if (piece.slot) lines.push(`${indent}  Words(text=${quote(cell.data === 'long' ? LONG : 'What the slot holds')}, kind="body", outcome="none", level=0, testId=${quote(`${testId}-slot`)})`);
   return lines;
@@ -252,7 +258,8 @@ export function generate(designDir, playDir) {
   // The first preset is theme.json itself (what apps ship), so an edit there shows at once.
   const presets = { theme: theme, ...presetsOf(designDir) };
   const shapes = Object.assign({}, ...all.map((p) => p.shapes));
-  const ctx = { needs: new Set(), shapes: Object.assign({}, ...all.map((p) => p.shapes)) };
+  const sampleFile = join(playDir, 'samples.json');
+  const ctx = { needs: new Set(), shapes: Object.assign({}, ...all.map((p) => p.shapes)), props: existsSync(sampleFile) ? JSON.parse(readFileSync(sampleFile, 'utf8')) : {} };
   const byPkg = new Map();
   for (const p of all) byPkg.set(p.pkg, [...(byPkg.get(p.pkg) ?? []), p]);
   const uses = [...byPkg].map(([pkg, list]) => {
@@ -275,7 +282,7 @@ export function generate(designDir, playDir) {
 
   // Theme: every colour token on one line, light and dark.
   pages.push('theme');
-  nav.push(`        NavHeading(label="Theme")`, `        NavItem(label=${quote(theme.name)}, on=(page == "theme"), press=show("theme"), testId="nav-theme")`);
+  nav.push(`            option ${quote(theme.name)} value="theme"`);
   view.push(`      if page == "theme"`, `        Page(title=${quote(theme.name)}, note=${quote('Each colour, light and dark.')})`, `          TokenGrid()`);
   for (const name of Object.keys(theme.color)) {
     view.push(`            if find == "" or ${quote(`theme-${name}`)}.includes(find)`, `              TokenRow(name=${quote(human(name))}, testId=${quote(`theme-${name}`)})`);
@@ -288,13 +295,13 @@ export function generate(designDir, playDir) {
   for (const layer of ['components', 'blocks', 'wip', 'screens']) {
     const list = all.filter((p) => p.layer === layer);
     if (!list.length) continue;
-    nav.push(`        NavHeading(label=${quote(word(layer === 'wip' ? 'Work in progress' : layer))})`);
+
     for (const p of list) {
       const key = `${layer}-${p.name}`;
       const cs = layer === 'screens' ? screenCells(p) : cells(p, marks(p));
       total += cs.length;
       pages.push(key);
-      nav.push(`        NavItem(label=${quote(human(p.name))}, on=(page == ${quote(key)}), press=show(${quote(key)}), testId=${quote(`nav-${id(key)}`)})`);
+      nav.push(`            option ${quote(human(p.name))} value=${quote(key)}`);
       view.push(`      if page == ${quote(key)}`, `        Page(title=${quote(human(p.name))}, note=${quote(`${cs.length} states, light and dark`)})`);
       cs.forEach((cell) => {
         const name = cellName(p, cell);
@@ -320,7 +327,7 @@ export function generate(designDir, playDir) {
   const app = [
     HEADER,
     `// ${all.length} pieces, ${total} cells, each light and dark. Pages: ${pages.length}.`,
-    `use Shell, NavList, NavItem, NavHeading, Page, MatrixRow, MatrixCell, ScreenCell, ModeChoice, TokenRow, TokenSwatch, TokenGrid from "${packageOf(join(designDir, 'frame')).name}"`,
+    `use Shell, NavList, Page, MatrixRow, MatrixCell, ScreenCell, ModeChoice, TokenRow, TokenSwatch, TokenGrid, NavField from "${packageOf(join(designDir, 'frame')).name}"`,
     ...uses,
     '',
     'component App',
@@ -332,6 +339,7 @@ export function generate(designDir, playDir) {
     '  action show(p: string)',
     '    page = p',
     '  action noop',
+    '  action noopWith(v: string)',
     '  action setFind(v: string)',
     '    find = v',
     ...(presetNames.length > 1 ? ['  action pickPreset(p: string)', '    preset = p', '    setMode("preset", p)'] : []),
@@ -351,12 +359,15 @@ export function generate(designDir, playDir) {
     '  view',
     `    Shell(title=${quote(`${theme.name} playground`)})`,
     `      NavList(title=${quote(`${theme.name} playground`)})`,
-    `        input type="search" value=find input=setFind placeholder="Find a state" aria-label="Find a state" testId="find"`,
-    ...(presetNames.length > 1 ? [`        NavHeading(label="Preset")`, `        select value=preset change=pickPreset aria-label="Preset" testId="preset"`, ...presetNames.map((n) => `          option ${quote(presets[n].$label ?? (n === 'theme' ? 'Theme' : presets[n].name ?? word(n)))} value=${quote(n)}`)] : []),
-    ...Object.entries(theme.options ?? {}).flatMap(([group, choices]) => [`        NavHeading(label=${quote(group)})`, `        select value=opt_${slug(group).replace(/-/g, '_')} change=pick_${slug(group).replace(/-/g, '_')} aria-label=${quote(group)} testId=${quote(`option-${slug(group)}`)}`, ...Object.keys(choices).map((c) => `          option ${quote(c)} value=${quote(slug(c))}`)]),
-    `        NavHeading(label="Look")`,
-    `        ModeChoice(scheme=(scheme == "light" ? "light" : scheme == "dark" ? "dark" : "system"), lightLabel="Light", darkLabel="Dark", systemLabel="Auto", groupLabel="Look", light=light, dark=dark, system=system)`,
+    `        NavField(label="Find")`,
+    `          input type="search" value=find input=setFind placeholder="A state" aria-label="Find a state" testId="find"`,
+    `        NavField(label="Page")`,
+    `          select value=page change=show aria-label="Page" testId="page"`,
     ...nav,
+    ...(presetNames.length > 1 ? [`        NavField(label="Preset")`, `          select value=preset change=pickPreset aria-label="Preset" testId="preset"`, ...presetNames.map((n) => `            option ${quote(presets[n].$label ?? (n === 'theme' ? 'Theme' : presets[n].name ?? word(n)))} value=${quote(n)}`)] : []),
+    ...Object.entries(theme.options ?? {}).flatMap(([group, choices]) => [`        NavField(label=${quote(group)})`, `          select value=opt_${slug(group).replace(/-/g, '_')} change=pick_${slug(group).replace(/-/g, '_')} aria-label=${quote(group)} testId=${quote(`option-${slug(group)}`)}`, ...Object.keys(choices).map((c) => `            option ${quote(c)} value=${quote(slug(c))}`)]),
+    `        NavField(label="Look")`,
+    `          ModeChoice(scheme=(scheme == "light" ? "light" : scheme == "dark" ? "dark" : "system"), lightLabel="Light", darkLabel="Dark", systemLabel="Auto", groupLabel="Look", light=light, dark=dark, system=system)`,
     ...view,
     '',
   ].join('\n');
@@ -371,7 +382,7 @@ export function generate(designDir, playDir) {
     '',
     'test "every page opens"',
     '  clock data',
-    ...pages.filter((p) => p !== 'theme').flatMap((p) => [`  tap "nav-${id(p)}"`, '  clock data', `  expect state page == ${quote(p)}`]),
+    ...pages.filter((p) => p !== 'theme').flatMap((p) => [`  type "page" ${quote(p)}`, '  clock data', `  expect state page == ${quote(p)}`]),
     '',
     'test "find shows one state"',
     '  clock data',
@@ -392,7 +403,10 @@ function screenCells(p) {
   const { axes, variants } = states(p);
   const data = axes.find((a) => a.prop === 'data');
   const base = Object.fromEntries([...axes, ...variants].map((a) => [a.prop, a.values[0]]));
-  return data ? data.values.map((v) => ({ ...base, data: v })) : [base];
+  const out = data ? data.values.map((v) => ({ ...base, data: v })) : [base];
+  // Each other value of a screen's own enums and bools (a button's status, a scheme), alone.
+  for (const a of [...axes.filter((x) => x.prop !== 'data'), ...variants]) for (const v of a.values.slice(1)) out.push({ ...base, [a.prop]: v });
+  return out;
 }
 
 // ---- presets: the playground's `preset` axis (one click switches every host, live; Exact's setMode)
