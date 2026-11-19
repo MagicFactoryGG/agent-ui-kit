@@ -7,8 +7,10 @@
 // full list, not a stub, and the card's bounds hold through the change. The card's bottom is its own edge in
 // every state, no band to arrive or vanish there. On a phone the card grows with what it holds — a stack,
 // the platform's own idiom — one row a short card, a state with little to say its own quiet room, the order
-// line wearing one slim band, for a small window owes every pixel to the rows. The header is one line in
-// every state: the title, and the unread count as one badge — a pill on the theme's fill in the accent's
+// line wearing one slim band, for a small window owes every pixel to the rows. The header is one line while
+// it fits and wraps when it does not — the title grows from its own words' width and never narrows below a
+// named minimum, so a long title takes the full width and the badge drops under it, cut to one line, rather
+// than squeezing the title into a tall column beside it: the title, and the unread count as one badge — a pill on the theme's fill in the accent's
 // ink, sharing the unread dots' colour — but only while a message waits, for a badge is news: at zero, while
 // the messages load, when they fail to arrive or the box is empty, it says nothing at all rather than dress a
 // zero or breathe a grey shape where its words would be; the rows' own shimmer tells the loading story, and
@@ -340,14 +342,14 @@ component MessageList
   view
     column testId=testId width="100%" max-width="blocks.mail-max" margin-left="auto" margin-right="auto" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden" aria-busy=(data == "loading")
       column justify-content="center" min-height="blocks.bar-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
-        row align-items="center" gap="theme.space.md"
-          column flex=1 min-width=0 gap="theme.space.xs"
+        row flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.xs"
+          column flex="max-content" min-width="blocks.header-min" gap="theme.space.xs"
             if title != ""
               Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
             if agent == "changed" and not agentInList
               text agentNote testId=`${testId}-agent` font="theme.type.caption" color="theme.color.accent"
           if unreadCount > 0
-            text `${unreadCount} ${unreadLabel}` testId=`${testId}-count` flex-shrink=0 max-width="blocks.badge-max" box-sizing="border-box" font="theme.type.caption" color="theme.color.accent" background-color="theme.color.fill" border-radius="theme.radius.pill" padding-top="theme.space.xs" padding-bottom="theme.space.xs" padding-left="theme.space.sm" padding-right="theme.space.sm" font-variant-numeric="tabular-nums" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+            text `${unreadCount} ${unreadLabel}` testId=`${testId}-count` min-width=0 max-width="blocks.badge-max" box-sizing="border-box" font="theme.type.caption" color="theme.color.accent" background-color="theme.color.fill" border-radius="theme.radius.pill" padding-top="theme.space.xs" padding-bottom="theme.space.xs" padding-left="theme.space.sm" padding-right="theme.space.sm" font-variant-numeric="tabular-nums" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
       if narrow
         ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, orderLabel=orderLabel, roomMin="blocks.state-min", bandMin="theme.space.xxl", compose=compose, retry=retry, pulse=pulse, testId=testId)
       else
