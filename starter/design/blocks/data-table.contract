@@ -19,9 +19,10 @@
 // bulk act that cannot happen) — and the state holds `blocks.state-max` at the card's middle: the failed
 // state's warning mark above its message and the retry, the empty state's message and its `create`, both the
 // primary act of a contentless state. While loading four quiet rows hold the loaded rows' own slots and rules
-// (no invented data, still under the person's motion preference, the app's loading line said as the table's
-// own name), so the frame does not move when the rows arrive. On a phone the list has no header, so the line
-// sits on the card. States: data
+// (no invented data, still under the person's motion preference), so the frame does not move when the rows
+// arrive, and the app's loading line sits under them in the card's foot (a status, seen and said, in both
+// layouts). The foot carries the agent's mark too, at the same edge as the rows it marks, so the note and the
+// rows read as one sign. States: data
 // many|one|empty|loading|failed|long, interaction idle|busy (the card says it, and the checkboxes wait),
 // agent none|changed. Every word is a prop.
 use Words, ActionButton from "__SCOPE__/components"
@@ -185,10 +186,10 @@ component DataTable
                 svg viewBox="0 0 12 12" width="blocks.glyph" height="blocks.glyph" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
                   path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
       else
-        table testId=`${testId}-table` width="100%" border-spacing=0 aria-label=(data == "loading" ? loadingText : "")
+        table testId=`${testId}-table` width="100%" border-spacing=0
           thead
             tr
-              th scope="col" width="blocks.select-col" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
+              th scope="col" width="blocks.select-col" box-sizing="border-box" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
                 if not noRows
                   input type="checkbox" checked=allOn change=pickAll disabled=(interaction == "busy") aria-label=selectAllLabel testId=`${testId}-check-all`
               th scope="col" aria-sort=(sort == "title" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
@@ -260,9 +261,11 @@ component DataTable
                       text r.owner font="theme.type.body" color="theme.color.ink-muted"
                     td text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
                       text r.updated font="theme.type.body" color="theme.color.ink-muted" font-variant-numeric="tabular-nums"
-      if agent == "changed" or interaction == "busy"
-        column gap="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md"
+      if agent == "changed" or interaction == "busy" or data == "loading"
+        column gap="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(agent == "changed") padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md"
           if agent == "changed"
             text agentNote font="theme.type.caption" color="theme.color.accent" testId=`${testId}-agent`
+          if data == "loading"
+            text loadingText role="status" font="theme.type.caption" color="theme.color.ink-muted" testId=`${testId}-loading`
           if interaction == "busy"
             text busyText role="status" font="theme.type.caption" color="theme.color.ink-muted" testId=`${testId}-busy`
