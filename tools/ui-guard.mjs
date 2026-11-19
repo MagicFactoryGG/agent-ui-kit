@@ -112,6 +112,12 @@ export function guard(app) {
     else forma(f, rel);
   }
   vendor(app);
+  // The Brand layer (tools/brand.mjs): a registered mark's drawing or words appear only in its registered component.
+  const brandTool = join(app, 'vendor', 'brand.mjs');
+  if (existsSync(brandTool) && existsSync(join(app, 'vendor', 'brand.json'))) {
+    const run = Bun.spawnSync(['bun', brandTool, 'check', app, '--design', join(app, 'vendor')]);
+    if (run.exitCode !== 0) for (const l of run.stderr.toString().split('\n').slice(1).filter(Boolean)) say(l.split(': ')[0], 1, l.slice(l.indexOf(': ') + 2));
+  }
   return [...findings];
 }
 
