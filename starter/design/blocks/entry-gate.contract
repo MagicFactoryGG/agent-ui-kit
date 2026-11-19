@@ -28,17 +28,17 @@ component EntryGate
     guest: action
     testId: string
   view
-    column testId=testId gap="theme.space.xl" max-width="blocks.gate-max" margin-left="auto" margin-right="auto"
+    column testId=testId width="100%" max-width="blocks.gate-max" margin-left="auto" margin-right="auto" gap="theme.space.xl"
       column gap="theme.space.sm"
         Words(text=title, kind="title", outcome="none", level=1, testId=`${testId}-title`)
         Words(text=lead, kind="body", outcome="none", level=0, testId=`${testId}-lead`)
       row flex-wrap="wrap" gap="theme.space.lg" align-items="stretch"
-        column testId=`${testId}-auth` flex=1 min-width="blocks.gate-choice" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+        column testId=`${testId}-auth` flex=1 min-width="blocks.gate-choice" box-sizing="border-box" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
           Words(text=authTitle, kind="label", outcome="none", level=2, testId=`${testId}-auth-title`)
           if authNote != ""
             Words(text=authNote, kind="caption", outcome="none", level=0, testId=`${testId}-auth-note`)
           ActionButton(label=authLabel, kind="primary", interaction=(interaction == "busy" and busyChoice == "auth" ? "busy" : "idle"), outcome="none", press=auth, testId=`${testId}-auth-action`)
-        column testId=`${testId}-guest` flex=1 min-width="blocks.gate-choice" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+        column testId=`${testId}-guest` flex=1 min-width="blocks.gate-choice" box-sizing="border-box" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
           Words(text=guestTitle, kind="label", outcome="none", level=2, testId=`${testId}-guest-title`)
           if guestNote != ""
             Words(text=guestNote, kind="caption", outcome="none", level=0, testId=`${testId}-guest-note`)
