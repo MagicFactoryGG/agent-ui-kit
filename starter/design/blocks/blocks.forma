@@ -4,3 +4,9 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
+  blocks.nav-max: length = 420px
+  blocks.nav-row-min: length = 44px
+  blocks.nav-mark: length = 28px
+  blocks.nav-mark-line: length = 3px
+  blocks.nav-slot-max: length = 160px
+  blocks.nav-skel-head: length = 72px

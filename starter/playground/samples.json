@@ -1,3 +1,29 @@
 {
-  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types."
+  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A \"props:<Piece>\" object gives one piece's own prop values for its cells.",
+  "NavEntry:many": [
+    { "key": "naventry-1", "label": "Overview", "href": "/", "group": "Workspace", "badge": 0, "current": true },
+    { "key": "naventry-2", "label": "Reports", "href": "/reports", "group": "Workspace", "badge": 12, "current": false },
+    { "key": "naventry-3", "label": "Invoices", "href": "/invoices", "group": "Workspace", "badge": 0, "current": false },
+    { "key": "naventry-4", "label": "Team", "href": "/team", "group": "Admin", "badge": 0, "current": false },
+    { "key": "naventry-5", "label": "Billing", "href": "/billing", "group": "Admin", "badge": 3, "current": false }
+  ],
+  "NavEntry:one": [
+    { "key": "naventry-1", "label": "Overview", "href": "/", "group": "Workspace", "badge": 0, "current": true }
+  ],
+  "NavEntry:long": [
+    { "key": "naventry-1", "label": "A very long line of text, as a person might really write it, that runs past the width a designer planned for and has to wrap or be cut short", "href": "/reports", "group": "Workspace", "badge": 2, "current": false },
+    { "key": "naventry-2", "label": "Another very long line of text that a person wrote without thinking about the side panel's width at all", "href": "/archive", "group": "Archive", "badge": 0, "current": true }
+  ],
+  "props:SideNav": {
+    "productName": "Acme Console",
+    "productMark": "AC",
+    "navLabel": "Main menu",
+    "emptyText": "Nothing here yet.",
+    "loadingText": "Loading the menu…",
+    "failedText": "The menu could not be loaded.",
+    "accountName": "Ada Lovelace",
+    "accountDetail": "Workspace admin",
+    "agentKey": "naventry-2",
+    "agentNote": "Reports was added by your assistant."
+  }
 }

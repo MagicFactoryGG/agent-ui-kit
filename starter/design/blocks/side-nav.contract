@@ -1,0 +1,102 @@
+// SideNav: an app's side navigation. The header (the product's mark and name, each optional by being empty; the
+// slot at its end carries the app's own control, a collapse switch, and always shows) sits over the places, which
+// come as NavEntry rows grouped by `group` in first-seen order, a group's name its heading and "" no heading; the
+// account closes the panel. The current place is filled with the surface, ringed and weighted, and says aria-current="page"; a badge
+// counts. An agent that added or reordered an entry (agent "changed") marks the entry `agentKey` names with a
+// line at its start and `agentNote`'s words under its label — the kit's LinkRow language; the shell passes the
+// key from its ledger. Failed says its line as an alert banner — the surface, a 3px mark in the error's ink and
+// the words in the same ink, the kit's EntryGate language; loading says its line as a caption over three
+// skeleton rows in the places' own shape (aria-hidden: the line is what a reader hears); empty says its line
+// alone. Each group after the first is cut from the one before it by a hairline over its heading. A long
+// anything truncates to one line with an ellipsis. Width: full at a phone, never wider than blocks.nav-max,
+// with a rail line at its end, so a shell may sit it beside the content; given a definite height the account
+// pins to the panel's bottom (the spacer takes what is left). The shell decides when it shows at all. States:
+//   data   many|one|empty|loading|failed|long
+//   agent  none|changed
+use Words from "__SCOPE__/components"
+
+// One place in the navigation: `group` names the section it sits in ("" for none), `badge` counts what it holds
+// (0 hides the pill), `current` marks the place the person is on.
+shape NavEntry
+  key: string
+  label: string
+  href: string
+  group: string
+  badge: number
+  current: bool
+
+component SideNav
+  props
+    productName: string
+    productMark: string
+    navLabel: string
+    entries: NavEntry[]
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    emptyText: string
+    loadingText: string
+    failedText: string
+    accountName: string
+    accountDetail: string
+    agent: enum<"none", "changed">
+    agentKey: string
+    agentNote: string
+    testId: string
+  slot
+  derive names = entries.map(e => e.group)
+  derive groups = names.filter((g, i) => names.indexOf(g) == i)
+  view
+    column testId=testId role="navigation" aria-label=navLabel max-width="blocks.nav-max" box-sizing="border-box" gap="theme.space.sm" border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line"
+      row testId=`${testId}-header` align-items="center" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm"
+        if productMark != ""
+          column width="blocks.nav-mark" height="blocks.nav-mark" flex-shrink=0 background-color="theme.color.accent" border-radius="theme.radius.control" justify-content="center" overflow="hidden"
+            text productMark font="theme.type.label" color="theme.color.accent-ink" text-align="center" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+        column flex=1 min-width=0
+          if productName != ""
+            text productName testId=`${testId}-name` font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+        column min-width=0 max-width="blocks.nav-slot-max" align-items="flex-end"
+          children
+      if data == "failed"
+        row testId=`${testId}-failed` role="alert" align-items="center" gap="theme.space.sm" padding="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.control"
+          box align-self="stretch" width="blocks.nav-mark-line" background-color="theme.color.critical-text"
+          column flex=1 min-width=0
+            Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
+      else if data == "loading"
+        column padding="theme.space.lg" role="status" gap="theme.space.md"
+          column aria-hidden=true gap="theme.space.sm"
+            box width="blocks.nav-skel-head" height="theme.space.sm" background-color="theme.color.fill" border-radius="theme.radius.pill"
+            for i in [1, 2, 3] key=i
+              row align-items="center" gap="theme.space.sm" min-height="blocks.nav-row-min" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
+                box flex=1 height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
+                box width="theme.space.xxl" height="theme.space.md" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
+          Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+      else if data == "empty"
+        column padding="theme.space.lg" role="status"
+          Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+      else
+        for g, i in groups key=g
+          column
+            if g != ""
+              text g testId=`${testId}-group-${g}` font="theme.type.caption" color="theme.color.ink-muted" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top=(i > 0 ? "theme.space.sm" : "theme.space.xs") padding-bottom="theme.space.xs" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color=(i > 0 ? "theme.color.line" : "transparent") white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+            for e in entries.filter(e => e.group == g) key=e.key
+              link href=e.href testId=`${testId}-entry-${e.key}` aria-current=(e.current ? "page" : "false") display="flex" flex-direction="row" align-items="center" gap="theme.space.sm" min-height="blocks.nav-row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(e.current ? "theme.color.surface" : "transparent") border-left-width="blocks.nav-mark-line" border-left-style="solid" border-left-color=((agent == "changed" and e.key == agentKey) ? "theme.color.accent" : "transparent") box-shadow=(e.current ? "inset 0 0 0 1px theme.color.line" : "none")
+                :hover
+                  background-color="theme.color.hover"
+                :active
+                  background-color="theme.color.fill"
+                :focus-visible
+                  box-shadow="inset 0 0 0 2px theme.color.focus"
+                column flex=1 min-width=0
+                  text e.label font=(e.current ? "theme.type.label" : "theme.type.body") color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+                  if agent == "changed" and e.key == agentKey
+                    text agentNote testId=`${testId}-mark-${e.key}` font="theme.type.caption" color="theme.color.accent" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+                if e.badge > 0
+                  text `${e.badge}` testId=`${testId}-badge-${e.key}` flex-shrink=0 font="theme.type.caption" color="theme.color.ink-muted" font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.pill" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" white-space="nowrap"
+      column flex=1 min-height=0
+      if accountName != ""
+        row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+          column width="theme.space.xxl" height="theme.space.xxl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" align-items="center" justify-content="center" overflow="hidden"
+            text accountName.trim().slice(0, 1) font="theme.type.label" color="theme.color.ink"
+          column flex=1 min-width=0
+            text accountName font="theme.type.label" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+            if accountDetail != ""
+              text accountDetail font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
