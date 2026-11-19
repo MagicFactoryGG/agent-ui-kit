@@ -287,9 +287,12 @@ export const answer: Answer = ((source: string, args: unknown[]) => {
 `;
 }
 
-export function generate(designDir, playDir) {
+// opts.section: one of samples.json's "sections" ({"<name>": {"files": ["ias.contract", …]}}): a second playground app
+// (<playground>/<name>) that draws only the pieces of those files; the main playground leaves them out. A playground
+// that draws every app's screens outgrows one bundle. opts.samples and opts.wip name the main playground's.
+export function generate(designDir, playDir, opts = {}) {
   const layers = ['theme', 'components', 'blocks', 'screens'].map((l) => join(designDir, l)).filter((d) => existsSync(join(d, 'package.json')));
-  const wip = join(playDir, 'wip');
+  const wip = opts.wip ?? join(playDir, 'wip');
   const dirs = existsSync(join(wip, 'package.json')) ? [...layers, wip] : layers;
   const all = dirs.flatMap((d) => pieces(d));
   const bad = problems(all);
@@ -298,8 +301,12 @@ export function generate(designDir, playDir) {
   // The first preset is theme.json itself (what apps ship), so an edit there shows at once.
   const presets = { theme: theme, ...presetsOf(designDir) };
   const shapes = Object.assign({}, ...all.map((p) => p.shapes));
-  const sampleFile = join(playDir, 'samples.json');
+  const sampleFile = opts.samples ?? join(playDir, 'samples.json');
   const ctx = { needs: new Set(), shapes: Object.assign({}, ...all.map((p) => p.shapes)), props: existsSync(sampleFile) ? JSON.parse(readFileSync(sampleFile, 'utf8')) : {} };
+  const sections = ctx.props.sections ?? {};
+  const fileOf = (p) => p.at.split(':')[0].split('/').pop();
+  const sectionFiles = new Set(Object.values(sections).flatMap((x) => x.files ?? []));
+  const inPage = (p) => (opts.section ? (sections[opts.section]?.files ?? []).includes(fileOf(p)) : !sectionFiles.has(fileOf(p)));
   const byPkg = new Map();
   for (const p of all) byPkg.set(p.pkg, [...(byPkg.get(p.pkg) ?? []), p]);
   const uses = [...byPkg].map(([pkg, list]) => {
@@ -337,7 +344,7 @@ export function generate(designDir, playDir) {
   // by its own component's example, light and dark; the look check compares these cells with the references.
   brandFile = [join(designDir, 'brand.json'), join(designDir, 'brand.draft.json')].find((f) => existsSync(f));
   brandSet = brandFile ? JSON.parse(readFileSync(brandFile, 'utf8')) : null;
-  if (brandSet?.assets?.length) {
+  if (brandSet?.assets?.length && !opts.section) {
     pages.push('brand');
     nav.push(`            option "Brand" value="brand"`);
     view.push(`      if page == "brand"`, `        Page(title="Brand", note=${quote(brandFile.endsWith('draft.json') ? `${brandSet.owner?.name ?? ''}: pending registration by the Distiller` : `${brandSet.owner?.name ?? ''}: registered (${brandSet.owner?.proof?.mode ?? ''} record ${brandSet.owner?.proof?.record ?? ''})`)})`);
@@ -355,6 +362,7 @@ export function generate(designDir, playDir) {
     if (!list.length) continue;
 
     for (const p of list) {
+      if (!inPage(p)) continue;
       const key = `${layer}-${p.name}`;
       const cs = layer === 'screens' ? screenCells(p, marks(p)) : cells(p, marks(p));
       total += cs.length;
@@ -384,7 +392,7 @@ export function generate(designDir, playDir) {
   const layouts = all.filter((p) => p.layer === 'screens' && p.slot && /layouts\.contract$/.test(p.at.split(':')[0]));
   const palette = all.filter((p) => ['components', 'blocks', 'wip'].includes(p.layer)).sort((a, b) => a.name.localeCompare(b.name));
   const arrangeCells = new Map(palette.map((p) => [p.name, cells(p, marks(p)).map((c) => [cellName(p, c), c])]));
-  if (layouts.length && palette.length) {
+  if (layouts.length && palette.length && !opts.section) {
     pages.push('arrange');
     nav.push(`            option "Arrange" value="arrange"`);
     view.push(`      if page == "arrange"`, `        Page(title="Arrange", note="Start from a layout, fill it, reorder it, pick each piece's state. The line below is what play.mjs promote saves as a Block or Screen.")`);
@@ -444,7 +452,7 @@ export function generate(designDir, playDir) {
   });
   for (let k = 0; k < view.length; k++) if (view[k].includes('ARRANGED_NOOPS')) view[k] = view[k].replace('ARRANGED_NOOPS', [...arrangedNoops, ...arrangedRes].map((n) => `${n}=${n}`).join(', '));
   const presetNames = Object.keys(presets);
-  const overlay = ctx.props?.overlay?.piece && ctx.props?.overlay?.package ? ctx.props.overlay : null;
+  const overlay = ctx.props?.overlay?.piece && ctx.props?.overlay?.package && !opts.section ? ctx.props.overlay : null;
   const app = [
     HEADER,
     `// ${all.length} pieces, ${total} cells, each light and dark. Pages: ${pages.length}.`,
@@ -573,7 +581,7 @@ export function generate(designDir, playDir) {
     ...Object.entries(theme.options ?? {}).flatMap(([group, choices]) => Object.keys(choices).length < 2 ? [] : ['', `test ${quote(`the ${group.toLowerCase()} choice changes it everywhere`)}`, '  clock data', `  type ${quote(`option-${slug(group)}`)} ${quote(slug(Object.keys(choices)[1]))}`, '  clock settle', `  expect state opt_${slug(group).replace(/-/g, '_')} == ${quote(slug(Object.keys(choices)[1]))}`]),
     '',
   ].join('\n');
-  const own = Object.fromEntries(Object.entries(existsSync(join(playDir, 'samples.json')) ? JSON.parse(readFileSync(join(playDir, 'samples.json'), 'utf8')) : {}).filter(([, v]) => Array.isArray(v)));
+  const own = Object.fromEntries(Object.entries(existsSync(sampleFile) ? JSON.parse(readFileSync(sampleFile, 'utf8')) : {}).filter(([, v]) => Array.isArray(v)));
   return { app, tests, ts: samples(shapes, own), forma: presetForma(theme, presets), pieces: all.length, cells: total, pages: pages.length };
 }
 
@@ -663,7 +671,7 @@ export function presetForma(theme, presets) {
 }
 
 function main(argv) {
-  const [verb, a, b] = argv;
+  const [verb, a, b, ...rest] = argv;
   if (verb === 'check' || verb === 'list') {
     const dirs = ['components', 'blocks', 'screens'].map((l) => join(resolve(a), l)).filter((d) => existsSync(join(d, 'package.json')));
     if (b && existsSync(join(b, 'package.json'))) dirs.push(resolve(b));
@@ -680,7 +688,9 @@ function main(argv) {
     return 0;
   }
   if (verb === 'gen' && a && b) {
-    const out = generate(resolve(a), resolve(b));
+    const flag = (k) => (rest.includes(k) ? resolve(rest[rest.indexOf(k) + 1]) : undefined);
+    const section = rest.includes('--section') ? rest[rest.indexOf('--section') + 1] : undefined;
+    const out = generate(resolve(a), resolve(b), { section, samples: flag('--samples'), wip: flag('--wip') });
     if (out.bad) {
       console.error(`${RULE}: ${out.bad.length} problem${out.bad.length === 1 ? '' : 's'}.`);
       for (const x of out.bad) console.error(`  ${x}`);
