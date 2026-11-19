@@ -12,3 +12,5 @@ theme
   blocks.col-status: length = 120px
   blocks.col-owner: length = 160px
   blocks.col-updated: length = 140px
+  blocks.skel-bar: length = 8px
+  blocks.skel-check: length = 16px

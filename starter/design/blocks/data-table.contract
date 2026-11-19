@@ -3,11 +3,15 @@
 // app owns the selection, `toggle` gets the row's key, `toggleAll` the whole set) and a select-all checkbox in
 // the header. Cells sit edge to edge (`border-spacing=0`: the separated model's own gap would stripe a washed
 // row), so a checked row takes one fill band and the rules run the card's width. Rows an agent changed carry
-// the accent mark at their start while `agentNote` says so under the table. The card centres on a wide window
-// up to `blocks.table-max`; on a window narrower than 640px (the table's comfortable floor) the table becomes a
-// list of compact two-line rows — title, status and a chevron, then owner and date — so the table never scrolls
-// sideways. While empty, loading or failed the table keeps its frame and says the app's line in one full-width
-// row (on a phone, where the list has no header, the line sits on the card). States: data
+// the accent mark at their start while `agentNote` says so under the table. On a desktop row the title is the
+// one affordance (its own link); a chevron would spend a column to say what the link already says, so the
+// chevron belongs to the compact phone row alone. The card centres on a wide window up to `blocks.table-max`;
+// on a window narrower than 640px (the table's comfortable floor) the table becomes a list of compact
+// two-line rows — title, status and a chevron, then owner and date — so the table never scrolls sideways.
+// While empty, loading or failed the table keeps its frame — the selection column stays reserved, the app's
+// line sits in the Record column, and while loading three quiet rows hold the list's shape (no invented data,
+// and still under the person's motion preference) so the frame does not jump when the rows arrive; failed
+// offers the app's `retry`. On a phone the list has no header, so the line sits on the card. States: data
 // many|one|empty|loading|failed|long, interaction idle|busy (the card says it, and the checkboxes wait),
 // agent none|changed. Every word is a prop.
 use Words, Tag, ActionButton from "__SCOPE__/components"
@@ -30,9 +34,13 @@ shape Checked
 shape Marks
   keys: string[]
 
-// The window's width, the one fact this block reads to lay itself out.
+// The window's width, and the person's motion preference: the facts this block reads to lay itself out.
 shape Viewport
   width: number
+  prefersReducedMotion: bool
+
+keyframes breathe
+  50% opacity=0.4
 
 fn marked(agent: string, marks: Marks, key: string): bool = agent == "changed" and marks.keys.includes(key)
 fn markInk(on: bool): string = on ? "theme.color.accent" : "transparent"
@@ -83,8 +91,10 @@ component DataTable
     toggleAll()
   resource viewport = exactViewport() as shape Viewport
   derive narrow = viewport.width < 640
+  derive still = viewport.prefersReducedMotion
   derive noRows = data == "empty" or data == "loading" or data == "failed"
   derive allOn = records.length > 0 and checked.keys.length == records.length
+  derive pulse = still ? "none" : "breathe 1.6s ease-in-out infinite"
   derive note = data == "empty" ? emptyText : data == "loading" ? loadingText : failedText
   view
     column testId=testId aria-busy=(interaction == "busy") width="100%" max-width="blocks.table-max" margin-left="auto" margin-right="auto" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
@@ -95,6 +105,13 @@ component DataTable
             if data == "failed" and retryLabel != ""
               row
                 ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+          if data == "loading"
+            for n in [0, 1, 2] key=n
+              row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+                box width="blocks.skel-check" height="blocks.skel-check" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
+                column flex=1 min-width=0 gap="theme.space.xs"
+                  box width="60%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
+                  box width="35%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
         else
           if sort != "none"
             row align-items="center" gap="theme.space.xs" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
@@ -143,12 +160,27 @@ component DataTable
           if noRows
             tbody
               tr
-                td colspan=5 text-align="start" padding="theme.space.xl" role=(data == "failed" ? "alert" : "status")
+                td text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
+                td colspan=4 text-align="start" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.xl" padding-bottom="theme.space.xl" role=(data == "failed" ? "alert" : "status")
                   column gap="theme.space.md"
                     Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
                     if data == "failed" and retryLabel != ""
                       row
                         ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+              if data == "loading"
+                for n in [0, 1, 2] key=n
+                  tr
+                    td height="blocks.row-min" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
+                      box width="blocks.skel-check" height="blocks.skel-check" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
+                    td height="blocks.row-min" padding-left="theme.space.md" padding-right="theme.space.md"
+                      box width="55%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
+                    td height="blocks.row-min" padding-left="theme.space.md" padding-right="theme.space.md"
+                      box width="70%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
+                    td height="blocks.row-min" padding-left="theme.space.md" padding-right="theme.space.md"
+                      box width="50%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
+                    td height="blocks.row-min" text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg"
+                      row justify-content="flex-end"
+                        box width="40%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
           else
             tbody
               for r, i in records key=r.key
