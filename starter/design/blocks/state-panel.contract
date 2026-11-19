@@ -9,10 +9,11 @@
 // the line stands for; the mark is who acted. The title is the area's own name, the same size in the same place
 // in every state — the panel reads as the same panel, loading, not a skeleton of a card — resting in the muted
 // ink while loading, pending words one step quieter so the arc is the state's one live focal, and standing in the
-// full ink the moment data lands (role=status still speaks the name in every state). The state line is body size
-// in the ink its state calls for: the muted ink in empty, quiet; the error ink in failed — Section's own ink for
-// the line a failed area says, bright in dark where the muted grey read low, and speaking the state in the same
-// hue its disc and its card's line wear (role=alert speaks it in failed). Loading stands the content in three
+// full ink the moment data lands (role=status still speaks the name in every state). The state line is body
+// size in the muted ink in every state that shows one, empty and failed alike — the panel's state hue is said
+// enough times already (the disc, the card's line, the retry's ring), so the copy itself carries no colour;
+// Section's own error ink belongs to a row that has no other signal. role=alert speaks the failed line. Loading
+// stands the content in three
 // bones in the state line's own place — the line's own gap above them, sm between them so a bone and its gap are
 // one body line's own box — all one width on the one measure, symmetric with the panel's axis, so the skeleton is anchored where its sentence would sit; the action's own
 // footprint is held below it, one bone in the action's own height and corner, a placeholder not a promise
@@ -24,7 +25,10 @@
 // affordance for an act's outcome, the recovery control the error card calls for, distinct from the resting way
 // on (a red fill would say a destructive act; retry is not one). `agent` "changed" marks a load an agent
 // started — its tool calls the same action the button does, one ledger, two doors — and `agentNote` is
-// the mark's one sentence, the word group's last line in every state that shows it: the accent ink and a small
+// the mark's one sentence, drawn after the words it marks, LinkRow and ValueRow's own order for an agent's
+// note, in a band of its own: a status badge, not the group's last line, held at the action's own gap above
+// and below (the resting state's cluster break, 24 at full, 12 at compact), so its air is symmetric and it
+// never crowds the words above it or the action below. The mark itself: the accent ink and a small
 // accent disc on a low wash of the accent itself — a blue-tinted pill on the light card, a blue-dark one on the
 // dark, the Notice's own way with an area's sentence and this panel's own disc grammar in miniature — the wash
 // is the pill's own separation in both schemes and the dot is the mark's edge, riding the sentence's own
@@ -44,20 +48,19 @@ component Bone
     box height="blocks.bone" width=share background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 // The agent's mark: a small accent disc and one sentence at body size on a low wash of the accent, the Notice's
-// own way with an area's words — a state a person notices (the kit's first question), never mistaken for the action
-// or for a link. The wash is a drawn box behind the words, the kit's own way out of a theme with no wash token:
-// the accent at low opacity, no border (a border read as the chip's control), so the pill separates itself from
-// the card in light and dark alike. The dot rides the sentence's own baseline (align-items="baseline"), so its
-// centre sits at the letters' cap-height centre, not the line box's — the mark reads as written with its words.
-// Drawn once here and placed once, as the word group's last line in every state that shows it — LinkRow and
-// ValueRow's own placement for an agent's note, after the words it marks — so icon, title and line read as one
-// group and the mark never splits them.
+// own way with an area's words — a status badge a person notices (the kit's first question), never mistaken for
+// the action or for a link. The wash is a drawn box behind the words, the kit's own way out of a theme with no
+// wash token: the accent at low opacity, no border (a border read as the chip's control), so the pill separates
+// itself from the card in light and dark alike. The dot rides the sentence's own baseline
+// (align-items="baseline"), so its centre sits at the letters' cap-height centre, not the line box's — the mark
+// reads as written with its words. The band it sits in (the air above and below it) is the placer's, not the
+// pill's: StatePanel holds it at the action's own gap.
 component Mark
   props
     note: string
     testId: string
   view
-    row testId=testId position="relative" align-items="baseline" gap="theme.space.xs" margin-top="theme.space.sm" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
+    row testId=testId position="relative" align-items="baseline" gap="theme.space.xs" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
       box aria-hidden=true position="absolute" inset=0 background-color="theme.color.accent" opacity=0.12 border-radius="theme.radius.pill"
       svg viewBox="0 0 8 8" width="blocks.note-dot" height="blocks.note-dot" aria-hidden=true flex-shrink=0 position="relative"
         circle cx=4 cy=4 r=4 fill="theme.color.accent"
@@ -94,13 +97,14 @@ component StatePanel
         Words(text=title, kind="title", outcome=(data == "loading" ? "cancelled" : "none"), level=2, testId=`${testId}-title`)
         if data != "loading" and (data == "failed" ? failedText : message) != ""
           column width="100%" align-items="center" margin-top="theme.space.sm"
-            Words(text=(data == "failed" ? failedText : message), kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-message`)
+            Words(text=(data == "failed" ? failedText : message), kind="body", outcome="cancelled", level=0, testId=`${testId}-message`)
         if data == "loading"
           column testId=`${testId}-loading` width="100%" align-items="center" gap="theme.space.sm" margin-top="theme.space.sm"
             Bone(share="100%")
             Bone(share="100%")
             Bone(share="100%")
-        if agent == "changed"
+      if agent == "changed"
+        column margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md") align-items="center" testId=`${testId}-agent-band`
           Mark(note=agentNote, testId=`${testId}-agent`)
       if data == "loading"
         column width="100%" max-width="blocks.measure" margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md") align-items="center" testId=`${testId}-held`
