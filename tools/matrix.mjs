@@ -153,7 +153,7 @@ export function cellName(piece, cell) {
 // ---- writing the playground app
 
 const word = (name) => name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase());
-const quote = (s) => `"${String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+const quote = (s) => `"${String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`;
 const id = (s) => s.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase();
 
 // A prop's value in one cell: its state, else a sample by its name and type (long text when the data axis says so).
@@ -178,7 +178,9 @@ function value(prop, cell, ctx) {
   if (t === 'bool') return 'false';
   // An action prop the piece calls with an argument (`choose(o.key)`) is bound to one that takes it.
   if (t === 'action') {
-    if (!new RegExp(`\\b${prop.name}\\(\\s*[^)\\s]`).test(ctx.body ?? '')) return 'noop';
+    // Called with an argument (`choose(o.key)`), or the handler of a field (`input=edit`, `change=pick`): one argument.
+    const takesOne = new RegExp(`\\b${prop.name}\\(\\s*[^)\\s]`).test(ctx.body ?? '') || new RegExp(`\\b(input|change)=${prop.name}\\b`).test(ctx.body ?? '');
+    if (!takesOne) return 'noop';
     // One no-op per piece and prop: Exact infers an untyped parameter's type from its use (a key, a number).
     const name = `noop_${ctx.piece}_${prop.name}`;
     ctx.needs.add(`action:${name}`);
