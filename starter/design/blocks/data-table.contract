@@ -212,21 +212,6 @@ component DataTable
                       text r.owner font="theme.type.body" color="theme.color.ink-muted"
                     td text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
                       text r.updated font="theme.type.body" color="theme.color.ink-muted" font-variant-numeric="tabular-nums"
-                  tr background-color=(checked.keys.includes(r.key) ? "theme.color.fill" : "transparent")
-                    td text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(marked(agent, marks, r.key))
-                      input type="checkbox" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=(interaction == "busy") aria-label=`${selectLabel} ${r.title}` testId=`${testId}-check-${r.key}`
-                    td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                      link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
-                        :hover
-                          color="theme.color.accent"
-                        text r.title font="theme.type.body"
-                    td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                      row flex-shrink=0
-                        Tag(text=r.status, outcome="none")
-                    td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                      text r.owner font="theme.type.body" color="theme.color.ink-muted"
-                    td text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                      text r.updated font="theme.type.body" color="theme.color.ink-muted" font-variant-numeric="tabular-nums"
       if agent == "changed" or interaction == "busy"
         column gap="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md"
           if agent == "changed"
