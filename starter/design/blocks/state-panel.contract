@@ -6,10 +6,10 @@
 // The panel's words all sit on one measure, blocks.measure, centred — title, state line, agent note, and the
 // bones below — so every element shares one column, and a message wraps at the same width the skeleton stands in
 // for. Each element holds one job, said once: the disc is the data state's own glyph; the bones are the content
-// the line stands for; the mark is who acted. The title is the area's own name, the same size in the same place
-// in every state — the panel reads as the same panel, loading, not a skeleton of a card — resting in the muted
-// ink while loading, pending words one step quieter so the arc is the state's one live focal, and standing in the
-// full ink the moment data lands (role=status still speaks the name in every state). The state line is body
+// the line stands for; the mark is who acted. The title is the area's own name, the same size, place and ink in
+// every state — the one thing on the panel that is not loading (the data is pending; the name is known), so the
+// panel reads as the same panel loading, not a skeleton of a card, and role=status speaks the name in every
+// state. The state line is body
 // size in the muted ink in every state that shows one, empty and failed alike — the panel's state hue is said
 // enough times already (the disc, the card's line, the retry's ring), so the copy itself carries no colour;
 // Section's own error ink belongs to a row that has no other signal. role=alert speaks the failed line. Loading
@@ -94,7 +94,7 @@ component StatePanel
           rect x=7.5 y=7.5 width=9 height=9 rx=2.1 fill="none" stroke="theme.color.ink-muted" stroke-width=1.5
           path d="M7.5 12.6h2.55l1.05 1.65h1.8L13.95 12.6h2.55" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
       column width="100%" max-width="blocks.measure" align-items="center" gap="theme.space.sm"
-        Words(text=title, kind="title", outcome=(data == "loading" ? "cancelled" : "none"), level=2, testId=`${testId}-title`)
+        Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
         if data != "loading" and (data == "failed" ? failedText : message) != ""
           column width="100%" align-items="center" margin-top="theme.space.sm"
             Words(text=(data == "failed" ? failedText : message), kind="body", outcome="cancelled", level=0, testId=`${testId}-message`)
