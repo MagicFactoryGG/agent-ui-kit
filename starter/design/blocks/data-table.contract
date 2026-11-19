@@ -7,16 +7,20 @@
 // row), so a checked row takes one fill band and the rules run the card's width. Rows an agent changed carry
 // the accent mark at their start while `agentNote` says so under the table. On a desktop row the title is the
 // one affordance (its own link); a chevron would spend a column to say what the link already says, so the
-// chevron belongs to the compact phone row alone. The card centres on a wide window up to `blocks.table-max`;
-// on a window narrower than 640px (the table's comfortable floor) the table becomes a list of compact
-// two-line rows — the title on its own line, then the status pill with owner and date on the meta line, so a
-// title that wraps never pushes its pill out of line — and the table never scrolls sideways.
-// While empty, loading or failed the table keeps its frame — the select-all checkbox waits when there is
-// nothing to select, and while loading four quiet rows hold the loaded rows' own slots and rules (no invented
-// data, still under the person's motion preference, the app's loading line said as the table's own name), so
-// the frame does not move when the rows arrive. Empty
-// offers the app's `create`, failed the app's `retry` — the way on, as the app's own act, and the primary one
-// in a contentless state. On a phone the list has no header, so the line sits on the card. States: data
+// chevron belongs to the compact phone row alone. The card centres on a wide window up to `blocks.table-max`,
+// and the fixed columns hug what they hold, so the title column takes the width that is left and a title wraps
+// only when the card is truly full — a table that wraps its titles while air sits locked in over-wide columns
+// lies about its room. The status column centres its pills under its label (a chip reads from its middle; the
+// skeleton holds the same axis, so nothing jumps when the rows arrive). On a window narrower than 640px (the
+// table's comfortable floor) the table becomes a list of compact rows — the title with the status pill at the
+// line's top edge, then owner and date alone, their left edge true under the title's — and the table never
+// scrolls sideways. While empty, loading or failed the table keeps its frame — the select-all step is simply
+// absent while there is nothing to select (a waiting box would imply a bulk act that cannot happen) — and
+// while loading four quiet rows hold the loaded rows' own slots and rules (no invented data, still under the
+// person's motion preference, the app's loading line said as the table's own name), so the frame does not
+// move when the rows arrive. Empty offers the app's `create`, failed the app's `retry` under the state's own
+// warning mark — the way on, as the app's own act, and the primary one in a contentless state. On a phone the
+// list has no header, so the line sits on the card. States: data
 // many|one|empty|loading|failed|long, interaction idle|busy (the card says it, and the checkboxes wait),
 // agent none|changed. Every word is a prop.
 use Words, ActionButton from "__SCOPE__/components"
@@ -54,7 +58,8 @@ fn marked(agent: string, marks: Marks, key: string): bool = agent == "changed" a
 fn markInk(on: bool): string = on ? "theme.color.accent" : "transparent"
 
 // The theme's status tokens, one per tone: the word in the ink that reads on a wash (`-text` for the statuses,
-// the accent for progress), the dot in the fill a shape may carry. Neutral carries no dot: nothing to see.
+// the accent for progress), the dot in the fill a shape may carry. The neutral's own grey says "nothing to see"
+// without breaking the pill's shape.
 fn toneInk(t: string): string = t == "progress" ? "theme.color.accent" : t == "done" ? "theme.color.positive-text" : t == "attention" ? "theme.color.caution-text" : "theme.color.ink-muted"
 fn toneDot(t: string): string = t == "progress" ? "theme.color.accent" : t == "done" ? "theme.color.positive" : t == "attention" ? "theme.color.caution" : "theme.color.ink-muted"
 
@@ -71,19 +76,32 @@ component SortArrow
       else
         path d="M3.5 7L6 9.5L8.5 7" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
 
-// A record's status as a filled pill: the tone's dot and word on the theme's quiet wash. A fill, not a border,
-// so it holds on any row background — a checked row's own fill included — and on any party's Theme, for every
-// name it reads is a token the theme tool requires of every theme. It is drawn twice (the desktop column, the
-// phone meta line), so it lives here as the block's one local piece.
+// A record's status as a filled pill: the tone's dot (the neutral's is grey — one component, not a pill with a
+// piece missing) and word on the page's own wash, the lightest ground the theme names and the one every status
+// ink clears 4.5:1 on in both modes (the done ink reads 4.4:1 on the hover wash). A fill, not a border, so it
+// holds on any row background — a checked row's own fill included — and on any party's Theme, for every name it
+// reads is a token the theme tool requires of every theme. It never shrinks (a table cell grows its column
+// instead, a phone title wraps instead), and it is drawn twice (the desktop column, the phone title line), so
+// it lives here as the block's one local piece.
 component StatusPill
   props
     text: string
     tone: enum<"neutral", "progress", "done", "attention">
   view
-    row align-items="center" gap="theme.space.xs" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color="theme.color.hover" border-radius="theme.radius.pill"
-      if tone != "neutral"
-        box width="blocks.tone-dot" height="blocks.tone-dot" border-radius="theme.radius.pill" background-color=toneDot(tone)
+    row align-items="center" gap="theme.space.xs" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color="theme.color.page" border-radius="theme.radius.pill" flex-shrink=0
+      box width="blocks.tone-dot" height="blocks.tone-dot" border-radius="theme.radius.pill" background-color=toneDot(tone)
       text text font="theme.type.caption" color=toneInk(tone)
+
+// The failed state's own mark: a small warning triangle in the theme's critical colour, above the message, so
+// a glance tells failed from empty before a word is read. Drawn in both layouts, so it lives here too.
+component StateGlyph
+  props
+    ink: string
+  view
+    svg viewBox="0 0 20 20" width="blocks.state-glyph" height="blocks.state-glyph" fill="none" stroke=ink aria-hidden=true
+      path d="M10 3.5L17.5 16.5H2.5Z" stroke-width=1.8 stroke-linejoin="round"
+      path d="M10 8.5V11.5" stroke-width=1.8 stroke-linecap="round"
+      path d="M10 14H10.01" stroke-width=1.8 stroke-linecap="round"
 
 component DataTable
   props
@@ -137,7 +155,9 @@ component DataTable
                 box width="35%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
         else
           if noRows
-            column padding="theme.space.lg" gap="theme.space.md" role=(data == "failed" ? "alert" : "status")
+            column padding="theme.space.lg" gap="theme.space.md" role=(data == "failed" ? "alert" : "status") align-items="center" text-align="center"
+              if data == "failed"
+                StateGlyph(ink="theme.color.critical")
               Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
               if data == "failed" and retryLabel != ""
                 row
@@ -154,13 +174,13 @@ component DataTable
               row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" background-color=(checked.keys.includes(r.key) ? "theme.color.fill" : "transparent") border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(marked(agent, marks, r.key))
                 input type="checkbox" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=(interaction == "busy") aria-label=`${selectLabel} ${r.title}` flex-shrink=0 testId=`${testId}-check-${r.key}`
                 column flex=1 min-width=0 gap="theme.space.xs"
-                  link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
-                    :hover
-                      color="theme.color.accent"
-                    text r.title font="theme.type.label"
-                  row align-items="center" gap="theme.space.sm" flex-wrap="wrap"
+                  row align-items="flex-start" gap="theme.space.sm"
+                    link href=r.href color="theme.color.ink" flex=1 min-width=0 testId=`${testId}-link-${r.key}`
+                      :hover
+                        color="theme.color.accent"
+                      text r.title font="theme.type.label"
                     StatusPill(text=r.status, tone=r.tone)
-                    text `${r.owner} · ${r.updated}` font="theme.type.caption" color="theme.color.ink-muted"
+                  text `${r.owner} · ${r.updated}` font="theme.type.caption" color="theme.color.ink-muted"
                 svg viewBox="0 0 12 12" width="blocks.glyph" height="blocks.glyph" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
                   path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
       else
@@ -168,14 +188,15 @@ component DataTable
           thead
             tr
               th scope="col" width="blocks.select-col" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
-                input type="checkbox" checked=allOn change=pickAll disabled=(interaction == "busy" or noRows) aria-label=selectAllLabel testId=`${testId}-check-all`
+                if not noRows
+                  input type="checkbox" checked=allOn change=pickAll disabled=(interaction == "busy") aria-label=selectAllLabel testId=`${testId}-check-all`
               th scope="col" aria-sort=(sort == "title" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
                 row align-items="center" gap="theme.space.xs"
                   text titleLabel font="theme.type.caption" color=(sort == "title" ? "theme.color.ink" : "theme.color.ink-muted")
                   if sort == "title"
                     SortArrow(dir=sortDir, ink="theme.color.ink")
               th scope="col" width="blocks.col-status" aria-sort=(sort == "status" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
-                row align-items="center" gap="theme.space.xs"
+                row align-items="center" gap="theme.space.xs" justify-content="center"
                   text statusLabel font="theme.type.caption" color=(sort == "status" ? "theme.color.ink" : "theme.color.ink-muted")
                   if sort == "status"
                     SortArrow(dir=sortDir, ink="theme.color.ink")
@@ -198,7 +219,8 @@ component DataTable
                   td height="blocks.row-min" padding-left="theme.space.md" padding-right="theme.space.md" border-top-width=(n > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
                     box width="55%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
                   td height="blocks.row-min" padding-left="theme.space.md" padding-right="theme.space.md" border-top-width=(n > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                    box width="70%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
+                    row justify-content="center"
+                      box width="80%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
                   td height="blocks.row-min" padding-left="theme.space.md" padding-right="theme.space.md" border-top-width=(n > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
                     box width="50%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
                   td height="blocks.row-min" text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" border-top-width=(n > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
@@ -210,6 +232,8 @@ component DataTable
                 tr
                   td colspan=5 text-align="center" height="blocks.state-min" padding-left="theme.space.lg" padding-right="theme.space.lg" role=(data == "failed" ? "alert" : "status")
                     column gap="theme.space.md" align-items="center"
+                      if data == "failed"
+                        StateGlyph(ink="theme.color.critical")
                       Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
                       if data == "failed" and retryLabel != ""
                         row
@@ -229,7 +253,7 @@ component DataTable
                           color="theme.color.accent"
                         text r.title font="theme.type.body"
                     td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                      row flex-shrink=0
+                      row justify-content="center"
                         StatusPill(text=r.status, tone=r.tone)
                     td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
                       text r.owner font="theme.type.body" color="theme.color.ink-muted"
