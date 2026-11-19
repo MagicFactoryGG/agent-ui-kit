@@ -93,7 +93,8 @@ component DataTable
           column padding="theme.space.lg" gap="theme.space.md" role=(data == "failed" ? "alert" : "status")
             Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
             if data == "failed" and retryLabel != ""
-              ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+              row
+                ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
         else
           if sort != "none"
             row align-items="center" gap="theme.space.xs" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
@@ -146,7 +147,8 @@ component DataTable
                   column gap="theme.space.md"
                     Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
                     if data == "failed" and retryLabel != ""
-                      ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+                      row
+                        ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
           else
             tbody
               for r, i in records key=r.key
