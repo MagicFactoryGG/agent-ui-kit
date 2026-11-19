@@ -1,0 +1,6 @@
+{
+  "DetailPanel": [
+    { "data": "loading", "interaction": "disabled" },
+    { "data": "failed", "interaction": "disabled" }
+  ]
+}

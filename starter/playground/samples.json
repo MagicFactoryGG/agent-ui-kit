@@ -1,3 +1,41 @@
 {
-  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types."
+  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only; a prop for one data state as \"<prop>@<data>\" (\"interaction@failed\": \"disabled\").",
+  "props:DetailPanel": {
+    "title": "Aurora Desk Lamp",
+    "statusLabel": "In production",
+    "primaryLabel": "Edit record",
+    "secondaryLabel": "Export",
+    "changedNote": "Your assistant set the status to In production.",
+    "waitingNote": "Your assistant suggests setting the status to Paid.",
+    "busyNote": "Saving your change",
+    "retryLabel": "Try again",
+    "factsTitle": "Details",
+    "factsEmptyText": "No details yet.",
+    "notesTitle": "Notes",
+    "notes": "Assembled to order in Rotterdam. Ships in its original box with a spare bulb taped to the base; leave the plug adapter in the side pocket of the packing slip.",
+    "activityTitle": "Activity",
+    "activityEmptyText": "No activity yet.",
+    "loadingText": "Loading this record…",
+    "failedText": "This record did not load. Check your connection and try again.",
+    "interaction@failed": "disabled",
+    "interaction@loading": "disabled"
+  },
+  "Fact:one": [
+    { "key": "item", "label": "Item code", "value": "AUR-DL-8841" },
+    { "key": "quantity", "label": "Quantity", "value": "2" },
+    { "key": "warehouse", "label": "Ships from", "value": "Rotterdam depot" },
+    { "key": "updated", "label": "Last updated", "value": "Today, 14:05" }
+  ],
+  "Fact:long": [
+    { "key": "item", "label": "Item code", "value": "AUR-DL-8841" },
+    { "key": "care", "label": "Care instructions the supplier wrote at length for this lamp and its linen shade", "value": "Wipe the brass joint with a dry cloth and keep the linen shade away from damp windows; the cloth-wrapped cord must stay untwisted so the dimmer keeps its full range" }
+  ],
+  "Event:one": [
+    { "key": "packed", "who": "Sam Rivera", "what": "Packed the order and printed its label", "when": "Today, 14:05" },
+    { "key": "picked", "who": "Sam Rivera", "what": "Picked both lamps from shelf B7", "when": "Today, 11:20" },
+    { "key": "placed", "who": "Priya Nair", "what": "Placed the order over the phone", "when": "Yesterday, 16:47" }
+  ],
+  "Event:long": [
+    { "key": "note", "who": "Sam Rivera", "what": "Left a long note on the packing slip explaining that the spare bulb travels taped to the lamp's base so it cannot rattle loose on the way to the customer's door", "when": "Today, 14:06" }
+  ]
 }

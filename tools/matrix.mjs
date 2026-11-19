@@ -158,6 +158,12 @@ const id = (s) => s.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLower
 
 // A prop's value in one cell: its state, else a sample by its name and type (long text when the data axis says so).
 function value(prop, cell, ctx) {
+  // samples.json may set a prop for one data state ("props:DetailPanel": {"interaction@failed": "disabled"}): a cell is
+  // what an app copies, so a state that implies another (actions off while a record failed to load) shows it. It
+  // replaces only a resting value: a cell that names the axis itself (busy, disabled) keeps its own.
+  const byState = cell.data === undefined ? undefined : ctx.given?.[`${prop.name}@${cell.data}`];
+  const resting = /^enum<\s*"([^"]+)"/.exec(prop.type)?.[1];
+  if (byState !== undefined && (!(prop.name in cell) || cell[prop.name] === resting)) return prop.type === 'bool' || prop.type === 'number' ? String(byState) : quote(byState);
   if (prop.name in cell) return prop.type === 'bool' ? String(cell[prop.name]) : quote(cell[prop.name]);
   // samples.json may give a piece's words ("props:ProfileSelector": {"label": "Profile", …}); data only.
   const given = ctx.given?.[prop.name];
