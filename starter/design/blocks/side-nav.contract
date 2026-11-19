@@ -11,10 +11,9 @@
 // start on one edge, while a row's fill (the current place's, a hover's) spans the panel's own width. Grouping
 // is by space — a heading, then its rows, one rhythm (theme.space.xs between every one of them; the air
 // between groups, theme.space.lg, the only larger gap) — not by frames; the line token draws the rail, the
-// hairline that closes the brand and the one above the account. While the menu is one place, empty, loading or
-// failed its spacer keeps the menu's home (blocks.nav-places-min, half of it on each side of the empty line),
-// so a short state sits in stable room instead of collapsing to a sliver and the account stays where the
-// shell put it.
+// hairline that closes the brand and the one above the account. A state that still holds the menu's shape — one
+// place, loading — keeps the menu's home (blocks.nav-places-min on the spacer); a state that only speaks words —
+// empty, failed — stands compact at the rows' place, with nothing reserved that would read as a void.
 //
 // - The brand is its own region, the same height in every state: the product's mark and name (each optional by
 //   being empty, the name the panel's largest words) and the hairline that closes it. The slot (the app's
@@ -34,7 +33,7 @@
 //   ghost for the group's own label and ghosts for its rows, a fill bar where a label will be and, where a row
 //   carries a count, a fill pill of the badge's own size — so what arrives does not jump. Empty says its line
 //   at the rows' place, the first group's own place, with its way on below (a compact bordered button when the
-//   app gives `emptyLabel`), the spacer holding the menu's home beneath it. Failed is the kit's outcome
+//   app gives `emptyLabel`) and the account right after: an honest empty is compact. Failed is the kit's outcome
 //   language, as ActionButton draws it: a raised panel ringed by the critical's hair and washed with the
 //   critical at a breath (8%, the same opacity shading the kit's own buttons), the drawn mark beside the words
 //   in the error's ink, and `retryLabel`'s button drawn the way the kit draws a control in an outcome — the
@@ -98,11 +97,11 @@ component NavItem
       if badge > 0
         text `${badge}` testId=`${testId}-badge` flex-shrink=0 min-width="blocks.nav-badge-min" box-sizing="border-box" text-align="center" font="theme.type.caption" color=(current ? "theme.color.ink" : "theme.color.ink-muted") font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color=(current ? "theme.color.surface" : "theme.color.fill") border-radius="theme.radius.pill" white-space="nowrap"
 
-// A group's own label, still coming: a short bar at the heading's inset, the heading's height.
+// A group's own label, still coming: a short bar at the heading's inset, the height of the rows' own bars.
 component NavHeadGhost
   view
     row padding-left="theme.space.md" padding-right="theme.space.md"
-      box width="blocks.nav-ghost-head" height="theme.space.sm" background-color="theme.color.fill" border-radius="theme.radius.pill"
+      box width="blocks.nav-ghost-head" height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 // A place still coming: the row's own height and insets, a fill bar where the label will be and, where the row
 // carries a count, a fill pill of the badge's own size — so what arrives does not jump.
@@ -191,7 +190,7 @@ component SideNav
               column gap="theme.space.xs"
                 for e in entries.filter(e => e.group == g) key=e.key
                   NavItem(label=e.label, href=e.href, badge=e.badge, current=e.current, marked=(agent == "changed" and e.key == agentKey), note=agentNote, testId=`${testId}-entry-${e.key}`)
-      column flex=1 min-height=(data == "many" or data == "long" ? "0" : "blocks.nav-places-min")
+      column flex=1 min-height=(data == "one" or data == "loading" ? "blocks.nav-places-min" : "0")
       if accountName != ""
         row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
           column width="theme.space.xxl" height="theme.space.xxl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" align-items="center" justify-content="center" overflow="hidden" aria-hidden=true
