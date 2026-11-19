@@ -23,15 +23,14 @@
 // one measure, symmetric with the panel's axis, so the skeleton is
 // anchored where its sentence would sit; the action's own footprint is held below it, one bone in the action's
 // own height and corner, a placeholder not a promise (nothing is pressable, the box is aria-hidden), so the
-// card does not reflow when the state turns. The three bones wrap as the line above them does — full, full,
-// short-last, the shape of a centred sentence at the measure. The card is Section's own card — surface ground, the theme's 1px
+// card does not reflow when the state turns. The card is Section's own card — surface ground, the theme's 1px
 // line, the card's corner. The one action is the way in every state that shows it, the primary fill with its
 // own words: empty's own way on, `actionLabel`; failed's own way back, `retryLabel`. `agent` "changed" marks a load an
 // agent started — its tool calls the same action the button does, one ledger, two doors — and `agentNote` is
-// the mark's one sentence, under the title in every state that shows it: the accent ink and a small accent disc
-// on a fill pill, the Notice's own way with an area's sentence and this panel's own disc grammar in miniature —
-// the dot is the mark's edge, no border to read as a control — a mark a person notices, never mistaken for the
-// action or for a link. `size` "full" claims the width it is
+// the mark's one sentence, the word group's last line in every state that shows it: the accent ink and a small
+// accent disc on a fill pill, the Notice's own way with an area's sentence and this panel's own disc grammar
+// in miniature — the dot is the mark's edge, no border to read as a control — a mark a person notices, never
+// mistaken for the action or for a link. `size` "full" claims the width it is
 // given up to blocks.panel-max — the area's own surface at a phone, a capped card on a wide window — and the
 // words sit on blocks.measure, a generous column that leaves the card breathing room at both sides;
 // "compact" insets to a narrower card for a side panel or a card's body. The three bones are one small local
@@ -47,8 +46,9 @@ component Bone
 
 // The agent's mark: a small accent disc and one sentence at body size on a fill pill, the Notice's own way with
 // an area's words — a state a person notices (the kit's first question), never mistaken for the action or for a
-// link. Drawn once here and placed once, under the title in every state that shows it — TopBar's own placement
-// for an agent's line — so it never competes with the action below.
+// link. Drawn once here and placed once, as the word group's last line in every state that shows it — LinkRow
+// and ValueRow's own placement for an agent's note, after the words it marks — so icon, title and line read as
+// one group and the mark never splits them.
 component Mark
   props
     note: string
@@ -88,8 +88,6 @@ component StatePanel
           path d="M7.5 12.6h2.55l1.05 1.65h1.8L13.95 12.6h2.55" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
       column width="100%" max-width="blocks.measure" align-items="center" gap="theme.space.sm"
         Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
-        if agent == "changed"
-          Mark(note=agentNote, testId=`${testId}-agent`)
         if data != "loading" and (data == "failed" ? failedText : message) != ""
           column width="100%" align-items="center" margin-top="theme.space.sm"
             Words(text=(data == "failed" ? failedText : message), kind="body", outcome="cancelled", level=0, testId=`${testId}-message`)
@@ -98,6 +96,8 @@ component StatePanel
             Bone(share="100%")
             Bone(share="100%")
             Bone(share="100%")
+        if agent == "changed"
+          Mark(note=agentNote, testId=`${testId}-agent`)
       if data == "loading"
         column width="100%" max-width="blocks.measure" margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md") align-items="center" testId=`${testId}-held`
           box aria-hidden=true height="blocks.action-min" width="blocks.bone-action" background-color="theme.color.fill" border-radius="theme.radius.control"
