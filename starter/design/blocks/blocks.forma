@@ -6,6 +6,7 @@ theme
   blocks.sheet-max: length = 480px
   blocks.mail-max: length = 1100px
   blocks.state-min: length = 240px
+  blocks.card-min: length = 520px
   blocks.glyph: length = 48px
   blocks.icon: length = 16px
   blocks.dot: length = 8px
