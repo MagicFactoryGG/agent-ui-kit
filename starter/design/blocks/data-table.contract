@@ -150,11 +150,13 @@ component DataTable
       if narrow
         if data == "loading"
           for n in [0, 1, 2, 3] key=n
-            row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(n > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-              box width="blocks.skel-check" height="blocks.skel-check" background-color="theme.color.fill" border-radius="calc(theme.radius.control / 2)" animation=pulse
-              column flex=1 min-width=0 gap="theme.space.xs"
-                box width="60%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
-                box width="35%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
+            row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(n > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
+              box width="blocks.skel-check" height="blocks.skel-check" background-color="theme.color.fill" border-radius="calc(theme.radius.control / 2)" flex-shrink=0 animation=pulse
+              column flex=1 min-width=0 gap="theme.space.sm"
+                box width="70%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
+                row align-items="center" gap="theme.space.sm"
+                  box width="20%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
+                  box width="40%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
         else
           if noRows
             column padding="theme.space.lg" gap="theme.space.md" role=(data == "failed" ? "alert" : "status") align-items="center" text-align="center" max-width="blocks.state-max" margin-left="auto" margin-right="auto" box-sizing="border-box"
@@ -189,25 +191,25 @@ component DataTable
         table testId=`${testId}-table` width="100%" border-spacing=0
           thead
             tr
-              th scope="col" width="blocks.select-col" box-sizing="border-box" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
+              th scope="col" vertical-align="baseline" width="blocks.select-col" box-sizing="border-box" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
                 if not noRows
                   input type="checkbox" checked=allOn change=pickAll disabled=(interaction == "busy") aria-label=selectAllLabel testId=`${testId}-check-all`
-              th scope="col" aria-sort=(sort == "title" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+              th scope="col" vertical-align="baseline" aria-sort=(sort == "title" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
                 row align-items="center" gap="theme.space.xs"
                   text titleLabel font="theme.type.caption" color=(sort == "title" ? "theme.color.ink" : "theme.color.ink-muted")
                   if sort == "title"
                     SortArrow(dir=sortDir, ink="theme.color.ink")
-              th scope="col" width="blocks.col-status" aria-sort=(sort == "status" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+              th scope="col" vertical-align="baseline" width="blocks.col-status" aria-sort=(sort == "status" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
                 row align-items="center" gap="theme.space.xs" justify-content="center"
                   text statusLabel font="theme.type.caption" color=(sort == "status" ? "theme.color.ink" : "theme.color.ink-muted")
                   if sort == "status"
                     SortArrow(dir=sortDir, ink="theme.color.ink")
-              th scope="col" width="blocks.col-owner" aria-sort=(sort == "owner" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+              th scope="col" vertical-align="baseline" width="blocks.col-owner" aria-sort=(sort == "owner" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
                 row align-items="center" gap="theme.space.xs"
                   text ownerLabel font="theme.type.caption" color=(sort == "owner" ? "theme.color.ink" : "theme.color.ink-muted")
                   if sort == "owner"
                     SortArrow(dir=sortDir, ink="theme.color.ink")
-              th scope="col" width="blocks.col-updated" aria-sort=(sort == "updated" ? sortDir : "none") text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+              th scope="col" vertical-align="baseline" width="blocks.col-updated" aria-sort=(sort == "updated" ? sortDir : "none") text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
                 row align-items="center" gap="theme.space.xs" justify-content="flex-end"
                   text updatedLabel font="theme.type.caption" color=(sort == "updated" ? "theme.color.ink" : "theme.color.ink-muted")
                   if sort == "updated"
