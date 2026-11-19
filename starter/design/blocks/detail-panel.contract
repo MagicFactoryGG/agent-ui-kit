@@ -5,9 +5,10 @@
 // person must answer, under the title). While loading every group keeps its place and its label, each holding
 // quiet bars that claim nothing (Picture keeps its fill while loading; the sentence stays, for a voice). A fact's
 // short value sits at the end of its line; a long one reads as prose under its label. The failed card carries the
-// error's own border. The header's actions are the app's in every state (mechanisms, not opinions): a record that
-// failed gets its retry from the app, as an action like any other. At phone width the groups stack; wide, the
-// facts and notes sit beside the activity (columns that wrap at a named minimum, Exact's "columns that wrap on a
+// error's own border. The header's actions are the app's in every state, and so is their `interaction` (busy while
+// its write is in flight, disabled when it means to refuse them): a record that failed gets its retry from the
+// app, as an action like any other (mechanisms, not opinions). At phone width the groups stack; wide, the facts
+// and notes sit beside the activity (columns that wrap at a named minimum, Exact's "columns that wrap on a
 // phone"). Every word is a prop; rows arrive by shape (Fact, Event).
 use Swatch from "__SCOPE__/theme"
 use Words, ActionButton, Tag from "__SCOPE__/components"
@@ -39,6 +40,7 @@ component DetailPanel
     primaryPress: action
     secondaryLabel: string
     secondaryPress: action
+    interaction: enum<"idle", "busy", "disabled">
     changedNote: string
     waitingNote: string
     factsTitle: string
@@ -67,9 +69,9 @@ component DetailPanel
         if primaryLabel != "" or secondaryLabel != ""
           row flex-wrap="wrap" align-items="center" gap="theme.space.sm"
             if secondaryLabel != ""
-              ActionButton(label=secondaryLabel, kind="plain", interaction="idle", outcome="none", press=secondaryPress, testId=`${testId}-secondary`)
+              ActionButton(label=secondaryLabel, kind="plain", interaction=interaction, outcome="none", press=secondaryPress, testId=`${testId}-secondary`)
             if primaryLabel != ""
-              ActionButton(label=primaryLabel, kind="primary", interaction="idle", outcome="none", press=primaryPress, testId=`${testId}-primary`)
+              ActionButton(label=primaryLabel, kind="primary", interaction=interaction, outcome="none", press=primaryPress, testId=`${testId}-primary`)
       if data == "failed"
         column testId=`${testId}-failed` role="alert" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical"
           Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed-text`)
