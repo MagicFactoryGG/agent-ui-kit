@@ -6,24 +6,25 @@
 // One gutter holds everything: the panel pads by theme.space.sm and every row inside pads its words by
 // theme.space.md, so the brand, a group's heading, each place's label, the states' words and the account all
 // start on one edge, while a row's fill (the current place's, a hover's) spans the panel's own width. Grouping
-// is by space — a heading hugs the rows it names, theme.space.lg between groups — not by frames; the line token
-// draws the rail, the hairline that closes the header and the one above the account.
+// is by space — a heading, theme.space.sm of air, then its rows touching (theme.space.xs between them),
+// theme.space.lg between groups — not by frames; the line token draws the rail, the hairline that closes the
+// header and the one above the account.
 //
 // - The header is its own region: the product's mark and name (each optional by being empty, the name the
 //   panel's largest words), then the slot on its own line under them (the app's control: a switch, a search),
 //   then the hairline — so the slot's content never reads as the name's second line.
 // - The places: NavEntry rows grouped by `group` in first-seen order ("" no heading). The current place is the
-//   panel's one filled thing: the fill, a hairline ring in the accent, the label's heavier type in the accent,
+//   panel's one filled thing, and selection is one device: the fill, the label's heavier type in the accent,
 //   aria-current="page". A badge counts, as a fill pill (surface on the current row's fill): no border, so it
 //   holds on any row and in both schemes.
-// - An agent that added or reordered an entry (agent "changed"): the entry `agentKey` names gets an accent
-//   edge at its start and `agentNote`'s words under its label (the kit's LinkRow language).
+// - An agent that added or reordered an entry (agent "changed"): the entry `agentKey` names gets an accent edge
+//   at its start and `agentNote`'s words under its label (the kit's LinkRow language).
 // - Loading: a drawn cue beside its words at a heading's place (role="status"), over ghost rows in the places'
-//   own shape — a full row's height, span and corner, two with a badge's ghost at the end — so what arrives
-//   does not jump. Empty says its line under a drawn mark, and, when the app gives `emptyLabel`, its button
-//   below (the way on). Failed says its line in the error's ink inside a raised panel cut by the critical's
-//   edge, and `retryLabel`'s button below it (the way on, the panel's one filled thing). Both keep the heading
-//   (`navLabel`, the same words a reader hears for the landmark) at a group heading's place.
+//   own shape — a full row's height, span and corner, each with a badge's ghost at the end — so what arrives
+//   does not jump. Empty says its line, and, when the app gives `emptyLabel`, its compact button below (the way
+//   on). Failed says its line in the error's ink, the drawn mark beside it, inside a raised panel with the
+//   critical's edge at its start, and `retryLabel`'s compact button below it (the way on). Both keep the
+//   heading (`navLabel`, the same words a reader hears for the landmark) at a group heading's place.
 // - Long: everything the panel draws holds one line with an ellipsis; the slot's content is the app's.
 //
 // States:
@@ -41,8 +42,7 @@ shape NavEntry
   badge: number
   current: bool
 
-// A group's heading, at the rows' own inset: the places' sections and the states' heading. Nothing below it —
-// the column's gap carries the label-to-first-row spacing, so a label hugs the rows it names.
+// A group's heading, at the rows' own inset: the places' sections and the states' heading.
 component NavHeading
   props
     text: string
@@ -50,8 +50,8 @@ component NavHeading
   view
     text text testId=testId font="theme.type.heading" color="theme.color.ink-muted" padding-left="theme.space.md" padding-right="theme.space.md" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
 
-// One place: its label on one line (an ellipsis a whole gap before its count), the current place's fill, ring
-// and weight, an agent's edge and note.
+// One place: its label on one line (an ellipsis a whole gap before its count), the current place's fill and
+// weight, an agent's edge and note.
 component NavItem
   props
     label: string
@@ -62,7 +62,7 @@ component NavItem
     note: string
     testId: string
   view
-    link href=href testId=testId aria-current=(current ? "page" : "false") display="flex" flex-direction="row" align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(current ? "theme.color.fill" : "transparent") box-shadow=(current ? "inset 0 0 0 1px theme.color.accent" : "none")
+    link href=href testId=testId aria-current=(current ? "page" : "false") position="relative" display="flex" flex-direction="row" align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(current ? "theme.color.fill" : "transparent")
       :hover
         background-color="theme.color.hover"
       :active
@@ -78,16 +78,13 @@ component NavItem
       if badge > 0
         text `${badge}` testId=`${testId}-badge` flex-shrink=0 min-width="blocks.nav-badge-min" box-sizing="border-box" text-align="center" font="theme.type.caption" color=(current ? "theme.color.ink" : "theme.color.ink-muted") font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color=(current ? "theme.color.surface" : "theme.color.fill") border-radius="theme.radius.pill" white-space="nowrap"
 
-// A place still coming: the row's own shape (height, span, corner) in the fill, the badge's ghost a surface pill
-// at the row's end, so what arrives does not jump.
+// A place still coming: the row's own shape (height, span, corner) in the fill, the badge's ghost a surface
+// pill at the row's end, so what arrives does not jump.
 component NavGhost
-  props
-    badge: bool
   view
     row align-items="center" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.control" aria-hidden=true
       row flex=1
-      if badge
-        box width="blocks.nav-badge-min" height="blocks.nav-badge-min" flex-shrink=0 background-color="theme.color.surface" border-radius="theme.radius.pill"
+      box width="blocks.nav-badge-min" height="blocks.nav-badge-min" flex-shrink=0 background-color="theme.color.surface" border-radius="theme.radius.pill"
 
 component SideNav
   props
@@ -126,46 +123,47 @@ component SideNav
       if data == "failed"
         column role="alert" gap="theme.space.sm"
           NavHeading(text=navLabel, testId=`${testId}-heading`)
-          row align-items="stretch" background-color="theme.color.raised" border-radius="theme.radius.card" overflow="hidden"
-            box width="blocks.nav-mark-line" flex-shrink=0 background-color="theme.color.critical" aria-hidden=true
-            column flex=1 min-width=0 gap="theme.space.sm" padding="theme.space.md"
-              svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true
-                path d="M12 3.5 L21 19 h-18 z" stroke-width=1.75 stroke-linejoin="round"
-                path d="M12 9.5 v4.5" stroke-width=1.75 stroke-linecap="round"
-                path d="M12 16.6 v0.2" stroke-width=1.75 stroke-linecap="round"
-              Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
-              ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+          row position="relative" background-color="theme.color.raised" border-radius="theme.radius.card"
+            box position="absolute" left=0 top="theme.space.sm" bottom="theme.space.sm" width="blocks.nav-mark-line" background-color="theme.color.critical" border-radius="theme.radius.pill" aria-hidden=true
+            column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
+              row align-items="flex-start" gap="theme.space.sm"
+                svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
+                  path d="M12 3.5 L21 19 h-18 z" stroke-width=1.75 stroke-linejoin="round"
+                  path d="M12 9.5 v4.5" stroke-width=1.75 stroke-linecap="round"
+                  path d="M12 16.6 v0.2" stroke-width=1.75 stroke-linecap="round"
+                column flex=1 min-width=0
+                  Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
+              row
+                ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
       else if data == "loading"
         column gap="theme.space.sm"
-          row role="status" align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md" padding-bottom="theme.space.xs"
+          row role="status" align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md"
             svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" aria-hidden=true flex-shrink=0
               path d="M12 3.5 A8.5 8.5 0 1 1 3.5 12" stroke="theme.color.ink-muted" stroke-width=2.5 stroke-linecap="round"
             column flex=1 min-width=0
               Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-${data}`)
           column aria-hidden=true gap="theme.space.xs"
-            NavGhost(badge=false)
-            NavGhost(badge=true)
-            NavGhost(badge=false)
-            NavGhost(badge=true)
+            NavGhost()
+            NavGhost()
+            NavGhost()
+            NavGhost()
       else if data == "empty"
         column role="status" gap="theme.space.sm"
           NavHeading(text=navLabel, testId=`${testId}-heading`)
           column gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md"
-            svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.ink-muted" aria-hidden=true
-              path d="M4 6h16" stroke-width=2 stroke-linecap="round"
-              path d="M4 12h16" stroke-width=2 stroke-linecap="round"
-              path d="M4 18h16" stroke-width=2 stroke-linecap="round"
             Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
             if emptyLabel != ""
-              ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
+              row
+                ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
       else
         column gap="theme.space.lg"
           for g in groups key=g
-            column gap="theme.space.xs"
+            column gap="theme.space.sm"
               if g != ""
                 NavHeading(text=g, testId=`${testId}-group-${g}`)
-              for e in entries.filter(e => e.group == g) key=e.key
-                NavItem(label=e.label, href=e.href, badge=e.badge, current=e.current, marked=(agent == "changed" and e.key == agentKey), note=agentNote, testId=`${testId}-entry-${e.key}`)
+              column gap="theme.space.xs"
+                for e in entries.filter(e => e.group == g) key=e.key
+                  NavItem(label=e.label, href=e.href, badge=e.badge, current=e.current, marked=(agent == "changed" and e.key == agentKey), note=agentNote, testId=`${testId}-entry-${e.key}`)
       column flex=1 min-height=0
       if accountName != ""
         row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
