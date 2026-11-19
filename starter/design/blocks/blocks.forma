@@ -14,3 +14,4 @@ theme
   blocks.col-updated: length = 130px
   blocks.skel-bar: length = 8px
   blocks.skel-check: length = 16px
+  blocks.state-min: length = 176px

@@ -114,7 +114,7 @@ component DataTable
           if data == "loading"
             for n in [0, 1, 2] key=n
               row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
-                box width="blocks.skel-check" height="blocks.skel-check" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
+                box width="blocks.skel-check" height="blocks.skel-check" background-color="theme.color.fill" border-radius="calc(theme.radius.control / 2)" animation=pulse
                 column flex=1 min-width=0 gap="theme.space.xs"
                   box width="60%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
                   box width="35%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
@@ -131,7 +131,7 @@ component DataTable
                   link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
                     :hover
                       color="theme.color.accent"
-                    text r.title font="theme.type.label"
+                    text r.title font="theme.type.label" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
                   Tag(text=r.status, outcome="none")
                 text `${r.owner} · ${r.updated}` font="theme.type.caption" color="theme.color.ink-muted"
               svg viewBox="0 0 12 12" width="blocks.glyph" height="blocks.glyph" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
@@ -166,21 +166,26 @@ component DataTable
           if noRows
             tbody
               tr
-                td text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
-                td colspan=4 text-align="start" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top=(data == "loading" ? "theme.space.md" : "theme.space.xl") padding-bottom=(data == "loading" ? "theme.space.md" : "theme.space.xl") role=(data == "failed" ? "alert" : "status")
-                  column gap="theme.space.md"
-                    Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
-                    if data == "failed" and retryLabel != ""
-                      row
-                        ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="error", press=retry, testId=`${testId}-retry`)
-                    if data == "empty" and createLabel != ""
-                      row
-                        ActionButton(label=createLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=create, testId=`${testId}-create`)
+                if data == "loading"
+                  td text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
+                  td colspan=4 text-align="start" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" role=(data == "failed" ? "alert" : "status")
+                    column gap="theme.space.md"
+                      Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
+                else
+                  td colspan=5 text-align="center" height="blocks.state-min" padding-left="theme.space.lg" padding-right="theme.space.lg" role=(data == "failed" ? "alert" : "status")
+                    column gap="theme.space.md" align-items="center"
+                      Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
+                      if data == "failed" and retryLabel != ""
+                        row
+                          ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="error", press=retry, testId=`${testId}-retry`)
+                      if data == "empty" and createLabel != ""
+                        row
+                          ActionButton(label=createLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=create, testId=`${testId}-create`)
               if data == "loading"
                 for n in [0, 1, 2] key=n
                   tr
                     td height="blocks.row-min" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
-                      box width="blocks.skel-check" height="blocks.skel-check" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
+                      box width="blocks.skel-check" height="blocks.skel-check" background-color="theme.color.fill" border-radius="calc(theme.radius.control / 2)" animation=pulse
                     td height="blocks.row-min" padding-left="theme.space.md" padding-right="theme.space.md"
                       box width="55%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
                     td height="blocks.row-min" padding-left="theme.space.md" padding-right="theme.space.md"
