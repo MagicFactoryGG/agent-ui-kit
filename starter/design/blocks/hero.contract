@@ -90,16 +90,17 @@ component Hero
     testId: string
   derive shown = data == "many" or data == "one" or data == "long"
   view
-    column testId=testId role="region" aria-label=headline width="100%" max-width="blocks.hero-max" box-sizing="border-box" margin-left="auto" margin-right="auto" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="blocks.hero-air" padding-bottom="blocks.hero-air" background-color="theme.color.page"
+    column testId=testId role="region" aria-label=headline width="100%" max-width="blocks.hero-max" box-sizing="border-box" margin-left="auto" margin-right="auto" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="blocks.hero-air" padding-bottom="blocks.hero-air"
       row flex-wrap="wrap" align-items="center" column-gap="blocks.hero-gap" row-gap="theme.space.xxl"
         // The copy: kicker, headline, lead, the way on.
         column flex=1 min-width="blocks.hero-copy-min" box-sizing="border-box" gap="theme.space.xl"
           column gap="theme.space.md"
             if kicker != ""
-              row align-items="center" gap="theme.space.sm"
-                box width="blocks.note-dot" height="blocks.note-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color="theme.color.accent" aria-hidden=true
-                text kicker testId=`${testId}-kicker` font="theme.type.label" color="theme.color.accent"
-            text headline testId=`${testId}-headline` role="heading" aria-level=1 font="theme.type.title" font-size="blocks.hero-display" color="theme.color.ink"
+              row align-items="baseline" gap="theme.space.sm"
+                svg viewBox="0 0 8 8" width="blocks.note-dot" height="blocks.note-dot" aria-hidden=true flex-shrink=0
+                  circle cx=4 cy=4 r=4 fill="theme.color.accent"
+                text kicker testId=`${testId}-kicker` flex=1 min-width=0 font="theme.type.label" color="theme.color.accent"
+            text headline testId=`${testId}-headline` role="heading" aria-level=1 padding-top="theme.space.xs" padding-bottom="theme.space.xs" font="theme.type.title" font-size="blocks.hero-display" color="theme.color.ink"
             if lead != ""
               text lead testId=`${testId}-lead` max-width="blocks.measure" font="theme.type.body" font-size="blocks.hero-lead" color="theme.color.ink-muted"
           column gap="theme.space.md"
@@ -117,7 +118,7 @@ component Hero
                 ActionButton(label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
           if agent == "changed"
             row testId=`${testId}-changed` role="status" flex-wrap="wrap" align-items="center" gap="theme.space.md" padding-left="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="theme.color.accent"
-              text changedNote testId=`${testId}-agent` flex="1 1 blocks.hero-note-min" min-width=0 font="theme.type.body" color="theme.color.accent"
+              text changedNote testId=`${testId}-agent` flex-shrink=1 min-width=0 font="theme.type.body" color="theme.color.accent"
               ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
         // The panel: a drawn picture, then the rows (or the state that stands in their place).
         column testId=`${testId}-panel` flex=1 min-width="blocks.hero-panel-min" box-sizing="border-box" overflow="hidden" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(data == "failed" ? "theme.color.critical" : "theme.color.line")

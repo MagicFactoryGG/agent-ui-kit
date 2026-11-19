@@ -73,4 +73,3 @@ theme
   blocks.hero-lead: length = 18px  // the lead: the theme's body style a step up, between body and title
   blocks.hero-art: length = 168px
   blocks.hero-tick: length = 24px
-  blocks.hero-note-min: length = 200px
