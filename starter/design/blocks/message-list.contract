@@ -1,17 +1,16 @@
 // A mailbox's list of messages, with the pane that reads the chosen one on a wide window, in one card. On a
-// wide window the card holds one body height in every state — the split is a scaffold, so it never rearranges
-// under a person: twin bands open the two columns at one height under the card's header (the list's standing
-// order, the pane's name — chrome, present whatever the room holds), rows fill what they need, one row claims
-// the same room as five, and only the long list grows past it; the card's bottom is its own edge in every
-// state, no band to arrive or vanish there. Empty and failed collapse to the card's full width — the
-// platform's own split rests when there is nothing to read, and one centred room with its way on speaks more
-// truly than two saying the same thing twice — keeping the header, the order line and the one body height, so
-// the card's shape holds through the change. On a phone the card grows with what it holds — a stack, the
-// platform's own idiom — one row a short card, a state with little to say its own quiet room, the order line
-// wearing one slim band, for a small window owes every pixel to the rows. The header is one line in every
-// state: the title, and the unread count as one badge — a pill on the theme's fill in the accent's ink,
-// sharing the unread dots' colour — but only while a message waits, for a badge is news: at zero, while the
-// messages load, when they fail to arrive or the box is empty, it says nothing at all rather than dress a
+// wide window, whenever there are messages to choose from, twin bands open the two columns at one height
+// under the card's header (the list's standing order, the pane's name — chrome, present whatever the room
+// holds) and the rows set the card's height — one row a short card, five a tall one, the long list free to
+// grow — so a small box never carries a void it did not earn; the rooms without rows, empty and failed,
+// collapse to the card's full width and keep the full body height, so their quiet is a room the shape of a
+// full list, not a stub, and the card's bounds hold through the change. The card's bottom is its own edge in
+// every state, no band to arrive or vanish there. On a phone the card grows with what it holds — a stack,
+// the platform's own idiom — one row a short card, a state with little to say its own quiet room, the order
+// line wearing one slim band, for a small window owes every pixel to the rows. The header is one line in
+// every state: the title, and the unread count as one badge — a pill on the theme's fill in the accent's
+// ink, sharing the unread dots' colour — but only while a message waits, for a badge is news: at zero, while
+// the messages load, when they fail to arrive or the box is empty, it says nothing at all rather than dress a
 // zero or breathe a grey shape where its words would be; the rows' own shimmer tells the loading story, and
 // the header never half-helps. An agent's note under the title when it filed or flagged a message that is not
 // in the list, the one line that may appear, because an agent's act is worth a change of height.
@@ -31,8 +30,7 @@
 // reading as a family, failed's colour living on its glyph alone, and nothing competing with the way out.
 // Loading keeps its peace: five rows breathe in the real row's own grid, every word swapped for a shimmer
 // bar, a breathing dot in the unread's place on some rows and a kept empty slot on the others, as a real
-// list mixes — the room the wide card's one body height holds, so when the real rows arrive nothing moves
-// but the words.
+// list mixes — near the height of the full list, so the real rows arrive to a room they already fit.
 //
 // The reading pane, headed by a band the pane's own width in the header's rhythm, holds the chosen message:
 // who and when on one line, the subject as the pane's title, the snippet wrapping under; and the message
@@ -142,9 +140,11 @@ component SkelRow
         box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
 
 // The one focal point of a state with nothing to show: a glyph in a circle, the state's own line at title size
-// in the level ink (the state's voice is the focal text; grey-on-grey would whisper it), one plain button as
-// the way on or the way back, all centred in the room the pane holds. Empty and failed speak this one anatomy,
-// so the two states read as a family; failed's colour lives on its glyph alone, and no element shouts twice.
+// in the level ink (the state's voice is the focal text; grey-on-grey would whisper it), and the way out — one
+// plain button when the room is calm (an empty box offers, it does not urge), the filled accent button when
+// the state is a failure and the way back is the one act that mends it. All centred in the room the pane
+// holds. The two states speak one anatomy, so they read as a family; failed's colour lives on its glyph alone,
+// and no element shouts twice.
 component StateCluster
   props
     kind: enum<"empty", "failed">
@@ -167,7 +167,7 @@ component StateCluster
           path d="M12 8.2v4.2" stroke="theme.color.critical-ink" stroke-width=1.8 stroke-linecap="round"
           circle cx=12 cy=15.6 r=1 fill="theme.color.critical-ink"
       Words(text=text, kind="title", outcome="none", level=0, testId=testId)
-      ActionButton(label=actionLabel, kind="plain", interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
+      ActionButton(label=actionLabel, kind=(kind == "failed" ? "primary" : "plain"), interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
 
 // One band of the card's chrome: a hairline rule at its top or bottom edge, one line of quiet words centred in
 // the band's own height (`minH`: the card's bar rhythm on a wide window, one slim line on a phone, where the
@@ -303,13 +303,12 @@ component Reader
                   Words(text=paneQuietText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-pane-quiet`)
 
 // The mailbox: one card (it centres on a wide window up to its own max), the header, then the list — with the
-// reading pane beside it whenever the window is wide and there are messages to choose from, both panes held
-// to the card's one body height so the scaffold never rearranges itself under a person. Empty and failed
-// collapse to the card's full width — the platform's own split rests when there is nothing to read, and one
-// centred room with its way on speaks more truly than two saying the same thing twice — keeping the header,
-// the order line and the one body height, so the card's shape holds; only the long list grows past the room.
-// Alone on a phone the card grows with its rows, where the row's own way in (its href) opens the message, as
-// the platform composes a list with its detail.
+// reading pane beside it whenever the window is wide and there are messages to choose from. Rows set the
+// card's height — one row a short card, five a tall one, the long list free to grow — so a small box never
+// carries a void it did not earn; the rooms without rows, empty and failed, keep the full body height
+// (`roomMin`) so their quiet is a room the shape of a full list, not a stub, and the card's bounds hold
+// through the change. Alone on a phone the card grows with its rows, where the row's own way in (its href)
+// opens the message, as the platform composes a list with its detail.
 component MessageList
   props
     title: string
@@ -355,6 +354,6 @@ component MessageList
         if data == "empty" or data == "failed"
           ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, orderLabel=orderLabel, roomMin="blocks.mail-body", bandMin="blocks.bar-min", compose=compose, retry=retry, pulse=pulse, testId=testId)
         else
-          row flex=1 align-items="stretch" min-height="blocks.mail-body"
-            ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, orderLabel=orderLabel, roomMin="blocks.mail-body", bandMin="blocks.bar-min", compose=compose, retry=retry, pulse=pulse, testId=testId)
+          row flex=1 align-items="stretch"
+            ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, orderLabel=orderLabel, roomMin="blocks.state-min", bandMin="blocks.bar-min", compose=compose, retry=retry, pulse=pulse, testId=testId)
             Reader(paneLabel=paneLabel, paneEmptyText=paneEmptyText, paneQuietText=paneQuietText, openLabel=openLabel, messages=messages, chosenKey=chosenKey, loading=(data == "loading"), openMessage=openMessage, pulse=pulse, testId=testId)
