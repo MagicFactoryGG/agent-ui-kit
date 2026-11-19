@@ -11,7 +11,6 @@
     "footerLabel": "Newest first",
     "paneLabel": "Message preview",
     "paneEmptyText": "Choose a message to read it here.",
-    "paneNoneText": "Nothing to read yet.",
     "agentNote": "Your assistant filed the invoice from ACME.",
     "chosenKey": "message-2",
     "agentKey": "message-4"
