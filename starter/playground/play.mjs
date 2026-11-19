@@ -45,7 +45,7 @@ function check() {
   for (const f of ['package.json', 'samples.json']) if (existsSync(join(HERE, f))) copyFileSync(join(HERE, f), join(dir, f));
   run('cp', ['-R', join(HERE, 'wip'), join(dir, 'wip')]);
   const made = run('bun', [join(TOOLS, 'matrix.mjs'), 'gen', DESIGN, dir], { stdio: 'pipe' }).status === 0;
-  const stale = made ? ['app.contract', 'app.ts', 'app.forma'].filter((f) => readFileSync(join(dir, f), 'utf8') !== readFileSync(join(HERE, f), 'utf8')) : ['(the design does not generate)'];
+  const stale = made ? ['app.contract', 'app.ts', 'app.forma', 'app.test.contract'].filter((f) => readFileSync(join(dir, f), 'utf8') !== readFileSync(join(HERE, f), 'utf8')) : ['(the design does not generate)'];
   rmSync(dir, { recursive: true, force: true });
   if (stale.length) {
     console.error(`REFUSED by the playground check (AGENTS.md: the app is generated): ${stale.join(', ')} differ from what the design makes. Run: bun play.mjs gen`);

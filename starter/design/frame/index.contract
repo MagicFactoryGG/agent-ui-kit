@@ -17,7 +17,7 @@ component NavList
     title: string
   slot
   view
-    scroll width="frame.nav-width" flex-shrink=0 background-color="frame.panel" border-right-width=1 border-right-style="solid" border-right-color="frame.line"
+    scroll width="frame.nav-width" flex-shrink=0 overflow-x="hidden" scrollbar-width="none" background-color="frame.panel" border-right-width=1 border-right-style="solid" border-right-color="frame.line"
       column padding="frame.pad" gap="frame.small"
         text title role="heading" aria-level=1 font="frame.type-head" color="frame.ink" padding-bottom="frame.gap"
         children
@@ -33,7 +33,7 @@ component NavItem
     button press=press testId=testId aria-current=(on ? "page" : "false") text-align="start" padding-left="frame.gap" padding-right="frame.gap" padding-top="frame.small" padding-bottom="frame.small" border-radius="frame.corner" border-width=0 background-color=(on ? "frame.on" : "transparent") color="frame.ink"
       :hover
         background-color="frame.on"
-      text label font="frame.type-item"
+      text label font="frame.type-item" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
 
 component NavHeading
   props
@@ -48,11 +48,61 @@ component Page
     note: string
   slot
   view
-    scroll flex=1 min-width=0
+    scroll flex=1 min-width=0 scrollbar-width="none"
       column padding="frame.pad" gap="frame.gap"
         text title role="heading" aria-level=2 font="frame.type-title" color="frame.ink"
         text note font="frame.type-small" color="frame.ink-muted"
         children
+
+// The window's look, compact enough for the list: the frame's own control, not the brand's.
+component ModeChoice
+  props
+    scheme: enum<"system", "light", "dark">
+    lightLabel: string
+    darkLabel: string
+    systemLabel: string
+    groupLabel: string
+    light: action
+    dark: action
+    system: action
+  view
+    row role="group" aria-label=groupLabel gap="frame.small" padding="frame.small" background-color="frame.on" border-radius="frame.corner"
+      ModeButton(label=lightLabel, on=(scheme == "light"), press=light, testId="mode-light")
+      ModeButton(label=darkLabel, on=(scheme == "dark"), press=dark, testId="mode-dark")
+      ModeButton(label=systemLabel, on=(scheme == "system"), press=system, testId="mode-system")
+
+component ModeButton
+  props
+    label: string
+    on: bool
+    press: action
+    testId: string
+  view
+    button press=press testId=testId aria-pressed=on flex=1 min-width=0 padding-top="frame.small" padding-bottom="frame.small" border-radius="frame.corner" border-width=0 background-color=(on ? "frame.panel" : "transparent") color=(on ? "frame.ink" : "frame.ink-muted")
+      text label font="frame.type-small" white-space="nowrap"
+
+// One colour token on one line: the colour in light and in dark, then its name.
+component TokenRow
+  props
+    name: string
+    testId: string
+  slot
+  view
+    row testId=testId align-items="center" gap="frame.gap" max-width="frame.row-max" padding-left="frame.small" padding-right="frame.gap" padding-top="frame.small" padding-bottom="frame.small" border-radius="frame.corner"
+      :hover
+        background-color="frame.on"
+      children
+      text name flex=1 min-width=0 font="frame.type-item" color="frame.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+
+// One token's colour in one mode, pinned to it.
+component TokenSwatch
+  props
+    scheme: enum<"light", "dark">
+    testId: string
+  slot
+  view
+    row testId=testId color-scheme=(scheme == "dark" ? "dark" : "light") flex-shrink=0
+      children
 
 // One state: its name, then its cells (light, then dark), side by side.
 component MatrixRow

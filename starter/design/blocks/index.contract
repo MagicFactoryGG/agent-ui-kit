@@ -2,7 +2,7 @@
 // declared once as enum props (docs/recipes/state-matrix.md); for blocks the data axis is
 //   data   many, one, empty, loading, failed, long
 use Swatch from "__SCOPE__/theme"
-use Words from "__SCOPE__/components"
+use Words, ActionButton from "__SCOPE__/components"
 
 // The bar at the top of a screen: the title, then the slot's actions. While an agent waits for the person,
 // `agentNote` says so under the title.
@@ -63,3 +63,27 @@ component SheetBody
       if outcome != "none"
         Words(text=outcomeText, kind="body", outcome=outcome, level=0, testId="sheet-outcome")
       children
+
+// One way in: a title, a line that says what follows, and its one button. "primary" for the way the app
+// recommends, "plain" for the other. Busy keeps the words and cannot be pressed; an outcome says `outcomeText`.
+component EntryChoice
+  props
+    title: string
+    note: string
+    actionLabel: string
+    outcomeText: string
+    kind: enum<"primary", "plain">
+    interaction: enum<"idle", "busy">
+    outcome: enum<"none", "error", "blocked">
+    press: action
+    testId: string
+  slot
+  view
+    column testId=testId gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+      Words(text=title, kind="label", outcome="none", level=2, testId=`${testId}-title`)
+      Words(text=note, kind="caption", outcome="none", level=0, testId=`${testId}-note`)
+      children
+      ActionButton(label=actionLabel, kind=(kind == "primary" ? "primary" : "plain"), interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=press, testId=`${testId}-action`)
+      if outcome != "none"
+        Words(text=outcomeText, kind="caption", outcome=(outcome == "error" ? "error" : "blocked"), level=0, testId=`${testId}-outcome`)
+

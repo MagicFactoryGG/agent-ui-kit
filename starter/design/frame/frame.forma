@@ -14,6 +14,7 @@ theme
   frame.small: length = 4px
   frame.corner: length = 8px
   frame.cell-min: length = 280px
+  frame.row-max: length = 420px
   // Fixed px type, so the frame itself looks the same on every host and a whole-window comparison is fair.
   frame.type-title: type = 600 22px/1.2 system-ui
   frame.type-head: type = 600 15px/1.3 system-ui

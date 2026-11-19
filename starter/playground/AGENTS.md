@@ -5,7 +5,7 @@ Where __TITLE__'s components, blocks and screens are designed and tried, live, o
 
 - **Start it:** `bun play.mjs` (the web page and the Mac app, both reloading on every save); `bun play.mjs ios`
   adds iOS once; `bun play.mjs stop` ends them. Stop it when you are not looking.
-- **The app is generated.** `app.contract`, `app.ts` and `app.forma` are written by `play.mjs` from the design
+- **The app is generated.** `app.contract`, `app.ts`, `app.forma` and `app.test.contract` are written by `play.mjs` from the design
   repo (`__DESIGN__`) and `wip/`; never edit them. `bun play.mjs check` fails on a hand edit.
 - **New things start in `wip/`.** Declare the piece's states as enum props named for their axis; the matrix
   (every state, every pair, the marked ones) is drawn from them. A piece with none is refused.

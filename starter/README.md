@@ -37,8 +37,8 @@ every host. `tools/theme.mjs` checks it and writes `theme/theme.forma` (Exact), 
 properties with `light-dark()`) and `theme/tailwind.css` (a Tailwind v4 `@theme`) from it.
 
 - Every colour has a light and a dark value; one value fails.
-- Text pairs reach 4.5:1 in both modes, or are listed in `$open` as a decision for the brand's owner, which the
-  check prints on every run.
+- Text that reads poorly on its background (under WCAG's 4.5:1) is either changed or listed in `$open`, which the
+  check prints on every run until the brand decides.
 - Type sizes are px on purpose: a rem is 16px on the web and 13px on macOS (Exact 51002ee77), so rem type
   would not look the same. Exact warns of px type (`forma-type-fixed`): it does not follow the person's text
   size. That is the price of parity, said here.

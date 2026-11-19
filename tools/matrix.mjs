@@ -134,10 +134,18 @@ export function cells(piece, marked = []) {
   return out;
 }
 
+// A name people use, from a code name: "LinkRow" and "ink-muted" read "Link row" and "Ink muted".
+export const human = (s) => {
+  const words = String(s).replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/[-_]+/g, ' ').trim().split(/\s+/);
+  return words.map((w, i) => (i === 0 ? w[0].toUpperCase() + w.slice(1) : /^[A-Z]{2,}$/.test(w) ? w : w.toLowerCase())).join(' ');
+};
+
+// A cell's name: only the states that differ from resting, each by its value ("Hover · Success"); a variant that is a
+// bool says its prop ("On").
 export function cellName(piece, cell) {
   const { axes, variants } = states(piece);
-  const parts = [...axes, ...variants].filter((a) => cell[a.prop] !== a.values[0]).map((a) => `${a.prop} ${cell[a.prop]}`);
-  return parts.length ? parts.join(' · ') : 'resting';
+  const parts = [...axes, ...variants].filter((a) => cell[a.prop] !== a.values[0]).map((a) => human(a.values.join() === 'false,true' ? a.prop : cell[a.prop]));
+  return parts.length ? parts.join(' · ') : 'Resting';
 }
 
 // ---- writing the playground app
@@ -169,6 +177,10 @@ function value(prop, cell, ctx) {
     ctx.needs.add(`${list[1]}:${cell.data ?? 'many'}`);
     return `s_${list[1]}_${cell.data ?? 'many'}`;
   }
+  if (/^[A-Z]\w*$/.test(t) && ctx.shapes?.[t]) {
+    ctx.needs.add(`${t}:${cell.data ?? 'one'}:one`);
+    return `o_${t}_${cell.data ?? 'one'}`;
+  }
   const e = enumValues(t);
   if (e) return quote(e[0]);
   return quote('');
@@ -192,24 +204,37 @@ import type { Answer } from './app.contract.d.ts';
 export const grants = '';
 const FIELDS: Record<string, { name: string; type: string }[]> = ${JSON.stringify(make, null, 2)};
 const LONG = ${JSON.stringify(LONG)};
+const IMAGE = ${JSON.stringify(IMAGE)};
 const COUNT: Record<string, number> = { many: 4, one: 1, empty: 0, loading: 0, failed: 0, long: 2 };
 const own: Record<string, unknown[]> = ${JSON.stringify(own, null, 2)};
 
-function row(shape: string, i: number, long: boolean): Record<string, unknown> {
+function row(shape: string, i: number, long: boolean, depth = 0): Record<string, unknown> {
   return Object.fromEntries((FIELDS[shape] ?? []).map(({ name, type }) => {
-    if (type === 'number') return [name, i + 1];
+    const n = name.toLowerCase();
+    if (type === 'number') return [name, n.startsWith('face') ? -1 : i];
     if (type === 'bool') return [name, i % 2 === 0];
-    if (type.endsWith('[]')) return [name, []];
-    if (name === 'key') return [name, \`\${shape.toLowerCase()}-\${i + 1}\`];
-    if (name === 'href') return [name, '/'];
+    if (type.endsWith('[]')) {
+      const inner = type.slice(0, -2);
+      return [name, depth < 2 && FIELDS[inner] ? Array.from({ length: 3 }, (_, j) => row(inner, j, long, depth + 1)) : []];
+    }
+    if (FIELDS[type]) return [name, row(type, i, long, depth + 1)];
+    if (n === 'key' || n === 'id') return [name, \`\${shape.toLowerCase()}-\${i + 1}\`];
+    if (n.endsWith('href')) return [name, '/'];
+    if (n === 'src' || n.endsWith('image')) return [name, IMAGE];
+    if (n === 'share' || n === 'width') return [name, \`\${80 - i * 15}%\`];
+    if (n === 'mesh' || n === 'path' || n === 'd') return [name, ''];
     return [name, long ? LONG : \`\${name[0].toUpperCase()}\${name.slice(1)} \${i + 1}\`];
   }));
 }
 
 export const answer: Answer = ((source: string, args: unknown[]) => {
-  if (source !== 'sample') throw new Error(\`no source \${source}\`);
-  const [shape, data] = args as [string, string];
+  // One source per shape (rowsX, oneX): Exact gives each source one signature.
+  const m = /^(rows|one)([A-Z]\\w*)$/.exec(String(source));
+  if (!m) throw new Error(\`no source \${String(source)}\`);
+  const shape = m[2];
+  const [data] = args as [string];
   const mine = own[\`\${shape}:\${data}\`];
+  if (m[1] === 'one') return Array.isArray(mine) && mine[0] ? mine[0] : row(shape, 0, data === 'long');
   if (Array.isArray(mine)) return mine;
   return Array.from({ length: COUNT[data] ?? 3 }, (_, i) => row(shape, i, data === 'long'));
 }) as unknown as Answer;
@@ -227,7 +252,7 @@ export function generate(designDir, playDir) {
   // The first preset is theme.json itself (what apps ship), so an edit there shows at once.
   const presets = { theme: theme, ...presetsOf(designDir) };
   const shapes = Object.assign({}, ...all.map((p) => p.shapes));
-  const ctx = { needs: new Set() };
+  const ctx = { needs: new Set(), shapes: Object.assign({}, ...all.map((p) => p.shapes)) };
   const byPkg = new Map();
   for (const p of all) byPkg.set(p.pkg, [...(byPkg.get(p.pkg) ?? []), p]);
   const uses = [...byPkg].map(([pkg, list]) => {
@@ -248,14 +273,14 @@ export function generate(designDir, playDir) {
     return JSON.parse(readFileSync(file, 'utf8'))[p.name] ?? [];
   };
 
-  // Theme: every colour token, light and dark.
+  // Theme: every colour token on one line, light and dark.
   pages.push('theme');
   nav.push(`        NavHeading(label="Theme")`, `        NavItem(label=${quote(theme.name)}, on=(page == "theme"), press=show("theme"), testId="nav-theme")`);
-  view.push(`      if page == "theme"`, `        Page(title=${quote(`Theme: ${theme.name}`)}, note=${quote('Every colour token, light and dark. Edit theme.json, or move a token in the design tool; the playground reloads on every host.')})`);
+  view.push(`      if page == "theme"`, `        Page(title=${quote(theme.name)}, note=${quote('Each colour, light and dark.')})`);
   for (const name of Object.keys(theme.color)) {
-    view.push(`          MatrixRow(label=${quote(name)}, testId=${quote(`theme-${name}`)})`);
+    view.push(`          if find == "" or ${quote(`theme-${name}`)}.includes(find)`, `            TokenRow(name=${quote(human(name))}, testId=${quote(`theme-${name}`)})`);
     for (const scheme of ['light', 'dark']) {
-      view.push(`            if find == "" or ${quote(`theme-${name}-${scheme}`)}.includes(find)`, `              MatrixCell(scheme="${scheme}", testId=${quote(`theme-${name}-${scheme}`)})`, `                Swatch(token=${quote(name)}, label=${quote(name)})`);
+      view.push(`              TokenSwatch(scheme="${scheme}", testId=${quote(`theme-${name}-${scheme}`)})`, `                Swatch(token=${quote(name)}, label="")`);
     }
   }
 
@@ -269,8 +294,8 @@ export function generate(designDir, playDir) {
       const cs = layer === 'screens' ? screenCells(p) : cells(p, marks(p));
       total += cs.length;
       pages.push(key);
-      nav.push(`        NavItem(label=${quote(p.name)}, on=(page == ${quote(key)}), press=show(${quote(key)}), testId=${quote(`nav-${id(key)}`)})`);
-      view.push(`      if page == ${quote(key)}`, `        Page(title=${quote(p.name)}, note=${quote(`${word(layer)} · ${cs.length} cells (${layer === 'screens' ? 'each data state' : 'resting, each state, each pair, marked'}) · light and dark`)})`);
+      nav.push(`        NavItem(label=${quote(human(p.name))}, on=(page == ${quote(key)}), press=show(${quote(key)}), testId=${quote(`nav-${id(key)}`)})`);
+      view.push(`      if page == ${quote(key)}`, `        Page(title=${quote(human(p.name))}, note=${quote(`${cs.length} states, light and dark`)})`);
       cs.forEach((cell) => {
         const name = cellName(p, cell);
         const rowId = `${id(p.name)}--${id(name)}`;
@@ -286,14 +311,16 @@ export function generate(designDir, playDir) {
   }
 
   const resources = [...ctx.needs].sort().map((n) => {
-    const [shape, data] = n.split(':');
-    return `  resource s_${shape}_${data} = sample(${quote(shape)}, ${quote(data)}) as shape ${shape}[]`;
+    const [shape, data, one] = n.split(':');
+    return one
+      ? `  resource o_${shape}_${data} = one${shape}(${quote(data)}) as shape ${shape}`
+      : `  resource s_${shape}_${data} = rows${shape}(${quote(data)}) as shape ${shape}[]`;
   });
   const presetNames = Object.keys(presets);
   const app = [
     HEADER,
     `// ${all.length} pieces, ${total} cells, each light and dark. Pages: ${pages.length}.`,
-    `use Shell, NavList, NavItem, NavHeading, Page, MatrixRow, MatrixCell, ScreenCell from "${packageOf(join(designDir, 'frame')).name}"`,
+    `use Shell, NavList, NavItem, NavHeading, Page, MatrixRow, MatrixCell, ScreenCell, ModeChoice, TokenRow, TokenSwatch from "${packageOf(join(designDir, 'frame')).name}"`,
     ...uses,
     '',
     'component App',
@@ -321,22 +348,44 @@ export function generate(designDir, playDir) {
     `    Shell(title=${quote(`${theme.name} playground`)})`,
     `      NavList(title=${quote(`${theme.name} playground`)})`,
     `        input type="search" value=find input=setFind placeholder="Find a state" aria-label="Find a state" testId="find"`,
-    ...(presetNames.length > 1 ? [`        NavHeading(label="Preset")`, ...presetNames.map((n) => `        NavItem(label=${quote(presets[n].$label ?? (n === 'theme' ? `${presets[n].name} (theme.json)` : presets[n].name ?? word(n)))}, on=(preset == ${quote(n)}), press=pickPreset(${quote(n)}), testId=${quote(`preset-${id(n)}`)})`)] : []),
-    ...(all.some((p) => p.name === 'SchemeChoice') ? [`        NavHeading(label="Window")`,
-    `        SchemeChoice(scheme=(scheme == "light" ? "light" : scheme == "dark" ? "dark" : "system"), interaction="idle", lightLabel="Light", darkLabel="Dark", systemLabel="System", groupLabel="Light or dark", light=light, dark=dark, system=system)`] : []),
+    ...(presetNames.length > 1 ? [`        NavHeading(label="Preset")`, ...presetNames.map((n) => `        NavItem(label=${quote(presets[n].$label ?? (n === 'theme' ? 'Theme' : presets[n].name ?? word(n)))}, on=(preset == ${quote(n)}), press=pickPreset(${quote(n)}), testId=${quote(`preset-${id(n)}`)})`)] : []),
+    `        NavHeading(label="Look")`,
+    `        ModeChoice(scheme=(scheme == "light" ? "light" : scheme == "dark" ? "dark" : "system"), lightLabel="Light", darkLabel="Dark", systemLabel="Auto", groupLabel="Look", light=light, dark=dark, system=system)`,
     ...nav,
     ...view,
     '',
   ].join('\n');
+  const firstColour = Object.keys(theme.color)[0];
+  const tests = [
+    HEADER,
+    '',
+    'test "the theme page shows a token in light and dark"',
+    '  clock data',
+    `  expect tree has "theme-${firstColour}-light"`,
+    `  expect tree has "theme-${firstColour}-dark"`,
+    '',
+    'test "every page opens"',
+    '  clock data',
+    ...pages.filter((p) => p !== 'theme').flatMap((p) => [`  tap "nav-${id(p)}"`, '  clock data', `  expect state page == ${quote(p)}`]),
+    '',
+    'test "find shows one state"',
+    '  clock data',
+    `  type "find" ${quote(`theme-${Object.keys(theme.color).at(-1)}`)}`,
+    '  clock settle',
+    `  expect tree missing "theme-${firstColour}"`,
+    `  expect tree has ${quote(`theme-${Object.keys(theme.color).at(-1)}-dark`)}`,
+    ...(presetNames.length > 1 ? ['', 'test "a preset switches every token at once"', '  clock data', `  tap "preset-${id(presetNames[1])}"`, '  clock settle', `  expect state preset == ${quote(presetNames[1])}`] : []),
+    '',
+  ].join('\n');
   const own = Object.fromEntries(Object.entries(existsSync(join(playDir, 'samples.json')) ? JSON.parse(readFileSync(join(playDir, 'samples.json'), 'utf8')) : {}).filter(([, v]) => Array.isArray(v)));
-  return { app, ts: samples(shapes, own), forma: presetForma(theme, presets), pieces: all.length, cells: total, pages: pages.length };
+  return { app, tests, ts: samples(shapes, own), forma: presetForma(theme, presets), pieces: all.length, cells: total, pages: pages.length };
 }
 
 // A screen's cells: each value of its data axis (screens take real-looking data from samples).
 function screenCells(p) {
-  const { axes } = states(p);
+  const { axes, variants } = states(p);
   const data = axes.find((a) => a.prop === 'data');
-  const base = Object.fromEntries(axes.map((a) => [a.prop, a.values[0]]));
+  const base = Object.fromEntries([...axes, ...variants].map((a) => [a.prop, a.values[0]]));
   return data ? data.values.map((v) => ({ ...base, data: v })) : [base];
 }
 
@@ -403,6 +452,7 @@ function main(argv) {
     writeFileSync(join(b, 'app.contract'), out.app);
     writeFileSync(join(b, 'app.ts'), out.ts);
     writeFileSync(join(b, 'app.forma'), out.forma);
+    writeFileSync(join(b, 'app.test.contract'), out.tests);
     console.log(`matrix: ${out.pieces} pieces, ${out.cells} cells, ${out.pages} pages, light and dark: ${join(b, 'app.contract')}`);
     return 0;
   }

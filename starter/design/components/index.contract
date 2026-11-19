@@ -71,6 +71,23 @@ component ValueRow
       if agent != "none"
         text agentNote font="theme.type.caption" color=(agent == "waiting" ? "theme.color.caution" : "theme.color.accent")
 
+// Two lines that stack, a title and its detail, with a short trailing word in the outcome's ink.
+component TextRow
+  props
+    title: string
+    detail: string
+    trailing: string
+    outcome: enum<"none", "success", "error", "blocked", "cancelled">
+    testId: string
+  view
+    row testId=testId align-items="center" gap="theme.space.md" min-height="components.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" box-sizing="border-box"
+      column flex=1 min-width=0 gap="theme.space.xs"
+        text title font="theme.type.body" color="theme.color.ink"
+        if detail != ""
+          text detail font="theme.type.caption" color="theme.color.ink-muted"
+      if trailing != ""
+        text trailing font="theme.type.caption" color=(outcome == "none" ? "theme.color.ink-muted" : outcomeInk(outcome))
+
 // A track and its filled share. `share` is a CSS percentage such as "42%".
 component Meter
   props
@@ -157,3 +174,24 @@ component Picture
       if data == "one"
         image src width="100%" height="100%" aria-hidden=true
       children
+
+// A labelled native field: the label, the slot (the platform's own input, select or textarea), then the hint, or
+// the error in the error's ink. Words are the app's; the error sentence and the tool's refusal word come from one
+// fn in the app, so a person and an agent hear the same reason.
+component Field
+  props
+    id: string
+    label: string
+    hint: string
+    error: string
+    outcome: enum<"none", "error">
+  slot
+  view
+    column testId=`${id}-field` gap="theme.space.xs"
+      text label testId=`${id}-label` font="theme.type.label" color="theme.color.ink"
+      children
+      if outcome == "error"
+        text error testId=`${id}-error` role="alert" font="theme.type.caption" color="theme.color.critical"
+      else if hint != ""
+        text hint testId=`${id}-hint` font="theme.type.caption" color="theme.color.ink-muted"
+

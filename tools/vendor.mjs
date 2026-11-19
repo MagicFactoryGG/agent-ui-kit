@@ -6,7 +6,8 @@
 //
 //   bun tools/vendor.mjs <app dir> [--layers theme,components,blocks,screens] [--also <package dir>]…
 //
-// The app's package.json then names each as "file:./vendor/<layer>".
+// The app's package.json then names each as "file:./vendor/<layer>"; vendor/ui-guard.mjs (with its .d.mts) is the
+// guard, for the app's own tests.
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -47,15 +48,27 @@ function main(argv) {
     rmSync(to, { recursive: true, force: true });
     mkdirSync(to, { recursive: true });
     cpSync(dir, to, { recursive: true, filter: (src) => !/node_modules|bun\.lock|\.DS_Store/.test(src) });
-    // A workspace's own links become paths between the vendored copies.
+    // A workspace's own links become peers, which the app's own file: entries satisfy: one copy of each package
+    // (two copies of the theme would ship one design twice, which Exact refuses: forma-package-name).
     const pj = join(to, 'package.json');
     const p = JSON.parse(readFileSync(pj, 'utf8'));
     for (const [dep, spec] of Object.entries(p.dependencies ?? {})) {
-      if (String(spec).startsWith('workspace:') || String(spec).startsWith('file:')) p.dependencies[dep] = `file:../${dep.split('/').pop()}`;
+      if (String(spec).startsWith('workspace:') || String(spec).startsWith('file:')) {
+        p.peerDependencies = { ...(p.peerDependencies ?? {}), [dep]: '*' };
+        delete p.dependencies[dep];
+      }
     }
+    if (p.dependencies && Object.keys(p.dependencies).length === 0) delete p.dependencies;
     writeFileSync(pj, `${JSON.stringify(p, null, 2)}\n`);
     pkg.dependencies[p.name] = `file:./vendor/${name}`;
     for (const f of walk(to)) files[relative(vendor, f)] = createHash('sha256').update(readFileSync(f)).digest('hex');
+  }
+  // The guard travels with the packages, so the app's own tests can hold it (import { guard } from vendor/ui-guard.mjs).
+  const guardSrc = join(DESIGN, 'tools', 'ui-guard.mjs');
+  if (existsSync(guardSrc)) {
+    writeFileSync(join(vendor, 'ui-guard.mjs'), readFileSync(guardSrc));
+    writeFileSync(join(vendor, 'ui-guard.d.mts'), 'export interface Finding {\n  file: string;\n  line: number;\n  what: string;\n}\nexport function guard(app: string): Finding[];\n');
+    for (const f of ['ui-guard.mjs', 'ui-guard.d.mts']) files[f] = createHash('sha256').update(readFileSync(join(vendor, f))).digest('hex');
   }
   writeFileSync(join(vendor, 'MANIFEST.json'), `${JSON.stringify({ from: 'the design repo (agent-ui-kit starter)', commit: dirty ? `${commit} with uncommitted changes` : commit, files }, null, 2)}\n`);
   writeFileSync(join(app, 'package.json'), `${JSON.stringify(pkg, null, 2)}\n`);

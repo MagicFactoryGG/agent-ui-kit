@@ -37,7 +37,7 @@ function cellsOf(app, pieces, rows) {
     const name = page.replace(/^(components|blocks|screens|wip)-/, '');
     const screen = page.startsWith('screens-');
     if (!screen && !pieces.includes(name)) continue;
-    if (rows === 'resting' && label !== 'resting') continue;
+    if (rows === 'resting' && label.toLowerCase() !== 'resting') continue;
     out.push({ page, piece: name, row: label, mode: c[1], id: c[2], nav: `nav-${page.toLowerCase().replace(/[^a-z0-9]+/g, '-')}` });
   }
   return out;
