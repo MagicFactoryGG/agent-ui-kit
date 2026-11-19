@@ -11,7 +11,8 @@
 // the way on, which the shell wires to its own retry; loading says its line as a caption beside the platform's
 // own activity indicator, over three skeleton rows in the places' own shape, flush like the rows themselves
 // (aria-hidden: the line is what a reader hears); empty says its line under a drawn tray in an inset that
-// stands where the list stands. A long anything the panel draws truncates to one line with an ellipsis (the
+// stands where the list stands, and `emptyLabel`'s button, when the app gives one, is the way on — the shell
+// wires it as it wires `retry` for failed. A long anything the panel draws truncates to one line with an ellipsis (the
 // slot's own content wraps, for it is the app's). Given a definite height the account pins to the panel's
 // bottom (the spacer takes what is left); the shell decides when the panel shows at all. The data axis leads
 // with empty, loading, failed and long, so a designer meeting the matrix meets the honest states first; "one"
@@ -38,6 +39,8 @@ component SideNav
     entries: NavEntry[]
     data: enum<"many", "empty", "loading", "failed", "long", "one">
     emptyText: string
+    emptyLabel: string
+    empty: action
     loadingText: string
     failedText: string
     retryLabel: string
@@ -65,7 +68,7 @@ component SideNav
           children
       if data == "failed"
         column padding="theme.space.lg" role="alert"
-          row testId=`${testId}-failed` align-items="flex-start" gap="theme.space.md" padding="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.control"
+          row testId=`${testId}-failed` align-items="center" gap="theme.space.md" padding="theme.space.md" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.card"
             svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
               path d="M12 3.5 L21 19 h-18 z" stroke-width=1.5 stroke-linejoin="round"
               path d="M12 9.5 v5" stroke-width=1.5 stroke-linecap="round"
@@ -74,29 +77,30 @@ component SideNav
               Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
             ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
       else if data == "loading"
-        column padding="theme.space.lg" role="status" gap="theme.space.md"
+        column padding="theme.space.lg" role="status" gap="theme.space.sm"
           column aria-hidden=true
             for i in [1, 2, 3] key=i
-              row align-items="center" gap="theme.space.sm" min-height="blocks.nav-row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-left-width="blocks.nav-mark-line" border-left-style="solid" border-left-color="transparent"
+              row align-items="center" gap="theme.space.sm" min-height="blocks.nav-row-min" padding-left="blocks.nav-mark-line" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
                 box flex=1 height="theme.space.xl" background-color="theme.color.fill" border-radius="theme.radius.pill"
-                box width="theme.space.xxl" height="theme.space.xl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
-          row align-items="center" gap="theme.space.sm"
+          row align-items="center" gap="theme.space.sm" padding-left="blocks.nav-mark-line"
             progress aria-label=loadingText width="blocks.nav-skel-head" flex-shrink=0
             Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-${data}`)
       else if data == "empty"
         column padding="theme.space.lg" role="status"
-          column align-items="center" justify-content="center" gap="theme.space.sm" padding="theme.space.md" min-height="blocks.nav-empty-min" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.control"
+          column align-items="center" justify-content="center" gap="theme.space.sm" padding="theme.space.md" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.card"
             svg viewBox="0 0 24 24" width="theme.space.xxl" height="theme.space.xxl" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
               path d="M4.5 7 h15 v10.5 h-15 z" stroke-width=1.5 stroke-linejoin="round"
               path d="M8.5 13 h7" stroke-width=1.5 stroke-linecap="round"
             Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+            if emptyLabel != ""
+              ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
       else
         for g, i in groups key=g
           column
             if i > 0
               box border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" margin-left="blocks.nav-heading-inset" margin-right="theme.space.lg" margin-top="theme.space.xs"
             if g != ""
-              text g testId=`${testId}-group-${g}` font="theme.type.heading" color="theme.color.ink-muted" padding-left="blocks.nav-heading-inset" padding-right="theme.space.lg" padding-top=(i > 0 ? "theme.space.md" : "theme.space.xs") padding-bottom="theme.space.sm" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+              text g testId=`${testId}-group-${g}` font="theme.type.heading" color="theme.color.ink-muted" padding-left="blocks.nav-heading-inset" padding-right="theme.space.lg" padding-top=(i > 0 ? "theme.space.sm" : "theme.space.xs") padding-bottom="theme.space.sm" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
             for e in entries.filter(e => e.group == g) key=e.key
               link href=e.href testId=`${testId}-entry-${e.key}` aria-current=(e.current ? "page" : "false") display="flex" flex-direction="row" align-items="center" gap="theme.space.sm" min-height="blocks.nav-row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(e.current ? "theme.color.fill" : "transparent") border-left-width="blocks.nav-mark-line" border-left-style="solid" border-left-color=((agent == "changed" and e.key == agentKey) ? "theme.color.accent" : "transparent")
                 :hover
@@ -110,7 +114,7 @@ component SideNav
                   if agent == "changed" and e.key == agentKey
                     text agentNote testId=`${testId}-mark-${e.key}` font="theme.type.caption" color="theme.color.accent" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
                 if e.badge > 0
-                  text `${e.badge}` testId=`${testId}-badge-${e.key}` flex-shrink=0 font="theme.type.caption" color="theme.color.ink" font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.pill" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" white-space="nowrap"
+                  text `${e.badge}` testId=`${testId}-badge-${e.key}` flex-shrink=0 font="theme.type.caption" color="theme.color.ink" font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs" background-color="theme.color.raised" border-radius="theme.radius.pill" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" white-space="nowrap"
       column flex=1 min-height=0
       if accountName != ""
         row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" background-color="theme.color.raised" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"

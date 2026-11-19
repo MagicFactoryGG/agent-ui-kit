@@ -19,6 +19,7 @@
     "productMark": "AC",
     "navLabel": "Main menu",
     "emptyText": "Nothing here yet.",
+    "emptyLabel": "Add a place",
     "loadingText": "Loading the menu…",
     "failedText": "The menu could not be loaded.",
     "retryLabel": "Try again",
