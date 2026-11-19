@@ -27,15 +27,17 @@ keyframes breathe
 fn currentAt(steps: Step[]): number = match first(steps.map((s, i) => s.state == "current" ? i : -1).filter(x => x != -1)) { case some(i) => i, case none => 0 }
 fn currentTitle(steps: Step[]): string = match first(steps.filter(s => s.state == "current")) { case some(s) => s.title, case none => "" }
 
-// A step's dot: filled by where it stands, ringed when current; the slot holds its number or the drawn tick.
+// A step's dot: filled by where it stands, edged when it is a step to come (a fill alone can vanish on a dark
+// card), ringed when current; the slot holds its number or the drawn tick.
 component StepDot
   props
     fill: string
+    edge: string
     ring: bool
     testId: string
   slot
   view
-    box testId=testId min-width="blocks.step-dot" min-height="blocks.step-dot" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.pill" background-color=fill box-shadow=(ring ? "0 0 0 2px theme.color.focus" : "none")
+    box testId=testId min-width="blocks.step-dot" min-height="blocks.step-dot" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.pill" border-width="theme.line.width" border-style="solid" border-color=edge background-color=fill box-shadow=(ring ? "0 0 0 2px theme.color.focus" : "none")
       children
 
 // One gap of the track between two dots: a passed step colours it, a step to come leaves it quiet.
@@ -99,8 +101,9 @@ component OnboardingSteps
         text loadingText testId=`${testId}-loading` role="status" font="theme.type.body" color="theme.color.ink-muted"
         column gap="theme.space.md" aria-hidden=true animation="breathe 1.8s ease-in-out infinite"
           row gap="theme.space.md" align-items="center"
+            box min-width="blocks.skel-count" height="blocks.skel-line" border-radius="theme.radius.pill" background-color="theme.color.fill"
             for j in [0, 1, 2, 3] key=j
-              StepDot(fill="theme.color.fill", ring=false, testId="")
+              StepDot(fill="theme.color.fill", edge="theme.color.fill", ring=false, testId="")
               if j < 3
                 StepSeg(ink="theme.color.fill")
           SkBar(share="2 1 0", height="blocks.skel-head")
@@ -125,7 +128,7 @@ component OnboardingSteps
           if steps.length > 1
             row flex=1 min-width=0 align-items="center" aria-hidden=true
               for s, i in steps key=s.key
-                StepDot(fill=(s.state == "current" ? "theme.color.accent" : "theme.color.fill"), ring=(s.state == "current"), testId=`${testId}-step-${s.key}`)
+                StepDot(fill=(s.state == "current" ? "theme.color.accent" : s.state == "done" ? "theme.color.fill" : "theme.color.surface"), edge=(s.state == "current" ? "theme.color.accent" : s.state == "done" ? "theme.color.fill" : "theme.color.line"), ring=(s.state == "current"), testId=`${testId}-step-${s.key}`)
                   if s.state == "done"
                     svg viewBox="0 0 12 12" width="blocks.step-tick" height="blocks.step-tick" fill="none" stroke="theme.color.positive-text" aria-hidden=true
                       path d="M2.5 6.5L5 9l4.5-5" stroke-width=2 stroke-linecap="round" stroke-linejoin="round"
@@ -160,15 +163,16 @@ component OnboardingSteps
             text errorText testId=`${testId}-error` role="alert" font="theme.type.caption" color="theme.color.critical-text"
           if data == "failed"
             if retryLabel != ""
-              ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+              ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
           else if not hasSteps
             ActionButton(label=continueLabel, kind="primary", interaction="idle", outcome="none", press=advance, testId=`${testId}-continue`)
           else
             row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
-              if at > 0
-                ActionButton(label=backLabel, kind="plain", interaction="idle", outcome="none", press=back, testId=`${testId}-back`)
-              if skipLabel != ""
-                ActionButton(label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
+              row gap="theme.space.sm" align-items="center"
+                if at > 0
+                  ActionButton(label=backLabel, kind="plain", interaction="idle", outcome="none", press=back, testId=`${testId}-back`)
+                if skipLabel != ""
+                  ActionButton(label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
               box flex=1
               column flex="1 1 blocks.actions-min"
                 ActionButton(label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)
