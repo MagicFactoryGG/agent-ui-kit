@@ -50,8 +50,9 @@ component Bone
 // The agent's mark: a small accent disc and one sentence at body size on a low wash of the accent, the Notice's
 // own way with an area's words — a status badge a person notices (the kit's first question), never mistaken for
 // the action or for a link. The wash is a drawn box behind the words, the kit's own way out of a theme with no
-// wash token: the accent at low opacity, no border (a border read as the chip's control), so the pill separates
-// itself from the card in light and dark alike. The dot rides the sentence's own baseline
+// wash token: the accent at low opacity — a step above the first, fainter wash, so the pill's ground reads
+// against the card in dark as clearly as in light — with no border (a border read as the chip's control). The dot
+// rides the sentence's own baseline
 // (align-items="baseline"), so its centre sits at the letters' cap-height centre, not the line box's — the mark
 // reads as written with its words. The band it sits in (the air above and below it) is the placer's, not the
 // pill's: StatePanel holds it at the action's own gap.
@@ -61,7 +62,7 @@ component Mark
     testId: string
   view
     row testId=testId position="relative" align-items="baseline" gap="theme.space.xs" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
-      box aria-hidden=true position="absolute" inset=0 background-color="theme.color.accent" opacity=0.12 border-radius="theme.radius.pill"
+      box aria-hidden=true position="absolute" inset=0 background-color="theme.color.accent" opacity=0.18 border-radius="theme.radius.pill"
       svg viewBox="0 0 8 8" width="blocks.note-dot" height="blocks.note-dot" aria-hidden=true flex-shrink=0 position="relative"
         circle cx=4 cy=4 r=4 fill="theme.color.accent"
       text note position="relative" font="theme.type.body" color="theme.color.accent"
