@@ -8,6 +8,7 @@ use StatePanel from "./state-panel.contract"
 use DataTable, Record, Checked, Marks, Viewport from "./data-table.contract"
 use SettingsGroup, Setting from "./settings-group.contract"
 use OnboardingSteps, Step from "./onboarding-steps.contract"
+use Hero, Highlight from "./hero.contract"
 
 // The bar at the top of a screen: the title, then the slot's actions. While an agent waits for the person,
 // `agentNote` says so under the title.
