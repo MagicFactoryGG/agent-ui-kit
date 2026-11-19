@@ -10,3 +10,4 @@ theme
   blocks.bone: length = 12px
   blocks.note-dot: length = 6px
   blocks.measure: length = 400px
+  blocks.action-min: length = 44px  // ActionButton's own least height (components.row-min); a block may not reach into another package's sizes

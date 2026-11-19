@@ -6,17 +6,22 @@
 // alert itself. The panel's words all sit on one measure, blocks.measure, centred — title, state line, agent
 // note, and the bones below — so every element shares one column, and a message wraps at the same width the
 // skeleton stands in for. The state line is body size in the muted ink in every state that shows one: the panel
-// says in words what its area is, and the failed state's colour is carried by its disc and the card's ring —
-// the critical line doubled by an inset shadow, two pixels to the eye and no size moved — never by the words,
-// so the sentence stays readable and the state is said once in colour (role=alert speaks it in failed). In
+// says in words what its area is, and the failed state's colour is carried by its disc and its way back — the
+// retry is the kit's own error-ring button, ActionButton's plain on the surface with the critical line, the
+// affordance its `outcome` already draws for an act that ended in error — while the card keeps the theme's 1px
+// line in the critical hue, Proposal's own convention for a stateful card, so the sentence stays readable and
+// the state is said once in colour (role=alert speaks it in failed). In
 // loading the skeleton is the line, and the live words are the title's — role=status speaks what is loading —
 // and the note's when an agent started the load: the disc rests neutral then and the accent stays with the
 // mark, so no live sentence sits above placeholders to read half-loaded, and loading is said once. Loading
 // stands the content in three equal bones in the state line's own place — the line's own gap above them, the
 // line they stand for — all one width on the one measure, symmetric with the panel's axis, so the skeleton is
-// anchored where its sentence would sit and the panel's word column holds in every state. The card is Section's own card — surface ground, the theme's 1px line,
-// the card's corner. The one action is primary in every state that shows it: empty's own way on, `actionLabel`;
-// failed's own way back, `retryLabel` — red would say a destructive act. `agent` "changed" marks a load an
+// anchored where its sentence would sit; the action's own height is held below it, an empty slot at the
+// action's least height, so the card does not reflow when the state turns and no ghost button promises an act
+// that is not yet there. The card is Section's own card — surface ground, the theme's 1px line,
+// the card's corner. The one action is the way in every state that shows it: empty's own way on,
+// `actionLabel`, the accent's fill; failed's own way back, `retryLabel`, the error's ring — a red fill would
+// say a destructive act. `agent` "changed" marks a load an
 // agent started — its tool calls the same action the button does, one ledger, two doors — and `agentNote` says
 // so as the text block's last line, a breath of air above it: the accent ink and a small accent disc on a fill pill, the Notice's own way
 // with an area's sentence and this panel's own disc grammar in miniature — a mark a person notices, never
@@ -46,7 +51,7 @@ component StatePanel
     press: action
     testId: string
   view
-    column testId=testId role=(data == "failed" ? "alert" : data == "loading" ? "status" : "none") width="100%" max-width=(size == "full" ? "none" : "blocks.panel-compact") margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(size == "full" ? "theme.space.xxl" : "theme.space.lg") align-items="center" text-align="center" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(data == "failed" ? "theme.color.critical" : "theme.color.line") box-shadow=(data == "failed" ? "inset 0 0 0 1px theme.color.critical" : "none")
+    column testId=testId role=(data == "failed" ? "alert" : data == "loading" ? "status" : "none") width="100%" max-width=(size == "full" ? "none" : "blocks.panel-compact") margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(size == "full" ? "theme.space.xxl" : "theme.space.lg") align-items="center" text-align="center" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(data == "failed" ? "theme.color.critical" : "theme.color.line")
       svg viewBox="0 0 24 24" width=(size == "full" ? "blocks.shape-full" : "blocks.shape-compact") height=(size == "full" ? "blocks.shape-full" : "blocks.shape-compact") aria-hidden=true flex-shrink=0 margin-bottom=(size == "full" ? "theme.space.lg" : "theme.space.md")
         if data == "failed"
           circle cx=12 cy=12 r=11 fill="theme.color.critical"
@@ -69,10 +74,12 @@ component StatePanel
             Bone(share="100%")
             Bone(share="100%")
         if agent == "changed"
-          row testId=`${testId}-agent` align-items="center" gap="theme.space.xs" margin-top="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
+          row testId=`${testId}-agent` align-items="center" gap="theme.space.xs" margin-top="theme.space.sm" background-color="theme.color.fill" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
             svg viewBox="0 0 6 6" width="blocks.note-dot" height="blocks.note-dot" aria-hidden=true flex-shrink=0
               circle cx=3 cy=3 r=3 fill="theme.color.accent"
             text agentNote font="theme.type.caption" color="theme.color.accent"
+      if data == "loading"
+        column width="100%" max-width="blocks.measure" margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md") min-height="blocks.action-min" testId=`${testId}-held`
       if data != "loading" and (data == "failed" ? retryLabel : actionLabel) != ""
         column margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md")
-          ActionButton(label=(data == "failed" ? retryLabel : actionLabel), kind="primary", interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
+          ActionButton(label=(data == "failed" ? retryLabel : actionLabel), kind=(data == "failed" ? "plain" : "primary"), interaction="idle", outcome=(data == "failed" ? "error" : "none"), press=press, testId=`${testId}-action`)
