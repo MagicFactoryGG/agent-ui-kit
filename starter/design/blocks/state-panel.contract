@@ -1,10 +1,13 @@
 // One block for a whole area's empty, loading and failed states: a calm centred panel, its card, shape and type
 // all Theme tokens (no image file). The drawn shape says the state: an empty tray (empty), a broken arc in the
-// accent, the one active colour (loading), a filled alert form (failed). Loading keeps the title (so a reader
-// hears what loads, role=status) and stands in three stepped skeleton lines for the rest; the one action is
-// primary whenever it shows, the retry in failed as in empty. `size` "full" is the whole area's panel; "compact"
-// keeps the type and claims less width, for a card's body or a side panel. No agent axis, as Section: nothing
-// here for an agent to change or wait on; the app's notice says it.
+// accent, the one active colour (loading), a filled alert form (failed). The state line follows Section's own
+// convention: body size, muted for empty, the error's ink for failed. Loading keeps the title (so a reader hears
+// what loads, role=status) and stands in three stepped skeleton lines, centred as everything the person reads is;
+// the one action is primary whenever it shows, the retry in failed as in empty (red would say destructive, and a
+// retry is the way on). The rhythm is one scale: the title and its line one tight group, the way on held apart by
+// the one larger gap. `size` "full" is the whole area's panel; "compact" keeps the type and claims less width, for
+// a card's body or a side panel. No agent axis, as Section: nothing here for an agent to change or wait on; the
+// app's notice says it.
 use Words, ActionButton from "__SCOPE__/components"
 
 component StatePanel
@@ -18,7 +21,7 @@ component StatePanel
     testId: string
   view
     column testId=testId role=(data == "failed" ? "alert" : data == "loading" ? "status" : "none") width="100%" max-width=(size == "full" ? "blocks.panel-max" : "blocks.panel-compact") margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(size == "full" ? "theme.space.xxl" : "theme.space.xl") align-items="center" text-align="center" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
-      svg viewBox="0 0 24 24" width=(size == "full" ? "blocks.shape-full" : "blocks.shape-compact") height=(size == "full" ? "blocks.shape-full" : "blocks.shape-compact") aria-hidden=true flex-shrink=0 margin-bottom=(size == "full" ? "theme.space.xl" : "theme.space.lg")
+      svg viewBox="0 0 24 24" width=(size == "full" ? "blocks.shape-full" : "blocks.shape-compact") height=(size == "full" ? "blocks.shape-full" : "blocks.shape-compact") aria-hidden=true flex-shrink=0 margin-bottom=(size == "full" ? "theme.space.lg" : "theme.space.md")
         if data == "failed"
           circle cx=12 cy=12 r=11 fill="theme.color.critical"
           line x1=12 y1=6.75 x2=12 y2=13 stroke="theme.color.critical-ink" stroke-width=2 stroke-linecap="round"
@@ -37,6 +40,6 @@ component StatePanel
           box height="blocks.bone" width="60%" background-color="theme.color.fill" border-radius="theme.radius.pill"
       else
         column margin-bottom=(size == "full" ? "theme.space.xl" : "theme.space.lg")
-          Words(text=message, kind="caption", outcome="none", level=0, testId=`${testId}-message`)
+          Words(text=message, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-message`)
         if actionLabel != ""
           ActionButton(label=actionLabel, kind="primary", interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
