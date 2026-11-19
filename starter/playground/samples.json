@@ -3,7 +3,8 @@
   "props:StatePanel": {
     "title": "Your files",
     "message": "Everything you add to this project will appear here, ready to share with your team.",
-    "agentNote": "Your assistant is loading this for you.",
+    "failedText": "We couldn't load your files. Check your connection, then try again.",
+    "agentNote": "Your assistant is taking care of this.",
     "actionLabel": "Add files",
     "retryLabel": "Try again"
   }

@@ -4,10 +4,11 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
+  blocks.panel-max: length = 800px
   blocks.panel-compact: length = 320px
   blocks.shape-full: length = 56px
   blocks.shape-compact: length = 40px
   blocks.bone: length = 12px
   blocks.note-dot: length = 6px
-  blocks.measure: length = 400px
+  blocks.measure: length = 560px
   blocks.action-min: length = 44px  // ActionButton's own least height (components.row-min); a block may not reach into another package's sizes
