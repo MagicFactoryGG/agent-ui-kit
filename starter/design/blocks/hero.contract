@@ -20,7 +20,7 @@
 use Words, ActionButton from "__SCOPE__/components"
 
 // One point the hero makes: its key, a short title and a line of detail.
-shape Highlight
+shape HeroPoint
   key: string
   title: string
   detail: string
@@ -94,7 +94,7 @@ component Hero
     secondaryLabel: string
     pictureLabel: string
     panelTitle: string
-    items: Highlight[]
+    items: HeroPoint[]
     emptyText: string
     loadingText: string
     failedText: string
