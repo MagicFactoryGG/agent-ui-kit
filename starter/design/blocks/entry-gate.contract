@@ -1,0 +1,50 @@
+// The way into an app for someone who is not authenticated: the heading and lead line, then two choices —
+// authenticate (the primary button; its label is a prop, for the provider and method are the app's, never named
+// here) and continue as a guest (its line says what a guest can do, and that a guest's work moves into their
+// account when they authenticate) — side by side on a wide window, stacked on a phone (a card wraps at
+// blocks.gate-choice), then a small legal or help line. Busy shows on one choice only, the one `busyChoice`
+// names, its button keeping its words; an outcome draws `outcomeText` in its own ink under the choices and
+// never turns a button red. The two cards are drawn here, not with EntryChoice: a file in a package cannot
+// import from its own index.contract (contract-use-cycle), and the wrap width is the card's own. States:
+// interaction idle|busy, outcome none|error|blocked|cancelled, busyChoice auth|guest (which choice busy is on).
+use Words, ActionButton from "__SCOPE__/components"
+
+component EntryGate
+  props
+    title: string
+    lead: string
+    authTitle: string
+    authNote: string
+    authLabel: string
+    guestTitle: string
+    guestNote: string
+    guestLabel: string
+    legal: string
+    outcomeText: string
+    interaction: enum<"idle", "busy">
+    outcome: enum<"none", "error", "blocked", "cancelled">
+    busyChoice: enum<"auth", "guest">
+    auth: action
+    guest: action
+    testId: string
+  view
+    column testId=testId gap="theme.space.xl" max-width="blocks.gate-max" margin-left="auto" margin-right="auto"
+      column gap="theme.space.sm"
+        Words(text=title, kind="title", outcome="none", level=1, testId=`${testId}-title`)
+        Words(text=lead, kind="body", outcome="none", level=0, testId=`${testId}-lead`)
+      row flex-wrap="wrap" gap="theme.space.lg" align-items="stretch"
+        column testId=`${testId}-auth` flex=1 min-width="blocks.gate-choice" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+          Words(text=authTitle, kind="label", outcome="none", level=2, testId=`${testId}-auth-title`)
+          if authNote != ""
+            Words(text=authNote, kind="caption", outcome="none", level=0, testId=`${testId}-auth-note`)
+          ActionButton(label=authLabel, kind="primary", interaction=(interaction == "busy" and busyChoice == "auth" ? "busy" : "idle"), outcome="none", press=auth, testId=`${testId}-auth-action`)
+        column testId=`${testId}-guest` flex=1 min-width="blocks.gate-choice" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+          Words(text=guestTitle, kind="label", outcome="none", level=2, testId=`${testId}-guest-title`)
+          if guestNote != ""
+            Words(text=guestNote, kind="caption", outcome="none", level=0, testId=`${testId}-guest-note`)
+          ActionButton(label=guestLabel, kind="plain", interaction=(interaction == "busy" and busyChoice == "guest" ? "busy" : "idle"), outcome="none", press=guest, testId=`${testId}-guest-action`)
+      if outcome != "none"
+        column role=(outcome == "cancelled" ? "status" : "alert")
+          Words(text=outcomeText, kind="body", outcome=outcome, level=0, testId=`${testId}-outcome`)
+      if legal != ""
+        Words(text=legal, kind="caption", outcome="none", level=0, testId=`${testId}-legal`)

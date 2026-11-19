@@ -4,3 +4,5 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
+  blocks.gate-max: length = 560px
+  blocks.gate-choice: length = 240px
