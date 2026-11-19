@@ -159,7 +159,7 @@ component DataTable
                   box width="40%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
         else
           if noRows
-            column padding="theme.space.lg" gap="theme.space.md" role=(data == "failed" ? "alert" : "status") align-items="center" text-align="center" max-width="blocks.state-max" margin-left="auto" margin-right="auto" box-sizing="border-box"
+            column padding="theme.space.lg" gap="theme.space.md" role=(data == "failed" ? "alert" : "status") align-items="center" justify-content="center" min-height="blocks.state-min" text-align="center" max-width="blocks.state-max" margin-left="auto" margin-right="auto" box-sizing="border-box"
               if data == "failed"
                 StateGlyph(ink="theme.color.critical")
               Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
