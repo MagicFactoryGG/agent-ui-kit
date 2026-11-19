@@ -179,11 +179,14 @@ function value(prop, cell, ctx) {
   // An action prop the piece calls with an argument (`choose(o.key)`) is bound to one that takes it.
   if (t === 'action') {
     // Called with an argument (`choose(o.key)`), or the handler of a field (`input=edit`, `change=pick`): one argument.
-    const takesOne = new RegExp(`\\b${prop.name}\\(\\s*[^)\\s]`).test(ctx.body ?? '') || new RegExp(`\\b(input|change)=${prop.name}\\b`).test(ctx.body ?? '');
-    if (!takesOne) return 'noop';
+    // As many arguments as the piece's first call passes (`drag(e.clientX, e.clientY)`: two).
+    const code = (ctx.body ?? '').split('\n').filter((l) => !l.trim().startsWith('//')).join('\n');
+    const field = new RegExp(`\\b(input|change)=${prop.name}\\b`).test(code);
+    const arity = Math.max(callArity(code, prop.name), field ? 1 : 0);
+    if (arity === 0) return 'noop';
     // One no-op per piece and prop: Exact infers an untyped parameter's type from its use (a key, a number).
     const name = `noop_${ctx.piece}_${prop.name}`;
-    ctx.needs.add(`action:${name}`);
+    ctx.needs.add(`action:${name}:${arity}`);
     return name;
   }
   const list = /^(\w+)\[\]$/.exec(t);
@@ -198,6 +201,28 @@ function value(prop, cell, ctx) {
   const e = enumValues(t);
   if (e) return quote(e[0]);
   return quote('');
+}
+
+// How many arguments the code's calls of `name(…)` pass: the most any call passes, counting only top-level commas.
+function callArity(code, name) {
+  let most = 0;
+  for (const m of code.matchAll(new RegExp(`(?<![\\w.])${name}\\(`, 'g'))) {
+    let depth = 0;
+    let args = 0;
+    let any = false;
+    for (let i = m.index + m[0].length; i < code.length; i++) {
+      const c = code[i];
+      if (c === '(' || c === '[') depth++;
+      else if (c === ')' || c === ']') {
+        if (depth === 0) break;
+        depth--;
+      } else if (c === ',' && depth === 0) args++;
+      else if (!/\s/.test(c)) any = true;
+      if (c !== ')' && c !== ']' && !/\s/.test(c)) any = true;
+    }
+    if (any) most = Math.max(most, args + 1);
+  }
+  return most;
 }
 
 function placement(piece, cell, testId, ctx, indent) {
@@ -326,7 +351,10 @@ export function generate(designDir, playDir) {
     }
   }
 
-  const argActions = [...ctx.needs].filter((n) => n.startsWith('action:')).sort().flatMap((n) => [`  action ${n.slice(7)}(v)`, '    find = find']);
+  const argActions = [...ctx.needs].filter((n) => n.startsWith('action:')).sort().flatMap((n) => {
+    const [, name, arity] = n.split(':');
+    return [`  action ${name}(${Array.from({ length: Number(arity) || 1 }, (_, i) => `v${i}`).join(', ')})`, '    find = find'];
+  });
   const resources = [...ctx.needs].filter((n) => !n.startsWith('action:')).sort().map((n) => {
     const [shape, data, one] = n.split(':');
     return one
@@ -334,11 +362,15 @@ export function generate(designDir, playDir) {
       : `  resource s_${shape}_${data} = rows${shape}(${quote(data)}) as shape ${shape}[]`;
   });
   const presetNames = Object.keys(presets);
+  const overlay = ctx.props?.overlay?.piece && ctx.props?.overlay?.package ? ctx.props.overlay : null;
   const app = [
     HEADER,
     `// ${all.length} pieces, ${total} cells, each light and dark. Pages: ${pages.length}.`,
     `use Shell, NavList, Page, MatrixRow, MatrixCell, ScreenCell, ModeChoice, TokenRow, TokenSwatch, TokenGrid, NavField from "${packageOf(join(designDir, 'frame')).name}"`,
     ...uses,
+    // samples.json "overlay": {"piece", "package"}: one piece of the playground's own (an agent dock, say) placed once
+    // over every page, as an app places it; it holds its own state.
+    ...(overlay ? [`use ${overlay.piece} from ${quote(overlay.package)}`] : []),
     '',
     'component App',
     '  state page = "theme"',
@@ -379,6 +411,7 @@ export function generate(designDir, playDir) {
     `        NavField(label="Look")`,
     `          ModeChoice(scheme=(scheme == "light" ? "light" : scheme == "dark" ? "dark" : "system"), lightLabel="Light", darkLabel="Dark", systemLabel="Auto", groupLabel="Look", light=light, dark=dark, system=system)`,
     ...view,
+    ...(overlay ? [`      ${overlay.piece}()`] : []),
     '',
   ].join('\n');
   const firstColour = Object.keys(theme.color)[0];
