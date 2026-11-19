@@ -9,8 +9,8 @@ theme
   blocks.skel-line: length = 10px
   blocks.skel-title: length = 16px
   blocks.skel-when: length = 56px
+  blocks.skel-tail: length = 96px
   blocks.glyph: length = 48px
-  blocks.pane-glyph: length = 32px
   blocks.icon: length = 16px
   blocks.dot: length = 8px
   blocks.dot-gutter: length = 20px
