@@ -21,24 +21,27 @@
 //   the brand's height never depends on what the app puts there, and the slot's content never reads as the
 //   name's second line.
 // - The places: NavEntry rows grouped by `group` in first-seen order ("" no heading); a group's own name is its
-//   heading. The current place is the panel's one filled thing, and selection is one device: the fill, the
-//   label's heavier type in the accent, aria-current="page". A badge counts, as a fill pill (surface on the
-//   current row's fill): no border, so it holds on any row and in both schemes; a row with no count keeps the
-//   count's room, so every label holds its line on the same edge.
+//   heading. The current place is the panel's one filled thing, and selection is one device in the accent's
+//   ink: a flush hair at the row's start (the theme's dark washes are quiet; three look rounds asked for the
+//   bar), the label's heavier type, the fill, aria-current="page" — the agent's mark stays its own drawing, a
+//   rounded edge set in from the row, with its note. A badge counts, as a fill pill (surface on the current
+//   row's fill): no border, so it holds on any row and in both schemes; a row with no count keeps the count's
+//   room, so every label holds its line on the same edge.
 // - An agent that added or reordered an entry (agent "changed"): the entry `agentKey` names gets an accent edge
 //   at its start and `agentNote`'s words under its label (the kit's LinkRow language).
 // - The states that stand where the places stand speak where the rows speak — no heading of their own, so a
 //   state never reads as a copy change. Loading says its line once (role=status, for the ear: the eye needs no
 //   second signal) and then shows the shape coming as a menu's own shape: two sections as menus have, each a
 //   ghost for the group's own label and ghosts for its rows, a fill bar where a label will be and, where a row
-//   carries a count, a fill pill of the badge's own size — so what arrives does not jump. Empty says its line
-//   at the rows' place, the first group's own place, with its way on below (a compact bordered button when the
-//   app gives `emptyLabel`) and the account right after: an honest empty is compact. Failed is the kit's outcome
-//   language, as ActionButton draws it: a raised panel ringed by the critical's hair and washed with the
-//   critical at a breath (8%, the same opacity shading the kit's own buttons), the drawn mark beside the words
-//   in the error's ink, and `retryLabel`'s button drawn the way the kit draws a control in an outcome — the
-//   critical's own outline, ActionButton's `outcome="error"` — so no second hue competes with the error's
-//   voice.
+//   carries a count, a fill pill of the badge's own width — so what arrives does not jump. The two states that
+//   only speak words share one pattern, a framed note at the rows' place: Empty, a raised panel ringed by the
+//   line's own hair — nothing happened, so nothing is tinted — its line and its way on inside (a compact
+//   bordered button when the app gives `emptyLabel`), an honest empty with the weight of a frame and no more.
+//   Failed, the same panel in the kit's outcome language, as ActionButton draws it: ringed by the critical's
+//   hair and washed with the critical at a breath (8%, the same opacity shading the kit's own buttons), the
+//   drawn mark beside the words in the error's ink, and `retryLabel`'s button drawn the way the kit draws a
+//   control in an outcome — the critical's own outline, ActionButton's `outcome="error"` — so no second hue
+//   competes with the error's voice.
 // - The landmark's name, `navLabel`, is what a reader hears; the words a person sees above the rows are the
 //   data's own group names.
 // - Long: everything the panel draws holds one line with an ellipsis — the account's role a short byline
@@ -81,7 +84,7 @@ component NavItem
     note: string
     testId: string
   view
-    link href=href testId=testId aria-current=(current ? "page" : "false") position="relative" display="flex" flex-direction="row" align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(current ? "theme.color.fill" : "transparent")
+    link href=href testId=testId aria-current=(current ? "page" : "false") position="relative" display="flex" flex-direction="row" align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-left-width="blocks.nav-mark-line" border-left-style="solid" border-left-color=(current ? "theme.color.accent" : "transparent") border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(current ? "theme.color.fill" : "transparent")
       :hover
         background-color="theme.color.hover"
       :active
@@ -112,7 +115,7 @@ component NavGhost
     row align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" aria-hidden=true
       box flex=1 height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
       if badge
-        box width="blocks.nav-ghost-badge" height="theme.space.xl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
+        box width="blocks.nav-ghost-badge" height="theme.space.md" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 component SideNav
   props
@@ -176,11 +179,12 @@ component SideNav
               NavGhost(badge=false)
               NavGhost(badge=true)
       else if data == "empty"
-        column role="status" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md"
-          Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
-          if emptyLabel != ""
-            row
-              ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
+        row role="status" background-color="theme.color.raised" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.control"
+          column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
+            Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+            if emptyLabel != ""
+              row
+                ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
       else
         column gap="theme.space.lg"
           for g in groups key=g
