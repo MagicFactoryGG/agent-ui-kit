@@ -2,18 +2,20 @@
 // connector each, the track spanning the frame, the current step accent-filled and ringed, done steps carrying a
 // drawn tick; a single step keeps its node beside the count; count and steps together stay one compact bar on a
 // phone), the current step's title and lead line, the slot for the step's content, then the way on: Back (hidden
-// on the first step), an optional Skip ("" hides it) and Continue, which right-clusters on a desktop and takes its
-// own full-width row on a phone; the frame's one filled element a state is the way on, and it carries the busy
-// state in whichever branch draws it. The frame groups by surface and space: one raised panel with the theme's
-// line edge (a fill alone can vanish in a theme that paints page and surface one colour), one hairline above the
-// actions, and a lone way on sized to content at the corner. States: data many|one|empty|loading|failed|long
-// (loading says itself over a breathing skeleton of the frame whose bar mirrors the resting bar's geometry, so the
-// swap moves nothing; empty keeps the way on; failed says itself in a breathing tinted alert whose words take ink
-// — the tint and the drawn warning are the signal, and status ink is promised on the page and surface, not on a
-// tint — and offers its way back), interaction idle|busy (the way on busy), outcome none|error (an error line a
-// footer's gap above the actions), agent none|proposed (an agent filled this step in: a calm note, two answer
-// words, both quiet buttons so the way on stays the one filled control). Every word is the app's; every value is
-// a Theme token or a blocks.* size, so a party's own Theme restyles the whole frame.
+// on the first step), an optional Skip ("" hides it) and Continue, which right-clusters capped at a named width on
+// a desktop (the space between the secondary and primary zones reads as a deliberate gutter, not a stretched
+// slab) and takes its own full-width row on a phone; the frame's one filled element a state is the way on, and it
+// carries the busy state in whichever branch draws it; a state with no steps and one way on fills the row, so the
+// hairline it sits under reads as the footer's edge. The frame groups by surface and space: one raised panel with
+// the theme's line edge (a fill alone can vanish in a theme that paints page and surface one colour), one
+// hairline above the actions. States: data many|one|empty|loading|failed|long (loading says itself over a
+// breathing skeleton of the frame whose bar and buttons mirror the resting geometry and caps, so the swap moves
+// nothing; empty keeps the way on; failed says itself in a breathing tinted alert whose words take ink — the tint
+// and the drawn warning are the signal, and status ink is promised on the page and surface, not on a tint — and
+// offers its way back), interaction idle|busy (the way on busy), outcome none|error (an error line a footer's gap
+// above the actions), agent none|proposed (an agent filled this step in: a calm note, two answer words, both quiet
+// buttons so the way on stays the one filled control). Every word is the app's; every value is a Theme token or
+// a blocks.* size, so a party's own Theme restyles the whole frame.
 
 use Words, ActionButton from "__SCOPE__/components"
 
@@ -59,12 +61,13 @@ component SkBar
   view
     box flex=share height=height background-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)" border-radius="theme.radius.pill"
 
-// A bar the shape of a button still loading.
+// A bar the shape of a button still loading; `max` caps it where the real button is capped.
 component SkBtn
   props
     basis: string
+    max: string
   view
-    box flex=basis min-width="blocks.skel-btn" min-height="blocks.skel-btn-tall" background-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)" border-radius="theme.radius.control"
+    box flex=basis max-width=max min-width="blocks.skel-btn" min-height="blocks.skel-btn-tall" background-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)" border-radius="theme.radius.control"
 
 // The frame's ghost: the steps that have not arrived, breathing, never a control. Its bar mirrors the resting
 // bar's geometry exactly — a count pill, then the nodes flush with their connectors in one inner row — so the
@@ -72,7 +75,7 @@ component SkBtn
 component SkTrack
   view
     column gap="theme.space.md" aria-hidden=true animation="breathe 1.8s ease-in-out infinite"
-      row align-items="center" gap="theme.space.md"
+      row align-items="center" gap="theme.space.lg"
         box min-width="blocks.skel-count" height="blocks.skel-head" border-radius="theme.radius.pill" background-color="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)"
         row flex=1 min-width=0 align-items="center"
           for j in [0, 1, 2, 3] key=j
@@ -124,7 +127,7 @@ component OnboardingSteps
       else if data == "failed"
         if countLabel != ""
           Words(text=countLabel, kind="title", outcome="none", level=2, testId=`${testId}-heading`)
-        row gap="theme.space.sm" align-items="center" padding="theme.space.lg" border-radius="theme.radius.control" background-color="color-mix(in srgb, theme.color.critical 12%, theme.color.raised)"
+        row gap="theme.space.sm" align-items="center" padding="theme.space.xl" border-radius="theme.radius.control" background-color="color-mix(in srgb, theme.color.critical 12%, theme.color.raised)"
           svg viewBox="0 0 16 16" width="blocks.alert" height="blocks.alert" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
             path d="M8 2.5L14.5 13.5H1.5Z" stroke-width=1.5 stroke-linejoin="round"
             path d="M8 6.5v3.2" stroke-width=1.5 stroke-linecap="round"
@@ -135,7 +138,7 @@ component OnboardingSteps
           Words(text=countLabel, kind="title", outcome="none", level=2, testId=`${testId}-heading`)
         text emptyText testId=`${testId}-empty` role="status" font="theme.type.body" color="theme.color.ink-muted"
       else
-        row testId=`${testId}-bar` role="status" aria-label=countLabel align-items="center" gap="theme.space.md"
+        row testId=`${testId}-bar` role="status" aria-label=countLabel align-items="center" gap="theme.space.lg"
           box min-height="blocks.step-dot" flex-shrink=0 display="flex" align-items="center"
             text `${at + 1}/${steps.length}` testId=`${testId}-count` font="theme.type.label" color="theme.color.ink" font-variant-numeric="tabular-nums"
           row flex=1 min-width=0 align-items="center" aria-hidden=true
@@ -166,10 +169,10 @@ component OnboardingSteps
       if data == "loading" and outcome != "error"
         column margin-top="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.md" aria-hidden=true
           row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
-            SkBtn(basis="none")
-            SkBtn(basis="none")
+            SkBtn(basis="none", max="none")
+            SkBtn(basis="none", max="none")
             box flex=1
-            SkBtn(basis="1 1 blocks.actions-min")
+            SkBtn(basis="1 1 blocks.actions-min", max="blocks.primary-max")
       if data != "loading" or outcome == "error"
         column gap="theme.space.md" margin-top="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.md"
           if outcome == "error"
@@ -180,12 +183,10 @@ component OnboardingSteps
                 ActionButton(label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
               box flex=1
               if retryLabel != ""
-                column flex="1 1 blocks.actions-min"
+                column flex="1 1 blocks.actions-min" max-width="blocks.primary-max"
                   ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
           else if not hasSteps
-            row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
-              box flex=1
-              ActionButton(label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)
+            ActionButton(label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)
           else
             row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
               row gap="theme.space.sm" align-items="center"
@@ -194,5 +195,5 @@ component OnboardingSteps
                 if skipLabel != ""
                   ActionButton(label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
               box flex=1
-              column flex="1 1 blocks.actions-min"
+              column flex="1 1 blocks.actions-min" max-width="blocks.primary-max"
                 ActionButton(label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)
