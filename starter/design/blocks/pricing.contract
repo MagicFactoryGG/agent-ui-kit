@@ -1,0 +1,188 @@
+// Pricing: a section of plans a person compares and picks, as cards in one row. What it is: a centred head (the
+// section's title and one lead line), then the plans (shape Plan), each a card that reads top to bottom in one
+// order — the plan's name (with a small tag on the featured one), its price large with its period beside it in the
+// muted ink, the line that says who it is for, its points as a list of rows each led by a drawn tick, and its one
+// action at the card's foot. The feet line up across the row (a spacer takes the slack), so the three actions
+// read as one line on a desktop. The featured plan is raised: the raised ground, a heavier accent edge and its tag
+// — the edge, not the fill, carries it, since a theme may give page and surface one colour — and its action is the
+// section's one filled control. Every other plan's action is plain.
+//
+// Width, with no breakpoint (Exact has no media query): the cards share a wrapping row, each flex=1 from a named
+// least width (blocks.plan-min) up to a named most (blocks.plan-max), border-box, centred; the section caps at
+// blocks.pricing-max. Three fit across on a desktop; on a phone each takes its own line, full width; a lone plan
+// stands centred at the most width rather than stretching into a slab.
+//
+// States, declared once:
+// - data many|one|empty|loading|failed|long. Loading keeps the head (the section's name is known; the plans are
+//   not), says `loadingText` as a status line where the lead stood, and stands three breathing ghost cards in the
+//   cards' own geometry — name, price, line, three points, the action's own height — so nothing moves when the
+//   plans arrive. Empty and failed are the kit's StatePanel in the cards' place: empty says `emptyTitle` and
+//   `emptyText` with the way on (`contactLabel`, which reaches `contact`); failed says `failedTitle` and
+//   `failedText` with `retryLabel`, which reaches `retry`. Long text wraps inside each card; nothing truncates.
+// - interaction idle|busy: the chosen plan's action (`chosenKey`) keeps its words, is busy and cannot be pressed.
+// - outcome none|success|error: one line under the chosen plan's action, `outcomeText` in the outcome's ink on the
+//   card's own ground (status words never sit on a tint).
+// - agent none|proposed|changed|waiting, always about the chosen plan, whose card carries the mark at its start
+//   edge (accent for proposed and changed, caution while waiting) and one sentence beside a dot of the same ink
+//   above its foot, the way LinkRow and SettingsGroup mark an agent's act. Proposed: the sentence
+//   (`proposalText`) and the two answer words in the card's foot in place of its action (`rejectLabel` plain,
+//   `acceptLabel` the state's one filled control, so the featured action steps down to plain while the person is
+//   asked); changed: `changedText` and `undoLabel`, a plain button that reaches `undo`; waiting: `waitingText`,
+//   that the act waits for the person.
+// Both doors reach the same actions: a plan's button calls `choose` with the plan's key, as an agent's tool does.
+// The kit's Proposal and EntryChoice live inline in this package's index.contract, which imports this file back,
+// so a plan card and the ask are drawn here from the same components (Words, ActionButton, Tag); StatePanel has
+// its own file and is used as it is. Every word is the app's; every value a Theme token or a blocks.* size.
+use Words, ActionButton, Tag from "__SCOPE__/components"
+use StatePanel from "./state-panel.contract"
+
+// One plan: its key, its name, its price and the period that price is for ("" for none), the line that says who
+// it is for, what it includes, whether it is the plan the app recommends, and the words of its one action.
+shape Plan
+  key: string
+  name: string
+  price: string
+  period: string
+  detail: string
+  points: string[]
+  featured: bool
+  action: string
+
+// The ghost cards breathe, so loading reads as in progress, not as drawn shapes.
+keyframes plan-breathe
+  50% opacity=0.55
+
+// The ink of an agent's mark: the accent for an ask or a change, caution while it waits for the person.
+fn markInk(a: string): string = a == "waiting" ? "theme.color.caution" : "theme.color.accent"
+fn markWords(a: string): string = a == "waiting" ? "theme.color.caution-text" : "theme.color.accent"
+
+// One point a plan includes: a drawn tick, then its words, which wrap under themselves.
+component PlanPoint
+  props
+    text: string
+  view
+    row role="listitem" align-items="flex-start" gap="theme.space.sm"
+      row min-height="blocks.point-line" align-items="center" flex-shrink=0 aria-hidden=true
+        svg viewBox="0 0 12 12" width="blocks.point-tick" height="blocks.point-tick" fill="none" stroke="theme.color.accent"
+          path d="M2.5 6.5L5 9l4.5-5" stroke-width=1.75 stroke-linecap="round" stroke-linejoin="round"
+      text text flex=1 min-width=0 font="theme.type.body" color="theme.color.ink"
+
+// One bar of a ghost card: `share` of its line against `rest`, at the height of the words it stands for.
+component GhostBar
+  props
+    share: string
+    rest: string
+    height: string
+  view
+    row
+      box flex=share height=height background-color="theme.color.fill" border-radius="theme.radius.pill"
+      box flex=rest
+
+// A plan that has not arrived: the card's own frame and rhythm, breathing, never a control.
+component GhostPlan
+  view
+    column flex=1 min-width="blocks.plan-min" max-width="blocks.plan-max" box-sizing="border-box" gap="theme.space.lg" padding="theme.space.xl" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" aria-hidden=true animation="plan-breathe 1.8s ease-in-out infinite"
+      column gap="theme.space.md"
+        GhostBar(share="1 1 0", rest="2 1 0", height="blocks.ghost-line")
+        GhostBar(share="1 1 0", rest="1 1 0", height="blocks.ghost-price")
+        GhostBar(share="4 1 0", rest="1 1 0", height="blocks.ghost-line")
+      column gap="theme.space.sm"
+        GhostBar(share="3 1 0", rest="1 1 0", height="blocks.ghost-line")
+        GhostBar(share="2 1 0", rest="1 1 0", height="blocks.ghost-line")
+        GhostBar(share="3 1 0", rest="2 1 0", height="blocks.ghost-line")
+      box height="blocks.action-min" background-color="theme.color.fill" border-radius="theme.radius.control"
+
+component Pricing
+  props
+    title: string
+    lead: string
+    plans: Plan[]
+    tagLabel: string
+    chosenKey: string
+    loadingText: string
+    emptyTitle: string
+    emptyText: string
+    contactLabel: string
+    failedTitle: string
+    failedText: string
+    retryLabel: string
+    outcomeText: string
+    proposalText: string
+    acceptLabel: string
+    rejectLabel: string
+    changedText: string
+    undoLabel: string
+    waitingText: string
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    interaction: enum<"idle", "busy">
+    outcome: enum<"none", "success", "error">
+    agent: enum<"none", "proposed", "changed", "waiting">
+    choose: action
+    contact: action
+    retry: action
+    accept: action
+    reject: action
+    undo: action
+    testId: string
+  derive asking = agent == "proposed" and plans.filter(p => p.key == chosenKey).length > 0
+  // One door for the person's press; an agent's tool calls the app's same `choose` with the same key.
+  action pick(key: string)
+    choose(key)
+  // The state panel's one way on: back to the plans when they failed, else to a person who can set one up.
+  action wayOn
+    if data == "failed"
+      retry()
+    else
+      contact()
+  view
+    column testId=testId role="region" aria-label=title width="100%" max-width="blocks.pricing-max" box-sizing="border-box" margin-left="auto" margin-right="auto" gap="theme.space.xl"
+      column align-items="center" text-align="center" gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg"
+        Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+        if data == "loading"
+          text loadingText testId=`${testId}-loading` role="status" font="theme.type.body" color="theme.color.ink-muted"
+        else if lead != ""
+          text lead testId=`${testId}-lead` max-width="blocks.lead-max" font="theme.type.body" color="theme.color.ink-muted"
+      if data == "loading"
+        row flex-wrap="wrap" justify-content="center" gap="theme.space.lg"
+          GhostPlan()
+          GhostPlan()
+          GhostPlan()
+      else if data == "empty" or data == "failed" or plans.length == 0
+        StatePanel(title=(data == "failed" ? failedTitle : emptyTitle), message=emptyText, failedText=failedText, agentNote="", actionLabel=contactLabel, retryLabel=retryLabel, data=(data == "failed" ? "failed" : "empty"), agent="none", size="full", press=wayOn, testId=`${testId}-state`)
+      else
+        row role="list" flex-wrap="wrap" justify-content="center" align-items="stretch" gap="theme.space.lg"
+          for p in plans key=p.key
+            column role="listitem" testId=`${testId}-plan-${p.key}` aria-label=p.name flex=1 min-width="blocks.plan-min" max-width="blocks.plan-max" box-sizing="border-box" gap="theme.space.lg" padding="theme.space.xl" background-color=(p.featured ? "theme.color.raised" : "theme.color.surface") border-radius="theme.radius.card" border-style="solid" border-width=(p.featured ? "blocks.featured-line" : "theme.line.width") border-color=(p.featured ? "theme.color.accent" : "theme.color.line") border-left-width=(p.key == chosenKey and agent != "none" ? "blocks.mark-line" : p.featured ? "blocks.featured-line" : "theme.line.width") border-left-color=(p.key == chosenKey and agent != "none" ? markInk(agent) : p.featured ? "theme.color.accent" : "theme.color.line")
+              column gap="theme.space.sm"
+                row flex-wrap="wrap" align-items="center" column-gap="theme.space.sm" row-gap="theme.space.xs"
+                  text p.name testId=`${testId}-name-${p.key}` role="heading" aria-level=3 flex=1 min-width=0 font="theme.type.label" color="theme.color.ink"
+                  if p.featured and tagLabel != ""
+                    Tag(text=tagLabel, outcome="none")
+                row flex-wrap="wrap" align-items="baseline" column-gap="theme.space.xs"
+                  text p.price testId=`${testId}-price-${p.key}` min-width=0 font="theme.type.title" color="theme.color.ink" font-variant-numeric="tabular-nums"
+                  if p.period != ""
+                    text p.period min-width=0 font="theme.type.caption" color="theme.color.ink-muted"
+                if p.detail != ""
+                  text p.detail min-width=0 font="theme.type.caption" color="theme.color.ink-muted"
+              if p.points.length > 0
+                column role="list" gap="theme.space.sm"
+                  for pt, i in p.points key=i
+                    PlanPoint(text=pt)
+              column flex=1
+              column gap="theme.space.md"
+                if p.key == chosenKey and agent != "none"
+                  row testId=`${testId}-agent` role="status" align-items="baseline" gap="theme.space.sm"
+                    box width="blocks.agent-dot" height="blocks.agent-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color=markInk(agent) aria-hidden=true
+                    text (agent == "proposed" ? proposalText : agent == "changed" ? changedText : waitingText) flex=1 min-width=0 font="theme.type.caption" color=markWords(agent)
+                if p.key == chosenKey and agent == "proposed"
+                  row flex-wrap="wrap" gap="theme.space.sm"
+                    column flex=1
+                      ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+                    column flex=1
+                      ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+                else
+                  ActionButton(label=p.action, kind=(p.featured and not asking ? "primary" : "plain"), interaction=(p.key == chosenKey and interaction == "busy" ? "busy" : "idle"), outcome="none", press=pick(p.key), testId=`${testId}-choose-${p.key}`)
+                if p.key == chosenKey and agent == "changed" and undoLabel != ""
+                  ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+                if p.key == chosenKey and outcome != "none"
+                  text outcomeText testId=`${testId}-outcome` role=(outcome == "error" ? "alert" : "status") font="theme.type.caption" color=(outcome == "error" ? "theme.color.critical-text" : "theme.color.positive-text")

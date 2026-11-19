@@ -264,5 +264,117 @@
     "accountDetail": "Workspace admin",
     "agentKey": "naventry-2",
     "agentNote": "Added by your assistant"
-  }
+  },
+  "props:Pricing": {
+    "title": "Choose your plan",
+    "lead": "Every plan includes unlimited projects and a 14-day free trial. Change or cancel any time.",
+    "tagLabel": "Most popular",
+    "chosenKey": "business",
+    "loadingText": "Loading plans…",
+    "emptyTitle": "No plans to choose from yet",
+    "emptyText": "Plans for your region are on their way. Talk to us and we will set one up for you.",
+    "contactLabel": "Talk to us",
+    "failedTitle": "Plans did not load",
+    "failedText": "Check your connection, then try again. Your current plan has not changed.",
+    "retryLabel": "Try again",
+    "outcomeText": "You are on Business now.",
+    "proposalText": "Your assistant suggests moving to Business.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Reject",
+    "changedText": "Your assistant moved you to Business.",
+    "undoLabel": "Undo",
+    "waitingText": "Your assistant is waiting for you to confirm Business."
+  },
+  "Plan:many": [
+    {
+      "key": "starter",
+      "name": "Starter",
+      "price": "$0",
+      "period": "per month",
+      "detail": "For one person trying things out.",
+      "points": [
+        "3 projects",
+        "1 GB of storage",
+        "Community help"
+      ],
+      "featured": false,
+      "action": "Start with Starter"
+    },
+    {
+      "key": "team",
+      "name": "Team",
+      "price": "$12",
+      "period": "per person, per month",
+      "detail": "For small teams that ship together.",
+      "points": [
+        "Unlimited projects",
+        "100 GB of storage",
+        "Shared workspaces",
+        "Help within a day"
+      ],
+      "featured": true,
+      "action": "Choose Team"
+    },
+    {
+      "key": "business",
+      "name": "Business",
+      "price": "$29",
+      "period": "per person, per month",
+      "detail": "For companies with rules to follow.",
+      "points": [
+        "Everything in Team",
+        "Single sign-on",
+        "Audit log",
+        "A named contact"
+      ],
+      "featured": false,
+      "action": "Choose Business"
+    }
+  ],
+  "Plan:one": [
+    {
+      "key": "business",
+      "name": "Business",
+      "price": "$29",
+      "period": "per person, per month",
+      "detail": "The one plan your organisation offers.",
+      "points": [
+        "Unlimited projects",
+        "Single sign-on",
+        "Audit log",
+        "A named contact"
+      ],
+      "featured": false,
+      "action": "Choose Business"
+    }
+  ],
+  "Plan:long": [
+    {
+      "key": "team",
+      "name": "Team for growing studios and agencies with many clients",
+      "price": "$1,249.99",
+      "period": "per person, per month, billed every year in advance",
+      "detail": "For teams that share work across several clients, time zones and review rounds every week.",
+      "points": [
+        "Unlimited projects, each with its own client workspace and permissions",
+        "500 GB of storage shared by everyone on the team, with older versions kept for a year",
+        "Help from a person within one working day, in your own language"
+      ],
+      "featured": true,
+      "action": "Choose Team for growing studios"
+    },
+    {
+      "key": "business",
+      "name": "Business with single sign-on and an audit trail",
+      "price": "$2,999.00",
+      "period": "per person, per month",
+      "detail": "For organisations whose security review asks for every sign-in to be recorded and kept.",
+      "points": [
+        "Everything in Team, with the same limits raised for large organisations",
+        "Single sign-on through your own identity provider"
+      ],
+      "featured": false,
+      "action": "Choose Business with single sign-on"
+    }
+  ]
 }
