@@ -1,3 +1,22 @@
 {
-  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types."
+  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types.",
+  "Record:many": [
+    { "key": "record-1", "title": "Q3 expense review", "status": "In review", "owner": "Maya Okafor", "updated": "Nov 12, 09:41", "href": "/" },
+    { "key": "record-2", "title": "Renew design licences", "status": "Open", "owner": "Jonas Weber", "updated": "Nov 11, 17:03", "href": "/" },
+    { "key": "record-3", "title": "Move audit log to cold storage", "status": "Blocked", "owner": "Priya Nair", "updated": "Nov 10, 14:20", "href": "/" },
+    { "key": "record-4", "title": "Rotate service credentials", "status": "Done", "owner": "Sam Delacroix", "updated": "Nov 8, 08:15", "href": "/" }
+  ],
+  "Record:one": [
+    { "key": "record-1", "title": "Q3 expense review", "status": "In review", "owner": "Maya Okafor", "updated": "Nov 12, 09:41", "href": "/" }
+  ],
+  "Record:long": [
+    { "key": "record-1", "title": "A very long record title, the kind a person writes when the record carries its whole context in its name and runs past the width a designer planned", "status": "In review", "owner": "Maya Okafor", "updated": "Nov 12, 09:41", "href": "/" },
+    { "key": "record-2", "title": "Another long record title that wraps onto a second line inside its column, so its row grows taller and nothing is clipped or covered", "status": "Blocked", "owner": "Jonas Weber", "updated": "Nov 11, 17:03", "href": "/" }
+  ],
+  "Checked:many": [ { "keys": ["record-2"] } ],
+  "Checked:one": [ { "keys": ["record-1"] } ],
+  "Checked:long": [ { "keys": ["record-1"] } ],
+  "Marks:many": [ { "keys": ["record-3"] } ],
+  "Marks:one": [ { "keys": ["record-1"] } ],
+  "Marks:long": [ { "keys": ["record-1"] } ]
 }

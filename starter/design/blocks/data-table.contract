@@ -1,0 +1,152 @@
+// A data table of records: a header row of column labels, the sorted column marked (its label in ink, an arrow,
+// `aria-sort`), a status shown as a Tag, a checkbox a row (a name of `selectLabel` and the record's title; the
+// app owns the selection, `toggle` gets the row's key, `toggleAll` the whole set) and a select-all checkbox in
+// the header. Rows an agent changed carry the accent mark at their start while `agentNote` says so under the
+// table. The card centres on a wide window up to `blocks.table-max`; on a window narrower than 640px (the
+// table's comfortable floor) the table becomes a list of compact two-line rows — title and status, then owner
+// and date — so the table never scrolls sideways. States: data many|one|empty|loading|failed|long (empty,
+// loading and failed say their line on the card), interaction idle|busy (the card says it and dims),
+// agent none|changed. Every word is a prop.
+use Words, Tag from "__SCOPE__/components"
+
+// One record: its key, what it says, a status word, who owns it, when it changed, where it opens.
+shape Record
+  key: string
+  title: string
+  status: string
+  owner: string
+  updated: string
+  href: string
+
+// The rows the person has checked, by key (the compiler owns the name `Selection`). The app owns this value;
+// a person's checkbox and an agent's tool write it with the same function.
+shape Checked
+  keys: string[]
+
+// The rows an agent changed, by key: while `agent` says "changed", these rows carry the mark.
+shape Marks
+  keys: string[]
+
+// The window's width, the one fact this block reads to lay itself out.
+shape Viewport
+  width: number
+
+fn marked(agent: string, marks: Marks, key: string): bool = agent == "changed" and marks.keys.includes(key)
+fn markInk(on: bool): string = on ? "theme.color.accent" : "transparent"
+
+// The small arrow that marks the sorted column, in the ink its header carries.
+component SortArrow
+  props
+    dir: enum<"ascending", "descending">
+    ink: string
+  view
+    svg viewBox="0 0 12 12" width="blocks.sort-glyph" height="blocks.sort-glyph" fill="none" stroke=ink aria-hidden=true flex-shrink=0
+      path d="M6 2.5V9.5" stroke-width=1.5 stroke-linecap="round"
+      if dir == "ascending"
+        path d="M3.5 5L6 2.5L8.5 5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+      else
+        path d="M3.5 7L6 9.5L8.5 7" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+
+component DataTable
+  props
+    records: Record[]
+    checked: Checked
+    marks: Marks
+    titleLabel: string
+    statusLabel: string
+    ownerLabel: string
+    updatedLabel: string
+    selectLabel: string
+    selectAllLabel: string
+    emptyText: string
+    loadingText: string
+    failedText: string
+    busyText: string
+    agentNote: string
+    sort: enum<"none", "title", "status", "owner", "updated">
+    sortDir: enum<"ascending", "descending">
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    interaction: enum<"idle", "busy">
+    agent: enum<"none", "changed">
+    toggle: action
+    toggleAll: action
+    testId: string
+  // The checkbox events become by-key acts: the same `toggle` a person's checkbox runs, an agent's tool runs.
+  action pick(key: string, on: bool)
+    toggle(key)
+  action pickAll(on: bool)
+    toggleAll()
+  resource viewport = exactViewport() as shape Viewport
+  derive narrow = viewport.width < 640
+  derive noRows = data == "empty" or data == "loading" or data == "failed"
+  derive allOn = records.length > 0 and checked.keys.length == records.length
+  view
+    column testId=testId aria-busy=(interaction == "busy") width="100%" max-width="blocks.table-max" margin-left="auto" margin-right="auto" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden" opacity=(interaction == "busy" ? 0.7 : 1)
+      if noRows
+        column padding="theme.space.lg" role=(data == "failed" ? "alert" : "status")
+          Words(text=(data == "empty" ? emptyText : data == "loading" ? loadingText : failedText), kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
+      if not noRows
+        if narrow
+          if sort != "none"
+            row align-items="center" gap="theme.space.xs" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+              text (sort == "title" ? titleLabel : sort == "status" ? statusLabel : sort == "owner" ? ownerLabel : updatedLabel) font="theme.type.caption" color="theme.color.ink-muted"
+              SortArrow(dir=sortDir, ink="theme.color.ink-muted")
+          for r, i in records key=r.key
+            row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(marked(agent, marks, r.key))
+              input type="checkbox" checked=checked.keys.includes(r.key) change=pick(r.key) aria-label=`${selectLabel} ${r.title}` flex-shrink=0 testId=`${testId}-check-${r.key}`
+              column flex=1 min-width=0 gap="theme.space.xs"
+                row align-items="center" gap="theme.space.sm"
+                  link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
+                    :hover
+                      color="theme.color.accent"
+                    text r.title font="theme.type.label"
+                  Tag(text=r.status, outcome="none")
+                text `${r.owner} · ${r.updated}` font="theme.type.caption" color="theme.color.ink-muted"
+        else
+          table testId=`${testId}-table` width="100%"
+            thead
+              tr
+                th scope="col" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+                  input type="checkbox" checked=allOn change=pickAll aria-label=selectAllLabel testId=`${testId}-check-all`
+                th scope="col" aria-sort=(sort == "title" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+                  row align-items="center" gap="theme.space.xs"
+                    text titleLabel font="theme.type.caption" color=(sort == "title" ? "theme.color.ink" : "theme.color.ink-muted")
+                    if sort == "title"
+                      SortArrow(dir=sortDir, ink="theme.color.ink")
+                th scope="col" aria-sort=(sort == "status" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+                  row align-items="center" gap="theme.space.xs"
+                    text statusLabel font="theme.type.caption" color=(sort == "status" ? "theme.color.ink" : "theme.color.ink-muted")
+                    if sort == "status"
+                      SortArrow(dir=sortDir, ink="theme.color.ink")
+                th scope="col" aria-sort=(sort == "owner" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+                  row align-items="center" gap="theme.space.xs"
+                    text ownerLabel font="theme.type.caption" color=(sort == "owner" ? "theme.color.ink" : "theme.color.ink-muted")
+                    if sort == "owner"
+                      SortArrow(dir=sortDir, ink="theme.color.ink")
+                th scope="col" aria-sort=(sort == "updated" ? sortDir : "none") text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+                  row align-items="center" gap="theme.space.xs" margin-left="auto"
+                    text updatedLabel font="theme.type.caption" color=(sort == "updated" ? "theme.color.ink" : "theme.color.ink-muted")
+                    if sort == "updated"
+                      SortArrow(dir=sortDir, ink="theme.color.ink")
+            tbody
+              for r, i in records key=r.key
+                tr
+                  td text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(marked(agent, marks, r.key))
+                    input type="checkbox" checked=checked.keys.includes(r.key) change=pick(r.key) aria-label=`${selectLabel} ${r.title}` testId=`${testId}-check-${r.key}`
+                  td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                    link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
+                      :hover
+                        color="theme.color.accent"
+                      text r.title font="theme.type.body"
+                  td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                    Tag(text=r.status, outcome="none")
+                  td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                    text r.owner font="theme.type.body" color="theme.color.ink-muted"
+                  td text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                    text r.updated font="theme.type.body" color="theme.color.ink-muted" font-variant-numeric="tabular-nums"
+      if agent == "changed" or interaction == "busy"
+        column gap="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md"
+          if agent == "changed"
+            text agentNote font="theme.type.caption" color="theme.color.accent" testId=`${testId}-agent`
+          if interaction == "busy"
+            text busyText role="status" font="theme.type.caption" color="theme.color.ink-muted" testId=`${testId}-busy`
