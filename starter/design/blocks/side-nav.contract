@@ -30,18 +30,21 @@
 //   at its start and `agentNote`'s words under its label (the kit's LinkRow language).
 // - The states that stand where the places stand speak where the rows speak — no heading of their own, so a
 //   state never reads as a copy change. Loading says its line once (role=status, for the ear: the eye needs no
-//   second signal — the menu's own shape is arriving below it) and then shows the shape coming: a ghost for the
-//   group's own label and ghosts for the rows, each the row's own height and insets with a fill bar where the
-//   label will be and a fill pill where the count sits, so what arrives does not jump. Empty centres its line
-//   and its way on in the menu's home (a compact bordered button when the app gives `emptyLabel`). Failed is
-//   the kit's outcome language, as ActionButton draws it: a raised panel ringed by the critical's hair and
-//   washed with the critical at a breath (8%, the same opacity shading the kit's own buttons), the drawn mark
-//   beside the words in the error's ink, and `retryLabel`'s button drawn the way the kit draws a control in an
-//   outcome — the critical's own outline, ActionButton's `outcome="error"` — so no second hue competes with
-//   the error's voice.
+//   second signal) and then shows the shape coming as a menu's own shape: two sections as menus have, each a
+//   ghost for the group's own label and ghosts for its rows, a fill bar where a label will be and, where a row
+//   carries a count, a fill pill of the badge's own size — so what arrives does not jump. Empty says its line
+//   at the rows' place, the first group's own place, with its way on below (a compact bordered button when the
+//   app gives `emptyLabel`), the spacer holding the menu's home beneath it. Failed is the kit's outcome
+//   language, as ActionButton draws it: a raised panel ringed by the critical's hair and washed with the
+//   critical at a breath (8%, the same opacity shading the kit's own buttons), the drawn mark beside the words
+//   in the error's ink, and `retryLabel`'s button drawn the way the kit draws a control in an outcome — the
+//   critical's own outline, ActionButton's `outcome="error"` — so no second hue competes with the error's
+//   voice.
 // - The landmark's name, `navLabel`, is what a reader hears; the words a person sees above the rows are the
 //   data's own group names.
-// - Long: everything the panel draws holds one line with an ellipsis; the slot's content is the app's.
+// - Long: everything the panel draws holds one line with an ellipsis — the account's role a short byline
+//   (blocks.nav-role-max), never a second sentence racing the name; the slot's content is the app's, and a
+//   package cannot clamp what it does not draw.
 //
 // States:
 //   data   many|empty|loading|failed|long|one
@@ -95,13 +98,22 @@ component NavItem
       if badge > 0
         text `${badge}` testId=`${testId}-badge` flex-shrink=0 min-width="blocks.nav-badge-min" box-sizing="border-box" text-align="center" font="theme.type.caption" color=(current ? "theme.color.ink" : "theme.color.ink-muted") font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color=(current ? "theme.color.surface" : "theme.color.fill") border-radius="theme.radius.pill" white-space="nowrap"
 
-// A place still coming: the row's own height and insets, a fill bar where the label will be and a fill pill where
-// the count sits — every ghost reserves the row's whole anatomy, so what arrives does not jump.
+// A group's own label, still coming: a short bar at the heading's inset, the heading's height.
+component NavHeadGhost
+  view
+    row padding-left="theme.space.md" padding-right="theme.space.md"
+      box width="blocks.nav-ghost-head" height="theme.space.sm" background-color="theme.color.fill" border-radius="theme.radius.pill"
+
+// A place still coming: the row's own height and insets, a fill bar where the label will be and, where the row
+// carries a count, a fill pill of the badge's own size — so what arrives does not jump.
 component NavGhost
+  props
+    badge: bool
   view
     row align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" aria-hidden=true
       box flex=1 height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
-      box width="blocks.nav-badge-min" height="theme.space.md" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
+      if badge
+        box width="blocks.nav-ghost-badge" height="theme.space.xl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 component SideNav
   props
@@ -154,15 +166,17 @@ component SideNav
           row role="status" padding-left="theme.space.md" padding-right="theme.space.md" padding-bottom="theme.space.xs"
             column flex=1 min-width=0
               Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-${data}`)
-          column aria-hidden=true gap="theme.space.xs"
-            row padding-left="theme.space.md" padding-right="theme.space.md"
-              box width="blocks.nav-ghost-head" height="theme.space.sm" background-color="theme.color.fill" border-radius="theme.radius.pill"
-            NavGhost()
-            NavGhost()
-            NavGhost()
-            NavGhost()
+          column aria-hidden=true gap="theme.space.lg"
+            column gap="theme.space.xs"
+              NavHeadGhost()
+              NavGhost(badge=false)
+              NavGhost(badge=true)
+              NavGhost(badge=false)
+            column gap="theme.space.xs"
+              NavHeadGhost()
+              NavGhost(badge=false)
+              NavGhost(badge=true)
       else if data == "empty"
-        column flex=1 min-height="blocks.nav-places-half"
         column role="status" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md"
           Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
           if emptyLabel != ""
@@ -177,7 +191,7 @@ component SideNav
               column gap="theme.space.xs"
                 for e in entries.filter(e => e.group == g) key=e.key
                   NavItem(label=e.label, href=e.href, badge=e.badge, current=e.current, marked=(agent == "changed" and e.key == agentKey), note=agentNote, testId=`${testId}-entry-${e.key}`)
-      column flex=1 min-height=(data == "empty" ? "blocks.nav-places-half" : data == "many" or data == "long" ? "0" : "blocks.nav-places-min")
+      column flex=1 min-height=(data == "many" or data == "long" ? "0" : "blocks.nav-places-min")
       if accountName != ""
         row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
           column width="theme.space.xxl" height="theme.space.xxl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" align-items="center" justify-content="center" overflow="hidden" aria-hidden=true
@@ -185,4 +199,4 @@ component SideNav
           column flex=1 min-width=0
             text accountName font="theme.type.label" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
             if accountDetail != ""
-              text accountDetail font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+              text accountDetail max-width="blocks.nav-role-max" font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
