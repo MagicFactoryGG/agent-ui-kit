@@ -174,14 +174,14 @@ component OnboardingSteps
       else if data == "failed"
         if countLabel != ""
           Words(text=countLabel, kind="title", outcome="none", level=2, testId=`${testId}-heading`)
-        row gap="theme.space.sm" align-items="center" padding="theme.space.xl" border-radius="theme.radius.control" background-color="color-mix(in srgb, theme.color.critical 12%, theme.color.raised)" border-width="theme.line.width" border-style="solid" border-color="color-mix(in srgb, theme.color.critical 30%, theme.color.raised)" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="theme.color.critical"
+        row gap="theme.space.sm" align-items="center" padding="theme.space.xl" border-radius="theme.radius.control" background-color="color-mix(in srgb, theme.color.critical 18%, theme.color.raised)" border-width="theme.line.width" border-style="solid" border-color="color-mix(in srgb, theme.color.critical 30%, theme.color.raised)" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="theme.color.critical"
           svg viewBox="0 0 16 16" width="blocks.alert" height="blocks.alert" fill="none" stroke="theme.color.critical" aria-hidden=true flex-shrink=0
             path d="M8 2.5L14.5 13.5H1.5Z" stroke-width=1.5 stroke-linejoin="round"
             path d="M8 6.5v3.2" stroke-width=1.5 stroke-linecap="round"
             path d="M8 11.4v0.01" stroke-width=1.5 stroke-linecap="round"
           text failedText testId=`${testId}-failed` role="alert" flex=1 min-width=0 font="theme.type.label" color="theme.color.ink"
       else if not hasSteps
-        row testId=`${testId}-done` align-items="center" gap="theme.space.sm" padding="theme.space.xl" border-radius="theme.radius.control" background-color="color-mix(in srgb, theme.color.positive 12%, theme.color.raised)"
+        row testId=`${testId}-done` align-items="center" gap="theme.space.sm" padding="theme.space.xl" border-radius="theme.radius.control" background-color="color-mix(in srgb, theme.color.positive 18%, theme.color.raised)"
           Tick(size="blocks.alert")
           if completeText != ""
             text completeText testId=`${testId}-complete` flex=1 min-width=0 font="theme.type.label" color="theme.color.ink"
