@@ -99,7 +99,7 @@ component DataTable
             row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" background-color=(checked.keys.includes(r.key) ? "theme.color.fill" : "transparent") border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(marked(agent, marks, r.key))
               input type="checkbox" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=(interaction == "busy") aria-label=`${selectLabel} ${r.title}` flex-shrink=0 testId=`${testId}-check-${r.key}`
               column flex=1 min-width=0 gap="theme.space.xs"
-                row align-items="flex-start" gap="theme.space.sm"
+                row align-items="baseline" gap="theme.space.sm"
                   link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
                     :hover
                       color="theme.color.accent"
@@ -112,25 +112,25 @@ component DataTable
         table testId=`${testId}-table` width="100%" border-spacing=0
           thead
             tr
-              if not noRows
-                th scope="col" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
+              th scope="col" width="blocks.select-col" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
+                if not noRows
                   input type="checkbox" checked=allOn change=pickAll disabled=(interaction == "busy") aria-label=selectAllLabel testId=`${testId}-check-all`
               th scope="col" aria-sort=(sort == "title" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
                 row align-items="center" gap="theme.space.xs"
                   text titleLabel font="theme.type.caption" color=(sort == "title" ? "theme.color.ink" : "theme.color.ink-muted")
                   if sort == "title"
                     SortArrow(dir=sortDir, ink="theme.color.ink")
-              th scope="col" aria-sort=(sort == "status" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+              th scope="col" width="blocks.col-status" aria-sort=(sort == "status" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
                 row align-items="center" gap="theme.space.xs"
                   text statusLabel font="theme.type.caption" color=(sort == "status" ? "theme.color.ink" : "theme.color.ink-muted")
                   if sort == "status"
                     SortArrow(dir=sortDir, ink="theme.color.ink")
-              th scope="col" aria-sort=(sort == "owner" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+              th scope="col" width="blocks.col-owner" aria-sort=(sort == "owner" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
                 row align-items="center" gap="theme.space.xs"
                   text ownerLabel font="theme.type.caption" color=(sort == "owner" ? "theme.color.ink" : "theme.color.ink-muted")
                   if sort == "owner"
                     SortArrow(dir=sortDir, ink="theme.color.ink")
-              th scope="col" aria-sort=(sort == "updated" ? sortDir : "none") text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+              th scope="col" width="blocks.col-updated" aria-sort=(sort == "updated" ? sortDir : "none") text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
                 row align-items="center" gap="theme.space.xs" justify-content="flex-end"
                   text updatedLabel font="theme.type.caption" color=(sort == "updated" ? "theme.color.ink" : "theme.color.ink-muted")
                   if sort == "updated"
@@ -138,7 +138,7 @@ component DataTable
           if noRows
             tbody
               tr
-                td colspan=4 text-align="start" padding="theme.space.xl" role=(data == "failed" ? "alert" : "status")
+                td colspan=5 text-align="start" padding="theme.space.xl" role=(data == "failed" ? "alert" : "status")
                   Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
           else
             tbody
