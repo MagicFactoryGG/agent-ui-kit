@@ -18,9 +18,10 @@
 // and the note's when an agent started the load. Each element holds one job, said once: the disc is the data
 // state's own glyph, the spinner in every loading state (the agent axis is the mark's, not the disc's); the
 // bones are the content the line stands for; the mark is who acted. Loading
-// stands the content in three equal bones in the state line's own place — the line's own gap above them, the
-// line they stand for, xs between them so the three stand one 44px block, the action's own height — all one
-// width on the one measure, symmetric with the panel's axis, so the skeleton is
+// stands the content in three bones in the state line's own place — the line's own gap above them, the
+// line they stand for, sm between them so a bone and its gap are one body line's own box — wrapping full,
+// full, short-last, the shape of a centred sentence at the measure, all on the one measure, symmetric with the
+// panel's axis, so the skeleton is
 // anchored where its sentence would sit; the action's own footprint is held below it, one bone in the action's
 // own height and corner, a placeholder not a promise (nothing is pressable, the box is aria-hidden), so the
 // card does not reflow when the state turns. The three bones wrap as the line above them does — full, full,
@@ -94,7 +95,7 @@ component StatePanel
           column width="100%" align-items="center" margin-top="theme.space.sm"
             Words(text=(data == "failed" ? failedText : message), kind="body", outcome="cancelled", level=0, testId=`${testId}-message`)
         if data == "loading"
-          column testId=`${testId}-loading` width="100%" align-items="center" gap="theme.space.xs" margin-top="theme.space.sm"
+          column testId=`${testId}-loading` width="100%" align-items="center" gap="theme.space.sm" margin-top="theme.space.sm"
             Bone(share="100%")
             Bone(share="100%")
             Bone(share="60%")
