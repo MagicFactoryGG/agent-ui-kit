@@ -8,9 +8,11 @@
 // One gutter holds everything: the panel pads by theme.space.sm and every row inside pads its words by
 // theme.space.md, so the brand, a group's heading, each place's label, the states' words and the account all
 // start on one edge, while a row's fill (the current place's, a hover's) spans the panel's own width. Grouping
-// is by space — a heading, theme.space.sm of air, then its rows touching (theme.space.xs between them),
-// theme.space.lg between groups — not by frames; the line token draws the rail, the hairline that closes the
-// brand and the one above the account.
+// is by space — a heading, then its rows, one rhythm (theme.space.xs between every one of them; the air
+// between groups, theme.space.lg, the only larger gap) — not by frames; the line token draws the rail, the
+// hairline that closes the brand and the one above the account. While the menu is one place, empty, loading or
+// failed its spacer keeps the menu's home (blocks.nav-places-min), so a short state sits in stable room
+// instead of collapsing to a sliver and the account stays where the shell put it.
 //
 // - The brand is its own region, the same height in every state: the product's mark and name (each optional by
 //   being empty, the name the panel's largest words) and the hairline that closes it. The slot (the app's
@@ -26,12 +28,13 @@
 //   at its start and `agentNote`'s words under its label (the kit's LinkRow language).
 // - The states that stand where the places stand speak where the rows speak — no heading of their own, so a
 //   state never reads as a copy change: loading's drawn cue beside its words at a heading's place (role=status),
-//   over ghost rows in the places' own shape — the row's own height, span and corner in the fill, a surface bar
-//   where the label will be and a surface pill where some counts sit, as the real badge sits on the current
-//   row's fill — so what arrives does not jump. Empty says its line at the rows' place, then, when the app gives
-//   `emptyLabel`, its way on as a quiet text action (the emptier state keeping the lighter gesture). Failed
-//   binds its line and its way on in one raised panel cut by the critical's border: the drawn mark beside the
-//   words in the error's ink, `retryLabel`'s compact bordered button below.
+//   over ghost rows in the places' own anatomy — the row's own height and insets, a fill bar where the label
+//   will be and, on some rows, a fill pill where some counts sit — so what arrives does not jump. Empty says
+//   its line at the rows' place, then, when the app gives `emptyLabel`, its way on as a quiet text action (the
+//   emptier state keeping the lighter gesture). Failed binds its line and its way on in one raised panel cut
+//   by the critical's border and washed with the critical at a breath (8%, the same opacity shading the kit's
+//   own buttons): the drawn mark beside the words in the error's ink, `retryLabel`'s compact bordered button
+//   below.
 // - The landmark's name, `navLabel`, is what a reader hears; the words a person sees above the rows are the
 //   data's own group names.
 // - Long: everything the panel draws holds one line with an ellipsis; the slot's content is the app's.
@@ -87,17 +90,16 @@ component NavItem
       if badge > 0
         text `${badge}` testId=`${testId}-badge` flex-shrink=0 min-width="blocks.nav-badge-min" box-sizing="border-box" text-align="center" font="theme.type.caption" color=(current ? "theme.color.ink" : "theme.color.ink-muted") font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color=(current ? "theme.color.surface" : "theme.color.fill") border-radius="theme.radius.pill" white-space="nowrap"
 
-// A place still coming: the row's own shape (height, span, corner) in the fill, a surface bar where the label
-// will be and — on some rows, as some real rows carry counts — a surface pill where the count sits, the same
-// surface-on-fill the current row's own badge uses, so what arrives does not jump.
+// A place still coming: the row's own height and insets, a fill bar where the label will be and — on some rows,
+// as some real rows carry counts — a fill pill where the count sits, so what arrives does not jump.
 component NavGhost
   props
     badge: bool
   view
-    row align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.control" aria-hidden=true
-      box flex=1 height="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.pill"
+    row align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" aria-hidden=true
+      box flex=1 height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
       if badge
-        box width="blocks.nav-badge-min" height="theme.space.md" flex-shrink=0 background-color="theme.color.surface" border-radius="theme.radius.pill"
+        box width="blocks.nav-badge-min" height="theme.space.md" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 component SideNav
   props
@@ -133,8 +135,9 @@ component SideNav
       column min-width=0 padding-left="theme.space.md" padding-right="theme.space.md"
         children
       if data == "failed"
-        row role="alert" background-color="theme.color.raised" border-left-width="blocks.nav-mark-line" border-left-style="solid" border-left-color="theme.color.critical" border-radius="theme.radius.card"
-          column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
+        row role="alert" position="relative" background-color="theme.color.raised" border-left-width="blocks.nav-mark-line" border-left-style="solid" border-left-color="theme.color.critical" border-radius="theme.radius.card" overflow="hidden"
+          box position="absolute" inset=0 background-color="theme.color.critical" opacity=0.08 aria-hidden=true
+          column position="relative" flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
             row align-items="flex-start" gap="theme.space.sm"
               svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
                 path d="M12 3.5 L21 19 h-18 z" stroke-width=1.75 stroke-linejoin="round"
@@ -170,13 +173,13 @@ component SideNav
       else
         column gap="theme.space.lg"
           for g in groups key=g
-            column gap="theme.space.sm"
+            column gap="theme.space.xs"
               if g != ""
                 NavHeading(text=g, testId=`${testId}-group-${g}`)
               column gap="theme.space.xs"
                 for e in entries.filter(e => e.group == g) key=e.key
                   NavItem(label=e.label, href=e.href, badge=e.badge, current=e.current, marked=(agent == "changed" and e.key == agentKey), note=agentNote, testId=`${testId}-entry-${e.key}`)
-      column flex=1 min-height=0
+      column flex=1 min-height=(data == "many" or data == "long" ? "0" : "blocks.nav-places-min")
       if accountName != ""
         row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
           column width="theme.space.xxl" height="theme.space.xxl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" align-items="center" justify-content="center" overflow="hidden" aria-hidden=true
