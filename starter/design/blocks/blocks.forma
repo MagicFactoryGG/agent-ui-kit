@@ -10,4 +10,3 @@ theme
   blocks.shape-compact: length = 40px
   blocks.bone: length = 12px
   blocks.measure: length = 320px
-  blocks.edge: length = 3px
