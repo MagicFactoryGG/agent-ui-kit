@@ -12,7 +12,8 @@
     "paneEmptyText": "Choose a message to read it here.",
     "agentNote": "Your assistant filed the invoice from ACME.",
     "chosenKey": "message-2",
-    "agentKey": "message-4"
+    "agentKey": "message-4",
+    "listFooter": "Newest first."
   },
   "Message:many": [
     {

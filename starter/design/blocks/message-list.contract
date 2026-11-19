@@ -1,14 +1,16 @@
 // A mailbox's list of messages with the pane that reads the chosen one, in one card: the card's header (the
 // title with the unread count at its end while the mailbox's data can hold messages, an agent's note under the
-// title when it filed or flagged one), then the split — the rows at the start edge with their unread dots, the
-// reading pane beside them on a wide window and under them on a phone, one card holding both so the pair never
-// reads as two strangers and no state can leave them different heights. The chosen message is a filled tile in
-// the heavier type; an agent's mark is the accent edge at its row's start, the kit's idiom (LinkRow); a flagged
-// message carries a small caution flag at its first line's end. Empty, loading and failed each say their own line
-// alone in the card's body, so the state is the focal point: loading shows quiet rows under its line, empty
-// offers the way on, failed offers the way back in the error's colour. The split flips at the window's 640px
-// floor (the responsive-columns recipe: "Else read exactViewport's width"), each pane keeping a share; long
-// words cut with an ellipsis in the rows and wrap in the pane. Every word is the app's.
+// title when it filed or flagged one), then the split — the list pane at the start edge with its rows and its
+// own states, the reading pane beside it on a wide window and under it on a phone, one card holding both so
+// the pair never reads as two strangers, and no state reshapes the card: empty, loading and failed each say
+// their own line in the list pane (loading shows quiet rows under its line, empty offers the way on, failed
+// offers the way back in the error's colour) while the reading pane holds its own quiet state. The chosen
+// message is a filled tile in the heavier type with the accent edge at its start, tying it to the pane that
+// reads it; an agent's mark is the same edge, the kit's idiom (LinkRow); a flagged message carries a small
+// caution flag in a fixed slot at the first line's end, so every row's time shares one right edge; a muted
+// footer (`listFooter`) closes the rows, the app's place to say the list's order. The split flips at the
+// window's 640px floor (the responsive-columns recipe: "Else read exactViewport's width"), each pane keeping a
+// share; long words cut with an ellipsis in the rows and wrap in the pane. Every word is the app's.
 use Swatch from "__SCOPE__/theme"
 use Words, ActionButton from "__SCOPE__/components"
 
@@ -37,9 +39,10 @@ keyframes breathe
 fn rowInk(strong: bool): string = strong ? "theme.color.ink" : "theme.color.ink-muted"
 
 // One row: the dot's gutter (kept for read rows, so every row's words align), then sender and time on the first
-// line (the time at its end, a flagged message's flag after it, both cut with an ellipsis so a long one holds),
-// then the subject, then the snippet's one line. The chosen row is a filled tile in the heavier type; an
-// agent's mark is the accent edge at the start.
+// line, then a fixed slot at the line's end where a flagged message's flag sits (kept for unflagged rows, so
+// every row's time shares one right edge), then the subject, then the snippet's one line. The chosen row is a
+// filled tile in the heavier type with the accent edge at its start, tying it to the pane that reads it; an
+// agent's mark is the same edge.
 component MessageRow
   props
     message: Message
@@ -47,7 +50,7 @@ component MessageRow
     marked: bool
     testId: string
   view
-    link href=message.href testId=testId aria-current=(chosen ? "true" : "false") display="flex" flex-direction="row" align-items="flex-start" gap="theme.space.xs" min-height="components.row-min" margin-left="theme.space.sm" margin-right="theme.space.sm" border-radius="theme.radius.control" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" color="theme.color.ink" text-decoration-line="none" background-color=(chosen ? "theme.color.fill" : "transparent") border-left-width="components.mark-line" border-left-style="solid" border-left-color=(marked ? "theme.color.accent" : "transparent")
+    link href=message.href testId=testId aria-current=(chosen ? "true" : "false") display="flex" flex-direction="row" align-items="flex-start" gap="theme.space.xs" min-height="components.row-min" margin-left="theme.space.sm" margin-right="theme.space.sm" border-radius="theme.radius.control" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" color="theme.color.ink" text-decoration-line="none" background-color=(chosen ? "theme.color.fill" : "transparent") border-left-width="components.mark-line" border-left-style="solid" border-left-color=(marked or chosen ? "theme.color.accent" : "transparent")
       :hover
         background-color="theme.color.hover"
       :active
@@ -59,12 +62,13 @@ component MessageRow
           box width="blocks.dot" height="blocks.dot" background-color="theme.color.accent" border-radius="theme.radius.pill"
       column flex=1 min-width=0 gap="theme.space.xs"
         row align-items="center" gap="theme.space.md"
-          text message.from testId=`${testId}-from` min-width=0 font=(message.unread or chosen ? "theme.type.label" : "theme.type.body") color=rowInk(message.unread or chosen) white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-          text message.when testId=`${testId}-when` margin-left="auto" min-width=0 font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-          if message.flagged
-            svg viewBox="0 0 12 12" width="blocks.icon" height="blocks.icon" fill="none" aria-hidden=true flex-shrink=0
-              path d="M3 2v8" stroke="theme.color.caution" stroke-width=1.5 stroke-linecap="round"
-              path d="M3.5 2.5h5.5l-1.8 2 1.8 2H3.5z" fill="theme.color.caution"
+          text message.from testId=`${testId}-from` min-width=0 flex=1 font=(message.unread or chosen ? "theme.type.label" : "theme.type.body") color=rowInk(message.unread or chosen) white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+          text message.when testId=`${testId}-when` min-width=0 flex-shrink=0 font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+          box width="blocks.icon" height="blocks.icon" flex-shrink=0 display="flex" align-items="center" justify-content="center"
+            if message.flagged
+              svg viewBox="0 0 12 12" width="blocks.icon" height="blocks.icon" fill="none" aria-hidden=true
+                path d="M3 2v8" stroke="theme.color.caution" stroke-width=1.5 stroke-linecap="round"
+                path d="M3.5 2.5h5.5l-1.8 2 1.8 2H3.5z" fill="theme.color.caution"
         text message.subject testId=`${testId}-subject` font=(message.unread or chosen ? "theme.type.label" : "theme.type.body") color=rowInk(message.unread or chosen) white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
         text message.snippet testId=`${testId}-snippet` font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
 
@@ -82,35 +86,67 @@ component SkelRow
         row gap="theme.space.sm" align-items="center"
           box flex=1 height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
           box width="blocks.skel-when" height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" flex-shrink=0 animation=pulse
+          box width="blocks.icon" height="blocks.skel-line" flex-shrink=0
         box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
         box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" margin-right="blocks.skel-tail" animation=pulse
 
-// The list's own body, drawn once for both layouts: while the messages load, the line that says so above quiet
-// rows that claim nothing; otherwise the messages themselves as rows, one listitem each.
-component Rows
+// The list's own pane, drawn once for both layouts: the messages as rows (one listitem each) with the app's
+// footer closing them; empty, loading and failed say their own line here, so the card's shape never changes
+// with its state — only the list's content does.
+component ListPane
   props
     messages: Message[]
     chosenKey: string
     agentKey: string
     marked: bool
-    loading: bool
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
     loadingText: string
+    emptyText: string
+    failedText: string
+    composeLabel: string
+    retryLabel: string
+    listFooter: string
+    compose: action
+    retry: action
     pulse: string
     edge: enum<"under", "side">
     testId: string
   view
-    column flex=(edge == "side" ? 1 : 0) min-width=0 role="list"
-      if loading
-        column padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md"
-          text loadingText testId=`${testId}-loading` role="status" font="theme.type.caption" color="theme.color.ink-muted"
-        SkelRow(pulse=pulse)
-        SkelRow(pulse=pulse)
-        SkelRow(pulse=pulse)
-        SkelRow(pulse=pulse)
+    column flex=(edge == "side" ? 1 : 0) min-width=0
+      if data == "empty"
+        column role="status" min-height="blocks.state-min" justify-content="center" align-items="center" gap="theme.space.md" padding="theme.space.xl"
+          svg viewBox="0 0 24 24" width="blocks.glyph" height="blocks.glyph" aria-hidden=true
+            circle cx=12 cy=12 r=12 fill="theme.color.fill"
+            rect x="5" y="7.5" width="14" height="9" rx="2" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5
+            path d="M5.5 8.5l6.5 4.5 6.5-4.5" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+          Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-empty`)
+          ActionButton(label=composeLabel, kind="primary", interaction="idle", outcome="none", press=compose, testId=`${testId}-compose`)
       else
-        for m in messages key=m.key
-          column role="listitem"
-            MessageRow(message=m, chosen=(m.key == chosenKey), marked=(marked and m.key == agentKey), testId=`${testId}-row-${m.key}`)
+        if data == "failed"
+          column role="alert" min-height="blocks.state-min" justify-content="center" align-items="center" gap="theme.space.md" padding="theme.space.xl"
+            svg viewBox="0 0 24 24" width="blocks.glyph" height="blocks.glyph" aria-hidden=true
+              circle cx=12 cy=12 r=12 fill="theme.color.fill"
+              circle cx=12 cy=12 r="5.5" fill="none" stroke="theme.color.critical" stroke-width=1.8
+              path d="M12 9v3.2" stroke="theme.color.critical" stroke-width=1.8 stroke-linecap="round"
+              circle cx=12 cy=15 r=1 fill="theme.color.critical"
+            Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed`)
+            ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
+        else
+          if data == "loading"
+            column padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md"
+              text loadingText testId=`${testId}-loading` role="status" font="theme.type.caption" color="theme.color.ink-muted"
+            SkelRow(pulse=pulse)
+            SkelRow(pulse=pulse)
+            SkelRow(pulse=pulse)
+            SkelRow(pulse=pulse)
+          else
+            column role="list"
+              for m in messages key=m.key
+                column role="listitem"
+                  MessageRow(message=m, chosen=(m.key == chosenKey), marked=(marked and m.key == agentKey), testId=`${testId}-row-${m.key}`)
+            if listFooter != ""
+              column padding="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg"
+                Words(text=listFooter, kind="caption", outcome="none", level=0, testId=`${testId}-footer`)
 
 // The reading pane, drawn once for both layouts (`edge` names where its line is drawn): its label, then the
 // chosen message — who it is from and when it arrived on one line, the subject as the pane's title, the one
@@ -137,7 +173,7 @@ component Reader
             box flex=2 height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
             box flex=1 height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
           box height="blocks.skel-title" background-color="theme.color.fill" border-radius="theme.radius.pill" margin-right="blocks.skel-tail" animation=pulse
-          box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
+          box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" margin-right="blocks.skel-tail" animation=pulse
           box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" margin-right="blocks.skel-tail" animation=pulse
       else
         match picked
@@ -159,11 +195,12 @@ component Reader
                 Words(text=paneEmptyText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-pane-empty`)
 
 // The mailbox: one card (it centres on a wide window up to its own max), the header, and under it the split
-// (stacked under the window's floor) or the state that owns the card's body alone.
+// (stacked under the window's floor) — the same two panes in every state.
 component MessageList
   props
     title: string
     unreadLabel: string
+    listFooter: string
     emptyText: string
     loadingText: string
     failedText: string
@@ -194,30 +231,11 @@ component MessageList
             text `${unreadCount} ${unreadLabel}` testId=`${testId}-count` margin-left="auto" min-width=0 font="theme.type.caption" color="theme.color.ink-muted" font-variant-numeric="tabular-nums" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
         if agent == "changed"
           text agentNote testId=`${testId}-agent` font="theme.type.caption" color="theme.color.accent"
-      if data == "empty"
-        column role="status" min-height="blocks.state-min" justify-content="center" align-items="center" gap="theme.space.md" padding="theme.space.xl"
-          svg viewBox="0 0 24 24" width="blocks.glyph" height="blocks.glyph" aria-hidden=true
-            circle cx=12 cy=12 r=12 fill="theme.color.fill"
-            rect x="5" y="7.5" width="14" height="9" rx="2" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5
-            path d="M5.5 8.5l6.5 4.5 6.5-4.5" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
-          Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-empty`)
-          ActionButton(label=composeLabel, kind="primary", interaction="idle", outcome="none", press=compose, testId=`${testId}-compose`)
+      if narrow
+        column
+          ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), data=data, loadingText=loadingText, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, listFooter=listFooter, compose=compose, retry=retry, pulse=pulse, edge="under", testId=testId)
+          Reader(paneLabel=paneLabel, paneEmptyText=paneEmptyText, messages=messages, chosenKey=chosenKey, loading=(data == "loading"), pulse=pulse, edge="under", testId=testId)
       else
-        if data == "failed"
-          column role="alert" min-height="blocks.state-min" justify-content="center" align-items="center" gap="theme.space.md" padding="theme.space.xl"
-            svg viewBox="0 0 24 24" width="blocks.glyph" height="blocks.glyph" aria-hidden=true
-              circle cx=12 cy=12 r=12 fill="theme.color.fill"
-              circle cx=12 cy=12 r="5.5" fill="none" stroke="theme.color.critical" stroke-width=1.8
-              path d="M12 9v3.2" stroke="theme.color.critical" stroke-width=1.8 stroke-linecap="round"
-              circle cx=12 cy=15 r=1 fill="theme.color.critical"
-            Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed`)
-            ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
-        else
-          if narrow
-            column
-              Rows(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), loading=(data == "loading"), loadingText=loadingText, pulse=pulse, edge="under", testId=testId)
-              Reader(paneLabel=paneLabel, paneEmptyText=paneEmptyText, messages=messages, chosenKey=chosenKey, loading=(data == "loading"), pulse=pulse, edge="under", testId=testId)
-          else
-            row align-items="stretch"
-              Rows(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), loading=(data == "loading"), loadingText=loadingText, pulse=pulse, edge="side", testId=testId)
-              Reader(paneLabel=paneLabel, paneEmptyText=paneEmptyText, messages=messages, chosenKey=chosenKey, loading=(data == "loading"), pulse=pulse, edge="side", testId=testId)
+        row align-items="stretch"
+          ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), data=data, loadingText=loadingText, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, listFooter=listFooter, compose=compose, retry=retry, pulse=pulse, edge="side", testId=testId)
+          Reader(paneLabel=paneLabel, paneEmptyText=paneEmptyText, messages=messages, chosenKey=chosenKey, loading=(data == "loading"), pulse=pulse, edge="side", testId=testId)
