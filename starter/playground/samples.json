@@ -8,7 +8,12 @@
     "failedText": "Your settings could not be loaded.",
     "failedDetail": "Nothing was changed.",
     "retryLabel": "Try again",
-    "agentNote": "Your assistant is active in this group.",
+    "proposalText": "Your assistant suggests turning the weekly digest off.",
+    "proposalKey": "digest",
+    "acceptLabel": "Accept",
+    "declineLabel": "Decline",
+    "changedText": "Your assistant turned the weekly digest off.",
+    "waitingText": "One change is waiting for your answer.",
     "outcomeText": "How your last change ended."
   },
   "Setting:many": [
