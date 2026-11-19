@@ -11,3 +11,4 @@ theme
   blocks.nav-glyph: length = 20px
   blocks.nav-badge-min: length = 24px
   blocks.nav-places-min: length = 320px
+  blocks.nav-places-half: length = 160px
