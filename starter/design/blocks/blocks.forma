@@ -9,6 +9,8 @@ theme
   blocks.nav-mark: length = 28px
   blocks.nav-mark-line: length = 3px
   blocks.nav-glyph: length = 20px
+  blocks.nav-cue: length = 16px
+  blocks.nav-slot-bay: length = 42px
   blocks.nav-badge-min: length = 24px
   blocks.nav-count-space: length = 56px
   blocks.nav-places-min: length = 320px

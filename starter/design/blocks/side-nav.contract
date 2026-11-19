@@ -17,23 +17,24 @@
 //
 // - The brand is its own region, the same height in every state: the product's mark and name (each optional by
 //   being empty, the name the panel's largest words) and the hairline that closes it. The slot (the app's
-//   control: a switch, a search) opens the places' area under the hairline, where a sidebar's search lives — so
-//   the brand's height never depends on what the app puts there, and the slot's content never reads as the
-//   name's second line.
+//   control: a switch, a search) opens the places' area under the hairline, where a sidebar's search lives —
+//   a bay two body lines tall (blocks.nav-slot-bay): a control fits, and what the app puts there beyond two
+//   lines scrolls inside the bay rather than pushing the menu down, so the places always start at the same edge
+//   and the brand's height never depends on what the app puts there.
 // - The places: NavEntry rows grouped by `group` in first-seen order ("" no heading); a group's own name is its
 //   heading. The current place is the panel's one filled thing, and selection is one device in the accent's
 //   ink: a flush hair at the row's start (the theme's dark washes are quiet; three look rounds asked for the
 //   bar), the label's heavier type, the fill, aria-current="page" — the agent's mark stays its own drawing, a
-//   rounded edge set in from the row, with its note. A badge counts, as a fill pill (surface on the current
-//   row's fill): no border, so it holds on any row and in both schemes; a row with no count keeps the count's
-//   room, so every label holds its line on the same edge.
+//   rounded edge set in from the row, with its note. A badge counts, as a fill pill in the ink itself (surface
+//   on the current row's fill): a count is worth reading at a glance, in either scheme; a row with no count
+//   keeps the count's room, so every label holds its line on the same edge.
 // - An agent that added or reordered an entry (agent "changed"): the entry `agentKey` names gets an accent edge
 //   at its start and `agentNote`'s words under its label (the kit's LinkRow language).
 // - The states that stand where the places stand speak where the rows speak — no heading of their own, so a
-//   state never reads as a copy change. Loading says its line once, as the first section's own label (the
-//   heading's own type and place, role=status for the ear), over that section's rows still coming — a fill bar
-//   where a label will be, a fill pill of the badge's own width where a row carries a count — and then the next
-//   section's own label ghost and its rows: the same shape the resting list has, so what arrives does not jump.
+//   state never reads as a copy change. Loading says its line once — a small drawn cue beside muted words
+//   (role=status): state text, never a section label — above the shape coming: two sections as the resting
+//   list has, each a ghost for the group's own label and ghosts for its rows, a fill bar where a label will be
+//   and a fill pill of the badge's own width where a row carries a count — so what arrives does not jump.
 //   The two states that only speak words share one pattern, a framed note at the rows' place: Empty, a raised panel ringed by the
 //   line's own hair — nothing happened, so nothing is tinted — its line and its way on inside (a compact
 //   bordered button when the app gives `emptyLabel`), an honest empty with the weight of a frame and no more.
@@ -98,7 +99,7 @@ component NavItem
         if marked
           text note testId=`${testId}-mark` font="theme.type.caption" color="theme.color.accent" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
       if badge > 0
-        text `${badge}` testId=`${testId}-badge` flex-shrink=0 min-width="blocks.nav-badge-min" box-sizing="border-box" text-align="center" font="theme.type.caption" color=(current ? "theme.color.ink" : "theme.color.ink-muted") font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color=(current ? "theme.color.surface" : "theme.color.fill") border-radius="theme.radius.pill" white-space="nowrap"
+        text `${badge}` testId=`${testId}-badge` flex-shrink=0 min-width="blocks.nav-badge-min" box-sizing="border-box" text-align="center" font="theme.type.caption" color="theme.color.ink" font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color=(current ? "theme.color.surface" : "theme.color.fill") border-radius="theme.radius.pill" white-space="nowrap"
 
 // A group's own label, still coming: a short bar at the heading's inset, the height of the rows' own bars.
 component NavHeadGhost
@@ -148,8 +149,9 @@ component SideNav
             text productMark.trim().slice(0, 2) font="theme.type.heading" color="theme.color.ink" text-align="center" white-space="nowrap"
         if productName != ""
           text productName testId=`${testId}-name` flex=1 min-width=0 font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-      column min-width=0 padding-left="theme.space.md" padding-right="theme.space.md" padding-bottom="theme.space.sm"
-        children
+      column padding-bottom="theme.space.sm"
+        column min-width=0 height="blocks.nav-slot-bay" overflow="auto" padding-left="theme.space.md" padding-right="theme.space.md"
+          children
       if data == "failed"
         row role="alert" position="relative" background-color="theme.color.raised" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical" border-radius="theme.radius.control" overflow="hidden"
           box position="absolute" inset=0 background-color="theme.color.critical" opacity=0.08 aria-hidden=true
@@ -165,10 +167,13 @@ component SideNav
               ActionButton(label=retryLabel, kind="plain", outcome="error", interaction="idle", press=retry, testId=`${testId}-retry`)
       else if data == "loading"
         column gap="theme.space.lg"
-          row role="status" padding-left="theme.space.md" padding-right="theme.space.md"
+          row role="status" align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md"
+            svg viewBox="0 0 24 24" width="blocks.nav-cue" height="blocks.nav-cue" fill="none" aria-hidden=true flex-shrink=0
+              path d="M12 3.5 A8.5 8.5 0 1 1 3.5 12" stroke="theme.color.ink-muted" stroke-width=2.5 stroke-linecap="round"
             column flex=1 min-width=0
-              Words(text=loadingText, kind="heading", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+              Words(text=loadingText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
           column aria-hidden=true gap="theme.space.xs"
+            NavHeadGhost()
             NavGhost(badge=false)
             NavGhost(badge=true)
             NavGhost(badge=false)
