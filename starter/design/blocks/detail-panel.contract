@@ -65,7 +65,7 @@ component DetailPanel
             if primaryLabel != ""
               ActionButton(label=primaryLabel, kind="primary", interaction="idle", outcome="none", press=primaryPress, testId=`${testId}-primary`)
       if data == "failed"
-        column testId=`${testId}-failed` role="alert" max-width="blocks.message-max" box-sizing="border-box" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+        column testId=`${testId}-failed` role="alert" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
           Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed-text`)
       else
         row flex-wrap="wrap" align-items="flex-start" gap="theme.space.xl"
