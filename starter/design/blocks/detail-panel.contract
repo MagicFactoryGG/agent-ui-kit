@@ -170,7 +170,7 @@ component DetailPanel
             Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed-text`)
           if retryLabel != ""
             row
-              ActionButton(label=retryLabel, kind="plain", interaction=interaction, outcome="none", press=retryPress, testId=`${testId}-retry`)
+              ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retryPress, testId=`${testId}-retry`)
       else
         column gap="theme.space.sm"
           if factsTitle != ""
