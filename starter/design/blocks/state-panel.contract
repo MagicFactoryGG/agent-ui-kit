@@ -12,10 +12,8 @@
 // line, the affordance its `outcome` already draws for an act that ended in error — and the card wears the
 // state's own line in the critical hue, Proposal's own convention for a stateful card, so the state is said in
 // colour at the card's edge and in its way back (role=alert speaks it in failed). The title is the area's own
-// name in every state, resting in the muted ink while loading — pending words, the same size and the same
-// place, so the one live accent under them (the arc, or the mark's pill) is the focal and role=status still
-// speaks the name of what is loading. In
-// loading the skeleton is the line, and the live words are the title's — role=status speaks what is loading —
+// name, the same ink in every state, so the state matrix reads true: a state changes its declared axes only.
+// In loading the skeleton is the line, and the live words are the title's — role=status speaks what is loading —
 // and the note's when an agent started the load: the disc rests neutral then and the accent stays with the
 // mark, so no live sentence sits above placeholders to read half-loaded, and loading is said once. Loading
 // stands the content in three equal bones in the state line's own place — the line's own gap above them, the
@@ -28,11 +26,10 @@
 // `actionLabel`, the accent's fill; failed's own way back, `retryLabel`, the error's ring — a red fill would
 // say a destructive act. `agent` "changed" marks a load an
 // agent started — its tool calls the same action the button does, one ledger, two doors — and `agentNote` is
-// the mark's one sentence, drawn once and placed per state: the accent ink and a small accent disc on a fill
-// pill, the Notice's own way with an area's
-// sentence and this panel's own disc grammar in miniature — the dot
-// is the mark's edge, no border to read as a control — a mark a person notices, never mistaken for the action
-// or for a link. `size` "full" claims the width it is
+// the mark's one sentence, under the title in every state that shows it: the accent ink and a small accent disc
+// on a fill pill, the Notice's own way with an area's sentence and this panel's own disc grammar in miniature —
+// the dot is the mark's edge, no border to read as a control — a mark a person notices, never mistaken for the
+// action or for a link. `size` "full" claims the width it is
 // given up to blocks.panel-max — the area's own surface at a phone, a capped card on a wide window — and the
 // words sit on blocks.measure, a generous column that leaves the card breathing room at both sides;
 // "compact" insets to a narrower card for a side panel or a card's body. The three bones are one small local
@@ -47,8 +44,8 @@ component Bone
     box height="blocks.bone" width=share background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 // The agent's mark: a small accent disc and one sentence on a fill pill, the Notice's own way with an area's
-// words. Drawn once here and placed twice: under the title while loading (TopBar's placement for an agent's
-// line, clear of the placeholder bones), after the state line otherwise (LinkRow and ValueRow's placement).
+// words. Drawn once here and placed once, under the title in every state that shows it — TopBar's own placement
+// for an agent's line — so it never competes with the action below.
 component Mark
   props
     note: string
@@ -87,18 +84,16 @@ component StatePanel
           rect x=7.5 y=7.5 width=9 height=9 rx=2.1 fill="none" stroke="theme.color.ink-muted" stroke-width=1.5
           path d="M7.5 12.6h2.55l1.05 1.65h1.8L13.95 12.6h2.55" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
       column width="100%" max-width="blocks.measure" align-items="center" gap="theme.space.sm"
-        Words(text=title, kind="title", outcome=(data == "loading" ? "cancelled" : "none"), level=2, testId=`${testId}-title`)
-        if agent == "changed" and data == "loading"
+        Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+        if agent == "changed"
           Mark(note=agentNote, testId=`${testId}-agent`)
         if data != "loading" and (data == "failed" ? failedText : message) != ""
           Words(text=(data == "failed" ? failedText : message), kind="body", outcome="cancelled", level=0, testId=`${testId}-message`)
         if data == "loading"
-          column testId=`${testId}-loading` width="100%" align-items="center" gap="theme.space.xs" margin-top="theme.space.sm"
+          column testId=`${testId}-loading` width="100%" align-items="center" gap="theme.space.xs"
             Bone(share="100%")
             Bone(share="100%")
             Bone(share="100%")
-        if agent == "changed" and data != "loading"
-          Mark(note=agentNote, testId=`${testId}-agent`)
       if data == "loading"
         column width="100%" max-width="blocks.measure" margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md") align-items="center" testId=`${testId}-held`
           box aria-hidden=true height="blocks.action-min" width="blocks.bone-action" background-color="theme.color.fill" border-radius="theme.radius.control"
