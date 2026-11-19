@@ -8,4 +8,5 @@ theme
   blocks.notes-hold: length = 96px
   blocks.spin: length = 16px
   blocks.term: length = 160px
+  blocks.detail-min: length = 320px
   blocks.header-min: length = 240px

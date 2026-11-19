@@ -1,11 +1,11 @@
 // The detail of one record, alone or inside a screen's column: a header (the title with its status tag beside it,
 // up to two actions), the record's facts as definition rows, a notes paragraph, and its activity at the end. The
-// panel keeps one measure (`blocks.detail-max`) and groups by space, not by frames: facts and activity are rows on
-// the page, divided by the one meaningful line, their labels one quiet step above; the notes sit on the fill ground
-// as prose; the record's own work (loading, a save in flight) says itself as a chip on the same fill ground beside
-// the tag. The one filled focal element is the primary action; the rest is quiet. One rail holds it together: every
-// label, term and row starts at the panel's left edge, and only time stamps and the header's actions end at its
-// right.
+// panel keeps one measure (`blocks.detail-max`) and groups by space, not by frames: facts and activity are rows,
+// divided by the one meaningful line, their labels one quiet step above; the notes sit on the fill ground as prose;
+// the record's own work (loading, a save in flight) says itself as a chip on the same fill ground beside the tag.
+// The one filled focal element is the primary action; the rest is quiet. Wide, the record's groups hold the left
+// column and the activity stands beside them at the end (columns that wrap at `blocks.detail-min`, so a phone
+// stacks them); every label, term and row starts at the column's left edge, and time stamps end at its right.
 //
 // States: `data` one record, loading, failed and long content; `agent` none, changed (a changed value carries the
 // kit's mark with `changedNote`, the ledger's "did" sentence) and waiting (`waitingNote`, its "asks" sentence, is
@@ -55,7 +55,7 @@ component StatusChip
     testId: string
     speak: bool
   view
-    row role=(speak ? "status" : "none") gap="theme.space.xs" align-items="center" background-color="theme.color.fill" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" testId=testId
+    row role=(speak ? "status" : "none") gap="theme.space.xs" align-items="center" background-color="theme.color.fill" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" margin-left="theme.space.sm" testId=testId
       progress aria-label=text width="blocks.spin" height="blocks.spin"
       text text testId=`${testId}-text` font="theme.type.caption" color="theme.color.ink"
 
@@ -96,16 +96,16 @@ component EventRow
 component GhostFact
   view
     row aria-hidden=true min-height="components.row-min" box-sizing="border-box" padding-top="theme.space.md" padding-bottom="theme.space.md" align-items="center" gap="theme.space.md"
-      box width="blocks.term" height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill" flex-shrink=0
-      box height="theme.space.md" flex=1 background-color="theme.color.fill" border-radius="theme.radius.pill"
+      box width="blocks.term" height="theme.space.md" background-color="theme.color.ink" opacity=0.12 border-radius="theme.radius.pill" flex-shrink=0
+      box height="theme.space.md" flex=1 background-color="theme.color.ink" opacity=0.12 border-radius="theme.radius.pill"
 
 // The quiet stand-in for an activity row: the what's line, then the who's line with the when's stamp at the end.
 component GhostEvent
   view
     row aria-hidden=true min-height="components.row-min" box-sizing="border-box" padding-top="theme.space.md" padding-bottom="theme.space.md"
       column flex=1 gap="theme.space.sm"
-        box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
-        box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
+        box height="theme.space.md" background-color="theme.color.ink" opacity=0.12 border-radius="theme.radius.pill"
+        box height="theme.space.md" background-color="theme.color.ink" opacity=0.12 border-radius="theme.radius.pill"
 
 component DetailPanel
   props
@@ -137,9 +137,9 @@ component DetailPanel
     agent: enum<"none", "changed", "waiting">
   view
     column testId=testId width="100%" max-width="blocks.detail-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.xl"
-      row flex-wrap="wrap" align-items="flex-start" gap="theme.space.md"
+      row flex-wrap="wrap" align-items="flex-start" gap="theme.space.lg"
         column flex=1 min-width="blocks.header-min" box-sizing="border-box" gap="theme.space.xs"
-          row flex-wrap="wrap" align-items="baseline" gap="theme.space.sm"
+          row flex-wrap="wrap" align-items="baseline" gap="theme.space.md"
             Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
             if statusLabel != ""
               Tag(text=statusLabel, outcome=status)
@@ -158,50 +158,59 @@ component DetailPanel
             if primaryLabel != ""
               ActionButton(label=primaryLabel, kind="primary", interaction=interaction, outcome="none", press=primaryPress, testId=`${testId}-primary`)
       if data == "failed"
-        // The failure is the record's: one block lifted on the surface ground with the one semantic border in
-        // the critical ink, a warning triangle at the message's side, the words in the error's ink - and the way
-        // on as a quiet button of the app's own words. What did not arrive says nothing.
-        column testId=`${testId}-failed` role="alert" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical"
-          row gap="theme.space.sm" align-items="flex-start"
-            svg viewBox="0 0 16 16" width="blocks.spin" height="blocks.spin" fill="none" stroke="theme.color.critical" aria-hidden=true margin-top="theme.space.xs" flex-shrink=0
+        // The failure is the record's, said the way the kit's notice says an act: one block lifted on the surface
+        // ground, the one semantic border in the critical ink, a warning triangle at the message's side, the words
+        // in the error's ink filling the line - and the way on at its end, a quiet button of the app's own words.
+        // What did not arrive says nothing.
+        row testId=`${testId}-failed` role="alert" flex-wrap="wrap" align-items="center" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical"
+          row flex=1 min-width=0 gap="theme.space.sm" align-items="center"
+            svg viewBox="0 0 16 16" width="blocks.spin" height="blocks.spin" fill="none" stroke="theme.color.critical" aria-hidden=true flex-shrink=0
               path d="M8 2.5L14.5 13.5H1.5Z" stroke-width=1.3 stroke-linejoin="round"
               path d="M8 6.5L8 9.5" stroke-width=1.3 stroke-linecap="round"
               circle cx=8 cy=11.6 r=0.7 fill="theme.color.critical" stroke="none"
             Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed-text`)
           if retryLabel != ""
-            row
-              ActionButton(label=retryLabel, kind="plain", interaction=interaction, outcome="none", press=retryPress, testId=`${testId}-retry`)
+            ActionButton(label=retryLabel, kind="plain", interaction=interaction, outcome="none", press=retryPress, testId=`${testId}-retry`)
       else
-        column gap="theme.space.sm"
-          if factsTitle != ""
-            GroupLabel(text=factsTitle, testId=`${testId}-facts-title`)
-          column testId=`${testId}-facts` role=(data == "loading" ? "none" : facts.length == 0 ? "status" : "list")
-            if data == "loading"
-              for n in [1, 2, 3, 4] key=n
-                GhostFact()
-            else
-              if facts.length == 0
-                text factsEmptyText testId=`${testId}-facts-empty` padding-top="theme.space.md" padding-bottom="theme.space.md" font="theme.type.body" color="theme.color.ink-muted"
-              for f, i in facts key=f.key
-                FactRow(fact=f, testId=`${testId}-fact-${f.key}`, first=(i == 0))
-        if notes != ""
-          column gap="theme.space.sm"
-            if notesTitle != ""
-              GroupLabel(text=notesTitle, testId=`${testId}-notes-title`)
-            if data == "loading"
-              // The fill ground holds the paragraph's place, claiming nothing.
-              box aria-hidden=true min-height="blocks.notes-hold" background-color="theme.color.fill" border-radius="theme.radius.card" testId=`${testId}-notes-hold`
-            else
-              text notes testId=`${testId}-notes-text` padding="theme.space.lg" background-color="theme.color.fill" border-radius="theme.radius.card" font="theme.type.body" color="theme.color.ink"
-        column gap="theme.space.sm"
-          if activityTitle != ""
-            GroupLabel(text=activityTitle, testId=`${testId}-activity-title`)
-          column testId=`${testId}-activity` role=(data == "loading" ? "none" : events.length == 0 ? "status" : "list")
-            if data == "loading"
-              for n in [1, 2, 3] key=n
-                GhostEvent()
-            else
-              if events.length == 0
-                text activityEmptyText testId=`${testId}-activity-empty` padding-top="theme.space.md" padding-bottom="theme.space.md" font="theme.type.body" color="theme.color.ink-muted"
-              for e, i in events key=e.key
-                EventRow(event=e, testId=`${testId}-event-${e.key}`, first=(i == 0))
+        // Wide, the record's own groups sit in the left column and its activity beside them at the end; a phone
+        // stacks the two columns unchanged. The columns are bare rows, so the shorter one ends on the page, not
+        // in the air.
+        row flex-wrap="wrap" align-items="flex-start" gap="theme.space.xl"
+          column flex=1 min-width="blocks.detail-min" box-sizing="border-box" gap="theme.space.xl"
+            column gap="theme.space.sm"
+              if factsTitle != ""
+                GroupLabel(text=factsTitle, testId=`${testId}-facts-title`)
+              column testId=`${testId}-facts` role=(data == "loading" ? "none" : facts.length == 0 ? "status" : "list")
+                if data == "loading"
+                  for n in [1, 2, 3, 4] key=n
+                    GhostFact()
+                else
+                  if facts.length == 0
+                    text factsEmptyText testId=`${testId}-facts-empty` padding-top="theme.space.md" padding-bottom="theme.space.md" font="theme.type.body" color="theme.color.ink-muted"
+                  for f, i in facts key=f.key
+                    FactRow(fact=f, testId=`${testId}-fact-${f.key}`, first=(i == 0))
+            if notes != ""
+              column gap="theme.space.sm"
+                if notesTitle != ""
+                  GroupLabel(text=notesTitle, testId=`${testId}-notes-title`)
+                if data == "loading"
+                  // The fill ground holds the paragraph's place, cut out where its lines will sit.
+                  column aria-hidden=true min-height="blocks.notes-hold" background-color="theme.color.fill" border-radius="theme.radius.card" padding="theme.space.lg" gap="theme.space.sm" testId=`${testId}-notes-hold`
+                    box height="theme.space.md" flex=1 background-color="theme.color.ink" opacity=0.12 border-radius="theme.radius.pill"
+                    box height="theme.space.md" flex=1 background-color="theme.color.ink" opacity=0.12 border-radius="theme.radius.pill"
+                    box width="blocks.term" height="theme.space.md" background-color="theme.color.ink" opacity=0.12 border-radius="theme.radius.pill"
+                else
+                  text notes testId=`${testId}-notes-text` padding="theme.space.lg" background-color="theme.color.fill" border-radius="theme.radius.card" font="theme.type.body" color="theme.color.ink"
+          column flex=1 min-width="blocks.detail-min" box-sizing="border-box"
+            column gap="theme.space.sm"
+              if activityTitle != ""
+                GroupLabel(text=activityTitle, testId=`${testId}-activity-title`)
+              column testId=`${testId}-activity` role=(data == "loading" ? "none" : events.length == 0 ? "status" : "list")
+                if data == "loading"
+                  for n in [1, 2, 3] key=n
+                    GhostEvent()
+                else
+                  if events.length == 0
+                    text activityEmptyText testId=`${testId}-activity-empty` padding-top="theme.space.md" padding-bottom="theme.space.md" font="theme.type.body" color="theme.color.ink-muted"
+                  for e, i in events key=e.key
+                    EventRow(event=e, testId=`${testId}-event-${e.key}`, first=(i == 0))
