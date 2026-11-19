@@ -7,7 +7,7 @@ theme
   blocks.mail-max: length = 1100px
   blocks.state-min: length = 240px
   blocks.card-min: length = 520px
-  blocks.glyph: length = 48px
+  blocks.glyph: length = 56px
   blocks.icon: length = 16px
   blocks.dot: length = 8px
   blocks.dot-gutter: length = 16px
