@@ -45,5 +45,129 @@
     "agentNote": "Your assistant is taking care of this.",
     "actionLabel": "Add files",
     "retryLabel": "Try again"
+  },
+  "Record:many": [
+    {
+      "key": "record-1",
+      "title": "Q3 expense review — EMEA marketing, all card spend",
+      "status": "Draft",
+      "owner": "Maya Okafor",
+      "updated": "Nov 12, 09:41",
+      "href": "/",
+      "tone": "neutral"
+    },
+    {
+      "key": "record-2",
+      "title": "Renew the design tool licences before the December cut",
+      "status": "In review",
+      "owner": "Jonas Weber",
+      "updated": "Nov 11, 17:03",
+      "href": "/",
+      "tone": "progress"
+    },
+    {
+      "key": "record-3",
+      "title": "Move the 2024 audit log to cold storage, free the disk",
+      "status": "Scheduled",
+      "owner": "Priya Nair",
+      "updated": "Nov 10, 14:20",
+      "href": "/",
+      "tone": "attention"
+    },
+    {
+      "key": "record-4",
+      "title": "Rotate the deploy service credentials and note it",
+      "status": "Filed",
+      "owner": "Sam Delacroix",
+      "updated": "Nov 8, 08:15",
+      "href": "/",
+      "tone": "done"
+    }
+  ],
+  "Record:one": [
+    {
+      "key": "record-1",
+      "title": "Q3 expense review — EMEA marketing, all card spend",
+      "status": "Draft",
+      "owner": "Maya Okafor",
+      "updated": "Nov 12, 09:41",
+      "href": "/",
+      "tone": "neutral"
+    }
+  ],
+  "Record:long": [
+    {
+      "key": "record-1",
+      "title": "A very long record title, the kind a person writes when the record carries its whole context in its name and runs past the width a designer planned",
+      "status": "Draft",
+      "owner": "Maya Okafor",
+      "updated": "Nov 12, 09:41",
+      "href": "/",
+      "tone": "neutral"
+    },
+    {
+      "key": "record-2",
+      "title": "Another long record title that wraps onto a second line inside its column, so its row grows taller and nothing is clipped or covered",
+      "status": "In review",
+      "owner": "Jonas Weber",
+      "updated": "Nov 11, 17:03",
+      "href": "/",
+      "tone": "progress"
+    }
+  ],
+  "Checked:many": [
+    {
+      "keys": [
+        "record-2"
+      ]
+    }
+  ],
+  "Checked:one": [
+    {
+      "keys": []
+    }
+  ],
+  "Checked:long": [
+    {
+      "keys": [
+        "record-1"
+      ]
+    }
+  ],
+  "Marks:many": [
+    {
+      "keys": [
+        "record-3"
+      ]
+    }
+  ],
+  "Marks:one": [
+    {
+      "keys": [
+        "record-1"
+      ]
+    }
+  ],
+  "Marks:long": [
+    {
+      "keys": [
+        "record-1"
+      ]
+    }
+  ],
+  "props:DataTable": {
+    "titleLabel": "Record",
+    "statusLabel": "Status",
+    "ownerLabel": "Owner",
+    "updatedLabel": "Updated",
+    "selectLabel": "Select",
+    "selectAllLabel": "Select all",
+    "emptyText": "No records yet. Create one to get started.",
+    "loadingText": "Loading records…",
+    "failedText": "Couldn't load records. Check your connection and try again.",
+    "busyText": "Updating records…",
+    "agentNote": "Your assistant changed \u201cMove the 2024 audit log to cold storage\u201d.",
+    "retryLabel": "Try again",
+    "createLabel": "New record"
   }
 }

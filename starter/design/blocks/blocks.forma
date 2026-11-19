@@ -20,3 +20,17 @@ theme
   blocks.note-dot: length = 8px
   blocks.measure: length = 480px
   blocks.action-min: length = 44px  // ActionButton's own least height (components.row-min); a block may not reach into another package's sizes
+  blocks.table-max: length = 960px
+  blocks.row-min: length = 44px
+  blocks.mark-line: length = 3px
+  blocks.glyph: length = 12px
+  blocks.state-glyph: length = 24px
+  blocks.select-col: length = 48px
+  blocks.col-status: length = 112px
+  blocks.col-owner: length = 128px
+  blocks.col-updated: length = 112px
+  blocks.skel-bar: length = 8px
+  blocks.skel-check: length = 20px
+  blocks.tone-dot: length = 6px
+  blocks.state-min: length = 176px
+  blocks.state-max: length = 480px
