@@ -12,6 +12,7 @@ theme
   blocks.dot: length = 10px
   blocks.dot-gutter: length = 16px
   blocks.row-line: length = 21px
+  blocks.row-inset: length = 52px
   blocks.badge-max: length = 160px
   blocks.skel-line: length = 10px
   blocks.skel-title: length = 16px
