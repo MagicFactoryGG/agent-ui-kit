@@ -4,3 +4,8 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
+  blocks.steps-max: length = 560px
+  blocks.step-dot: length = 28px
+  blocks.step-tick: length = 12px
+  blocks.step-line: length = 2px
+  blocks.mark-line: length = 3px
