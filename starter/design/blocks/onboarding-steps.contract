@@ -2,9 +2,9 @@
 // connector each, the track spanning the frame, the current step accent-filled and ringed, done steps carrying a
 // drawn tick; a single step keeps its node beside the count; count and steps together stay one compact bar on a
 // phone), the current step's title and lead line, the slot for the step's content, then the way on: Back (hidden
-// on the first step), an optional Skip ("" hides it) and Continue, which right-clusters capped at a named width on
-// a desktop (the space between the secondary and primary zones reads as a deliberate gutter, not a stretched
-// slab) and takes its own full-width row on a phone; the frame's one filled element a state is the way on, and it
+// on the first step), an optional Skip ("" hides it) and Continue, which right-clusters at a named width on a
+// desktop (a Gutter takes the spare width, so the space between the zones reads as deliberate, not a stretched
+// slab) and fills its own row on a phone; the frame's one filled element a state is the way on, and it
 // carries the busy state in whichever branch draws it; a state with no steps and one way on fills the row, so the
 // hairline it sits under reads as the footer's edge. The frame groups by surface and space: one raised panel with
 // the theme's line edge (a fill alone can vanish in a theme that paints page and surface one colour), one
@@ -53,13 +53,24 @@ component StepSeg
   view
     box flex=1 height="blocks.step-line" background-color=ink
 
-// A bar of text still loading: breathing, never a control.
+// The gutter between the secondary and primary zones: it takes nearly all the spare width (1000 to the
+// primary's 1), so on one line the primary keeps its basis; once the primary wraps to its own line (a phone)
+// the gutter stays behind and the primary fills that line alone.
+component Gutter
+  view
+    box flex="1000 1 0"
+
+// A bar of text still loading: breathing, never a control. It takes `share` of its line's width against
+// `rest` (a width share in a row: a flex share inside the column would size its height, and drew nothing).
 component SkBar
   props
     share: string
+    rest: string
     height: string
   view
-    box flex=share height=height background-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)" border-radius="theme.radius.pill"
+    row
+      box flex=share height=height background-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)" border-radius="theme.radius.pill"
+      box flex=rest
 
 // A bar the shape of a button still loading; `max` caps it where the real button is capped.
 component SkBtn
@@ -82,9 +93,9 @@ component SkTrack
             StepDot(fill="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)", edge="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)", ring=false, testId="")
             if j < 3
               StepSeg(ink="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)")
-      SkBar(share="2 1 0", height="blocks.skel-head")
-      SkBar(share="1 1 0", height="blocks.skel-line")
-      SkBar(share="2 1 0", height="blocks.skel-line")
+      column gap="theme.space.sm"
+        SkBar(share="2 1 0", rest="3 1 0", height="blocks.skel-head")
+        SkBar(share="5 1 0", rest="1 1 0", height="blocks.skel-line")
 
 component OnboardingSteps
   props
@@ -159,7 +170,7 @@ component OnboardingSteps
       if agent == "proposed"
         column testId=`${testId}-note` role="status" gap="theme.space.sm" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="theme.color.accent" padding-left="theme.space.md"
           text agentNote testId=`${testId}-sentence` font="theme.type.caption" color="theme.color.accent"
-          row gap="theme.space.lg" flex-wrap="wrap"
+          row gap="theme.space.sm" flex-wrap="wrap"
             if rejectLabel != ""
               ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
             if acceptLabel != ""
@@ -169,10 +180,11 @@ component OnboardingSteps
       if data == "loading" and outcome != "error"
         column margin-top="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.md" aria-hidden=true
           row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
-            SkBtn(basis="none", max="none")
-            SkBtn(basis="none", max="none")
-            box flex=1
-            SkBtn(basis="1 1 blocks.actions-min", max="blocks.primary-max")
+            row gap="theme.space.sm" align-items="center"
+              SkBtn(basis="none", max="none")
+              SkBtn(basis="none", max="none")
+            Gutter()
+            SkBtn(basis="1 1 blocks.primary-max", max="none")
       if data != "loading" or outcome == "error"
         column gap="theme.space.md" margin-top="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.md"
           if outcome == "error"
@@ -181,9 +193,9 @@ component OnboardingSteps
             row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
               if skipLabel != ""
                 ActionButton(label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
-              box flex=1
+              Gutter()
               if retryLabel != ""
-                column flex="1 1 blocks.actions-min" max-width="blocks.primary-max"
+                column flex="1 1 blocks.primary-max"
                   ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
           else if not hasSteps
             ActionButton(label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)
@@ -194,6 +206,6 @@ component OnboardingSteps
                   ActionButton(label=backLabel, kind="plain", interaction="idle", outcome="none", press=back, testId=`${testId}-back`)
                 if skipLabel != ""
                   ActionButton(label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
-              box flex=1
-              column flex="1 1 blocks.actions-min" max-width="blocks.primary-max"
+              Gutter()
+              column flex="1 1 blocks.primary-max"
                 ActionButton(label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)
