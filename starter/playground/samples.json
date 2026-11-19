@@ -4,6 +4,7 @@
     "title": "Your files",
     "message": "Everything you add to this project will appear here, ready to share with your team.",
     "agentNote": "Your assistant is loading this for you.",
-    "actionLabel": "Add files"
+    "actionLabel": "Add files",
+    "retryLabel": "Try again"
   }
 }
