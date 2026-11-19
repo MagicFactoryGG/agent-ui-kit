@@ -34,13 +34,15 @@
 // rows, theme.space.xs between every one of them; the air between groups, theme.space.lg, the only larger gap —
 // not by frames; the line token draws the panel's own frame and those two hairlines, and nothing else.
 //
-// - The brand is its own band, closed by a hairline: the product's mark and name (each optional by being
-//   empty, the name the panel's largest words). The slot (the app's control: a search field, a workspace
-//   picker) opens the places' area under the hairline, in a plain column on the header's own gutters
-//   (theme.space.md each side) that grows to whatever height the app's content needs: no fixed height, no
-//   scroll, no clip, no frame or ground of its own — the field draws its own frame. (Rounds 21-31 drew a
-//   framed bay of a fixed height to keep every state's geometry; the coordinator's r2 look found it cut the
-//   long state's slot mid-sentence. A slot's content is the app's; the block only gives it room.)
+// - The header is its own band, closed by a hairline: the product's mark and name (each optional by being
+//   empty, the name the panel's largest words), and under them, on its own line, the slot (the app's
+//   control: a search field, a workspace picker), the way the kit's TopBar holds its slot in its banner. The
+//   slot's column takes the header's own gutters (theme.space.md each side) and grows to whatever height the
+//   app's content needs: no fixed height, no scroll, no clip, no frame or ground of its own — the field draws
+//   its own frame. (Rounds 21-31 drew a framed bay of a fixed height under the hairline; the coordinator's r2
+//   look found it cut the long state's slot mid-sentence. r32 unframed it but left it under the hairline,
+//   where, bare, the app's words floated between the brand's line and the first group's heading and read as
+//   a stray label; inside the band they belong to the header, and the places start clean under the line.)
 // - The places: NavEntry rows grouped by `group` in first-seen order ("" no heading); a group's own name is its
 //   heading, an eyebrow — the caption type, muted, uppercase with a little letter-spacing, on a row the height
 //   of every section label (theme.space.xl, so the sections read as names of rooms, not as rows, and the ghost
@@ -241,15 +243,15 @@ component SideNav
   view
     row flex-wrap="wrap" align-items="stretch"
       column testId=testId role="navigation" aria-label=navLabel flex-grow=1 flex-shrink=1 flex-basis="blocks.nav-min" min-width=0 box-sizing="border-box" gap="theme.space.lg" padding="theme.space.sm" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
-        column
-          row align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+        column padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+          row align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.sm" padding-bottom="theme.space.sm"
             if productMark != ""
               column width="blocks.nav-mark" height="blocks.nav-mark" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.control" justify-content="center" overflow="hidden" aria-hidden=true
                 text productMark.trim().slice(0, 2) font="theme.type.heading" color="theme.color.ink" text-align="center" white-space="nowrap"
             if productName != ""
               text productName testId=`${testId}-name` title=productName flex=1 min-width=0 font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-        column min-width=0 padding-left="theme.space.md" padding-right="theme.space.md"
-          children
+          column min-width=0 padding-left="theme.space.md" padding-right="theme.space.md"
+            children
         column flex=1 min-width=0 min-height=0 overflow="auto"
           if data == "failed"
             row role="alert" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.control" margin-bottom="theme.space.lg"
