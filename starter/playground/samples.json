@@ -1,5 +1,16 @@
 {
-  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types.",
+  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own sample words, keyed \"props:<Piece>\", for the props whose generated defaults read badly.",
+  "props:SettingsGroup": {
+    "title": "General",
+    "footer": "Changes apply everywhere at once.",
+    "emptyText": "Nothing to set in this group yet.",
+    "loadingText": "Loading your settings",
+    "failedText": "Your settings could not be loaded.",
+    "failedDetail": "Nothing was changed.",
+    "retryLabel": "Try again",
+    "agentNote": "Your assistant is active in this group.",
+    "outcomeText": "How your last change ended."
+  },
   "Setting:many": [
     { "key": "digest", "kind": "switch", "label": "Weekly digest", "detail": "A summary of your week, each Monday.", "value": "", "on": true },
     { "key": "units", "kind": "value", "label": "Units", "detail": "Used wherever something is measured.", "value": "Metric", "on": false },

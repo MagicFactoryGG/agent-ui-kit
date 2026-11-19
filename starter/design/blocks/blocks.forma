@@ -4,9 +4,10 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
-  blocks.settings-max: length = 640px
+  blocks.settings-max: length = 560px
   blocks.row-min: length = 44px
   blocks.mark-line: length = 3px
   blocks.chevron: length = 12px
   blocks.skeleton-line: length = 12px
   blocks.skeleton-blob: length = 32px
+  blocks.empty-mark: length = 16px
