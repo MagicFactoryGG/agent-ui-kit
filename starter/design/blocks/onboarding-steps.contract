@@ -2,11 +2,12 @@
 // connector each, the track spanning the card, the current step accent-filled and ringed, done steps carrying a
 // drawn tick; count and steps together stay one compact bar on a phone), the current step's title and lead line,
 // the slot for the step's content, then the way on: Back (hidden on the first step), an optional Skip ("" hides
-// it) and Continue, which takes its own full-width row when the width is a phone's. States: data
-// many|one|empty|loading|failed|long (loading says itself over a skeleton of the card; empty keeps the way on;
-// failed says itself with a drawn warning and offers its way back), interaction idle|busy (Continue busy),
-// outcome none|error (an error line above the actions), agent none|proposed (an agent filled this step in: a
-// calm note, two answer words). Every word is the app's; every value is a Theme token or a blocks.* size.
+// it) and Continue, which right-clusters on a desktop and takes its own full-width row on a phone. States: data
+// many|one|empty|loading|failed|long (loading says itself over a breathing skeleton of the card; empty keeps the
+// way on; failed says itself in a tinted alert with a drawn warning and offers its way back), interaction
+// idle|busy (Continue busy), outcome none|error (an error line above the actions), agent none|proposed (an agent
+// filled this step in: a calm note, two answer words). Every word is the app's; every value is a Theme token or a
+// blocks.* size.
 
 use Words, ActionButton from "__SCOPE__/components"
 
@@ -73,7 +74,7 @@ component OnboardingSteps
       else if data == "failed"
         if countLabel != ""
           Words(text=countLabel, kind="title", outcome="none", level=2, testId=`${testId}-heading`)
-        row gap="theme.space.sm" align-items="center"
+        row gap="theme.space.sm" align-items="center" padding="theme.space.md" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical" background-color="color-mix(in srgb, theme.color.critical 12%, theme.color.surface)"
           svg viewBox="0 0 16 16" width="blocks.alert" height="blocks.alert" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
             path d="M8 2.5L14.5 13.5H1.5Z" stroke-width=1.5 stroke-linejoin="round"
             path d="M8 6.5v3.2" stroke-width=1.5 stroke-linecap="round"
@@ -84,9 +85,9 @@ component OnboardingSteps
           Words(text=countLabel, kind="title", outcome="none", level=2, testId=`${testId}-heading`)
         text emptyText testId=`${testId}-empty` role="status" font="theme.type.body" color="theme.color.ink-muted"
       else
-        if steps.length > 1
-          row testId=`${testId}-bar` role="status" aria-label=countLabel align-items="center" gap="theme.space.md"
-            text `${at + 1}/${steps.length}` testId=`${testId}-count` flex-shrink=0 font="theme.type.label" color="theme.color.ink" font-variant-numeric="tabular-nums"
+        row testId=`${testId}-bar` role="status" aria-label=countLabel align-items="center" gap="theme.space.md"
+          text `${at + 1}/${steps.length}` testId=`${testId}-count` flex-shrink=0 font="theme.type.label" color="theme.color.ink" font-variant-numeric="tabular-nums"
+          if steps.length > 1
             row flex=1 min-width=0 align-items="center" aria-hidden=true
               for s, i in steps key=s.key
                 box testId=`${testId}-step-${s.key}` min-width="blocks.step-dot" min-height="blocks.step-dot" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.pill" background-color=(s.state == "current" ? "theme.color.accent" : "theme.color.fill") box-shadow=(s.state == "current" ? "0 0 0 2px theme.color.focus" : "none")
@@ -124,15 +125,9 @@ component OnboardingSteps
             text errorText testId=`${testId}-error` role="alert" font="theme.type.caption" color="theme.color.critical-text"
           if data == "failed"
             if retryLabel != ""
-              row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
-                box flex=1
-                column flex="1 1 blocks.actions-min"
-                  ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+              ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
           else if not hasSteps
-            row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
-              box flex=1
-              column flex="1 1 blocks.actions-min"
-                ActionButton(label=continueLabel, kind="primary", interaction="idle", outcome="none", press=advance, testId=`${testId}-continue`)
+            ActionButton(label=continueLabel, kind="primary", interaction="idle", outcome="none", press=advance, testId=`${testId}-continue`)
           else
             row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
               if at > 0
