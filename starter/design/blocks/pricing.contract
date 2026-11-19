@@ -124,7 +124,6 @@ component Pricing
     reject: action
     undo: action
     testId: string
-  derive asking = agent == "proposed" and plans.filter(p => p.key == chosenKey).length > 0
   // One door for the person's press; an agent's tool calls the app's same `choose` with the same key.
   action pick(key: string)
     choose(key)
@@ -181,7 +180,7 @@ component Pricing
                     column flex=1
                       ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
                 else
-                  ActionButton(label=p.action, kind=(p.featured and not asking ? "primary" : "plain"), interaction=(p.key == chosenKey and interaction == "busy" ? "busy" : "idle"), outcome="none", press=pick(p.key), testId=`${testId}-choose-${p.key}`)
+                  ActionButton(label=p.action, kind=(p.featured and agent != "proposed" ? "primary" : "plain"), interaction=(p.key == chosenKey and interaction == "busy" ? "busy" : "idle"), outcome="none", press=pick(p.key), testId=`${testId}-choose-${p.key}`)
                 if p.key == chosenKey and agent == "changed" and undoLabel != ""
                   ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
                 if p.key == chosenKey and outcome != "none"
