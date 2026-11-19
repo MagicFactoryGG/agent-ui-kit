@@ -159,6 +159,9 @@ component NavHeading
 // One place: its label on one line (an ellipsis then a whole gap before its count; a row with no count keeps
 // the count's room, so every label in the panel holds its line on the same edge), the current place's fill
 // and weight, an agent's edge and note. The label's `title` carries the whole of it for a line the panel cuts.
+// One edge per row: where an agent acted on the current place, the edge is the agent's (rounded, set in from
+// top and bottom) and the selection keeps its fill, accent ink, weight and aria-current — drawn together, the
+// flush hair swallowed the agent's edge and the change went unseen (the "one, changed" cell, by eye).
 // The gap before a count is the row's own theme.space.lg plus a label's sm: look rounds have read the
 // ellipsis as touching the chip three times; measured, 16px held at every width — the extra sm makes the
 // guarantee visible to the eye as well as to the ruler.
@@ -179,7 +182,7 @@ component NavItem
         background-color="theme.color.fill"
       :focus-visible
         box-shadow="inset 0 0 0 2px theme.color.focus"
-      if current
+      if current and marked == false
         box position="absolute" left=0 top=0 bottom=0 width="blocks.nav-mark-line" background-color="theme.color.accent" aria-hidden=true
       if marked
         box position="absolute" left=0 top="theme.space.sm" bottom="theme.space.sm" width="blocks.nav-mark-line" background-color="theme.color.accent" border-radius="theme.radius.pill" aria-hidden=true
