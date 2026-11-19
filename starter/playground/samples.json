@@ -56,7 +56,7 @@
     "emptyTitle": "You're all caught up",
     "emptyText": "New notifications will appear here as they arrive.",
     "emptyActionLabel": "Notification settings",
-    "failedTitle": "Notifications didn't load",
+    "failedTitle": "Couldn't load just now",
     "failedText": "Check your connection, then try again. Nothing you received is lost.",
     "retryLabel": "Try again",
     "proposedNote": "Your assistant suggests marking 2 notifications read.",
@@ -64,7 +64,8 @@
     "rejectLabel": "Not now",
     "changedNote": "Your assistant marked 3 notifications read.",
     "undoLabel": "Undo",
-    "summary@one": "1 new"
+    "summary@one": "1 new",
+    "summary@long": "1 new"
   },
   "Note:many": [
     {"key":  "move-review", "title":  "Your assistant suggests moving Thursday's review to 15:00.", "detail":  "It overlaps the supplier call Priya booked.", "when":  "2 min ago", "unread":  true, "kind":  "agent", "yesLabel":  "Accept", "noLabel":  "Reject"},

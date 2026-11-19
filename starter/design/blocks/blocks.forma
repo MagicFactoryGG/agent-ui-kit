@@ -24,3 +24,4 @@ theme
   blocks.note-title-min: length = 160px  // a notification's title keeps this much before its time wraps under it
   blocks.note-head-min: length = 160px  // the list's name keeps this much before "Mark all read" wraps under it
   blocks.note-when: length = 64px  // the time's stand-in while the notes load
+  blocks.notes-max: length = 560px  // the list's own measure: rows read at ~64 characters, a side panel's width
