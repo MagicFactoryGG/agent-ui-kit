@@ -30,11 +30,11 @@
 // - An agent that added or reordered an entry (agent "changed"): the entry `agentKey` names gets an accent edge
 //   at its start and `agentNote`'s words under its label (the kit's LinkRow language).
 // - The states that stand where the places stand speak where the rows speak — no heading of their own, so a
-//   state never reads as a copy change. Loading says its line once (role=status, for the ear: the eye needs no
-//   second signal) and then shows the shape coming as a menu's own shape: two sections as menus have, each a
-//   ghost for the group's own label and ghosts for its rows, a fill bar where a label will be and, where a row
-//   carries a count, a fill pill of the badge's own width — so what arrives does not jump. The two states that
-//   only speak words share one pattern, a framed note at the rows' place: Empty, a raised panel ringed by the
+//   state never reads as a copy change. Loading says its line once, as the first section's own label (the
+//   heading's own type and place, role=status for the ear), over that section's rows still coming — a fill bar
+//   where a label will be, a fill pill of the badge's own width where a row carries a count — and then the next
+//   section's own label ghost and its rows: the same shape the resting list has, so what arrives does not jump.
+//   The two states that only speak words share one pattern, a framed note at the rows' place: Empty, a raised panel ringed by the
 //   line's own hair — nothing happened, so nothing is tinted — its line and its way on inside (a compact
 //   bordered button when the app gives `emptyLabel`), an honest empty with the weight of a frame and no more.
 //   Failed, the same panel in the kit's outcome language, as ActionButton draws it: ringed by the critical's
@@ -148,7 +148,7 @@ component SideNav
             text productMark.trim().slice(0, 2) font="theme.type.heading" color="theme.color.ink" text-align="center" white-space="nowrap"
         if productName != ""
           text productName testId=`${testId}-name` flex=1 min-width=0 font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-      column min-width=0 padding-left="theme.space.md" padding-right="theme.space.md"
+      column min-width=0 padding-left="theme.space.md" padding-right="theme.space.md" padding-bottom="theme.space.sm"
         children
       if data == "failed"
         row role="alert" position="relative" background-color="theme.color.raised" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical" border-radius="theme.radius.control" overflow="hidden"
@@ -164,20 +164,18 @@ component SideNav
             row
               ActionButton(label=retryLabel, kind="plain", outcome="error", interaction="idle", press=retry, testId=`${testId}-retry`)
       else if data == "loading"
-        column gap="theme.space.xs"
-          row role="status" padding-left="theme.space.md" padding-right="theme.space.md" padding-bottom="theme.space.xs"
+        column gap="theme.space.lg"
+          row role="status" padding-left="theme.space.md" padding-right="theme.space.md"
             column flex=1 min-width=0
-              Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-${data}`)
-          column aria-hidden=true gap="theme.space.lg"
-            column gap="theme.space.xs"
-              NavHeadGhost()
-              NavGhost(badge=false)
-              NavGhost(badge=true)
-              NavGhost(badge=false)
-            column gap="theme.space.xs"
-              NavHeadGhost()
-              NavGhost(badge=false)
-              NavGhost(badge=true)
+              Words(text=loadingText, kind="heading", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+          column aria-hidden=true gap="theme.space.xs"
+            NavGhost(badge=false)
+            NavGhost(badge=true)
+            NavGhost(badge=false)
+          column aria-hidden=true gap="theme.space.xs"
+            NavHeadGhost()
+            NavGhost(badge=false)
+            NavGhost(badge=true)
       else if data == "empty"
         row role="status" background-color="theme.color.raised" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.control"
           column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
