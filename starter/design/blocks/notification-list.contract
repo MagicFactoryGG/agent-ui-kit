@@ -24,6 +24,8 @@
 // groups alike, and its open ask carries the accent line at its start; a settled one keeps only the mark, so the
 // accent line stays the signal of what waits, never of what group a row sits in. Every word is a prop or the note's
 // own; a word too long for its line (a file name, a key) breaks inside it rather than spilling.
+// While the band proposes, its yes is the screen's one filled answer in every data state: the rows' answers, the
+// empty way on and the failed way back step back to plain until the person has answered.
 //
 // Section, Proposal and TopBar live inline in this package's index.contract, which a sibling file cannot import
 // (contract-use-cycle), so the group card and the agent band are drawn here, in their manner.
@@ -178,7 +180,7 @@ component NotificationList
               text failedText testId=`${testId}-failed-text` overflow-wrap="break-word" hyphens="none" font="theme.type.body" color="theme.color.ink"
               if retryLabel != ""
                 row
-                  ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+                  ActionButton(label=retryLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
       else if data == "empty"
         // The tray, where the new group's rows would land: its mark, the line that says what will arrive, and the
         // way on. No group label above it - the zero state is the whole list's, not one group's.
@@ -191,7 +193,7 @@ component NotificationList
               text emptyText testId=`${testId}-empty-text` overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
               if emptyActionLabel != ""
                 row
-                  ActionButton(label=emptyActionLabel, kind="primary", interaction="idle", outcome="none", press=emptyPress, testId=`${testId}-empty-action`)
+                  ActionButton(label=emptyActionLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=emptyPress, testId=`${testId}-empty-action`)
       else if data == "loading"
         // Both groups stand in their own shape: a bar at each label's place, then the card of rows, so what arrives
         // lands where the bones stood.
