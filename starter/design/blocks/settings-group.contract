@@ -1,0 +1,119 @@
+// A titled group of settings rows on one card, the way a settings page groups them: a switch row, a value row
+// that opens a choice, a link row, and a destructive row at the end (in the critical ink, never a filled red
+// block). The rows come in as data; the app owns every value and word. Both doors — the person's press and the
+// agent's tool — reach the app's same actions, each with the row's key: `toggle` (a switch; the app flips its
+// own value), `choose` (a value row's choice), `open` (a link row), `remove` (the destructive row; the app may
+// confirm it in a sheet first).
+//
+// States, declared once as axes: `data` draws the rows or says its own line on the card (empty, loading,
+// failed); `interaction` (idle, disabled, busy) stills the whole group; `outcome` (success, error) says one
+// line under the group; `agent` (proposed, changed, waiting) marks the card's start and says `agentNote` under
+// it, the way LinkRow and TopBar do. `blocks.settings-max` keeps the card a sensible width on a wide window; on
+// a phone every label, detail and value wraps, so the edges stay aligned and nothing is cut off.
+use Swatch from "__SCOPE__/theme"
+use Words from "__SCOPE__/components"
+
+// One row of the group, drawn by its `kind`: a switch keeps its state in `on`; a value row shows `value` and
+// opens a choice; a link row opens by its key; a danger row acts at once. `detail` is its second line, "" for
+// none; `value` is "" on every other kind.
+shape Setting
+  key: string
+  kind: enum<"switch", "value", "link", "danger">
+  label: string
+  detail: string
+  value: string
+  on: bool
+
+// The mark an agent's act leaves on the card: accent for a change or a suggestion, caution while it waits.
+fn agentLine(a: string): string = a == "proposed" or a == "changed" ? "theme.color.accent" : a == "waiting" ? "theme.color.caution" : "transparent"
+
+component SettingsGroup
+  props
+    title: string
+    footer: string
+    emptyText: string
+    loadingText: string
+    failedText: string
+    agentNote: string
+    outcomeText: string
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    interaction: enum<"idle", "disabled", "busy">
+    outcome: enum<"none", "success", "error">
+    agent: enum<"none", "proposed", "changed", "waiting">
+    rows: Setting[]
+    toggle: action
+    choose: action
+    open: action
+    remove: action
+    testId: string
+  // The platform's switch says its new state; the app's `toggle` takes the row's key and flips its own value.
+  action flip(key: string, on: bool)
+    toggle(key)
+  view
+    column testId=testId role="group" aria-label=title gap="theme.space.sm" max-width="blocks.settings-max"
+      if title != ""
+        column padding-left="theme.space.lg" padding-right="theme.space.lg"
+          Words(text=title, kind="heading", outcome="none", level=2, testId=`${testId}-title`)
+      column testId=`${testId}-card` aria-busy=(interaction == "busy") background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=agentLine(agent) overflow="hidden" opacity=(interaction == "disabled" ? 0.5 : interaction == "busy" ? 0.7 : 1)
+        if data == "empty" or data == "loading" or data == "failed"
+          column padding="theme.space.lg" role=(data == "failed" ? "alert" : "status")
+            Words(text=(data == "empty" ? emptyText : data == "loading" ? loadingText : failedText), kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
+        for r, i in rows key=r.key
+          if r.kind == "switch"
+            row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+              column flex=1 min-width=0 gap="theme.space.xs"
+                text r.label font="theme.type.body" color="theme.color.ink"
+                if r.detail != ""
+                  text r.detail font="theme.type.caption" color="theme.color.ink-muted"
+              input type="checkbox" switch checked=r.on change=flip(r.key) disabled=(interaction != "idle") aria-label=r.label testId=`${testId}-switch-${r.key}`
+          else if r.kind == "value"
+            button press=choose(r.key) disabled=(interaction != "idle") testId=`${testId}-value-${r.key}` display="flex" flex-direction="row" align-items="center" gap="theme.space.md" text-align="start" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" background-color="transparent"
+              :hover
+                background-color="theme.color.hover"
+              :active
+                background-color="theme.color.fill"
+              :focus-visible
+                box-shadow="inset 0 0 0 2px theme.color.focus"
+              column flex=1 min-width=0 gap="theme.space.xs"
+                text r.label font="theme.type.body" color="theme.color.ink"
+                if r.detail != ""
+                  text r.detail font="theme.type.caption" color="theme.color.ink-muted"
+              if r.value != ""
+                text r.value font="theme.type.body" color="theme.color.ink" text-align="end"
+              svg viewBox="0 0 12 12" width="blocks.chevron" height="blocks.chevron" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
+                path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+          else if r.kind == "link"
+            button press=open(r.key) disabled=(interaction != "idle") testId=`${testId}-link-${r.key}` display="flex" flex-direction="row" align-items="center" gap="theme.space.md" text-align="start" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" background-color="transparent"
+              :hover
+                background-color="theme.color.hover"
+              :active
+                background-color="theme.color.fill"
+              :focus-visible
+                box-shadow="inset 0 0 0 2px theme.color.focus"
+              column flex=1 min-width=0 gap="theme.space.xs"
+                text r.label font="theme.type.body" color="theme.color.ink"
+                if r.detail != ""
+                  text r.detail font="theme.type.caption" color="theme.color.ink-muted"
+              svg viewBox="0 0 12 12" width="blocks.chevron" height="blocks.chevron" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
+                path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+          else
+            button press=remove(r.key) disabled=(interaction != "idle") testId=`${testId}-danger-${r.key}` display="flex" flex-direction="row" align-items="center" gap="theme.space.md" text-align="start" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" background-color="transparent"
+              :hover
+                background-color="theme.color.hover"
+              :active
+                background-color="theme.color.fill"
+              :focus-visible
+                box-shadow="inset 0 0 0 2px theme.color.focus"
+              column flex=1 min-width=0 gap="theme.space.xs"
+                text r.label font="theme.type.body" color="theme.color.critical-text"
+                if r.detail != ""
+                  text r.detail font="theme.type.caption" color="theme.color.ink-muted"
+      if agent != "none"
+        column padding-left="theme.space.lg" padding-right="theme.space.lg"
+          text agentNote testId=`${testId}-agent` font="theme.type.caption" color=(agent == "waiting" ? "theme.color.caution-text" : "theme.color.accent")
+      if outcome != "none"
+        column padding-left="theme.space.lg" padding-right="theme.space.lg" role=(outcome == "error" ? "alert" : "status")
+          Words(text=outcomeText, kind="caption", outcome=(outcome == "success" ? "success" : "error"), level=0, testId=`${testId}-outcome`)
+      if footer != ""
+        column padding-left="theme.space.lg" padding-right="theme.space.lg"
+          Words(text=footer, kind="caption", outcome="none", level=0, testId=`${testId}-footer`)

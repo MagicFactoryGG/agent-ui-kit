@@ -3,6 +3,7 @@
 //   data   many, one, empty, loading, failed, long
 use Swatch from "__SCOPE__/theme"
 use Words, ActionButton from "__SCOPE__/components"
+use SettingsGroup, Setting from "./settings-group.contract"
 
 // The bar at the top of a screen: the title, then the slot's actions. While an agent waits for the person,
 // `agentNote` says so under the title.

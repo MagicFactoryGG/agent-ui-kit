@@ -1,3 +1,16 @@
 {
-  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types."
+  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types.",
+  "Setting:many": [
+    { "key": "digest", "kind": "switch", "label": "Weekly digest", "detail": "A summary of your week, every Monday morning.", "value": "", "on": true },
+    { "key": "units", "kind": "value", "label": "Units", "detail": "Used wherever something is measured.", "value": "Metric", "on": false },
+    { "key": "help", "kind": "link", "label": "Help and support", "detail": "Guides, answers and a way to reach us.", "value": "", "on": false },
+    { "key": "reset", "kind": "danger", "label": "Reset all settings", "detail": "Puts every setting back the way it began.", "value": "", "on": false }
+  ],
+  "Setting:one": [
+    { "key": "digest", "kind": "switch", "label": "Weekly digest", "detail": "A summary of your week, every Monday morning.", "value": "", "on": false }
+  ],
+  "Setting:long": [
+    { "key": "units", "kind": "value", "label": "A very long label for one setting, the way a person might really name it, running past the width a designer planned", "detail": "A very long detail line, as a person might really write it, that has to wrap instead of pushing the row apart", "value": "A very long chosen value", "on": false },
+    { "key": "digest", "kind": "switch", "label": "A very long label for a switch row, written the way a person might really write it, going past the width of a narrow phone", "detail": "A very long detail line under the switch, as a person might really write it, that wraps to keep the switch in reach", "value": "", "on": true }
+  ]
 }
