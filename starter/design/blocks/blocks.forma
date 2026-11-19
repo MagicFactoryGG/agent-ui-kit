@@ -18,3 +18,4 @@ theme
   blocks.nav-ghost-head: length = 64px
   blocks.nav-ghost-badge: length = 32px
   blocks.nav-role-max: length = 150px
+  blocks.nav-places-min: length = 620px
