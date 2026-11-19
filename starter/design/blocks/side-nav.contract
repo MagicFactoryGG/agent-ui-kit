@@ -1,22 +1,28 @@
 // SideNav: an app's side navigation, drawn as its own panel: the surface, a hairline rail at its end, never
-// wider than blocks.nav-max, full-width at a phone. The header — the product's mark and name, each optional by
-// being empty — carries the slot on its own line under the name (the app's own control, a collapse switch, and
-// always shown). The places come as NavEntry rows grouped by `group` in first-seen order, a group's name its
-// heading and "" no heading; each group after the first is cut from the one before by an inset hairline. The
-// current place is filled and weighted and says aria-current="page", its label in the accent — the one place the
-// person is on is the panel's focal point. A badge counts. An agent that added or reordered an entry
-// (agent "changed") marks the entry `agentKey` names with a line at its start and `agentNote`'s words under its
-// label — the kit's LinkRow language; the shell passes the key and words from its ledger. Failed says its line
-// as an alert banner: the fill, a drawn alert mark, the words in the error's ink and a `retryLabel` button —
-// the way on, which the shell wires to its own retry; loading says its line as a caption beside the platform's
-// own activity indicator, over three skeleton rows in the places' own shape, flush like the rows themselves
-// (aria-hidden: the line is what a reader hears); empty says its line under a drawn tray in an inset that
-// stands where the list stands, and `emptyLabel`'s button, when the app gives one, is the way on — the shell
-// wires it as it wires `retry` for failed. A long anything the panel draws truncates to one line with an ellipsis (the
-// slot's own content wraps, for it is the app's). Given a definite height the account pins to the panel's
-// bottom (the spacer takes what is left); the shell decides when the panel shows at all. The data axis leads
-// with empty, loading, failed and long, so a designer meeting the matrix meets the honest states first; "one"
-// trails. States:
+// wider than blocks.nav-max, full-width at a phone; the shell decides when the panel shows at all.
+//
+// One gutter holds everything: the panel pads by theme.space.sm and every row inside it pads its words by
+// theme.space.md, so the brand, a group's heading, each place's label, the states' words and the account all
+// start on one edge, and the current place's fill sits inside the same gutter as every other row. Grouping is
+// by space (a group's heading, theme.space.lg between groups), not by frames; the line token draws the rail and
+// one divider, above the account.
+//
+// - The header: the product's mark and name, each optional by being empty, the name in the title type (the
+//   panel's largest words); the slot on its own line under them (the app's control: a switch, a search).
+// - The places: NavEntry rows grouped by `group` in first-seen order ("" no heading). The current place is the
+//   panel's one filled thing: the fill token, the label's heavier type in the accent, aria-current="page".
+//   A badge counts, as a fill pill (surface on the current row's fill): no border, so it holds on any row and
+//   in both schemes.
+// - An agent that added or reordered an entry (agent "changed"): the entry `agentKey` names gets an accent
+//   edge at its start and `agentNote`'s words under its label (the kit's LinkRow language).
+// - Loading, empty and failed stand where the places stand, under a heading (`navLabel`, the same words a
+//   reader hears for the landmark) at a group heading's place: loading puts the platform's activity cue beside
+//   its words, over skeleton rows of the places' own shape drawn in the fill token; empty says its line and,
+//   when the app gives `emptyLabel`, its button below (the way on); failed says its line in the error's ink with
+//   a drawn mark, then `retryLabel`'s button below it (the way on).
+// - Long: everything the panel draws holds one line with an ellipsis; the slot's content is the app's.
+//
+// States:
 //   data   many|empty|loading|failed|long|one
 //   agent  none|changed
 use Words, ActionButton from "__SCOPE__/components"
@@ -30,6 +36,49 @@ shape NavEntry
   group: string
   badge: number
   current: bool
+
+// A group's heading, at the rows' own inset: the places' sections and the states' heading.
+component NavHeading
+  props
+    text: string
+    testId: string
+  view
+    text text testId=testId font="theme.type.heading" color="theme.color.ink-muted" padding-left="theme.space.md" padding-right="theme.space.md" padding-bottom="theme.space.xs" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+
+// One place: its label on one line, its count, the current place's fill and weight, an agent's edge and note.
+component NavItem
+  props
+    label: string
+    href: string
+    badge: number
+    current: bool
+    marked: bool
+    note: string
+    testId: string
+  view
+    link href=href testId=testId aria-current=(current ? "page" : "false") position="relative" display="flex" flex-direction="row" align-items="center" gap="theme.space.sm" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(current ? "theme.color.fill" : "transparent")
+      :hover
+        background-color="theme.color.hover"
+      :active
+        background-color="theme.color.fill"
+      :focus-visible
+        box-shadow="inset 0 0 0 2px theme.color.focus"
+      if marked
+        box position="absolute" left=0 top="theme.space.sm" bottom="theme.space.sm" width="blocks.nav-mark-line" background-color="theme.color.accent" border-radius="theme.radius.pill" aria-hidden=true
+      column flex=1 min-width=0
+        text label font=(current ? "theme.type.label" : "theme.type.body") color=(current ? "theme.color.accent" : "theme.color.ink") white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+        if marked
+          text note testId=`${testId}-mark` font="theme.type.caption" color="theme.color.accent" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+      if badge > 0
+        text `${badge}` testId=`${testId}-badge` flex-shrink=0 min-width="blocks.nav-badge-min" box-sizing="border-box" text-align="center" font="theme.type.caption" color=(current ? "theme.color.ink" : "theme.color.ink-muted") font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color=(current ? "theme.color.surface" : "theme.color.fill") border-radius="theme.radius.pill" white-space="nowrap"
+
+// A place still coming: a row of the places' shape with a bar where the label will be.
+component NavGhost
+  props
+    width: string
+  view
+    row align-items="center" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md"
+      box width=width height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 component SideNav
   props
@@ -55,70 +104,57 @@ component SideNav
   derive names = entries.map(e => e.group)
   derive groups = names.filter((g, i) => names.indexOf(g) == i)
   view
-    column testId=testId role="navigation" aria-label=navLabel max-width="blocks.nav-max" box-sizing="border-box" gap="theme.space.sm" padding-bottom="theme.space.sm" background-color="theme.color.surface" border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line"
-      column gap="theme.space.xs" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm"
-        row align-items="center" gap="theme.space.md"
+    column testId=testId role="navigation" aria-label=navLabel max-width="blocks.nav-max" box-sizing="border-box" gap="theme.space.lg" padding="theme.space.sm" background-color="theme.color.surface" border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line"
+      column gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.sm"
+        row align-items="center" gap="theme.space.sm"
           if productMark != ""
-            column width="blocks.nav-mark" height="blocks.nav-mark" flex-shrink=0 background-color="theme.color.accent" border-radius="theme.radius.control" justify-content="center" overflow="hidden"
-              text productMark.trim().slice(0, 2) font="theme.type.label" color="theme.color.accent-ink" text-align="center" white-space="nowrap"
-          column flex=1 min-width=0
-            if productName != ""
-              text productName testId=`${testId}-name` font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+            column width="blocks.nav-mark" height="blocks.nav-mark" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.control" justify-content="center" overflow="hidden" aria-hidden=true
+              text productMark.trim().slice(0, 2) font="theme.type.heading" color="theme.color.ink" text-align="center" white-space="nowrap"
+          if productName != ""
+            text productName testId=`${testId}-name` flex=1 min-width=0 font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
         column min-width=0
           children
       if data == "failed"
-        column padding="theme.space.lg" role="alert"
-          row testId=`${testId}-failed` align-items="center" gap="theme.space.md" padding="theme.space.md" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.card"
-            svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
-              path d="M12 3.5 L21 19 h-18 z" stroke-width=1.5 stroke-linejoin="round"
-              path d="M12 9.5 v5" stroke-width=1.5 stroke-linecap="round"
-              path d="M12 17.1 v0.2" stroke-width=1.5 stroke-linecap="round"
-            column flex=1 min-width=0
-              Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
+        column role="alert" gap="theme.space.sm"
+          NavHeading(text=navLabel, testId=`${testId}-heading`)
+          column align-items="flex-start" gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md"
+            row align-items="flex-start" gap="theme.space.sm"
+              svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
+                path d="M12 3.5 L21 19 h-18 z" stroke-width=1.75 stroke-linejoin="round"
+                path d="M12 9.5 v4.5" stroke-width=1.75 stroke-linecap="round"
+                path d="M12 16.6 v0.2" stroke-width=1.75 stroke-linecap="round"
+              column flex=1 min-width=0
+                Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
             ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
       else if data == "loading"
-        column padding="theme.space.lg" role="status" gap="theme.space.md"
+        column gap="theme.space.sm"
+          row role="status" align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md" padding-bottom="theme.space.xs"
+            progress aria-label=loadingText width="blocks.nav-glyph" flex-shrink=0
+            column flex=1 min-width=0
+              Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-${data}`)
           column aria-hidden=true
-            for i in [1, 2, 3] key=i
-              row align-items="center" gap="theme.space.sm" min-height="blocks.nav-row-min" padding-left="blocks.nav-mark-line" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
-                box flex=1 height="theme.space.xl" background-color="theme.color.fill" border-radius="theme.radius.pill"
-          row align-items="center" gap="theme.space.sm" padding-left="blocks.nav-mark-line"
-            progress aria-label=loadingText width="blocks.nav-skel-head" flex-shrink=0
-            Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+            NavGhost(width="blocks.nav-ghost-a")
+            NavGhost(width="blocks.nav-ghost-b")
+            NavGhost(width="blocks.nav-ghost-c")
       else if data == "empty"
-        column padding="theme.space.lg" role="status"
-          column align-items="center" justify-content="center" gap="theme.space.sm" padding="theme.space.md" min-height="blocks.nav-empty-min"
-            svg viewBox="0 0 24 24" width="theme.space.xxl" height="theme.space.xxl" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
-              path d="M4.5 7 h15 v10.5 h-15 z" stroke-width=1.5 stroke-linejoin="round"
-              path d="M8.5 13 h7" stroke-width=1.5 stroke-linecap="round"
+        column role="status" gap="theme.space.sm"
+          NavHeading(text=navLabel, testId=`${testId}-heading`)
+          column align-items="flex-start" gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md"
             Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
             if emptyLabel != ""
               ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
       else
-        for g, i in groups key=g
-          column
-            if i > 0
-              box border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" margin-left="blocks.nav-heading-inset" margin-right="theme.space.lg" margin-top="theme.space.sm"
-            if g != ""
-              text g testId=`${testId}-group-${g}` font="theme.type.heading" color="theme.color.ink-muted" padding-left="blocks.nav-heading-inset" padding-right="theme.space.lg" padding-top=(i > 0 ? "theme.space.sm" : "theme.space.xs") padding-bottom="theme.space.sm" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-            for e in entries.filter(e => e.group == g) key=e.key
-              link href=e.href testId=`${testId}-entry-${e.key}` aria-current=(e.current ? "page" : "false") display="flex" flex-direction="row" align-items="center" gap="theme.space.sm" min-height="blocks.nav-row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(e.current ? "theme.color.fill" : "transparent") border-left-width="blocks.nav-mark-line" border-left-style="solid" border-left-color=((agent == "changed" and e.key == agentKey) ? "theme.color.accent" : "transparent")
-                :hover
-                  background-color="theme.color.hover"
-                :active
-                  background-color="theme.color.fill"
-                :focus-visible
-                  box-shadow="inset 0 0 0 2px theme.color.focus"
-                column flex=1 min-width=0
-                  text e.label font=(e.current ? "theme.type.label" : "theme.type.body") color=(e.current ? "theme.color.accent" : "theme.color.ink") white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-                  if agent == "changed" and e.key == agentKey
-                    text agentNote testId=`${testId}-mark-${e.key}` font="theme.type.caption" color="theme.color.accent" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-                if e.badge > 0
-                  text `${e.badge}` testId=`${testId}-badge-${e.key}` flex-shrink=0 font="theme.type.caption" color="theme.color.ink" font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs" background-color="theme.color.raised" border-radius="theme.radius.pill" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" white-space="nowrap"
+        column gap="theme.space.lg"
+          for g in groups key=g
+            column gap="theme.space.xs"
+              if g != ""
+                NavHeading(text=g, testId=`${testId}-group-${g}`)
+              for e in entries.filter(e => e.group == g) key=e.key
+                NavItem(label=e.label, href=e.href, badge=e.badge, current=e.current, marked=(agent == "changed" and e.key == agentKey), note=agentNote, testId=`${testId}-entry-${e.key}`)
       column flex=1 min-height=0
       if accountName != ""
-        row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" background-color="theme.color.raised" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
-          column width="theme.space.xxl" height="theme.space.xxl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" align-items="center" justify-content="center" overflow="hidden"
+        row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+          column width="theme.space.xxl" height="theme.space.xxl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" align-items="center" justify-content="center" overflow="hidden" aria-hidden=true
             text accountName.trim().slice(0, 1) font="theme.type.label" color="theme.color.ink"
           column flex=1 min-width=0
             text accountName font="theme.type.label" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
