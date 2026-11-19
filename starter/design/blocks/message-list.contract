@@ -1,0 +1,166 @@
+// A mailbox's list of messages. Each row carries its own state: unread ones in the heavier type with a dot at
+// their start, the chosen one a filled tile (inset, rounded, with a line at its start edge) read in the heavier
+// type too, a flagged one with a small flag at its first line's end, and an agent's mark (it filed or flagged
+// that message) as a line at the row's start edge, said by `agentNote` above the card. Rows are grouped by
+// space alone (a list is rows, not cards). When the window is wide, the pane that reads the chosen message
+// sits beside the list, its start edge carrying the same accent line as the chosen row; a phone stacks the
+// pane under it. The pane has one rule of its own: while the messages load it shows quiet bars, and with
+// nothing chosen it says `paneEmptyText` over a small glyph. Data's six states each say their own line:
+// loading shows rows still coming, empty offers the way on (`compose`) under a drawn glyph, failed offers
+// `retry` beside the reason. Every word is the app's.
+use Swatch from "__SCOPE__/theme"
+use Words, ActionButton from "__SCOPE__/components"
+
+// One message: its key (the app names the chosen one and the agent's by key), who it is from, its subject, the
+// one line that previews it, when it arrived, and where it opens.
+shape Message
+  key: string
+  from: string
+  subject: string
+  snippet: string
+  when: string
+  unread: bool
+  flagged: bool
+  href: string
+
+// A row reads strongly (unread, or the chosen one) in ink and the heavier type; read rows fall to the muted ink.
+fn rowInk(strong: bool): string = strong ? "theme.color.ink" : "theme.color.ink-muted"
+
+// One row: the dot's gutter (kept for read rows, so every row's words align), then sender and time on the
+// first line, the subject, and the snippet's one line under it. Both first-line words cut with an ellipsis, so
+// a long sender or time holds; a flagged message carries a small flag at the line's end. Every row sits in a
+// little inset of its own, so a fill or a hover reads as a tile, not as the card's edge moving.
+component MessageRow
+  props
+    message: Message
+    chosen: bool
+    marked: bool
+    testId: string
+  view
+    link href=message.href testId=testId aria-current=(chosen ? "true" : "false") display="flex" flex-direction="row" align-items="flex-start" gap="theme.space.xs" min-height="components.row-min" margin-left="theme.space.sm" margin-right="theme.space.sm" border-radius="theme.radius.control" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.lg" padding-bottom="theme.space.lg" color="theme.color.ink" text-decoration-line="none" background-color=(chosen ? "theme.color.fill" : "transparent") border-left-width="components.mark-line" border-left-style="solid" border-left-color=(marked or chosen ? "theme.color.accent" : "transparent")
+      :hover
+        background-color="theme.color.hover"
+      :active
+        background-color="theme.color.fill"
+      :focus-visible
+        box-shadow="inset 0 0 0 2px theme.color.focus"
+      box width="blocks.dot-gutter" height="blocks.dot-line" flex-shrink=0 display="flex" align-items="center"
+        if message.unread
+          box width="blocks.dot" height="blocks.dot" background-color="theme.color.accent" border-radius="theme.radius.pill"
+      column flex=1 min-width=0 gap="theme.space.xs"
+        row align-items="center" gap="theme.space.md"
+          text message.from testId=`${testId}-from` min-width=0 font=(message.unread or chosen ? "theme.type.label" : "theme.type.body") color=rowInk(message.unread or chosen) white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+          text message.when testId=`${testId}-when` margin-left="auto" min-width=0 font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+          if message.flagged
+            svg viewBox="0 0 12 12" width="blocks.icon" height="blocks.icon" fill="none" aria-hidden=true flex-shrink=0
+              path d="M3 2v8" stroke="theme.color.caution" stroke-width=1.5 stroke-linecap="round"
+              path d="M3.5 2.5h5.5l-1.8 2 1.8 2H3.5z" fill="theme.color.caution"
+        text message.subject testId=`${testId}-subject` font=(message.unread or chosen ? "theme.type.label" : "theme.type.body") color=rowInk(message.unread or chosen) white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+        text message.snippet testId=`${testId}-snippet` font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+
+// One quiet bar row while the messages load: a dot, then a long line and a short one (sender and time), then
+// the subject's line and the snippet's under it. It says "rows are coming", not "nothing is here".
+component SkelRow
+  props
+    first: bool
+  view
+    row align-items="center" gap="theme.space.xs" margin-left="theme.space.sm" margin-right="theme.space.sm" border-radius="theme.radius.control" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.lg" padding-bottom="theme.space.lg"
+      box width="blocks.dot" height="blocks.dot" background-color="theme.color.fill" border-radius="theme.radius.pill" flex-shrink=0
+      column flex=1 min-width=0 gap="theme.space.xs"
+        row gap="theme.space.sm" align-items="center"
+          box flex=1 height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+          box width="blocks.skel-when" height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" flex-shrink=0
+        box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+        box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+
+// The list and its reading pane: on a wide window the pair sits side by side (each keeps a named minimum
+// width, so a phone stacks them instead of squeezing), the pane under the list on a narrow one.
+component MessageList
+  props
+    title: string
+    unreadLabel: string
+    emptyText: string
+    loadingText: string
+    failedText: string
+    composeLabel: string
+    retryLabel: string
+    paneLabel: string
+    paneEmptyText: string
+    agentNote: string
+    chosenKey: string
+    agentKey: string
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    agent: enum<"none", "changed">
+    messages: Message[]
+    compose: action
+    retry: action
+    testId: string
+  derive unreadCount = messages.filter(m => m.unread).length
+  derive picked = first(messages.filter(m => m.key == chosenKey))
+  view
+    row testId=testId flex-wrap="wrap" gap="theme.space.lg"
+      column flex=1 min-width="blocks.list-min" box-sizing="border-box" display="flex" flex-direction="column" gap="theme.space.sm"
+        if title != "" or unreadCount > 0
+          row align-items="baseline" gap="theme.space.md"
+            if title != ""
+              Words(text=title, kind="heading", outcome="none", level=2, testId=`${testId}-title`)
+            if unreadCount > 0
+              text `${unreadCount} ${unreadLabel}` testId=`${testId}-count` font="theme.type.caption" color="theme.color.ink-muted"
+        if agent != "none"
+          text agentNote testId=`${testId}-agent` font="theme.type.caption" color="theme.color.accent"
+        column flex=1 background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden" aria-busy=(data == "loading")
+          if data == "empty"
+            column padding="theme.space.lg" gap="theme.space.md" role="status" justify-content="center" align-items="center"
+              svg viewBox="0 0 24 24" width="blocks.glyph" height="blocks.glyph" aria-hidden=true
+                circle cx=12 cy=12 r=12 fill="theme.color.fill"
+                rect x=5 y=7.5 width=14 height=9 rx=2 fill="none" stroke="theme.color.ink-muted" stroke-width=1.5
+                path d="M5.5 8.5l6.5 4.5 6.5-4.5" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+              Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-empty`)
+              ActionButton(label=composeLabel, kind="primary", interaction="idle", outcome="none", press=compose, testId=`${testId}-compose`)
+          if data == "loading"
+            column role="status"
+              text loadingText testId=`${testId}-loading` font="theme.type.caption" color="theme.color.ink-muted" padding="theme.space.lg"
+              SkelRow(first=true)
+              SkelRow(first=false)
+              SkelRow(first=false)
+              SkelRow(first=false)
+          if data == "failed"
+            column padding="theme.space.lg" gap="theme.space.md" role="alert" justify-content="center" align-items="center"
+              svg viewBox="0 0 24 24" width="blocks.glyph" height="blocks.glyph" aria-hidden=true
+                circle cx=12 cy=12 r=12 fill="theme.color.fill"
+                circle cx=12 cy=12 r=5.5 fill="none" stroke="theme.color.critical" stroke-width=1.8
+                path d="M12 9v3.2" stroke="theme.color.critical" stroke-width=1.8 stroke-linecap="round"
+                circle cx=12 cy=15 r=1 fill="theme.color.critical"
+              Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed`)
+              ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+          if data == "many" or data == "one" or data == "long"
+            column role="list"
+              for m, i in messages key=m.key
+                column role="listitem"
+                  MessageRow(message=m, chosen=(m.key == chosenKey), marked=(agent == "changed" and m.key == agentKey), testId=`${testId}-row-${m.key}`)
+      column flex=1 min-width="blocks.pane-min" box-sizing="border-box" display="flex" flex-direction="column" role="complementary" aria-label=paneLabel
+        if data == "loading"
+          column flex=1 padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden" justify-content="center"
+            column gap="theme.space.xs"
+              row gap="theme.space.sm" align-items="center"
+                box flex=2 height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+                box flex=1 height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+              box height="blocks.skel-title" background-color="theme.color.fill" border-radius="theme.radius.pill"
+              box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+        else
+          match picked
+            case some(m)
+              column flex=1 padding="theme.space.lg" gap="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-left-width="components.mark-line" border-left-style="solid" border-left-color="theme.color.accent" overflow="hidden"
+                row align-items="center" gap="theme.space.md"
+                  text m.from testId=`${testId}-pane-from` font="theme.type.label" color="theme.color.ink"
+                  text m.when testId=`${testId}-pane-when` margin-left="auto" min-width=0 font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+                box height="theme.line.width" background-color="theme.color.line"
+                Words(text=m.subject, kind="title", outcome="none", level=3, testId=`${testId}-pane-subject`)
+                text m.snippet testId=`${testId}-pane-snippet` font="theme.type.body" color="theme.color.ink-muted"
+            case none
+              column flex=1 padding="theme.space.lg" gap="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden" justify-content="center" align-items="center"
+                svg viewBox="0 0 24 24" width="blocks.pane-glyph" height="blocks.pane-glyph" fill="none" aria-hidden=true
+                  rect x=4.5 y=3.5 width=15 height=17 rx=2.5 stroke="theme.color.ink-muted" stroke-width=1.5
+                  path d="M8 8h8M8 12h8M8 16h5" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round"
+                if paneEmptyText != ""
+                  Words(text=paneEmptyText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-pane-empty`)

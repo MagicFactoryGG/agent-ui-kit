@@ -1,3 +1,17 @@
 {
-  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types."
+  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types.",
+  "props:MessageList": {
+    "title": "Inbox",
+    "unreadLabel": "unread",
+    "emptyText": "No messages yet.",
+    "loadingText": "Loading your messages…",
+    "failedText": "Your messages did not load.",
+    "composeLabel": "Write a message",
+    "retryLabel": "Try again",
+    "paneLabel": "Reading pane",
+    "paneEmptyText": "Nothing to read here.",
+    "agentNote": "Your assistant filed the invoice from ACME.",
+    "chosenKey": "message-2",
+    "agentKey": "message-4"
+  }
 }
