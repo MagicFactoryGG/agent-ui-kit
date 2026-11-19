@@ -113,10 +113,11 @@ component SkBtn
 
 // The frame's ghost: the steps that have not arrived, breathing, never a control. Its bar mirrors the
 // resting bar's own row exactly — the same gap, an invisible box holding the count's own width, then
-// the same dots and connectors in a flex track — so the swap from loading to loaded moves nothing (a
-// drawn pill there read as a stray mark; an empty box reserves the place and draws nothing). Its text
-// lines hold the title's and lead's own heights and left edges at fixed shares, so no line runs at the
-// card's edge.
+// the same dots and connectors in a flex track, each connector at the track's own line weight (the
+// hairline a step to come takes would all but vanish under the breathing) — so the swap from loading to
+// loaded moves nothing (a drawn pill there read as a stray mark; an empty box reserves the place and
+// draws nothing). Its text lines hold the title's and lead's own heights and left edges at fixed shares,
+// so no line runs at the card's edge.
 component SkTrack
   view
     column gap="theme.space.md" aria-hidden=true animation="breathe 1.8s ease-in-out infinite"
@@ -126,7 +127,7 @@ component SkTrack
           for j in [0, 1, 2, 3] key=j
             StepDot(fill="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)", edge="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)", ring=false, testId="")
             if j < 3
-              StepSeg(ink="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)", tall=false)
+              StepSeg(ink="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)", tall=true)
       column gap="theme.space.sm"
         SkBar(share="2 1 0", rest="3 1 0", height="blocks.skel-head")
         SkBar(share="17 1 0", rest="3 1 0", height="blocks.skel-line")
