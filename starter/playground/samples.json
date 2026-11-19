@@ -12,7 +12,7 @@
     "proposalKey": "digest",
     "acceptLabel": "Accept",
     "declineLabel": "Decline",
-    "changedText": "Your assistant turned the weekly digest off.",
+    "changedText": "Your assistant turned the weekly digest on.",
     "waitingText": "One change is waiting for your answer.",
     "outcomeText": "How your last change ended."
   },

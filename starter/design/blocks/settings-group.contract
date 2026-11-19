@@ -232,7 +232,7 @@ component SettingsGroup
               row align-items="flex-start" gap="theme.space.md" min-height="blocks.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=(isMarked(agent, r.key, proposalKey) ? "theme.color.accent" : "transparent")
                 RowWords(label=r.label, detail=r.detail, ink=rowInk(interaction))
                 row align-items="center" min-height="blocks.label-line" flex-shrink=0
-                  input type="checkbox" switch checked=r.on change=flip(r.key) disabled=(interaction != "idle") aria-label=r.label opacity=(interaction == "disabled" ? 0.5 : interaction == "busy" ? 0.6 : 1) testId=`${testId}-switch-${r.key}`
+                  input type="checkbox" switch accent-color="theme.color.accent" checked=r.on change=flip(r.key) disabled=(interaction != "idle") aria-label=r.label opacity=(interaction == "disabled" ? 0.5 : interaction == "busy" ? 0.6 : 1) testId=`${testId}-switch-${r.key}`
             else
               SettingRow(label=r.label, detail=r.detail, value=r.value, chevron=(r.kind == "value" or r.kind == "link"), danger=(r.kind == "danger"), mark=isMarked(agent, r.key, proposalKey), interaction=interaction, press=act(r.kind, r.key), testId=`${testId}-${r.kind}-${r.key}`)
         if agent == "proposed"
