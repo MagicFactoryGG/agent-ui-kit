@@ -64,3 +64,15 @@ theme
   blocks.skel-line: length = 12px
   blocks.skel-btn: length = 96px
   blocks.skel-btn-tall: length = 44px
+  blocks.nav-min: length = 304px
+  blocks.nav-page-min: length = 240px
+  blocks.nav-row-min: length = 44px
+  blocks.nav-mark: length = 28px
+  blocks.nav-mark-line: length = 3px
+  blocks.nav-glyph: length = 20px
+  blocks.nav-cue: length = 20px
+  blocks.nav-badge-min: length = 24px
+  blocks.nav-count-space: length = 56px
+  blocks.nav-ghost-word: length = 96px
+  blocks.nav-ghost-head: length = 64px
+  blocks.nav-ghost-badge: length = 32px

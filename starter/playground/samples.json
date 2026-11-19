@@ -231,5 +231,38 @@
     "agentNote": "Your assistant filled this step in from your account details.",
     "acceptLabel": "Keep it",
     "rejectLabel": "Clear it"
+  },
+  "NavEntry:many": [
+    { "key": "naventry-1", "label": "Overview", "href": "/", "group": "Workspace", "badge": 0, "current": true },
+    { "key": "naventry-2", "label": "Reports", "href": "/reports", "group": "Workspace", "badge": 12, "current": false },
+    { "key": "naventry-3", "label": "Invoices", "href": "/invoices", "group": "Workspace", "badge": 0, "current": false },
+    { "key": "naventry-4", "label": "Expenses", "href": "/expenses", "group": "Workspace", "badge": 0, "current": false },
+    { "key": "naventry-5", "label": "Team", "href": "/team", "group": "People", "badge": 0, "current": false },
+    { "key": "naventry-6", "label": "Guests", "href": "/guests", "group": "People", "badge": 3, "current": false },
+    { "key": "naventry-7", "label": "Permissions", "href": "/permissions", "group": "People", "badge": 0, "current": false },
+    { "key": "naventry-8", "label": "Billing", "href": "/billing", "group": "Admin", "badge": 5, "current": false },
+    { "key": "naventry-9", "label": "Integrations", "href": "/integrations", "group": "Admin", "badge": 0, "current": false },
+    { "key": "naventry-10", "label": "Settings", "href": "/settings", "group": "Admin", "badge": 0, "current": false }
+  ],
+  "NavEntry:one": [
+    { "key": "naventry-2", "label": "Overview", "href": "/", "group": "Workspace", "badge": 0, "current": true }
+  ],
+  "NavEntry:long": [
+    { "key": "naventry-1", "label": "A very long line of text, as a person might really write it, that runs past the width a designer planned for and has to wrap or be cut short", "href": "/reports", "group": "Workspace", "badge": 2, "current": false },
+    { "key": "naventry-2", "label": "Another very long line of text that a person wrote without thinking about the side panel's width at all", "href": "/archive", "group": "Archive", "badge": 0, "current": true }
+  ],
+  "props:SideNav": {
+    "productName": "Acme Console",
+    "productMark": "AC",
+    "navLabel": "Main menu",
+    "emptyText": "Nothing here yet.",
+    "emptyLabel": "Add a place",
+    "loadingText": "Loading the menu…",
+    "failedText": "The menu could not be loaded.",
+    "retryLabel": "Try again",
+    "accountName": "Ada Lovelace",
+    "accountDetail": "Workspace admin",
+    "agentKey": "naventry-2",
+    "agentNote": "Added by your assistant"
   }
 }
