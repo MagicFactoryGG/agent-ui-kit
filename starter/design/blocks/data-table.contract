@@ -161,7 +161,7 @@ component DataTable
             tbody
               tr
                 td text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
-                td colspan=4 text-align="start" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.xl" padding-bottom="theme.space.xl" role=(data == "failed" ? "alert" : "status")
+                td colspan=4 text-align="start" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top=(data == "loading" ? "theme.space.md" : "theme.space.xl") padding-bottom=(data == "loading" ? "theme.space.md" : "theme.space.xl") role=(data == "failed" ? "alert" : "status")
                   column gap="theme.space.md"
                     Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
                     if data == "failed" and retryLabel != ""
