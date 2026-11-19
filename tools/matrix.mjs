@@ -670,13 +670,35 @@ export function presetForma(theme, presets) {
   return `${lines.join('\n')}\n`;
 }
 
+// A package's .forma names each length once. Pieces built apart each add their own lengths to the one file, and a
+// second `blocks.glyph` at another value silently wins over the first. Say which name, where, and which pieces use it.
+function formaDuplicates(dirs) {
+  const out = [];
+  for (const d of dirs) {
+    for (const f of readdirSync(d).filter((x) => x.endsWith('.forma'))) {
+      const lines = readFileSync(join(d, f), 'utf8').split('\n');
+      const seen = new Map();
+      lines.forEach((l, i) => {
+        const m = /^\s+([a-z][\w-]*\.[\w-]+)\s*:/.exec(l);
+        if (m) seen.set(m[1], [...(seen.get(m[1]) ?? []), i + 1]);
+      });
+      for (const [name, at] of seen) {
+        if (at.length < 2) continue;
+        const users = readdirSync(d).filter((x) => x.endsWith('.contract') && readFileSync(join(d, x), 'utf8').includes(`"${name}"`));
+        out.push(`${f}: ${name} is declared ${at.length} times (lines ${at.join(', ')}); used by ${users.join(', ') || 'no piece'}: give each piece its own name (${name.split('.')[0]}.<piece>-…)`);
+      }
+    }
+  }
+  return out;
+}
+
 function main(argv) {
   const [verb, a, b, ...rest] = argv;
   if (verb === 'check' || verb === 'list') {
     const dirs = ['components', 'blocks', 'screens'].map((l) => join(resolve(a), l)).filter((d) => existsSync(join(d, 'package.json')));
     if (b && existsSync(join(b, 'package.json'))) dirs.push(resolve(b));
     const all = dirs.flatMap((d) => pieces(d));
-    const bad = problems(all);
+    const bad = [...problems(all), ...formaDuplicates(dirs)];
     if (verb === 'list') for (const p of all.filter((x) => MATRIXED.includes(x.layer))) console.log(`${p.name}: ${cells(p).map((c) => cellName(p, c)).join(' | ')}`);
     if (bad.length) {
       console.error(`${RULE}: ${bad.length} problem${bad.length === 1 ? '' : 's'}.`);
