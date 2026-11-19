@@ -10,8 +10,9 @@
 // two-line rows — title, status and a chevron, then owner and date — so the table never scrolls sideways.
 // While empty, loading or failed the table keeps its frame — the selection column stays reserved, the app's
 // line sits in the Record column, and while loading three quiet rows hold the list's shape (no invented data,
-// and still under the person's motion preference) so the frame does not jump when the rows arrive; failed
-// offers the app's `retry`. On a phone the list has no header, so the line sits on the card. States: data
+// and still under the person's motion preference) so the frame does not jump when the rows arrive. Empty
+// offers the app's `create`, failed the app's `retry` — the way on, as the app's own act, and the primary one
+// in a contentless state. On a phone the list has no header, so the line sits on the card. States: data
 // many|one|empty|loading|failed|long, interaction idle|busy (the card says it, and the checkboxes wait),
 // agent none|changed. Every word is a prop.
 use Words, Tag, ActionButton from "__SCOPE__/components"
@@ -75,6 +76,7 @@ component DataTable
     busyText: string
     agentNote: string
     retryLabel: string
+    createLabel: string
     sort: enum<"none", "title", "status", "owner", "updated">
     sortDir: enum<"ascending", "descending">
     data: enum<"many", "one", "empty", "loading", "failed", "long">
@@ -83,6 +85,7 @@ component DataTable
     toggle: action
     toggleAll: action
     retry: action
+    create: action
     testId: string
   // The checkbox events become by-key acts: the same `toggle` a person's checkbox runs, an agent's tool runs.
   action pick(key: string, on: bool)
@@ -104,7 +107,10 @@ component DataTable
             Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
             if data == "failed" and retryLabel != ""
               row
-                ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+                ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+            if data == "empty" and createLabel != ""
+              row
+                ActionButton(label=createLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=create, testId=`${testId}-create`)
           if data == "loading"
             for n in [0, 1, 2] key=n
               row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
@@ -166,7 +172,10 @@ component DataTable
                     Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
                     if data == "failed" and retryLabel != ""
                       row
-                        ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+                        ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+                    if data == "empty" and createLabel != ""
+                      row
+                        ActionButton(label=createLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=create, testId=`${testId}-create`)
               if data == "loading"
                 for n in [0, 1, 2] key=n
                   tr
