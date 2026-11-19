@@ -64,3 +64,10 @@ theme
   blocks.skel-line: length = 12px
   blocks.skel-btn: length = 96px
   blocks.skel-btn-tall: length = 44px
+  blocks.features-max: length = 1040px
+  blocks.feature-min: length = 240px
+  blocks.feature-lead: length = 560px
+  blocks.feature-mark: length = 40px
+  blocks.feature-glyph: length = 20px
+  blocks.feature-ghost-title: length = 16px
+  blocks.feature-ghost-line: length = 12px

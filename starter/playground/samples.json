@@ -231,5 +231,36 @@
     "agentNote": "Your assistant filled this step in from your account details.",
     "acceptLabel": "Keep it",
     "rejectLabel": "Clear it"
-  }
+  },
+  "props:FeatureGrid": {
+    "title": "Everything your team needs",
+    "lead": "One place to plan, write and ship together, on every device you use.",
+    "actionLabel": "See all features",
+    "emptyText": "No features to show yet. Add the first one and it appears here.",
+    "addLabel": "Add a feature",
+    "loadingText": "Loading features…",
+    "failedText": "The features did not load. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "agentKey": "feature-2",
+    "proposalText": "Your assistant suggests a shorter description for Shared spaces.",
+    "changedText": "Your assistant rewrote the description of Shared spaces.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Reject"
+  },
+  "Feature:many": [
+    { "key": "feature-1", "title": "Works offline", "detail": "Edits save on the device first and sync the moment you are back online." },
+    { "key": "feature-2", "title": "Shared spaces", "detail": "Invite your team to one space and decide who can view, comment or edit." },
+    { "key": "feature-3", "title": "Version history", "detail": "Every change is kept for a year, so any earlier draft is one step away." },
+    { "key": "feature-4", "title": "Quick search", "detail": "Find any page, file or comment by a word in it, as fast as you can type." },
+    { "key": "feature-5", "title": "Private by default", "detail": "Your work stays yours: encrypted at rest and never used to train models." },
+    { "key": "feature-6", "title": "Works with your tools", "detail": "Connect your calendar, mail and storage once; changes flow both ways." }
+  ],
+  "Feature:one": [
+    { "key": "feature-1", "title": "Works offline", "detail": "Edits save on the device first and sync the moment you are back online." }
+  ],
+  "Feature:long": [
+    { "key": "feature-1", "title": "Works offline, on every device you carry, even on a long flight with no connection at all", "detail": "Edits save on the device first and sync the moment you are back online; nothing you write is lost, even when two people change the same page while both are offline." },
+    { "key": "feature-2", "title": "Shared spaces", "detail": "Invite your team to one space and decide who can view, comment or edit." },
+    { "key": "feature-3", "title": "Version history", "detail": "Every change is kept for a year, so any earlier draft is one step away." }
+  ]
 }
