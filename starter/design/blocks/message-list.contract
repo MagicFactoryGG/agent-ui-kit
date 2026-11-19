@@ -192,7 +192,8 @@ component Bar
 // standing order, present in every state so the column is labelled the same whether its rows are here, coming,
 // or unable to arrive (it names the column, not the content, so an empty or failed room keeps its label; on a
 // phone it wears one slim line, `bandMin`, for a small window owes every pixel to the rows) — then the
-// messages as bands (one listitem each) with air under the band's rule; empty and failed say their own line
+// messages as bands (one listitem each) with the same air under the band's rule and over the card's edge, so
+// a chosen last row never sits flush on the card's rounded corner; empty and failed say their own line
 // here — the one focal cluster, centred in the room the pane holds (`roomMin`, held by those two rooms alone:
 // the wide card's one body height, so a room without rows keeps the same shape as one with them, the phone's
 // quiet room; rows and their shimmer set their own height, so one row is a short card) — with the
@@ -229,14 +230,14 @@ component ListPane
           StateCluster(kind="failed", role="alert", text=failedText, actionLabel=retryLabel, press=retry, testId=`${testId}-failed`)
         else
           if data == "loading"
-            column margin-top="theme.space.sm"
+            column padding-top="theme.space.sm" padding-bottom="theme.space.sm"
               SkelRow(pulse=pulse, dot=true)
               SkelRow(pulse=pulse, dot=false)
               SkelRow(pulse=pulse, dot=true)
               SkelRow(pulse=pulse, dot=false)
               SkelRow(pulse=pulse, dot=true)
           else
-            column flex=1 role="list" margin-top="theme.space.sm"
+            column flex=1 role="list" padding-top="theme.space.sm" padding-bottom="theme.space.sm"
               for m in messages key=m.key
                 column role="listitem"
                   MessageRow(message=m, chosen=(m.key == chosenKey), marked=(marked and m.key == agentKey), note=agentNote, testId=`${testId}-row-${m.key}`)
