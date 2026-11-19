@@ -1,14 +1,18 @@
-// SideNav: an app's side navigation, drawn as its own panel. Width: the panel fills the column a shell gives it
-// and never grows past blocks.nav-max — a rail's width, not a slab's (the shell may still give it less: the
-// window at a phone; the rows' own truncation holds). Height is the shell's: given a definite height the spacer
-// grows and the account pins to the panel's bottom; alone in a window the panel is as
-// tall as what it holds — a package's own sizes are px (Exact refuses viewport units in a library's design), so
-// the rail cannot claim the window itself, and the shell decides when the panel shows at all.
+// SideNav: an app's side navigation, drawn as its own panel. Width, with no breakpoint (Exact has no media
+// query): the panel and an empty, zero-tall spacer share a wrapping row — the panel's basis blocks.nav-min, the
+// spacer's blocks.nav-page-min (the least room a page beside the rail needs) and a thousandfold grow. Where both
+// fit (a desktop, a tablet) the spacer takes the rest and the panel stands as a rail of its basis; where they do
+// not (a phone, or a shell's own sidebar column) the spacer wraps away and the panel fills the whole width, a
+// full-width list; narrower than its basis it shrinks (min-width 0) and the rows' own truncation holds. Height
+// is the shell's: given a definite height the panel's own spacer grows and the account pins to its bottom;
+// alone in a window the panel is as tall as what it holds — a package's own sizes are px (Exact refuses
+// viewport units in a library's design), so the rail cannot claim the window itself, and the shell decides
+// when the panel shows at all.
 //
 // One gutter holds everything: the panel pads by theme.space.sm and every word inside pads its start by
 // theme.space.md, so the brand's mark, a group's heading, each place's label, a state's words and the account
 // all start on one edge, while a row's fill (the current place's, a hover's) spans the panel's own width —
-// measured: both hairlines and every row fill span one grid edge, x 24..334 in the desktop shot (a look round
+// measured: both hairlines and every row fill span one grid edge, x 24..334 in an earlier desktop shot (a look round
 // claimed the brand's and the account's dividers span differently; they do not, and this note keeps the next
 // reader from chasing it). Grouping is by space — a heading, then its rows, theme.space.xs between every one of
 // them; the air between groups, theme.space.lg, the only larger gap — not by frames; the line token draws the
@@ -25,8 +29,9 @@
 //   longer reserves air it does not need.
 // - The places: NavEntry rows grouped by `group` in first-seen order ("" no heading); a group's own name is its
 //   heading. The current place is the panel's one filled thing, and selection is one device in the accent's
-//   ink: a flush hair at the row's start, the label's heavier type, the fill, aria-current="page" — the agent's
-//   mark stays its own drawing, a rounded edge set in from the row, with its note. A badge counts, as a pill in
+//   ink: a flush hair at the row's start (drawn over the fill and clipped by the row's corner, so the label
+//   keeps the gutter every other word starts on), the label's heavier type, the fill, aria-current="page" —
+//   the agent's mark stays its own drawing, a rounded edge set in from the row, with its note. A badge counts, as a pill in
 //   the ink itself (the fill's own colour, surface on the current row's fill): a count is worth reading at a
 //   glance, in either scheme; a row with no count keeps the count's room, so every label holds its line on the
 //   same edge.
@@ -94,13 +99,15 @@ component NavItem
     note: string
     testId: string
   view
-    link href=href testId=testId aria-current=(current ? "page" : "false") position="relative" display="flex" flex-direction="row" align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-left-width="blocks.nav-mark-line" border-left-style="solid" border-left-color=(current ? "theme.color.accent" : "transparent") border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(current ? "theme.color.fill" : "transparent")
+    link href=href testId=testId aria-current=(current ? "page" : "false") position="relative" display="flex" flex-direction="row" align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" overflow="hidden" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(current ? "theme.color.fill" : "transparent")
       :hover
         background-color="theme.color.hover"
       :active
         background-color="theme.color.fill"
       :focus-visible
         box-shadow="inset 0 0 0 2px theme.color.focus"
+      if current
+        box position="absolute" left=0 top=0 bottom=0 width="blocks.nav-mark-line" background-color="theme.color.accent" aria-hidden=true
       if marked
         box position="absolute" left=0 top="theme.space.sm" bottom="theme.space.sm" width="blocks.nav-mark-line" background-color="theme.color.accent" border-radius="theme.radius.pill" aria-hidden=true
       column flex=1 min-width=0 padding-right=(badge > 0 ? "0" : "blocks.nav-count-space")
@@ -153,65 +160,67 @@ component SideNav
   derive names = entries.map(e => e.group)
   derive groups = names.filter((g, i) => names.indexOf(g) == i)
   view
-    column testId=testId role="navigation" aria-label=navLabel max-width="blocks.nav-max" box-sizing="border-box" gap="theme.space.lg" padding="theme.space.sm" background-color="theme.color.surface" border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line"
-      row align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
-        if productMark != ""
-          column width="blocks.nav-mark" height="blocks.nav-mark" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.control" justify-content="center" overflow="hidden" aria-hidden=true
-            text productMark.trim().slice(0, 2) font="theme.type.heading" color="theme.color.ink" text-align="center" white-space="nowrap"
-        if productName != ""
-          text productName testId=`${testId}-name` flex=1 min-width=0 font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-      column min-width=0 max-height="blocks.nav-slot-bay" overflow="auto" padding-left="theme.space.md" padding-right="theme.space.md"
-        children
-      if data == "failed"
-        row role="alert" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical" border-radius="theme.radius.control"
-          column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
-            row align-items="flex-start" gap="theme.space.sm"
-              svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
-                path d="M12 3.5 L21 19 h-18 z" stroke-width=1.75 stroke-linejoin="round"
-                path d="M12 9.5 v4.5" stroke-width=1.75 stroke-linecap="round"
-                path d="M12 16.6 v0.2" stroke-width=1.75 stroke-linecap="round"
-              column flex=1 min-width=0
-                Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
-            row
-              ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
-      else if data == "loading"
-        column gap="theme.space.lg"
-          row role="status" align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md"
-            svg viewBox="0 0 24 24" width="blocks.nav-cue" height="blocks.nav-cue" fill="none" aria-hidden=true flex-shrink=0
-              path d="M12 3.5 A8.5 8.5 0 1 1 3.5 12" stroke="theme.color.ink-muted" stroke-width=2.5 stroke-linecap="round"
-            column flex=1 min-width=0
-              Words(text=loadingText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
-          column aria-hidden=true gap="theme.space.xs"
-            NavHeadGhost()
-            NavGhost(badge=false)
-            NavGhost(badge=true)
-            NavGhost(badge=false)
-          column aria-hidden=true gap="theme.space.xs"
-            NavHeadGhost()
-            NavGhost(badge=false)
-            NavGhost(badge=true)
-      else if data == "empty"
-        row role="status" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.control"
-          column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
-            Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
-            if emptyLabel != ""
+    row flex-wrap="wrap" align-items="stretch"
+      column testId=testId role="navigation" aria-label=navLabel flex-grow=1 flex-shrink=1 flex-basis="blocks.nav-min" min-width=0 box-sizing="border-box" gap="theme.space.lg" padding="theme.space.sm" background-color="theme.color.surface" border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line"
+        row align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+          if productMark != ""
+            column width="blocks.nav-mark" height="blocks.nav-mark" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.control" justify-content="center" overflow="hidden" aria-hidden=true
+              text productMark.trim().slice(0, 2) font="theme.type.heading" color="theme.color.ink" text-align="center" white-space="nowrap"
+          if productName != ""
+            text productName testId=`${testId}-name` flex=1 min-width=0 font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+        column min-width=0 max-height="blocks.nav-slot-bay" overflow="auto" padding-left="theme.space.md" padding-right="theme.space.md"
+          children
+        if data == "failed"
+          row role="alert" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical" border-radius="theme.radius.control"
+            column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
+              row align-items="flex-start" gap="theme.space.sm"
+                svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
+                  path d="M12 3.5 L21 19 h-18 z" stroke-width=1.75 stroke-linejoin="round"
+                  path d="M12 9.5 v4.5" stroke-width=1.75 stroke-linecap="round"
+                  path d="M12 16.6 v0.2" stroke-width=1.75 stroke-linecap="round"
+                column flex=1 min-width=0
+                  Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
               row
-                ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
-      else
-        column gap="theme.space.lg"
-          for g in groups key=g
-            column gap="theme.space.xs"
-              if g != ""
-                NavHeading(text=g, testId=`${testId}-group-${g}`)
+                ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+        else if data == "loading"
+          column gap="theme.space.lg"
+            row role="status" align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md"
+              svg viewBox="0 0 24 24" width="blocks.nav-cue" height="blocks.nav-cue" fill="none" aria-hidden=true flex-shrink=0
+                path d="M12 3.5 A8.5 8.5 0 1 1 3.5 12" stroke="theme.color.ink-muted" stroke-width=2.5 stroke-linecap="round"
+              column flex=1 min-width=0
+                Words(text=loadingText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+            column aria-hidden=true gap="theme.space.xs"
+              NavHeadGhost()
+              NavGhost(badge=false)
+              NavGhost(badge=true)
+              NavGhost(badge=false)
+            column aria-hidden=true gap="theme.space.xs"
+              NavHeadGhost()
+              NavGhost(badge=false)
+              NavGhost(badge=true)
+        else if data == "empty"
+          row role="status" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.control"
+            column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
+              Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+              if emptyLabel != ""
+                row
+                  ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
+        else
+          column gap="theme.space.lg"
+            for g in groups key=g
               column gap="theme.space.xs"
-                for e in entries.filter(e => e.group == g) key=e.key
-                  NavItem(label=e.label, href=e.href, badge=e.badge, current=e.current, marked=(agent == "changed" and e.key == agentKey), note=agentNote, testId=`${testId}-entry-${e.key}`)
-      column flex=1 min-height="0"
-      if accountName != ""
-        row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
-          column width="theme.space.xxl" height="theme.space.xxl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" align-items="center" justify-content="center" overflow="hidden" aria-hidden=true
-            text accountName.trim().slice(0, 1) font="theme.type.label" color="theme.color.ink"
-          column flex=1 min-width=0
-            text accountName font="theme.type.label" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-            if accountDetail != ""
-              text accountDetail max-width="blocks.nav-role-max" font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+                if g != ""
+                  NavHeading(text=g, testId=`${testId}-group-${g}`)
+                column gap="theme.space.xs"
+                  for e in entries.filter(e => e.group == g) key=e.key
+                    NavItem(label=e.label, href=e.href, badge=e.badge, current=e.current, marked=(agent == "changed" and e.key == agentKey), note=agentNote, testId=`${testId}-entry-${e.key}`)
+        column flex=1 min-height="0"
+        if accountName != ""
+          row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+            column width="theme.space.xxl" height="theme.space.xxl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" align-items="center" justify-content="center" overflow="hidden" aria-hidden=true
+              text accountName.trim().slice(0, 1) font="theme.type.label" color="theme.color.ink"
+            column flex=1 min-width=0
+              text accountName font="theme.type.label" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+              if accountDetail != ""
+                text accountDetail max-width="blocks.nav-role-max" font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+      box flex-grow=1000 flex-shrink=1 flex-basis="blocks.nav-page-min" height=0 aria-hidden=true
