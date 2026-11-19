@@ -21,13 +21,14 @@ component NavList
       text title role="heading" aria-level=1 font="frame.type-head" color="frame.ink" padding-bottom="frame.small" white-space="nowrap"
       children
 
-// One control in the bar, with its label above it.
+// One control in the bar, with its label above it. A fixed height: each host draws its native controls at its own
+// height, and the page below must start at the same place on every host (the parity check compares pixels).
 component NavField
   props
     label: string
   slot
   view
-    column gap="frame.small" width="frame.field-width"
+    column gap="frame.small" width="frame.field-width" height="frame.field-height" justify-content="flex-end"
       text label font="frame.type-small" color="frame.ink-muted" white-space="nowrap"
       children
 

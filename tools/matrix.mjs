@@ -201,7 +201,8 @@ function value(prop, cell, ctx) {
 function placement(piece, cell, testId, ctx, indent) {
   const args = piece.props.map((p) => `${p.name}=${value(p, cell, { ...ctx, testId, body: piece.body, piece: piece.name, given: ctx.props?.[`props:${piece.name}`] })}`).join(', ');
   const lines = [`${indent}${piece.name}(${args})`];
-  if (piece.slot) lines.push(`${indent}  Words(text=${quote(cell.data === 'long' ? LONG : 'What the slot holds')}, kind="body", outcome="none", level=0, testId=${quote(`${testId}-slot`)})`);
+  // samples.json "slot:<Piece>": false leaves a slot empty: a layer (an edge drawn around the piece) is not content.
+  if (piece.slot && ctx.props?.[`slot:${piece.name}`] !== false) lines.push(`${indent}  Words(text=${quote(cell.data === 'long' ? LONG : 'What the slot holds')}, kind="body", outcome="none", level=0, testId=${quote(`${testId}-slot`)})`);
   return lines;
 }
 

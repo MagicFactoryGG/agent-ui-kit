@@ -10,6 +10,7 @@ theme
   frame.on = light-dark(#e2e2e6, #2a2a2f)
   frame.nav-width: length = 220px
   frame.field-width: length = 168px
+  frame.field-height: length = 56px
   frame.pad: length = 16px
   frame.gap: length = 12px
   frame.small: length = 4px
