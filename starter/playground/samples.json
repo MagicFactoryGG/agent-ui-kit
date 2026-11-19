@@ -7,13 +7,14 @@
     "failedText": "Your messages did not load.",
     "composeLabel": "Write a message",
     "retryLabel": "Try again",
+    "orderLabel": "Newest first",
     "paneLabel": "Message preview",
     "paneEmptyText": "Choose a message to read it here.",
+    "paneQuietText": "When a message arrives, it opens here.",
+    "openLabel": "Open message",
     "agentNote": "Your assistant filed the invoice from ACME.",
     "chosenKey": "message-2",
-    "agentKey": "message-4",
-    "openLabel": "Open message",
-    "orderLabel": "Newest first"
+    "agentKey": "message-4"
   },
   "Message:many": [
     {

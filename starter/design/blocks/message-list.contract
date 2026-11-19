@@ -229,13 +229,15 @@ component ListPane
 // title, the one focal point of a chosen message, and the snippet under it, wrapping — and the pane closes
 // with the way on: its own band at the bottom edge, one plain button in the app's words, so the pane ends
 // where the person can go deeper, not in air. Nothing chosen, with messages to choose from, says so quietly
-// over a small glyph and offers no way on; with no messages at all the pane keeps its quiet glyph and its
-// silence — no words it cannot act on; while the messages load, quiet bars in the message's own shape claim
-// nothing either.
+// over a small glyph and offers no way on; with no messages at all the glyph keeps the app's own quiet line
+// (`paneQuietText`) — words for a room that waits, not an instruction it cannot act on; while the messages
+// load, quiet bars in the message's own shape claim nothing either, the subject's bar shorter than its line
+// and the paragraph's last line ragged, as a real message's words run.
 component Reader
   props
     paneLabel: string
     paneEmptyText: string
+    paneQuietText: string
     openLabel: string
     messages: Message[]
     chosenKey: string
@@ -253,9 +255,9 @@ component Reader
           row align-items="center" gap="theme.space.md"
             box flex=1 height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
             box width="blocks.skel-when" height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" flex-shrink=0 animation=pulse
-          box height="blocks.skel-title" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
+          box width="60%" height="blocks.skel-title" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
           box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
-          box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
+          box width="45%" height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
       else
         match picked
           case some(m)
@@ -275,8 +277,12 @@ component Reader
                 circle cx=12 cy=12 r=12 fill="theme.color.fill"
                 rect x="7.5" y="5.5" width="9" height="13" rx=1.5 fill="none" stroke="theme.color.ink-muted" stroke-width=1.5
                 path d="M9.5 9h5M9.5 12h5M9.5 15h3" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round"
-              if messages.length > 0 and paneEmptyText != ""
-                Words(text=paneEmptyText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-pane-empty`)
+              if messages.length > 0
+                if paneEmptyText != ""
+                  Words(text=paneEmptyText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-pane-empty`)
+              else
+                if paneQuietText != ""
+                  Words(text=paneQuietText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-pane-quiet`)
 
 // The mailbox: one card (it centres on a wide window up to its own max), the header, then the list — with the
 // reading pane beside it in every state whenever the window is wide, both panes held to the card's one body
@@ -295,6 +301,7 @@ component MessageList
     orderLabel: string
     paneLabel: string
     paneEmptyText: string
+    paneQuietText: string
     openLabel: string
     agentNote: string
     chosenKey: string
@@ -327,4 +334,4 @@ component MessageList
       else
         row flex=1 align-items="stretch" min-height="blocks.mail-body"
           ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, orderLabel=orderLabel, compose=compose, retry=retry, pulse=pulse, testId=testId)
-          Reader(paneLabel=paneLabel, paneEmptyText=paneEmptyText, openLabel=openLabel, messages=messages, chosenKey=chosenKey, loading=(data == "loading"), openMessage=openMessage, pulse=pulse, testId=testId)
+          Reader(paneLabel=paneLabel, paneEmptyText=paneEmptyText, paneQuietText=paneQuietText, openLabel=openLabel, messages=messages, chosenKey=chosenKey, loading=(data == "loading"), openMessage=openMessage, pulse=pulse, testId=testId)
