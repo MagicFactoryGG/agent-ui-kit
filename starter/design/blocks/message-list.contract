@@ -193,8 +193,9 @@ component Bar
 // or unable to arrive (it names the column, not the content, so an empty or failed room keeps its label; on a
 // phone it wears one slim line, `bandMin`, for a small window owes every pixel to the rows) — then the
 // messages as bands (one listitem each) with air under the band's rule; empty and failed say their own line
-// here — the one focal cluster, centred in the room the pane holds (`roomMin`: the wide card's one body
-// height, so a room without rows keeps the same shape as one with them, the phone's quiet room) — with the
+// here — the one focal cluster, centred in the room the pane holds (`roomMin`, held by those two rooms alone:
+// the wide card's one body height, so a room without rows keeps the same shape as one with them, the phone's
+// quiet room; rows and their shimmer set their own height, so one row is a short card) — with the
 // way on — and loading breathes five rows in the real row's own grid, some with a dot in the unread's place
 // and some without, as a real list mixes, so when the real rows arrive nothing moves but the words. No band
 // closes the pane: the bottom is the card's own edge in every state.
@@ -218,7 +219,7 @@ component ListPane
     pulse: string
     testId: string
   view
-    column flex=1 min-width=0 min-height=roomMin
+    column flex=1 min-width=0 min-height=(data == "empty" or data == "failed" ? roomMin : "0")
       if orderLabel != ""
         Bar(text=orderLabel, edge="bottom", inset="blocks.row-inset", minH=bandMin, testId=`${testId}-order`)
       if data == "empty"
