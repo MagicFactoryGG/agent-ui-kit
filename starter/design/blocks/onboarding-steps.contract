@@ -1,13 +1,15 @@
 // OnboardingSteps: a step-by-step frame — where the person is (a count beside numbered steps joined by one
-// connector each, the track spanning the card, the current step accent-filled and ringed, done steps carrying a
+// connector each, the track spanning the frame, the current step accent-filled and ringed, done steps carrying a
 // drawn tick; count and steps together stay one compact bar on a phone), the current step's title and lead line,
 // the slot for the step's content, then the way on: Back (hidden on the first step), an optional Skip ("" hides
-// it) and Continue, which right-clusters on a desktop and takes its own full-width row on a phone. States: data
-// many|one|empty|loading|failed|long (loading says itself over a breathing skeleton of the card; empty keeps the
-// way on; failed says itself in a tinted alert with a drawn warning and offers its way back), interaction
-// idle|busy (Continue busy), outcome none|error (an error line above the actions), agent none|proposed (an agent
-// filled this step in: a calm note, two answer words). Every word is the app's; every value is a Theme token or a
-// blocks.* size.
+// it) and Continue, which right-clusters on a desktop and takes its own full-width row on a phone. The frame
+// groups by surface and space, never by a drawn border: one raised panel, one hairline above the actions, and
+// one filled element a state (the way on). States: data many|one|empty|loading|failed|long (loading says itself
+// over a breathing skeleton of the frame; empty keeps the way on; failed says itself in a tinted alert with a
+// drawn warning and offers its way back), interaction idle|busy (Continue busy), outcome none|error (an error
+// line above the actions), agent none|proposed (an agent filled this step in: a calm note, two answer words,
+// both quiet buttons so the way on stays the one filled control). Every word is the app's; every value is a
+// Theme token or a blocks.* size, so a party's own Theme restyles the whole frame.
 
 use Words, ActionButton from "__SCOPE__/components"
 
@@ -24,6 +26,39 @@ keyframes breathe
 // Where the current step sits (0 when none is marked); its title ("" when none is marked).
 fn currentAt(steps: Step[]): number = match first(steps.map((s, i) => s.state == "current" ? i : -1).filter(x => x != -1)) { case some(i) => i, case none => 0 }
 fn currentTitle(steps: Step[]): string = match first(steps.filter(s => s.state == "current")) { case some(s) => s.title, case none => "" }
+
+// A step's dot: filled by where it stands, ringed when current; the slot holds its number or the drawn tick.
+component StepDot
+  props
+    fill: string
+    ring: bool
+    testId: string
+  slot
+  view
+    box testId=testId min-width="blocks.step-dot" min-height="blocks.step-dot" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.pill" background-color=fill box-shadow=(ring ? "0 0 0 2px theme.color.focus" : "none")
+      children
+
+// One gap of the track between two dots: a passed step colours it, a step to come leaves it quiet.
+component StepSeg
+  props
+    ink: string
+  view
+    box flex=1 height="blocks.step-line" background-color=ink
+
+// A bar of text still loading: breathing, never a control.
+component SkBar
+  props
+    share: string
+    height: string
+  view
+    box flex=share height=height background-color="theme.color.fill" border-radius="theme.radius.pill"
+
+// A bar the shape of a button still loading.
+component SkBtn
+  props
+    basis: string
+  view
+    box flex=basis min-width="blocks.skel-btn" min-height="blocks.skel-btn-tall" background-color="theme.color.fill" border-radius="theme.radius.control"
 
 component OnboardingSteps
   props
@@ -57,7 +92,7 @@ component OnboardingSteps
   derive heading = currentTitle(steps)
   derive hasSteps = steps.length > 0 and data != "empty" and data != "loading" and data != "failed"
   view
-    column testId=testId width="100%" max-width="blocks.steps-max" box-sizing="border-box" margin-left="auto" margin-right="auto" padding="theme.space.xl" gap="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+    column testId=testId width="100%" max-width="blocks.steps-max" box-sizing="border-box" margin-left="auto" margin-right="auto" padding="theme.space.xl" gap="theme.space.lg" background-color="theme.color.raised" border-radius="theme.radius.card"
       if data == "loading"
         if countLabel != ""
           Words(text=countLabel, kind="title", outcome="none", level=2, testId=`${testId}-heading`)
@@ -65,16 +100,16 @@ component OnboardingSteps
         column gap="theme.space.md" aria-hidden=true animation="breathe 1.8s ease-in-out infinite"
           row gap="theme.space.md" align-items="center"
             for j in [0, 1, 2, 3] key=j
-              box min-width="blocks.step-dot" min-height="blocks.step-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color="theme.color.fill"
+              StepDot(fill="theme.color.fill", ring=false, testId="")
               if j < 3
-                box flex=1 height="blocks.step-line" background-color="theme.color.fill"
-          box flex="2 1 0" height="blocks.skel-head" background-color="theme.color.fill" border-radius="theme.radius.pill"
-          box flex=1 height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
-          box flex="2 1 0" height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+                StepSeg(ink="theme.color.fill")
+          SkBar(share="2 1 0", height="blocks.skel-head")
+          SkBar(share="1 1 0", height="blocks.skel-line")
+          SkBar(share="2 1 0", height="blocks.skel-line")
       else if data == "failed"
         if countLabel != ""
           Words(text=countLabel, kind="title", outcome="none", level=2, testId=`${testId}-heading`)
-        row gap="theme.space.sm" align-items="center" padding="theme.space.md" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical" background-color="color-mix(in srgb, theme.color.critical 12%, theme.color.surface)"
+        row gap="theme.space.sm" align-items="center" padding="theme.space.md" border-radius="theme.radius.control" background-color="color-mix(in srgb, theme.color.critical 12%, theme.color.raised)"
           svg viewBox="0 0 16 16" width="blocks.alert" height="blocks.alert" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
             path d="M8 2.5L14.5 13.5H1.5Z" stroke-width=1.5 stroke-linejoin="round"
             path d="M8 6.5v3.2" stroke-width=1.5 stroke-linecap="round"
@@ -90,14 +125,14 @@ component OnboardingSteps
           if steps.length > 1
             row flex=1 min-width=0 align-items="center" aria-hidden=true
               for s, i in steps key=s.key
-                box testId=`${testId}-step-${s.key}` min-width="blocks.step-dot" min-height="blocks.step-dot" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.pill" background-color=(s.state == "current" ? "theme.color.accent" : "theme.color.fill") box-shadow=(s.state == "current" ? "0 0 0 2px theme.color.focus" : "none")
+                StepDot(fill=(s.state == "current" ? "theme.color.accent" : "theme.color.fill"), ring=(s.state == "current"), testId=`${testId}-step-${s.key}`)
                   if s.state == "done"
                     svg viewBox="0 0 12 12" width="blocks.step-tick" height="blocks.step-tick" fill="none" stroke="theme.color.positive-text" aria-hidden=true
                       path d="M2.5 6.5L5 9l4.5-5" stroke-width=2 stroke-linecap="round" stroke-linejoin="round"
                   else
                     text `${i + 1}` font="theme.type.caption" color=(s.state == "current" ? "theme.color.accent-ink" : "theme.color.ink-muted")
                 if i + 1 < steps.length
-                  box flex=1 height="blocks.step-line" background-color=(s.state == "done" ? "theme.color.positive" : "theme.color.line")
+                  StepSeg(ink=(s.state == "done" ? "theme.color.positive" : "theme.color.line"))
         column gap="theme.space.xs"
           if heading != ""
             Words(text=heading, kind="title", outcome="none", level=2, testId=`${testId}-title`)
@@ -110,15 +145,15 @@ component OnboardingSteps
             if rejectLabel != ""
               ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
             if acceptLabel != ""
-              ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+              ActionButton(label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
       children
       if data == "loading"
         column border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.lg" aria-hidden=true
           row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
-            box min-width="blocks.skel-btn" min-height="blocks.skel-btn-tall" background-color="theme.color.fill" border-radius="theme.radius.control"
-            box min-width="blocks.skel-btn" min-height="blocks.skel-btn-tall" background-color="theme.color.fill" border-radius="theme.radius.control"
+            SkBtn(basis="none")
+            SkBtn(basis="none")
             box flex=1
-            box flex="1 1 blocks.actions-min" min-height="blocks.skel-btn-tall" background-color="theme.color.fill" border-radius="theme.radius.control"
+            SkBtn(basis="1 1 blocks.actions-min")
       if data != "loading" or outcome == "error"
         column gap="theme.space.sm" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.lg"
           if outcome == "error"
