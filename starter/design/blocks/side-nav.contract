@@ -77,7 +77,7 @@ component SideNav
               Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
             ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
       else if data == "loading"
-        column padding="theme.space.lg" role="status" gap="theme.space.sm"
+        column padding="theme.space.lg" role="status" gap="theme.space.md"
           column aria-hidden=true
             for i in [1, 2, 3] key=i
               row align-items="center" gap="theme.space.sm" min-height="blocks.nav-row-min" padding-left="blocks.nav-mark-line" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
@@ -87,7 +87,7 @@ component SideNav
             Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-${data}`)
       else if data == "empty"
         column padding="theme.space.lg" role="status"
-          column align-items="center" justify-content="center" gap="theme.space.sm" padding="theme.space.md" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.card"
+          column align-items="center" justify-content="center" gap="theme.space.sm" padding="theme.space.md" min-height="blocks.nav-empty-min"
             svg viewBox="0 0 24 24" width="theme.space.xxl" height="theme.space.xxl" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
               path d="M4.5 7 h15 v10.5 h-15 z" stroke-width=1.5 stroke-linejoin="round"
               path d="M8.5 13 h7" stroke-width=1.5 stroke-linecap="round"
@@ -98,7 +98,7 @@ component SideNav
         for g, i in groups key=g
           column
             if i > 0
-              box border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" margin-left="blocks.nav-heading-inset" margin-right="theme.space.lg" margin-top="theme.space.xs"
+              box border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" margin-left="blocks.nav-heading-inset" margin-right="theme.space.lg" margin-top="theme.space.sm"
             if g != ""
               text g testId=`${testId}-group-${g}` font="theme.type.heading" color="theme.color.ink-muted" padding-left="blocks.nav-heading-inset" padding-right="theme.space.lg" padding-top=(i > 0 ? "theme.space.sm" : "theme.space.xs") padding-bottom="theme.space.sm" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
             for e in entries.filter(e => e.group == g) key=e.key

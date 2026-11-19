@@ -12,3 +12,4 @@ theme
   blocks.nav-skel-head: length = 72px
   blocks.nav-glyph: length = 24px
   blocks.nav-heading-inset: length = 19px
+  blocks.nav-empty-min: length = 120px
