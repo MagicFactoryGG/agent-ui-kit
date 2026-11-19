@@ -356,7 +356,7 @@ export function generate(designDir, playDir) {
 
     for (const p of list) {
       const key = `${layer}-${p.name}`;
-      const cs = layer === 'screens' ? screenCells(p) : cells(p, marks(p));
+      const cs = layer === 'screens' ? screenCells(p, marks(p)) : cells(p, marks(p));
       total += cs.length;
       pages.push(key);
       nav.push(`            option ${quote(human(p.name))} value=${quote(key)}`);
@@ -468,13 +468,15 @@ export function generate(designDir, playDir) {
 }
 
 // A screen's cells: each value of its data axis (screens take real-looking data from samples).
-function screenCells(p) {
+function screenCells(p, marked = []) {
   const { axes, variants } = states(p);
   const data = axes.find((a) => a.prop === 'data');
   const base = Object.fromEntries([...axes, ...variants].map((a) => [a.prop, a.values[0]]));
   const out = data ? data.values.map((v) => ({ ...base, data: v })) : [base];
   // Each other value of a screen's own enums and bools (a button's status, a scheme), alone.
   for (const a of [...axes.filter((x) => x.prop !== 'data'), ...variants]) for (const v of a.values.slice(1)) out.push({ ...base, [a.prop]: v });
+  // And each combination the designer marks in the package's states.json (a screen's states often go together).
+  for (const m of marked) out.push({ ...base, ...m });
   return out;
 }
 
