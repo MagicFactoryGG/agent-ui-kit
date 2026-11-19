@@ -6,16 +6,15 @@
 // The panel's words all sit on one measure, blocks.measure, centred — title, state line, agent note, and the
 // bones below — so every element shares one column, and a message wraps at the same width the skeleton stands in
 // for. Each element holds one job, said once: the disc is the data state's own glyph; the bones are the content
-// the line stands for; the mark is who acted. The title is the area's own name, the same place in every state;
-// while loading it waits as a caption in the muted ink — pending words, one step down in size and weight both, so
-// the arc is the state's one live focal — and it stands at full title size the moment data lands (role=status
-// still speaks the name in every state). The state line is body size in the ink its state calls for: the muted
-// ink in empty, quiet; the full ink in failed — the sentence a person must read now, bright in dark, and carrying
-// no colour of its own, because the failed state's hue is already said twice, on the disc and on the card's line,
-// and a saturated red body under them flattens the hierarchy it should sit under (role=alert speaks it in
-// failed). Loading stands the content in three bones in the state line's own place — the line's own gap above
-// them, sm between them so a bone and its gap are one body line's own box — all one width on the one measure,
-// symmetric with the panel's axis, so the skeleton is anchored where its sentence would sit; the action's own
+// the line stands for; the mark is who acted. The title is the area's own name, the same size in the same place
+// in every state — the panel reads as the same panel, loading, not a skeleton of a card — resting in the muted
+// ink while loading, pending words one step quieter so the arc is the state's one live focal, and standing in the
+// full ink the moment data lands (role=status still speaks the name in every state). The state line is body size
+// in the ink its state calls for: the muted ink in empty, quiet; the error ink in failed — Section's own ink for
+// the line a failed area says, bright in dark where the muted grey read low, and speaking the state in the same
+// hue its disc and its card's line wear (role=alert speaks it in failed). Loading stands the content in three
+// bones in the state line's own place — the line's own gap above them, sm between them so a bone and its gap are
+// one body line's own box — all one width on the one measure, symmetric with the panel's axis, so the skeleton is anchored where its sentence would sit; the action's own
 // footprint is held below it, one bone in the action's own height and corner, a placeholder not a promise
 // (nothing is pressable, the box is aria-hidden), so the card does not reflow when the state turns. The card is
 // Section's own card — surface ground, the theme's 1px line, the card's corner; the failed card wears the state's
@@ -92,10 +91,10 @@ component StatePanel
           rect x=7.5 y=7.5 width=9 height=9 rx=2.1 fill="none" stroke="theme.color.ink-muted" stroke-width=1.5
           path d="M7.5 12.6h2.55l1.05 1.65h1.8L13.95 12.6h2.55" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
       column width="100%" max-width="blocks.measure" align-items="center" gap="theme.space.sm"
-        Words(text=title, kind=(data == "loading" ? "caption" : "title"), outcome=(data == "loading" ? "cancelled" : "none"), level=2, testId=`${testId}-title`)
+        Words(text=title, kind="title", outcome=(data == "loading" ? "cancelled" : "none"), level=2, testId=`${testId}-title`)
         if data != "loading" and (data == "failed" ? failedText : message) != ""
           column width="100%" align-items="center" margin-top="theme.space.sm"
-            Words(text=(data == "failed" ? failedText : message), kind="body", outcome=(data == "failed" ? "none" : "cancelled"), level=0, testId=`${testId}-message`)
+            Words(text=(data == "failed" ? failedText : message), kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-message`)
         if data == "loading"
           column testId=`${testId}-loading` width="100%" align-items="center" gap="theme.space.sm" margin-top="theme.space.sm"
             Bone(share="100%")
