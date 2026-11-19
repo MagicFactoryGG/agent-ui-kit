@@ -8,3 +8,4 @@ theme
   blocks.row-min: length = 44px
   blocks.mark-line: length = 3px
   blocks.chevron: length = 12px
+  blocks.skeleton-line: length = 12px
