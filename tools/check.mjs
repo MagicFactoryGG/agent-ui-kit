@@ -23,9 +23,10 @@ const steps = [
   ["modes", ["bun", "tools/modes.mjs", gallery, host], ROOT],
   ["tree-only", ["bun", "tools/tree-only.mjs", gallery, host], ROOT],
   ["recipes", ["bun", "tools/recipes.mjs", host], ROOT],
+  ["distiller", ["bun", "test"], resolve(ROOT, "tools/distiller")],
 ];
 
-const ONCE = new Set(["words", "library-gate", "library-gate tests", "gallery tests"]);
+const ONCE = new Set(["words", "library-gate", "library-gate tests", "gallery tests", "distiller"]);
 const run = host === "ios" ? steps.filter(([name]) => ONCE.has(name)) : steps;
 for (const [name] of steps.filter((s) => !run.includes(s))) console.log(`check: ${name}: not run on ios (one launch per case; run it on web and macos)`);
 let failed = 0;

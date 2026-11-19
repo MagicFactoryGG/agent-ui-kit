@@ -1,0 +1,31 @@
+/* A small brand guide for the tests: light and dark tokens, one component, one colour cycle. */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  --border: 0 0% 90%;
+  --primary: 220 90% 45%;
+  --primary-foreground: 0 0% 100%;
+  --highlight: 45 100% 50%;
+  --radius: 0.5rem;
+}
+.dark {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --muted: 0 0% 18%;
+  --muted-foreground: 0 0% 65%;
+  --border: 0 0% 20%;
+  --primary: 220 90% 60%;
+  --primary-foreground: 0 0% 0%;
+}
+.brand-button {
+  background: linear-gradient(to bottom, #2e2e2e, #000000);
+  color: #ffffff;
+  height: 44px;
+}
+.brand-button[data-status="failed"] { background: #ef4444; }
+@keyframes brand-cycle {
+  0% { stop-color: #0bfee0; }
+  100% { stop-color: #028ce4; }
+}

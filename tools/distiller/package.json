@@ -1,0 +1,8 @@
+{
+  "name": "distiller",
+  "private": true,
+  "type": "module",
+  "description": "Brand intake: reads a brand's guide, websites and apps, gives a light-and-dark Theme, per-app presets and a divergence report.",
+  "scripts": { "test": "bun test" },
+  "dependencies": { "playwright-core": "1.65.1" }
+}

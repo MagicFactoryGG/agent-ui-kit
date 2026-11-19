@@ -1,0 +1,10 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Site A</title>
+<style>
+:root { --background: 0 0% 100%; --foreground: 0 0% 0%; --border: 0 0% 90%; --primary: 220 90% 45%; }
+@media (prefers-color-scheme: dark) { :root { --background: 0 0% 0%; --foreground: 0 0% 100%; --border: 0 0% 20%; --primary: 220 90% 60%; } }
+html, body { margin: 0; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: system-ui, sans-serif; }
+main { padding: 24px; border: 1px solid hsl(var(--border)); border-radius: 8px; min-height: 600px; }
+button { background: hsl(var(--primary)); color: #fff; border: 0; border-radius: 8px; padding: 8px 16px; font-size: 15px; }
+</style></head>
+<body><main><h1>Site A</h1><p>Body text that follows the guide in both schemes.</p><button>Go on</button></main></body></html>
