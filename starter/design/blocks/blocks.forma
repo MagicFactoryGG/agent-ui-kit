@@ -100,3 +100,13 @@ theme
   blocks.skel-title: length = 16px
   blocks.skel-when: length = 56px
   blocks.skel-chip: length = 120px
+  blocks.feature-grid-max: length = 1040px
+  blocks.feature-grid-min: length = 240px
+  blocks.feature-grid-lead: length = 560px
+  blocks.feature-grid-mark: length = 40px
+  blocks.feature-grid-glyph: length = 20px
+  blocks.feature-grid-ghost-title: length = 16px
+  blocks.feature-grid-ghost-line: length = 12px
+  blocks.feature-grid-dot: length = 8px
+  blocks.feature-grid-action-height: length = 44px  // ActionButton's least height, held while the features load
+  blocks.feature-grid-action-width: length = 96px  // a two-word way on's width, held while the features load
