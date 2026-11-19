@@ -2,43 +2,39 @@
 // all Theme tokens (no image file). Every state's drawn shape is one disc — the grammar the failed alert already
 // had: a fill disc under the empty tray, a fill disc under the loading arc in the accent, the one active colour,
 // a critical disc for the alert form — so the three read as one family, and each state holds one filled focal:
-// empty's action, loading's arc (or, when the agent's pill speaks the load, the pill's own accent), the failed
-// alert itself. The panel's words all sit on one measure, blocks.measure, centred — title, state line, agent
-// note, and the bones below — so every element shares one column, and a message wraps at the same width the
-// skeleton stands in for. The state line is body size, and each
-// state says its own: empty's `message`, failed's `failedText` — Section's own naming for the line a failed area
-// says, so no empty promise sits under an alert. The failed state's colour is carried by its disc and its
-// card's line, Proposal's own convention for a stateful card, so the state is said in
-// colour at the card's edge (role=alert speaks it in failed). The title is the area's own name, the same size
-// in the same place in every state, resting in the muted ink while loading - pending words, so the one live
-// accent under them (the arc) is the state's focal and role=status still speaks the name of what is loading.
-// In loading the skeleton is the line, and the live words are the title's and the note's when an agent
-// started the load. Each element holds one job, said once: the disc is the data
-// state's own glyph, the spinner in every loading state (the agent axis is the mark's, not the disc's); the
-// bones are the content the line stands for; the mark is who acted. Loading
-// stands the content in three bones in the state line's own place — the line's own gap above them, the
-// line they stand for, sm between them so a bone and its gap are one body line's own box — all one width on the
-// one measure, symmetric with the panel's axis, so the skeleton is
-// anchored where its sentence would sit; the state line wears Section's own ink for the state it holds — the
-// muted ink in empty, the error ink in failed, exactly the line Section itself says for a failed area, so disc
-// and line escalate together in the alert; the action's own footprint is held below it, one bone in the action's
-// own height and corner, a placeholder not a promise (nothing is pressable, the box is aria-hidden), so the
-// card does not reflow when the state turns. The card is Section's own card — surface ground, the theme's 1px
-// line, the card's corner. The one action is the way in every state that shows it, the primary fill with its
-// own words: empty's own way on, `actionLabel`; failed's own way back, `retryLabel`, wearing the outcome's own
-// ring in the critical hue — ActionButton's own affordance for an act's outcome, so the control agrees with the
-// disc and the card's line while the fill keeps the way back (a red fill would say a destructive act, an
-// outlined button loses the way exactly when it matters most). `agent` "changed" marks a load an
-// agent started — its tool calls the same action the button does, one ledger, two doors — and `agentNote` is
+// empty's action, loading's arc, the failed alert itself (disc, card line and the retry's critical ring together).
+// The panel's words all sit on one measure, blocks.measure, centred — title, state line, agent note, and the
+// bones below — so every element shares one column, and a message wraps at the same width the skeleton stands in
+// for. Each element holds one job, said once: the disc is the data state's own glyph; the bones are the content
+// the line stands for; the mark is who acted. The title is the area's own name, the same place in every state;
+// while loading it waits as a caption in the muted ink — pending words, one step down in size and weight both, so
+// the arc is the state's one live focal — and it stands at full title size the moment data lands (role=status
+// still speaks the name in every state). The state line is body size in the ink its state calls for: the muted
+// ink in empty, quiet; the full ink in failed — the sentence a person must read now, bright in dark, and carrying
+// no colour of its own, because the failed state's hue is already said twice, on the disc and on the card's line,
+// and a saturated red body under them flattens the hierarchy it should sit under (role=alert speaks it in
+// failed). Loading stands the content in three bones in the state line's own place — the line's own gap above
+// them, sm between them so a bone and its gap are one body line's own box — all one width on the one measure,
+// symmetric with the panel's axis, so the skeleton is anchored where its sentence would sit; the action's own
+// footprint is held below it, one bone in the action's own height and corner, a placeholder not a promise
+// (nothing is pressable, the box is aria-hidden), so the card does not reflow when the state turns. The card is
+// Section's own card — surface ground, the theme's 1px line, the card's corner; the failed card wears the state's
+// own line in the critical hue, Proposal's own convention for a stateful card. The one action is the way in every
+// state that shows it, wearing its state: empty's own way on, `actionLabel`, the primary fill; failed's own way
+// back, `retryLabel`, the plain fill with the outcome's own ring in the critical hue — ActionButton's own
+// affordance for an act's outcome, the recovery control the error card calls for, distinct from the resting way
+// on (a red fill would say a destructive act; retry is not one). `agent` "changed" marks a load an agent
+// started — its tool calls the same action the button does, one ledger, two doors — and `agentNote` is
 // the mark's one sentence, the word group's last line in every state that shows it: the accent ink and a small
 // accent disc on a low wash of the accent itself — a blue-tinted pill on the light card, a blue-dark one on the
 // dark, the Notice's own way with an area's sentence and this panel's own disc grammar in miniature — the wash
-// is the pill's own separation in both schemes and the dot is the mark's edge, no border to read as a control —
-// a mark a person notices, never mistaken for the action or for a link. `size` "full" claims the width it is
-// given up to blocks.panel-max — the area's own surface at a phone, a capped card on a wide window — and the
-// words sit on blocks.measure, a generous column that leaves the card breathing room at both sides;
-// "compact" insets to a narrower card for a side panel or a card's body. The three bones are one small local
-// component: markup drawn twice or more is drawn once.
+// is the pill's own separation in both schemes and the dot is the mark's edge, riding the sentence's own
+// baseline so it reads as written with its words, no border to read as a control — a mark a person notices,
+// never mistaken for the action or for a link. `size` "full" claims the width it is given up to
+// blocks.panel-max — the area's own surface at a phone, a capped card on a wide window — and the words sit on
+// blocks.measure, a generous column that leaves the card breathing room at both sides; "compact" insets to a
+// narrower card for a side panel or a card's body. The three bones are one small local component: markup drawn
+// twice or more is drawn once.
 use Words, ActionButton from "__SCOPE__/components"
 
 // One skeleton line of the loading state: a bar of the fill colour at `share` of the measure.
@@ -52,18 +48,20 @@ component Bone
 // own way with an area's words — a state a person notices (the kit's first question), never mistaken for the action
 // or for a link. The wash is a drawn box behind the words, the kit's own way out of a theme with no wash token:
 // the accent at low opacity, no border (a border read as the chip's control), so the pill separates itself from
-// the card in light and dark alike. Drawn once here and placed once, as the word group's last line in every state
-// that shows it — LinkRow and ValueRow's own placement for an agent's note, after the words it marks — so icon,
-// title and line read as one group and the mark never splits them.
+// the card in light and dark alike. The dot rides the sentence's own baseline (align-items="baseline"), so its
+// centre sits at the letters' cap-height centre, not the line box's — the mark reads as written with its words.
+// Drawn once here and placed once, as the word group's last line in every state that shows it — LinkRow and
+// ValueRow's own placement for an agent's note, after the words it marks — so icon, title and line read as one
+// group and the mark never splits them.
 component Mark
   props
     note: string
     testId: string
   view
-    row testId=testId position="relative" align-items="center" gap="theme.space.xs" margin-top="theme.space.sm" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
+    row testId=testId position="relative" align-items="baseline" gap="theme.space.xs" margin-top="theme.space.sm" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
       box aria-hidden=true position="absolute" inset=0 background-color="theme.color.accent" opacity=0.12 border-radius="theme.radius.pill"
-      svg viewBox="0 0 6 6" width="blocks.note-dot" height="blocks.note-dot" aria-hidden=true flex-shrink=0 position="relative"
-        circle cx=3 cy=3 r=3 fill="theme.color.accent"
+      svg viewBox="0 0 8 8" width="blocks.note-dot" height="blocks.note-dot" aria-hidden=true flex-shrink=0 position="relative"
+        circle cx=4 cy=4 r=4 fill="theme.color.accent"
       text note position="relative" font="theme.type.body" color="theme.color.accent"
 
 component StatePanel
@@ -94,10 +92,10 @@ component StatePanel
           rect x=7.5 y=7.5 width=9 height=9 rx=2.1 fill="none" stroke="theme.color.ink-muted" stroke-width=1.5
           path d="M7.5 12.6h2.55l1.05 1.65h1.8L13.95 12.6h2.55" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
       column width="100%" max-width="blocks.measure" align-items="center" gap="theme.space.sm"
-        Words(text=title, kind="title", outcome=(data == "loading" ? "cancelled" : "none"), level=2, testId=`${testId}-title`)
+        Words(text=title, kind=(data == "loading" ? "caption" : "title"), outcome=(data == "loading" ? "cancelled" : "none"), level=2, testId=`${testId}-title`)
         if data != "loading" and (data == "failed" ? failedText : message) != ""
           column width="100%" align-items="center" margin-top="theme.space.sm"
-            Words(text=(data == "failed" ? failedText : message), kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-message`)
+            Words(text=(data == "failed" ? failedText : message), kind="body", outcome=(data == "failed" ? "none" : "cancelled"), level=0, testId=`${testId}-message`)
         if data == "loading"
           column testId=`${testId}-loading` width="100%" align-items="center" gap="theme.space.sm" margin-top="theme.space.sm"
             Bone(share="100%")
@@ -110,4 +108,4 @@ component StatePanel
           box aria-hidden=true height="blocks.action-min" width="blocks.bone-action" background-color="theme.color.fill" border-radius="theme.radius.control"
       if data != "loading" and (data == "failed" ? retryLabel : actionLabel) != ""
         column margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md")
-          ActionButton(label=(data == "failed" ? retryLabel : actionLabel), kind="primary", interaction="idle", outcome=(data == "failed" ? "error" : "none"), press=press, testId=`${testId}-action`)
+          ActionButton(label=(data == "failed" ? retryLabel : actionLabel), kind=(data == "failed" ? "plain" : "primary"), interaction="idle", outcome=(data == "failed" ? "error" : "none"), press=press, testId=`${testId}-action`)
