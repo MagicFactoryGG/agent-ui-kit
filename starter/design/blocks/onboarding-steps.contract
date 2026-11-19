@@ -62,6 +62,20 @@ component SkBtn
   view
     box flex=basis min-width="blocks.skel-btn" min-height="blocks.skel-btn-tall" background-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)" border-radius="theme.radius.control"
 
+// The frame's ghost: the steps that have not arrived, breathing, never a control.
+component SkTrack
+  view
+    column gap="theme.space.md" aria-hidden=true animation="breathe 1.8s ease-in-out infinite"
+      row gap="theme.space.md" align-items="center"
+        box min-width="blocks.skel-count" height="blocks.skel-line" border-radius="theme.radius.pill" background-color="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)"
+        for j in [0, 1, 2, 3] key=j
+          StepDot(fill="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)", edge="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)", ring=false, testId="")
+          if j < 3
+            StepSeg(ink="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)")
+      SkBar(share="2 1 0", height="blocks.skel-head")
+      SkBar(share="1 1 0", height="blocks.skel-line")
+      SkBar(share="2 1 0", height="blocks.skel-line")
+
 component OnboardingSteps
   props
     steps: Step[]
@@ -99,16 +113,7 @@ component OnboardingSteps
         if countLabel != ""
           Words(text=countLabel, kind="title", outcome="none", level=2, testId=`${testId}-heading`)
         text loadingText testId=`${testId}-loading` role="status" font="theme.type.body" color="theme.color.ink-muted"
-        column gap="theme.space.md" aria-hidden=true animation="breathe 1.8s ease-in-out infinite"
-          row gap="theme.space.md" align-items="center"
-            box min-width="blocks.skel-count" height="blocks.skel-line" border-radius="theme.radius.pill" background-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)"
-            for j in [0, 1, 2, 3] key=j
-              StepDot(fill="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)", edge="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)", ring=false, testId="")
-              if j < 3
-                StepSeg(ink="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)")
-          SkBar(share="2 1 0", height="blocks.skel-head")
-          SkBar(share="1 1 0", height="blocks.skel-line")
-          SkBar(share="2 1 0", height="blocks.skel-line")
+        SkTrack()
       else if data == "failed"
         if countLabel != ""
           Words(text=countLabel, kind="title", outcome="none", level=2, testId=`${testId}-heading`)
@@ -124,11 +129,12 @@ component OnboardingSteps
         text emptyText testId=`${testId}-empty` role="status" font="theme.type.body" color="theme.color.ink-muted"
       else
         row testId=`${testId}-bar` role="status" aria-label=countLabel align-items="center" gap="theme.space.md"
-          text `${at + 1}/${steps.length}` testId=`${testId}-count` flex-shrink=0 font="theme.type.label" color="theme.color.ink" font-variant-numeric="tabular-nums"
+          box min-height="blocks.step-dot" flex-shrink=0 display="flex" align-items="center"
+            text `${at + 1}/${steps.length}` testId=`${testId}-count` font="theme.type.label" color="theme.color.ink" font-variant-numeric="tabular-nums"
           if steps.length > 1
             row flex=1 min-width=0 align-items="center" aria-hidden=true
               for s, i in steps key=s.key
-                StepDot(fill=(s.state == "current" ? "theme.color.accent" : s.state == "done" ? "theme.color.fill" : "theme.color.surface"), edge=(s.state == "current" ? "theme.color.accent" : s.state == "done" ? "theme.color.fill" : "color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)"), ring=(s.state == "current"), testId=`${testId}-step-${s.key}`)
+                StepDot(fill=(s.state == "current" ? "theme.color.accent" : s.state == "done" ? "theme.color.fill" : "theme.color.surface"), edge=(s.state == "current" ? "theme.color.accent" : s.state == "done" ? "theme.color.positive-text" : "color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)"), ring=(s.state == "current"), testId=`${testId}-step-${s.key}`)
                   if s.state == "done"
                     svg viewBox="0 0 12 12" width="blocks.step-tick" height="blocks.step-tick" fill="none" stroke="theme.color.positive-text" aria-hidden=true
                       path d="M2.5 6.5L5 9l4.5-5" stroke-width=2 stroke-linecap="round" stroke-linejoin="round"
@@ -149,23 +155,32 @@ component OnboardingSteps
               ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
             if acceptLabel != ""
               ActionButton(label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
-      children
+      column margin-top="theme.space.sm"
+        children
       if data == "loading"
-        column margin-top="theme.space.sm" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.md" aria-hidden=true
+        column margin-top="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.md" aria-hidden=true
           row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
             SkBtn(basis="none")
             SkBtn(basis="none")
             box flex=1
             SkBtn(basis="1 1 blocks.actions-min")
       if data != "loading" or outcome == "error"
-        column gap="theme.space.sm" margin-top="theme.space.sm" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.md"
+        column gap="theme.space.sm" margin-top="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.md"
           if outcome == "error"
             text errorText testId=`${testId}-error` role="alert" font="theme.type.caption" color="theme.color.critical-text"
           if data == "failed"
-            if retryLabel != ""
-              ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+            row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
+              if skipLabel != ""
+                ActionButton(label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
+              box flex=1
+              if retryLabel != ""
+                column flex="1 1 blocks.actions-min"
+                  ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
           else if not hasSteps
-            ActionButton(label=continueLabel, kind="primary", interaction="idle", outcome="none", press=advance, testId=`${testId}-continue`)
+            row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
+              box flex=1
+              column flex="1 1 blocks.actions-min"
+                ActionButton(label=continueLabel, kind="primary", interaction="idle", outcome="none", press=advance, testId=`${testId}-continue`)
           else
             row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
               row gap="theme.space.sm" align-items="center"
