@@ -1,7 +1,7 @@
 // SideNav: an app's side navigation, drawn as its own panel. Width: the panel fills the column a shell gives it
 // and never grows past blocks.nav-max — a rail's width, not a slab's (the shell may still give it less: the
 // window at a phone; the rows' own truncation holds). Height is the shell's: given a definite height the spacer
-// and the states' floors grow and the account pins to the panel's bottom; alone in a window the panel is as
+// grows and the account pins to the panel's bottom; alone in a window the panel is as
 // tall as what it holds — a package's own sizes are px (Exact refuses viewport units in a library's design), so
 // the rail cannot claim the window itself, and the shell decides when the panel shows at all.
 //
@@ -32,18 +32,21 @@
 //   same edge.
 // - An agent that added or reordered an entry (agent "changed"): the entry `agentKey` names gets an accent edge
 //   at its start and `agentNote`'s words under its label (the kit's LinkRow language).
-// - The menu keeps its home in every state, and the states' words speak where the rows speak — no heading of
-//   their own, so a state never reads as a copy change. One place and loading hold the home by what they show
-//   (blocks.nav-places-min below a single row; the loading ghosts already fill a menu's own shape, so no floor
-//   is stacked under them — a look round caught the double height as dead panel above the account). Empty and
-//   failed stand their card in the middle of the home: a state sits in the room the menu owns, centered, not
-//   collapsed to a sliver under the brand (this round's look asked for exactly that; an earlier round wanted the
-//   compact card — the middle is the reserved home with the words centered in it).
+// - The states' words speak where the rows speak — no heading of their own, so a state never reads as a copy
+//   change — and the panel is one honest stack in every state: the brand, the slot, then the state's own shape
+//   where the places stand, then the account, with no air reserved that the state does not show. Two look rounds
+//   went opposite ways on reserved air (one dinged the compact card's footer for the empty window below it —
+//   space the shots harness owns, not the panel; the next read a centered card's reserved home as "skeleton
+//   rows removed but their space not collapsed"), and the arrangement no round has faulted is the tidy stack:
+//   an honest empty is compact, and the shell owns the pane's remaining height (measured twice: a library forma
+//   refuses viewport units, and a percentage height resolves against the harness's content-tall mount, so a
+//   panel alone in a window cannot pin its account to that window — the rail's right hairline and the account's
+//   own hairline close the panel instead, and a real shell's pane does the rest).
 // - Loading says its line once — a small drawn cue beside muted words (role=status) — above the shape coming:
-//   two sections as the resting list has, each a thin word-wide bar for the group's own label above word-wide
-//   label bars for its rows, a badge pill of the badge's own size where the row carries a count. Bars are the
-//   width of a word, not lines the width of the panel: what arrives does not jump, and the ghosts read as
-//   labels coming, not as rules across the rail.
+//   two sections as the resting list has, each a thin word-wide bar for the group's own label on a
+//   section-label row above word-wide label bars for its rows, a badge pill of the badge's own size where the
+//   row carries a count. Bars are the width of a word, not lines the width of the panel: what arrives does not
+//   jump, and the ghosts read as labels coming, not as rules across the rail.
 // - Failed speaks the kit's outcome language, theme-safe: the words and the drawn mark in the error's ink on
 //   the surface token (status words never sit on a tinted fill — another party's theme may not hold 4.5:1
 //   there), the frame a critical hairline on the surface, and `retryLabel`'s button drawn plain below the
@@ -107,11 +110,12 @@ component NavItem
       if badge > 0
         text `${badge}` testId=`${testId}-badge` flex-shrink=0 min-width="blocks.nav-badge-min" box-sizing="border-box" text-align="center" font="theme.type.caption" color="theme.color.ink" font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color=(current ? "theme.color.surface" : "theme.color.fill") border-radius="theme.radius.pill" white-space="nowrap"
 
-// A group's own label, still coming: a thin bar the width of a word at the heading's inset, on the heading's own
-// line — so the section that arrives takes the place its ghost held.
+// A group's own label, still coming: a thin bar the width of a word at the heading's inset, on a row the height
+// of a section label — so the section that arrives takes the place its ghost held, close to its rows the way a
+// real heading sits.
 component NavHeadGhost
   view
-    row min-height="theme.space.lg" align-items="center" padding-left="theme.space.md" padding-right="theme.space.md" aria-hidden=true
+    row min-height="theme.space.xl" align-items="center" padding-left="theme.space.md" padding-right="theme.space.md" aria-hidden=true
       box width="blocks.nav-ghost-word" height="theme.space.sm" background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 // A place still coming: the row's own height and insets, a bar the width of a word where the label will be and,
@@ -159,18 +163,17 @@ component SideNav
       column min-width=0 max-height="blocks.nav-slot-bay" overflow="auto" padding-left="theme.space.md" padding-right="theme.space.md"
         children
       if data == "failed"
-        column flex=1 min-height="blocks.nav-places-min" justify-content="center"
-          row role="alert" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical" border-radius="theme.radius.control"
-            column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
-              row align-items="flex-start" gap="theme.space.sm"
-                svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
-                  path d="M12 3.5 L21 19 h-18 z" stroke-width=1.75 stroke-linejoin="round"
-                  path d="M12 9.5 v4.5" stroke-width=1.75 stroke-linecap="round"
-                  path d="M12 16.6 v0.2" stroke-width=1.75 stroke-linecap="round"
-                column flex=1 min-width=0
-                  Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
-              row
-                ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+        row role="alert" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical" border-radius="theme.radius.control"
+          column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
+            row align-items="flex-start" gap="theme.space.sm"
+              svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
+                path d="M12 3.5 L21 19 h-18 z" stroke-width=1.75 stroke-linejoin="round"
+                path d="M12 9.5 v4.5" stroke-width=1.75 stroke-linecap="round"
+                path d="M12 16.6 v0.2" stroke-width=1.75 stroke-linecap="round"
+              column flex=1 min-width=0
+                Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
+            row
+              ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
       else if data == "loading"
         column gap="theme.space.lg"
           row role="status" align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md"
@@ -188,13 +191,12 @@ component SideNav
             NavGhost(badge=false)
             NavGhost(badge=true)
       else if data == "empty"
-        column flex=1 min-height="blocks.nav-places-min" justify-content="center"
-          row role="status" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.control"
-            column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
-              Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
-              if emptyLabel != ""
-                row
-                  ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
+        row role="status" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.control"
+          column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
+            Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+            if emptyLabel != ""
+              row
+                ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
       else
         column gap="theme.space.lg"
           for g in groups key=g
@@ -204,8 +206,7 @@ component SideNav
               column gap="theme.space.xs"
                 for e in entries.filter(e => e.group == g) key=e.key
                   NavItem(label=e.label, href=e.href, badge=e.badge, current=e.current, marked=(agent == "changed" and e.key == agentKey), note=agentNote, testId=`${testId}-entry-${e.key}`)
-      if data != "empty" and data != "failed"
-        column flex=1 min-height=(data == "one" ? "blocks.nav-places-min" : "0")
+      column flex=1 min-height="0"
       if accountName != ""
         row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
           column width="theme.space.xxl" height="theme.space.xxl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" align-items="center" justify-content="center" overflow="hidden" aria-hidden=true
