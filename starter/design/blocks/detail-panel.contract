@@ -78,8 +78,9 @@ component DetailPanel
                   column padding-left="theme.space.lg" padding-right="theme.space.lg"
                     Words(text=factsTitle, kind="heading", outcome="none", level=3, testId=`${testId}-facts-title`)
                 column testId=`${testId}-facts` background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
-                  for n in [1, 2, 3] key=n
-                    row aria-hidden=true min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" align-items="center" border-top-width=(n > 1 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                  for n in [1, 2, 3, 4] key=n
+                    row aria-hidden=true min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" align-items="center" gap="theme.space.md" border-top-width=(n > 1 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                      box height="theme.space.md" flex=1 background-color="theme.color.fill" border-radius="theme.radius.pill"
                       box height="theme.space.md" flex=1 background-color="theme.color.fill" border-radius="theme.radius.pill"
             else
               column gap="theme.space.sm"
@@ -111,7 +112,9 @@ component DetailPanel
                 column testId=`${testId}-activity` background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
                   for n in [1, 2, 3] key=n
                     row aria-hidden=true min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" align-items="center" border-top-width=(n > 1 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                      box height="theme.space.md" flex=1 background-color="theme.color.fill" border-radius="theme.radius.pill"
+                      column flex=1 gap="theme.space.xs"
+                        box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
+                        box height="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.pill"
               else
                 column testId=`${testId}-activity` role=(events.length == 0 ? "status" : "list") background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
                   if events.length == 0
