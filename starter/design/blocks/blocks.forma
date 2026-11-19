@@ -7,3 +7,4 @@ theme
   blocks.detail-max: length = 880px
   blocks.header-min: length = 240px
   blocks.detail-min: length = 320px
+  blocks.message-max: length = 480px

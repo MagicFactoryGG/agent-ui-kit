@@ -2,11 +2,13 @@
 // record's facts as label-value rows, a notes paragraph, and its activity at the end. States: `data` one record,
 // loading, failed, and long content; `agent` none, changed (a changed value carries the kit's mark with
 // `changedNote`, the ledger's "did" sentence) and waiting (`waitingNote`, its "asks" sentence, is the calm line the
-// person must answer, under the title). At phone width the groups stack; wide, the facts and notes sit beside the
-// activity (columns that wrap at a named minimum, Exact's "columns that wrap on a phone"). Every word is a prop;
-// rows arrive by shape (Fact, Event).
+// person must answer, under the title). While loading the two groups keep their shape as Picture keeps its fill:
+// the sentence in a card, then rows of quiet bars that claim nothing. The header's actions are the app's in every
+// state (mechanisms, not opinions): a record that failed gets its retry from the app, as an action like any other.
+// At phone width the groups stack; wide, the facts and notes sit beside the activity (columns that wrap at a named
+// minimum, Exact's "columns that wrap on a phone"). Every word is a prop; rows arrive by shape (Fact, Event).
 use Swatch from "__SCOPE__/theme"
-use Words, ActionButton, Tag, ValueRow from "__SCOPE__/components"
+use Words, ActionButton, Tag from "__SCOPE__/components"
 
 // One fact of the record: its key, the label it reads as, and its value.
 shape Fact
@@ -49,7 +51,7 @@ component DetailPanel
     column testId=testId width="100%" max-width="blocks.detail-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.xl"
       row flex-wrap="wrap" align-items="center" gap="theme.space.md"
         column flex=1 min-width="blocks.header-min" box-sizing="border-box" gap="theme.space.xs"
-          row flex-wrap="wrap" align-items="center" gap="theme.space.sm"
+          row flex-wrap="wrap" align-items="baseline" gap="theme.space.sm"
             Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
             if statusLabel != ""
               Tag(text=statusLabel, outcome=status)
@@ -62,40 +64,61 @@ component DetailPanel
               ActionButton(label=secondaryLabel, kind="plain", interaction="idle", outcome="none", press=secondaryPress, testId=`${testId}-secondary`)
             if primaryLabel != ""
               ActionButton(label=primaryLabel, kind="primary", interaction="idle", outcome="none", press=primaryPress, testId=`${testId}-primary`)
-      if data == "loading" or data == "failed"
-        column testId=`${testId}-${data}` role=(data == "failed" ? "alert" : "status") padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
-          Words(text=(data == "loading" ? loadingText : failedText), kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}-text`)
+      if data == "failed"
+        column testId=`${testId}-failed` role="alert" max-width="blocks.message-max" box-sizing="border-box" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+          Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed-text`)
       else
         row flex-wrap="wrap" align-items="flex-start" gap="theme.space.xl"
           column flex=1 min-width="blocks.detail-min" box-sizing="border-box" gap="theme.space.xl"
-            column gap="theme.space.sm"
-              if factsTitle != ""
-                column padding-left="theme.space.lg" padding-right="theme.space.lg"
-                  Words(text=factsTitle, kind="heading", outcome="none", level=3, testId=`${testId}-facts-title`)
-              column testId=`${testId}-facts` role=(facts.length == 0 ? "status" : "list") background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
-                if facts.length == 0
-                  text factsEmptyText testId=`${testId}-facts-empty` padding="theme.space.lg" font="theme.type.body" color="theme.color.ink-muted"
-                for f, i in facts key=f.key
-                  column role="listitem" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                    ValueRow(label=f.label, value=f.value, agentNote="", outcome="none", agent="none", testId=`${testId}-fact-${f.key}`)
-            if notes != ""
+            if data == "loading"
+              column testId=`${testId}-loading` role="status" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+                Words(text=loadingText, kind="body", outcome="cancelled", level=0, testId=`${testId}-loading-text`)
               column gap="theme.space.sm"
-                if notesTitle != ""
+                if factsTitle != ""
                   column padding-left="theme.space.lg" padding-right="theme.space.lg"
-                    Words(text=notesTitle, kind="heading", outcome="none", level=3, testId=`${testId}-notes-title`)
-                column padding-left="theme.space.lg" padding-right="theme.space.lg"
-                  text notes testId=`${testId}-notes` font="theme.type.body" color="theme.color.ink"
+                    Words(text=factsTitle, kind="heading", outcome="none", level=3, testId=`${testId}-facts-title`)
+                column testId=`${testId}-facts` background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+                  for n in [1, 2, 3] key=n
+                    row aria-hidden=true min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" align-items="center" border-top-width=(n > 1 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                      box height="theme.space.md" flex=1 background-color="theme.color.fill" border-radius="theme.radius.pill"
+            else
+              column gap="theme.space.sm"
+                if factsTitle != ""
+                  column padding-left="theme.space.lg" padding-right="theme.space.lg"
+                    Words(text=factsTitle, kind="heading", outcome="none", level=3, testId=`${testId}-facts-title`)
+                column testId=`${testId}-facts` role=(facts.length == 0 ? "status" : "list") background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+                  if facts.length == 0
+                    text factsEmptyText testId=`${testId}-facts-empty` padding="theme.space.lg" font="theme.type.body" color="theme.color.ink-muted"
+                  // Label and value each take half the line and wrap in their half; a value without a share of the
+                  // flex is squeezed to one word a line when the record's content runs long.
+                  for f, i in facts key=f.key
+                    row role="listitem" align-items="baseline" gap="theme.space.md" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                      text f.label testId=`${testId}-fact-${f.key}` flex=1 min-width=0 font="theme.type.body" color="theme.color.ink"
+                      text f.value flex=1 min-width=0 font="theme.type.body" color="theme.color.ink" text-align="end"
+              if notes != ""
+                column gap="theme.space.sm"
+                  if notesTitle != ""
+                    column padding-left="theme.space.lg" padding-right="theme.space.lg"
+                      Words(text=notesTitle, kind="heading", outcome="none", level=3, testId=`${testId}-notes-title`)
+                  column padding-left="theme.space.lg" padding-right="theme.space.lg"
+                    text notes testId=`${testId}-notes` font="theme.type.body" color="theme.color.ink"
           column flex=1 min-width="blocks.detail-min" box-sizing="border-box"
             column gap="theme.space.sm"
               if activityTitle != ""
                 column padding-left="theme.space.lg" padding-right="theme.space.lg"
                   Words(text=activityTitle, kind="heading", outcome="none", level=3, testId=`${testId}-activity-title`)
-              column testId=`${testId}-activity` role=(events.length == 0 ? "status" : "list") background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
-                if events.length == 0
-                  text activityEmptyText testId=`${testId}-activity-empty` padding="theme.space.lg" font="theme.type.body" color="theme.color.ink-muted"
-                for e, i in events key=e.key
-                  row role="listitem" align-items="baseline" gap="theme.space.md" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                    column flex=1 min-width=0 gap="theme.space.xs"
-                      text e.what testId=`${testId}-event-${e.key}` font="theme.type.body" color="theme.color.ink"
-                      text e.who font="theme.type.caption" color="theme.color.ink-muted"
-                    text e.when font="theme.type.caption" color="theme.color.ink-muted" text-align="end" flex-shrink=0
+              if data == "loading"
+                column testId=`${testId}-activity` background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+                  for n in [1, 2, 3] key=n
+                    row aria-hidden=true min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" align-items="center" border-top-width=(n > 1 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                      box height="theme.space.md" flex=1 background-color="theme.color.fill" border-radius="theme.radius.pill"
+              else
+                column testId=`${testId}-activity` role=(events.length == 0 ? "status" : "list") background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+                  if events.length == 0
+                    text activityEmptyText testId=`${testId}-activity-empty` padding="theme.space.lg" font="theme.type.body" color="theme.color.ink-muted"
+                  for e, i in events key=e.key
+                    row role="listitem" align-items="baseline" gap="theme.space.md" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                      column flex=1 min-width=0 gap="theme.space.xs"
+                        text e.what testId=`${testId}-event-${e.key}` font="theme.type.body" color="theme.color.ink"
+                        text e.who font="theme.type.caption" color="theme.color.ink-muted"
+                      text e.when font="theme.type.caption" color="theme.color.ink-muted" text-align="end" flex-shrink=0
