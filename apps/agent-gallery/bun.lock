@@ -1,0 +1,21 @@
+{
+  "lockfileVersion": 2,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "agent-gallery",
+      "dependencies": {
+        "@agent-ui-kit/agent": "file:../../packages/agent",
+        "@agent-ui-kit/commands": "file:../../packages/commands",
+        "@agent-ui-kit/forms": "file:../../packages/forms",
+      },
+    },
+  },
+  "packages": {
+    "@agent-ui-kit/agent": ["@agent-ui-kit/agent@file:../../packages/agent", {}],
+
+    "@agent-ui-kit/commands": ["@agent-ui-kit/commands@file:../../packages/commands", {}],
+
+    "@agent-ui-kit/forms": ["@agent-ui-kit/forms@file:../../packages/forms", {}],
+  }
+}

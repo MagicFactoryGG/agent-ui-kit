@@ -1,0 +1,254 @@
+{
+  "host": {
+    "web": {},
+    "macos": {
+      "minimumOS": "14.0",
+      "window": {
+        "width": 900,
+        "height": 700
+      }
+    },
+    "ios": {
+      "minimumOS": "17.0",
+      "deviceFamily": [
+        "iphone",
+        "ipad"
+      ]
+    }
+  },
+  "deploy": {
+    "store": {
+      "web": "0",
+      "macos": "0",
+      "ios": "0"
+    }
+  },
+  "$schema": "../../../../forks/expo/exact/scripts/app.schema.json",
+  "name": "Agent gallery",
+  "short_name": "Agent gallery",
+  "id": "com.example.agent-ui-kit.gallery",
+  "start_url": "/",
+  "display": "standalone",
+  "app": {
+    "id": "com.example.agent-ui-kit.gallery",
+    "name": "Agent gallery"
+  },
+  "intents": {
+    "tools": {
+      "readSettings": {
+        "title": "Read Settings"
+      },
+      "setSetting": {
+        "title": "Set Setting",
+        "parameters": {
+          "setting": {
+            "title": "Setting"
+          },
+          "on": {
+            "title": "On"
+          }
+        }
+      },
+      "setSecurity": {
+        "title": "Set Security",
+        "parameters": {
+          "setting": {
+            "title": "Setting"
+          },
+          "on": {
+            "title": "On"
+          }
+        }
+      },
+      "setQuietHours": {
+        "title": "Set Quiet Hours",
+        "parameters": {
+          "on": {
+            "title": "On"
+          }
+        }
+      },
+      "readProfile": {
+        "title": "Read Profile"
+      },
+      "setText": {
+        "title": "Set Text",
+        "parameters": {
+          "field": {
+            "title": "Field"
+          },
+          "value": {
+            "title": "Value"
+          }
+        }
+      },
+      "setNumber": {
+        "title": "Set Number",
+        "parameters": {
+          "field": {
+            "title": "Field"
+          },
+          "value": {
+            "title": "Value"
+          }
+        }
+      },
+      "setDate": {
+        "title": "Set Date",
+        "parameters": {
+          "field": {
+            "title": "Field"
+          },
+          "value": {
+            "title": "Value"
+          }
+        }
+      },
+      "setChoice": {
+        "title": "Set Choice",
+        "parameters": {
+          "field": {
+            "title": "Field"
+          },
+          "value": {
+            "title": "Value"
+          }
+        }
+      },
+      "readAccount": {
+        "title": "Read Account"
+      },
+      "setSecret": {
+        "title": "Set Secret",
+        "parameters": {
+          "field": {
+            "title": "Field"
+          },
+          "value": {
+            "title": "Value"
+          }
+        }
+      },
+      "setRole": {
+        "title": "Set Role",
+        "parameters": {
+          "member": {
+            "title": "Member"
+          },
+          "role": {
+            "title": "Role"
+          }
+        }
+      },
+      "addMember": {
+        "title": "Add Member",
+        "parameters": {
+          "name": {
+            "title": "Name"
+          }
+        }
+      },
+      "removeMember": {
+        "title": "Remove Member",
+        "parameters": {
+          "member": {
+            "title": "Member"
+          }
+        }
+      },
+      "findCity": {
+        "title": "Find City",
+        "parameters": {
+          "text": {
+            "title": "Text"
+          }
+        }
+      },
+      "setCity": {
+        "title": "Set City",
+        "parameters": {
+          "name": {
+            "title": "Name"
+          }
+        }
+      },
+      "setTeamName": {
+        "title": "Set Team Name",
+        "parameters": {
+          "value": {
+            "title": "Value"
+          }
+        }
+      },
+      "setRating": {
+        "title": "Set Rating",
+        "parameters": {
+          "value": {
+            "title": "Value"
+          }
+        }
+      },
+      "listFolders": {
+        "title": "List Folders"
+      },
+      "selectFolder": {
+        "title": "Select Folder",
+        "parameters": {
+          "id": {
+            "title": "Id"
+          }
+        }
+      },
+      "setAccent": {
+        "title": "Set Accent",
+        "parameters": {
+          "choice": {
+            "title": "Choice"
+          }
+        }
+      },
+      "readTimings": {
+        "title": "Read Timings"
+      },
+      "listActivity": {
+        "title": "List Activity"
+      },
+      "listWaiting": {
+        "title": "List Waiting"
+      },
+      "readPermits": {
+        "title": "Read Permits"
+      },
+      "undoChange": {
+        "title": "Undo Change",
+        "parameters": {
+          "change": {
+            "title": "Change"
+          }
+        }
+      },
+      "answerWaiting": {
+        "title": "Answer Waiting",
+        "parameters": {
+          "act": {
+            "title": "Act"
+          },
+          "yes": {
+            "title": "Yes"
+          }
+        }
+      },
+      "raiseMode": {
+        "title": "Raise Mode",
+        "parameters": {
+          "tool": {
+            "title": "Tool"
+          },
+          "mode": {
+            "title": "Mode"
+          }
+        }
+      }
+    }
+  }
+}

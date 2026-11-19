@@ -1,0 +1,67 @@
+// The agent's door: the actions the root's `tool` lines name. Each is one
+// line over the ledger's functions; the mode comes from the tool list, never
+// from an `if` here. Refusal words that come from the app's own checks
+// (invalid, unknown-option, unknown-id, too-short, too-long) are set before
+// the act.
+//
+// The door is passed as "agent": an action cannot read which door called it
+// (docs/recipes/exact-asks.md). A tool's action calls functions only, never
+// another action with arguments (Exact's tool-action bug, same recipe).
+use Ledger, act, answer, undo, raise from "@agent-ui-kit/agent"
+use titleOf, switchAct, setAct, secretAct, roleAct, addAct, removeAct, memberName, cities, teamNameProblem, isDay from "./model.contract"
+use folderIds from "./examples.contract"
+
+members App
+  action readSettings
+  action readProfile
+  action readAccount
+  action listActivity
+  action listWaiting
+  action readPermits
+  action listFolders
+  action readTimings
+  action findCity(text: string)
+    findQuery = text
+
+  action setSetting(setting: enum<"digest", "failures", "marketing">, on: bool)
+    book = act(book, switchAct("setSetting", setting, on))
+  action setSecurity(setting: enum<"twoStep">, on: bool)
+    book = act(book, switchAct("setSecurity", setting, on))
+  action setQuietHours(on: bool)
+    book = act(book, switchAct("setQuietHours", "quiet", on))
+  action setText(field: enum<"displayName">, value: string)
+    book = value.trim() == "" ? Ledger(book, answer="invalid") : act(book, setAct("setText", field, value.trim(), `“${value.trim()}”`))
+  action setNumber(field: enum<"goal", "volume">, value: number)
+    book = (field == "goal" ? value >= 1 and value <= 100000 : value >= 0 and value <= 100) ? act(book, setAct("setNumber", field, `${value}`, `${value}`)) : Ledger(book, answer="invalid")
+  action setDate(field: enum<"start">, value: string)
+    book = isDay(value) ? act(book, setAct("setDate", field, value, value)) : Ledger(book, answer="invalid")
+  action setChoice(field: enum<"units", "theme">, value: string)
+    book = (field == "units" ? ["metric", "imperial"].includes(value) : ["light", "dark", "auto"].includes(value)) ? act(book, setAct("setChoice", field, value, value)) : Ledger(book, answer="unknown-option")
+  // A secret: an agent may fill it, never read it. No tool returns its value.
+  action setSecret(field: enum<"apiKey", "code">, value: string)
+    book = value.trim() == "" ? Ledger(book, answer="invalid") : act(book, secretAct(field, value))
+  action setRole(member: string, role: enum<"member", "admin">)
+    book = memberName(book, member) == "" ? Ledger(book, answer="unknown-id") : act(book, roleAct(book, member, role))
+  action addMember(name: string)
+    book = name.trim() == "" ? Ledger(book, answer="invalid") : act(book, addAct(`n${book.seq + 1}`, name.trim()))
+  action removeMember(member: string)
+    book = memberName(book, member) == "" ? Ledger(book, answer="unknown-id") : act(book, removeAct(book, member))
+  action setCity(name: string)
+    book = cities().includes(name) ? act(book, setAct("setCity", "city", name, name)) : Ledger(book, answer="unknown-option")
+  action setTeamName(value: string)
+    book = teamNameProblem(value) != "" ? Ledger(book, answer=teamNameProblem(value)) : act(book, setAct("setTeamName", "teamName", value.trim(), value.trim()))
+  action setRating(value: number)
+    book = value < 0 or value > 5 or round(value) != value ? Ledger(book, answer="invalid") : act(book, setAct("setRating", "rating", `${value}`, `${value} of 5`))
+  action selectFolder(id: string)
+    book = folderIds().includes(id) ? act(book, setAct("selectFolder", "folder", id, id)) : Ledger(book, answer="unknown-id")
+  action setAccent(choice: enum<"blue", "green", "orange", "pink", "purple">)
+    book = act(book, setAct("setAccent", "accent", choice, choice))
+
+  // The ledger's own tools: undo the agent's change, answer an act (refused
+  // when the door that asked would answer), and make a tool's mode stricter.
+  action undoChange(change: string)
+    book = undo(book, change)
+  action answerWaiting(act: string, yes: bool)
+    book = answer(book, act, yes, "agent")
+  action raiseMode(tool: string, mode: enum<"recorded", "delayed", "proposed", "off">)
+    book = raise(book, tool, mode, "agent")

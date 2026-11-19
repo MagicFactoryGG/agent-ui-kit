@@ -1,0 +1,40 @@
+{
+  "ledger": "book",
+  "commands": "commands",
+  "paletteTab": "tap tab-more",
+  "paletteId": "commands",
+  "ledgerTools": {
+    "undoChange": "acts on the ledger: undoes an agent's own change, and is not itself recorded",
+    "answerWaiting": "acts on the ledger: answers a waiting act; the door that asked cannot answer",
+    "raiseMode": "acts on the ledger: only makes a tool's mode stricter"
+  },
+  "personOnly": {
+    "review": "opens the waiting sheet: view only, an agent has nothing to open",
+    "reject-all": "answering what waits is the person's act; an agent must not answer its own"
+  },
+  "viewOnly": ["review"],
+  "commandSetup": {
+    "undo": ["call setSetting {\"setting\":\"digest\",\"on\":false}"],
+    "reject-all": ["call setSecurity {\"setting\":\"twoStep\",\"on\":false}"]
+  },
+  "samples": {
+    "setSetting": { "setting": "digest", "on": false },
+    "setSecurity": { "setting": "twoStep", "on": false },
+    "setQuietHours": { "on": true },
+    "setText": { "field": "displayName", "value": "Ada" },
+    "setNumber": { "field": "goal", "value": 12000 },
+    "setDate": { "field": "start", "value": "2026-12-01" },
+    "setChoice": { "field": "units", "value": "imperial" },
+    "setSecret": { "field": "apiKey", "value": "sample-key" },
+    "setRole": { "member": "m1", "role": "admin" },
+    "addMember": { "name": "Ada" },
+    "removeMember": { "member": "m2" },
+    "setCity": { "name": "Perth" },
+    "setTeamName": { "value": "Platform Two" },
+    "setRating": { "value": 3 },
+    "selectFolder": { "id": "ui" },
+    "setAccent": { "choice": "green" }
+  },
+  "raise": ["call raiseMode {\"tool\":\"%tool\",\"mode\":\"%mode\"}"],
+  "lower": ["call raiseMode {\"tool\":\"%tool\",\"mode\":\"%mode\"}"]
+}

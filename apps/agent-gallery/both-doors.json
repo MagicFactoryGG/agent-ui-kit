@@ -1,0 +1,437 @@
+[
+  {
+    "name": "the weekly digest: the switch and setSetting reach the same value; the agent's is recorded and marked",
+    "person": [
+      "type digest false"
+    ],
+    "agent": [
+      "call setSetting {\"setting\":\"digest\",\"on\":false}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": [
+        "digest"
+      ],
+      "book.note.no": "Undo"
+    },
+    "expectPerson": {
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "an agent's change is undone by its id, and by the notice's Undo",
+    "person": [
+      "type digest false",
+      "type digest true"
+    ],
+    "agent": [
+      "call setSetting {\"setting\":\"digest\",\"on\":false}",
+      "call undoChange {\"change\":\"a1\"}",
+      "call setSetting {\"setting\":\"failures\",\"on\":false}",
+      "tap notice-settings-no"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "undone"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.changes": [],
+      "book.marked": []
+    }
+  },
+  {
+    "name": "two-step approval: the agent's act waits; the person's Accept on the switch reaches the person's own end state",
+    "person": [
+      "type twoStep false"
+    ],
+    "agent": [
+      "call setSecurity {\"setting\":\"twoStep\",\"on\":false}",
+      "tap twoStep-accept"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "proposed"
+      ]
+    ],
+    "expect": {
+      "book.waiting": [],
+      "book.changes.0.answeredBy": "person"
+    }
+  },
+  {
+    "name": "the door that asks never answers: the agent cannot accept its own proposal; the person can",
+    "agent": [
+      "call setSecurity {\"setting\":\"twoStep\",\"on\":false}",
+      "call answerWaiting {\"act\":\"a1\",\"yes\":true}",
+      "call listWaiting {}"
+    ],
+    "calls": [
+      [
+        "ok",
+        "proposed"
+      ],
+      [
+        "failed",
+        "answer-elsewhere"
+      ],
+      [
+        "ok"
+      ]
+    ],
+    "expect": {
+      "book.values.3.value": "on",
+      "book.waiting.length": 1
+    }
+  },
+  {
+    "name": "quiet hours: a delayed act applies after 5 seconds; Stop on the notice keeps the old value",
+    "person": [
+      "type quiet true"
+    ],
+    "agent": [
+      "call setQuietHours {\"on\":true}",
+      "clock +6000"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "delayed"
+      ]
+    ],
+    "expect": {
+      "book.waiting": [],
+      "book.changes.0.sentence": "Your assistant turned Quiet hours on."
+    }
+  },
+  {
+    "name": "quiet hours, stopped: nothing changes",
+    "agent": [
+      "call setQuietHours {\"on\":true}",
+      "tap notice-settings-no",
+      "clock +6000"
+    ],
+    "calls": [
+      [
+        "ok",
+        "delayed"
+      ]
+    ],
+    "expect": {
+      "book.values.4.value": "off",
+      "book.waiting": [],
+      "book.changes": []
+    }
+  },
+  {
+    "name": "each profile value: the controls and the tools reach the same values; refusals by word",
+    "person": [
+      "tap tab-profile",
+      "type goal 12000",
+      "type goal key Enter",
+      "type volume 70",
+      "type start 2026-12-01",
+      "type units imperial",
+      "tap theme-dark"
+    ],
+    "agent": [
+      "call setNumber {\"field\":\"goal\",\"value\":12000}",
+      "call setNumber {\"field\":\"volume\",\"value\":70}",
+      "call setDate {\"field\":\"start\",\"value\":\"2026-12-01\"}",
+      "call setChoice {\"field\":\"units\",\"value\":\"imperial\"}",
+      "call setChoice {\"field\":\"theme\",\"value\":\"dark\"}",
+      "call setNumber {\"field\":\"goal\",\"value\":0}",
+      "call setDate {\"field\":\"start\",\"value\":\"tomorrow\"}",
+      "call setChoice {\"field\":\"theme\",\"value\":\"purple\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "failed",
+        "invalid"
+      ],
+      [
+        "failed",
+        "invalid"
+      ],
+      [
+        "failed",
+        "unknown-option"
+      ]
+    ],
+    "expect": {
+      "book.changes.length": 5
+    }
+  },
+  {
+    "name": "the display name: other people see it, so the agent's act waits; Accept on the field reaches the person's value",
+    "person": [
+      "tap tab-profile",
+      "type displayName Ada"
+    ],
+    "agent": [
+      "call setText {\"field\":\"displayName\",\"value\":\"Ada\"}",
+      "tap tab-profile",
+      "tap displayName-accept"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "proposed"
+      ]
+    ],
+    "expect": {
+      "book.waiting": []
+    }
+  },
+  {
+    "name": "a secret: the agent fills it directly, and no tool or call record gives it back (the person's door: app.test.contract)",
+    "agent": [
+      "call setSecret {\"field\":\"apiKey\",\"value\":\"sample-key-123\"}",
+      "call readAccount {}"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok"
+      ]
+    ],
+    "expect": {
+      "book.values.11.value": "sample-key-123",
+      "book.changes": [],
+      "book.note.mode": "direct"
+    },
+    "noLeak": "sample-key-123"
+  },
+  {
+    "name": "a member's removal: proposed by the agent, then the person's Remove on the row",
+    "person": [
+      "tap tab-account",
+      "tap m2-remove"
+    ],
+    "agent": [
+      "call removeMember {\"member\":\"m2\"}",
+      "tap tab-account",
+      "tap m2-accept"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "proposed"
+      ]
+    ]
+  },
+  {
+    "name": "a member's role and a new member: proposed, then accepted in the sheet",
+    "agent": [
+      "call setRole {\"member\":\"m1\",\"role\":\"admin\"}",
+      "call addMember {\"name\":\"Ada\"}",
+      "call setRole {\"member\":\"nobody\",\"role\":\"admin\"}",
+      "tap review-settings",
+      "tap approvals-accept-all"
+    ],
+    "calls": [
+      [
+        "ok",
+        "proposed"
+      ],
+      [
+        "ok",
+        "proposed"
+      ],
+      [
+        "failed",
+        "unknown-id"
+      ]
+    ],
+    "expect": {
+      "book.values.14.value": "admin",
+      "book.values.24.value": "Ada",
+      "book.waiting": [],
+      "book.changes.length": 2
+    }
+  },
+  {
+    "name": "a city: the combobox and setCity reach the same value; an unknown one is refused",
+    "person": [
+      "tap tab-more",
+      "type city-input Per",
+      "type city-input key Enter"
+    ],
+    "agent": [
+      "call findCity {\"text\":\"per\"}",
+      "call setCity {\"name\":\"Perth\"}",
+      "call setCity {\"name\":\"Atlantis\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "Perth"
+      ],
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "failed",
+        "unknown-option"
+      ]
+    ]
+  },
+  {
+    "name": "the team name: the refusal word comes from the same check as the person's error",
+    "agent": [
+      "call setTeamName {\"value\":\"A\"}",
+      "call setTeamName {\"value\":\"Platform Two\"}"
+    ],
+    "calls": [
+      [
+        "failed",
+        "too-short"
+      ],
+      [
+        "ok",
+        "proposed"
+      ]
+    ]
+  },
+  {
+    "name": "drawn examples: the stars, the tree and the swatches reach the same values as the tools",
+    "person": [
+      "tap tab-examples",
+      "tap stars-star-3",
+      "tap tree-specs-toggle",
+      "tap tree-ui",
+      "tap swatches-purple"
+    ],
+    "agent": [
+      "call setRating {\"value\":3}",
+      "call selectFolder {\"id\":\"ui\"}",
+      "call setAccent {\"choice\":\"purple\"}",
+      "call setRating {\"value\":9}",
+      "call selectFolder {\"id\":\"nowhere\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "failed",
+        "invalid"
+      ],
+      [
+        "failed",
+        "unknown-id"
+      ]
+    ],
+    "expect": {
+      "openFolders": [
+        "docs"
+      ]
+    }
+  },
+  {
+    "name": "a raised mode: the person's raise makes the agent's act wait; the agent cannot lower it",
+    "agent": [
+      "tap tab-assistant",
+      "type permits-setSetting proposed",
+      "call setSetting {\"setting\":\"digest\",\"on\":false}",
+      "call raiseMode {\"tool\":\"setSetting\",\"mode\":\"recorded\"}",
+      "call raiseMode {\"tool\":\"setSecurity\",\"mode\":\"recorded\"}"
+    ],
+    "calls": [
+      [
+        "ok",
+        "proposed"
+      ],
+      [
+        "failed",
+        "person-only"
+      ],
+      [
+        "failed",
+        "below-floor"
+      ]
+    ],
+    "expect": {
+      "book.values.0.value": "on",
+      "book.waiting.0.key": "digest"
+    }
+  }
+]

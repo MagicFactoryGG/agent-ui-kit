@@ -1,0 +1,276 @@
+// The agent gallery: task screens that a person and an agent use alike. One
+// ledger, two doors: each control and the agent's tool write the same record
+// through the same functions (@agent-ui-kit/agent). The mode of each act comes
+// from the app's one tool list (model.contract), which also draws the palette
+// (do), the permit list (permit) and the activity (review). Sample data only.
+//
+// Members files: screens.contract (state and the person's door),
+// tools.contract (the agent's door), model.contract (words, the tool list,
+// sample values), examples.contract (drawn examples, not packages).
+use Ledger, Change, Waiting, valueOf, isOn, numberOf, waitingSentence, waitingYes, waitingNo, modeOf from "@agent-ui-kit/agent"
+use Notice, ActivityList, ApprovalSheet, PermitList from "@agent-ui-kit/agent"
+use Field, Combobox, ToggleRow, AgentRow from "@agent-ui-kit/forms"
+use Command, CommandPalette, command from "@agent-ui-kit/commands"
+use titleOf, markFor, modeLabels, memberIds, memberName, roleOf, rowKey, cities, teamNameProblem, teamNameMessage from "./model.contract"
+use DisclosureHeader, Rating, TreeView, SwatchPicker, Waterfall, Timeline, folderIds, folderTitle, folderParent, visibleFolders, swatches, timings, history, starsSaid from "./examples.contract"
+
+routes nav
+  tab settings "/"
+  tab profile "/profile"
+  tab account "/account"
+  tab more "/more"
+  tab assistant "/assistant"
+  tab examples "/examples"
+
+component App
+  members "./screens.contract"
+  members "./tools.contract"
+
+  derive settingsText = ["digest", "failures", "marketing", "twoStep", "quiet"].map(k => `${k}\t${valueOf(book, k)}\t${waitingSentence(book, k) == "" ? "" : "waiting"}`).join("\n")
+  derive profileText = ["displayName", "goal", "volume", "start", "units", "theme"].map(k => `${k}\t${valueOf(book, k)}\t${waitingSentence(book, k) == "" ? "" : "waiting"}`).join("\n")
+  derive accountText = [`apiKey\t${valueOf(book, "apiKey") == "" ? "empty" : "set"}`, `code\t${valueOf(book, "code") == "" ? "empty" : "set"}`].concat(memberIds(book).map(m => `member\t${m}\t${memberName(book, m)}\t${roleOf(book, m)}\t${waitingSentence(book, rowKey(book, m)) == "" ? "" : "waiting"}`)).join("\n")
+  derive cityHits = cities().filter(c => c.toLowerCase().includes(findQuery.toLowerCase())).join("\n")
+  derive activityText = book.changes.map(c => `${c.id}\t${c.tool}\t${c.key}\t${c.sentence}`).join("\n")
+  derive waitingText = book.waiting.map(w => `${w.id}\t${w.mode}\t${w.key}\t${w.sentence}`).join("\n")
+  derive permitText = book.tools.map(t => `${t.name}\t${t.floor}\t${modeOf(book, t.name)}`).join("\n")
+  derive folderText = folderIds().map(f => `${f}\t${folderParent(f)}\t${folderTitle(f)}${f == valueOf(book, "folder") ? "\tselected" : ""}`).join("\n")
+  derive timingText = timings().map(t => `${t.id}\t${t.label}\t${t.start}\t${t.duration}`).join("\n")
+  // The "do" view of the tool list: each command names its tool, or "" for
+  // the person's own (tools/palette-link.mjs holds the link).
+  derive commands = [
+    command("review", "Review what waits", `${book.waiting.length} waiting`, ""),
+    command("undo", "Undo the assistant's last change", (book.changes.length == 0 ? "Nothing to undo" : "Same as the notice's Undo"), "undoChange"),
+    command("digest", (isOn(book, "digest") ? "Turn the weekly digest off" : "Turn the weekly digest on"), "Same as the switch", "setSetting"),
+    command("quiet", (isOn(book, "quiet") ? "Turn quiet hours off" : "Turn quiet hours on"), "Same as the switch", "setQuietHours"),
+    command("reject-all", "Reject everything that waits", "Same as the sheet's Reject all", "")
+  ]
+
+  // The agent's door. Answer words are closed: saved, delayed, proposed, off,
+  // invalid, unknown-option, unknown-id, too-short, too-long, undone,
+  // accepted, rejected, answer-elsewhere, below-floor, person-only.
+  tool readSettings reads "Each setting, one per line: id, on or off, and waiting when an act waits on it, tab-separated." = readSettings
+    returns settingsText
+  tool setSetting writes idempotent closed "Turn an email setting on or off. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readSettings." = setSetting
+    returns book.answer
+    fails when book.answer == "off"
+  tool setSecurity writes idempotent closed "Suggest turning two-step approval on or off; the person decides. Answers proposed." = setSecurity
+    returns book.answer
+    fails when book.answer == "off"
+  tool setQuietHours writes idempotent closed "Turn quiet hours on or off after 5 seconds, unless the person stops it. Answers delayed." = setQuietHours
+    returns book.answer
+    fails when book.answer == "off"
+  tool readProfile reads "Each profile field, one per line: id, value, and waiting when an act waits on it, tab-separated." = readProfile
+    returns profileText
+  tool setText writes idempotent closed "Suggest a new display name; other people see it, so it waits for the person. Answers proposed or invalid." = setText
+    returns book.answer
+    fails when book.answer == "invalid" or book.answer == "off"
+  tool setNumber writes idempotent closed "Set goal (1 to 100000 steps) or volume (0 to 100). Answers saved or invalid." = setNumber
+    returns book.answer
+    fails when book.answer == "invalid" or book.answer == "off"
+  tool setDate writes idempotent closed "Set the start date, as YYYY-MM-DD. Answers saved or invalid." = setDate
+    returns book.answer
+    fails when book.answer == "invalid" or book.answer == "off"
+  tool setChoice writes idempotent closed "Set units (metric or imperial) or theme (light, dark or auto). Answers saved or unknown-option." = setChoice
+    returns book.answer
+    fails when book.answer == "unknown-option" or book.answer == "off"
+  tool readAccount reads "The account, one per line, tab-separated: apiKey and code as set or empty (their values are never shown), then each member as member, id, name, role, and waiting when an act waits on it." = readAccount
+    returns accountText
+  tool setSecret writes idempotent closed "Fill the API key or the pairing code. Its value is never returned, by this or any tool. Answers saved or invalid." = setSecret
+    returns book.answer
+    fails when book.answer == "invalid" or book.answer == "off"
+  tool setRole writes idempotent closed "Suggest making a member, by id from readAccount, a member or an admin. Answers proposed or unknown-id." = setRole
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off"
+  tool addMember writes additive closed "Suggest adding a member by name. Answers proposed or invalid." = addMember
+    returns book.answer
+    fails when book.answer == "invalid" or book.answer == "off"
+  tool removeMember destroys "Suggest removing a member, by id from readAccount; the person decides. Answers proposed or unknown-id." = removeMember
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off"
+  tool findCity reads "Cities whose name contains the text, one per line. Use one with setCity." = findCity
+    returns cityHits
+  tool setCity writes idempotent closed "Set the city to one from findCity. Answers saved or unknown-option." = setCity
+    returns book.answer
+    fails when book.answer == "unknown-option" or book.answer == "off"
+  tool setTeamName writes idempotent closed "Suggest a new team name (3 to 30 characters). Answers proposed, too-short or too-long." = setTeamName
+    returns book.answer
+    fails when book.answer == "too-short" or book.answer == "too-long" or book.answer == "off"
+  tool setRating writes idempotent closed "Rate the gallery from 0 to 5 stars, a whole number. Answers saved or invalid." = setRating
+    returns book.answer
+    fails when book.answer == "invalid" or book.answer == "off"
+  tool listFolders reads "Every folder, one per line: id, parent id (empty at the top), title, and selected on the chosen one, tab-separated." = listFolders
+    returns folderText
+  tool selectFolder writes idempotent closed "Select a folder by id from listFolders. Answers saved or unknown-id." = selectFolder
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off"
+  tool setAccent writes idempotent closed "Set the accent colour: blue, green, orange, pink or purple. Answers saved." = setAccent
+    returns book.answer
+    fails when book.answer == "off"
+  tool readTimings reads "The sample page load's requests, one per line: id, label, start and duration in milliseconds, tab-separated." = readTimings
+    returns timingText
+  tool listActivity reads "Changes that took effect, newest first: change id, tool, key, and the sentence that says it, tab-separated." = listActivity
+    returns activityText
+  tool listWaiting reads "Acts that wait, oldest first: act id, mode (delayed or proposed), key, and the sentence that says it, tab-separated." = listWaiting
+    returns waitingText
+  tool readPermits reads "Each tool an assistant may call: name, its floor, and the mode in force, tab-separated." = readPermits
+    returns permitText
+  tool undoChange writes closed "Undo one change, by its change id from listActivity. Answers undone or unknown-id." = undoChange
+    returns book.answer
+    fails when book.answer == "unknown-id"
+  tool answerWaiting writes closed "Answer an act that waits, by its id from listWaiting. Answers accepted, rejected, unknown-id, or answer-elsewhere: an act the assistant asked for is answered by the person." = answerWaiting
+    returns book.answer
+    fails when book.answer != "accepted" and book.answer != "rejected"
+  tool raiseMode writes idempotent closed "Make a tool's mode stricter (recorded, delayed, proposed or off). Answers saved, below-floor, or person-only: only the person makes a mode less strict." = raiseMode
+    returns book.answer
+    fails when book.answer != "saved"
+
+  action pick(name: string)
+    nav = select(nav, name)
+  action follow(url: string)
+    nav = go(nav, url)
+
+  view
+    main navigationKey=`${top(nav).id}` navigate=follow testId="app" width="100%" height="100%"
+      display="flex" flex-direction="column"
+      column flex=1 min-height=0 position="relative"
+        for t in nav.tabs key=t.name
+          column role="tabpanel" id=`panel-${t.name}` position="absolute" inset=0
+            for e in t.stack key=e.id
+              column navigationKey=`${e.id}` navigationScroll=`content-${e.id}` position="absolute" inset=0
+                display="flex" flex-direction="column"
+                header display="flex" align-items="center" padding="8px 16px"
+                  text (e.name == "settings" ? "Settings" : e.name == "profile" ? "Profile" : e.name == "account" ? "Account" : e.name == "more" ? "More" : e.name == "assistant" ? "Assistant" : "Examples") role="heading" aria-level=1 flex=1
+                  button press=review testId=`review-${t.name}`
+                    text `Waiting (${book.waiting.length})`
+                if e.name == "settings"
+                  list id=`content-${e.id}` appearance="auto" listStyle="inset-grouped" flex=1 min-height=0
+                    section
+                      header
+                        text "Email"
+                      for k in ["digest", "failures", "marketing"] key=k
+                        ToggleRow(id=k, title=titleOf(k), checked=isOn(book, k), set=setByPerson(k), mark=markFor(book, k), sentence=waitingSentence(book, k), yesLabel=waitingYes(book, k), noLabel=waitingNo(book, k), yes=answerKeyByPerson(k, true), no=answerKeyByPerson(k, false))
+                    section
+                      header
+                        text "Security and quiet"
+                      for k in ["twoStep", "quiet"] key=k
+                        ToggleRow(id=k, title=titleOf(k), checked=isOn(book, k), set=setByPerson(k), mark=markFor(book, k), sentence=waitingSentence(book, k), yesLabel=waitingYes(book, k), noLabel=waitingNo(book, k), yes=answerKeyByPerson(k, true), no=answerKeyByPerson(k, false))
+                    section
+                      header
+                        text "Your assistant's changes"
+                      ActivityList(id="activity", entries=book.changes, empty="No changes yet.", undoLabel="Undo", undo=undoByPerson)
+                else if e.name == "profile"
+                  list id=`content-${e.id}` appearance="auto" listStyle="inset-grouped" flex=1 min-height=0
+                    section
+                      header
+                        text "About you"
+                      AgentRow(id="displayName", title=titleOf("displayName"), mark=markFor(book, "displayName"), sentence=waitingSentence(book, "displayName"), yesLabel=waitingYes(book, "displayName"), noLabel=waitingNo(book, "displayName"), yes=answerKeyByPerson("displayName", true), no=answerKeyByPerson("displayName", false))
+                        input value=valueOf(book, "displayName") input=editByPerson("displayName") aria-label=titleOf("displayName") testId="displayName" flex=1 min-width=0 text-align="end"
+                      AgentRow(id="goal", title=titleOf("goal"), mark=markFor(book, "goal"), sentence=waitingSentence(book, "goal"), yesLabel=waitingYes(book, "goal"), noLabel=waitingNo(book, "goal"), yes=answerKeyByPerson("goal", true), no=answerKeyByPerson("goal", false))
+                        input type="number" value=valueOf(book, "goal") change=numberByPerson("goal") min=1 max=100000 step=500 aria-label=titleOf("goal") testId="goal"
+                      AgentRow(id="start", title=titleOf("start"), mark=markFor(book, "start"), sentence=waitingSentence(book, "start"), yesLabel=waitingYes(book, "start"), noLabel=waitingNo(book, "start"), yes=answerKeyByPerson("start", true), no=answerKeyByPerson("start", false))
+                        input type="date" value=valueOf(book, "start") change=editByPerson("start") aria-label=titleOf("start") testId="start"
+                    section
+                      header
+                        text "Preferences"
+                      AgentRow(id="volume", title=titleOf("volume"), mark=markFor(book, "volume"), sentence=waitingSentence(book, "volume"), yesLabel=waitingYes(book, "volume"), noLabel=waitingNo(book, "volume"), yes=answerKeyByPerson("volume", true), no=answerKeyByPerson("volume", false))
+                        input type="range" value=numberOf(book, "volume") change=rangeByPerson("volume") min=0 max=100 step=1 aria-label=titleOf("volume") testId="volume" flex=1 min-width=0
+                      AgentRow(id="units", title=titleOf("units"), mark=markFor(book, "units"), sentence=waitingSentence(book, "units"), yesLabel=waitingYes(book, "units"), noLabel=waitingNo(book, "units"), yes=answerKeyByPerson("units", true), no=answerKeyByPerson("units", false))
+                        select value=valueOf(book, "units") change=pickByPerson("units") aria-label=titleOf("units") testId="units"
+                          option "Metric" value="metric"
+                          option "Imperial" value="imperial"
+                      AgentRow(id="theme", title=titleOf("theme"), mark=markFor(book, "theme"), sentence=waitingSentence(book, "theme"), yesLabel=waitingYes(book, "theme"), noLabel=waitingNo(book, "theme"), yes=answerKeyByPerson("theme", true), no=answerKeyByPerson("theme", false))
+                        row role="radiogroup" aria-label=titleOf("theme") testId="theme"
+                          button role="radio" aria-checked=(valueOf(book, "theme") == "light") press=pickByPerson("theme", "light") testId="theme-light"
+                            text "Light"
+                          button role="radio" aria-checked=(valueOf(book, "theme") == "dark") press=pickByPerson("theme", "dark") testId="theme-dark"
+                            text "Dark"
+                          button role="radio" aria-checked=(valueOf(book, "theme") == "auto") press=pickByPerson("theme", "auto") testId="theme-auto"
+                            text "Auto"
+                else if e.name == "account"
+                  list id=`content-${e.id}` appearance="auto" listStyle="inset-grouped" flex=1 min-height=0
+                    section
+                      header
+                        text "Secrets"
+                      for k in ["apiKey", "code"] key=k
+                        AgentRow(id=`${k}-secret`, title=titleOf(k), mark=markFor(book, k), sentence=waitingSentence(book, k), yesLabel=waitingYes(book, k), noLabel=waitingNo(book, k), yes=answerKeyByPerson(k, true), no=answerKeyByPerson(k, false))
+                          input type="password" autocomplete=(k == "code" ? "one-time-code" : "off") value=valueOf(book, k) input=editByPerson(k) aria-label=titleOf(k) testId=k flex=1 min-width=0
+                      footer
+                        text "Your assistant can fill these but never read them."
+                    section
+                      header
+                        text "Members"
+                      for m in memberIds(book) key=m
+                        AgentRow(id=m, title=memberName(book, m), mark=markFor(book, `member:${m}`), sentence=waitingSentence(book, rowKey(book, m)), yesLabel=waitingYes(book, rowKey(book, m)), noLabel=waitingNo(book, rowKey(book, m)), yes=answerRowByPerson(m, true), no=answerRowByPerson(m, false))
+                          select value=roleOf(book, m) change=pickByPerson(`role:${m}`) aria-label=`Role for ${memberName(book, m)}` testId=`${m}-role`
+                            option "Member" value="member"
+                            option "Admin" value="admin"
+                          button press=removeByPerson(m) destructive=true aria-label=`Remove ${memberName(book, m)}` testId=`${m}-remove`
+                            text "Remove"
+                else if e.name == "more"
+                  scroll id=`content-${e.id}` flex=1 min-height=0
+                    column gap=24 padding=16
+                      AgentRow(id="city", title="City", mark=markFor(book, "city"), sentence=waitingSentence(book, "city"), yesLabel=waitingYes(book, "city"), noLabel=waitingNo(book, "city"), yes=answerKeyByPerson("city", true), no=answerKeyByPerson("city", false))
+                        Combobox(id="city-input", label="City", value=valueOf(book, "city"), options=cities(), placeholder="Search cities", choose=pickByPerson("city"))
+                      AgentRow(id="teamName-row", title=titleOf("teamName"), mark=markFor(book, "teamName"), sentence=waitingSentence(book, "teamName"), yesLabel=waitingYes(book, "teamName"), noLabel=waitingNo(book, "teamName"), yes=answerKeyByPerson("teamName", true), no=answerKeyByPerson("teamName", false))
+                        Field(id="teamName", label=titleOf("teamName"), hint="Other people see it.", error=teamNameMessage(teamNameProblem(valueOf(book, "teamName"))))
+                          input value=valueOf(book, "teamName") input=editByPerson("teamName") aria-label=titleOf("teamName") testId="teamName"
+                      column gap=8
+                        text "Commands" role="heading" aria-level=2
+                        CommandPalette(id="commands", label="Search commands", placeholder="Search commands", commands=commands, agentLabel="Your assistant can do this too", run=runCommand)
+                else if e.name == "assistant"
+                  list id=`content-${e.id}` appearance="auto" listStyle="inset-grouped" flex=1 min-height=0
+                    section
+                      header
+                        text "What your assistant can do here"
+                      PermitList(id="permits", tools=book.tools, raised=book.raised, modeLabels=modeLabels(), set=raiseByPerson)
+                      footer
+                        text "You can make any of these stricter. The app sets the least strict mode."
+                    section
+                      header
+                        text "Answers"
+                      ToggleRow(id="agentAnswers", title="Your assistant may answer its own suggestions", checked=(not book.asksNeverAnswers), set=letAgentAnswer, mark="", sentence=waitingSentence(book, "agentAnswers"), yesLabel=waitingYes(book, "agentAnswers"), noLabel=waitingNo(book, "agentAnswers"), yes=noteYesByPerson, no=noteNoByPerson)
+                    section
+                      header
+                        text "Your assistant's changes"
+                      ActivityList(id="activity-all", entries=book.changes, empty="No changes yet.", undoLabel="Undo", undo=undoByPerson)
+                else
+                  scroll id=`content-${e.id}` flex=1 min-height=0
+                    column gap=24 padding=16
+                      AgentRow(id="rating", title="Rate this gallery", mark=markFor(book, "rating"), sentence=waitingSentence(book, "rating"), yesLabel=waitingYes(book, "rating"), noLabel=waitingNo(book, "rating"), yes=answerKeyByPerson("rating", true), no=answerKeyByPerson("rating", false))
+                        Rating(id="stars", label="Rating", value=numberOf(book, "rating"), said=starsSaid(numberOf(book, "rating")), set=rateByPerson)
+                      AgentRow(id="folder", title="Folder", mark=markFor(book, "folder"), sentence=waitingSentence(book, "folder"), yesLabel=waitingYes(book, "folder"), noLabel=waitingNo(book, "folder"), yes=answerKeyByPerson("folder", true), no=answerKeyByPerson("folder", false))
+                        text folderTitle(valueOf(book, "folder")) testId="folder-chosen"
+                      TreeView(id="tree", nodes=visibleFolders(openFolders), selected=valueOf(book, "folder"), expandLabel="Open", collapseLabel="Close", toggle=toggleFolder, choose=pickByPerson("folder"))
+                      AgentRow(id="accent", title="Accent", mark=markFor(book, "accent"), sentence=waitingSentence(book, "accent"), yesLabel=waitingYes(book, "accent"), noLabel=waitingNo(book, "accent"), yes=answerKeyByPerson("accent", true), no=answerKeyByPerson("accent", false))
+                        SwatchPicker(id="swatches", label="Accent", swatches=swatches(), value=valueOf(book, "accent"), chosenLabel="chosen", choose=pickByPerson("accent"))
+                      column gap=8
+                        DisclosureHeader(id="advanced", title="Advanced", open=advancedOpen, toggle=toggleAdvanced)
+                        if advancedOpen
+                          text "Nothing here yet: a disclosure's body is the app's, under its own if." testId="advanced-body"
+                      column gap=8
+                        text "Request timing" role="heading" aria-level=2
+                        Waterfall(id="timing", spans=timings(), total=700)
+                      column gap=8
+                        text "History" role="heading" aria-level=2
+                        Timeline(id="history", entries=history())
+                Notice(id=`notice-${t.name}`, note=book.note, yes=noteYesByPerson, no=noteNoByPerson)
+      row role="tablist" testId="tabs"
+        button role="tab" aria-controls="panel-settings" aria-selected=(nav.tab == "settings") press=pick("settings") testId="tab-settings" flex=1
+          image "symbol:settings"
+          text "Settings"
+        button role="tab" aria-controls="panel-profile" aria-selected=(nav.tab == "profile") press=pick("profile") testId="tab-profile" flex=1
+          image "symbol:person"
+          text "Profile"
+        button role="tab" aria-controls="panel-account" aria-selected=(nav.tab == "account") press=pick("account") testId="tab-account" flex=1
+          image "symbol:lock"
+          text "Account"
+        button role="tab" aria-controls="panel-more" aria-selected=(nav.tab == "more") press=pick("more") testId="tab-more" flex=1
+          image "symbol:more"
+          text "More"
+        button role="tab" aria-controls="panel-assistant" aria-selected=(nav.tab == "assistant") press=pick("assistant") testId="tab-assistant" flex=1
+          image "symbol:checkmark"
+          text "Assistant"
+        button role="tab" aria-controls="panel-examples" aria-selected=(nav.tab == "examples") press=pick("examples") testId="tab-examples" flex=1
+          image "symbol:document"
+          text "Examples"
+      ApprovalSheet(id="approvals", title="Waiting for you", items=book.waiting, empty="Nothing waiting.", acceptAllLabel="Accept all", rejectAllLabel="Reject all", closeLabel="Close", accept=acceptByPerson, reject=rejectByPerson, acceptAll=acceptAllByPerson, rejectAll=rejectAllByPerson)

@@ -1,0 +1,150 @@
+// Examples, not packages: drawn pieces that show the agent layer works with
+// any control an app makes. They stay in the gallery until an app needs them
+// (docs/recipes/examples-not-packages.md says why). Each takes its words from
+// the app; an agent reaches each by key through the app's tool, never through
+// the drawing.
+
+// A disclosure's header: the app holds `open` and shows the body under its own
+// `if open`. It says its state aloud.
+component DisclosureHeader
+  props
+    id: string
+    title: string
+    open: bool
+    toggle: action
+  view
+    button press=toggle testId=id aria-expanded=open
+      text title
+      image "symbol:forward-chevron" aria-hidden=true transform=(open ? "rotate(90deg)" : "rotate(0deg)")
+
+// A rating from 0 to 5: one native button per star, each with its own spoken
+// name, which the app gives (`said`).
+component Rating
+  props
+    id: string
+    label: string
+    value: number
+    said: string[]
+    set: action
+  view
+    row testId=id gap=8 role="group" aria-label=label
+      for n in [1, 2, 3, 4, 5] key=n
+        button press=set(n) testId=`${id}-star-${n}` buttonStyle="plain" aria-label=(match said.at(n - 1) { case some(s) => s, case none => "" })
+          image (n <= value ? "symbol:star-fill" : "symbol:star") -exact-tint-color=(n <= value ? "-exact-system-yellow" : "-exact-tertiary-label")
+
+// One visible node of a tree, already flattened by the app.
+shape TreeNode
+  id: string
+  title: string
+  depth: number
+  hasChildren: bool
+  expanded: bool
+
+// A tree, drawn: each visible node is a row indented by its depth, with a
+// disclosure for its children and a selectable title. Opening is the
+// person's view; an agent selects by key.
+component TreeView
+  props
+    id: string
+    nodes: TreeNode[]
+    selected: string
+    expandLabel: string
+    collapseLabel: string
+    toggle: action
+    choose: action
+  view
+    column testId=id
+      for n in nodes key=n.id
+        row testId=`${id}-${n.id}-row` align-items="center" gap=8
+          for d in [1, 2, 3, 4, 5, 6].filter(x => x <= n.depth) key=d
+            box width="1.5rem"
+          if n.hasChildren
+            button press=toggle(n.id) testId=`${id}-${n.id}-toggle` aria-expanded=n.expanded aria-label=`${n.expanded ? collapseLabel : expandLabel} ${n.title}`
+              image "symbol:forward-chevron" transform=(n.expanded ? "rotate(90deg)" : "rotate(0deg)")
+          else
+            box width="1.5rem"
+          button press=choose(n.id) testId=`${id}-${n.id}` aria-selected=(n.id == selected) buttonStyle="plain"
+            text n.title font-weight=(n.id == selected ? 600 : 400)
+
+// One colour a person can choose: its key, its spoken name, its paint.
+shape Swatch
+  id: string
+  name: string
+  paint: string
+
+// A colour choice, drawn: each swatch is a button that says its name and
+// whether it is chosen.
+component SwatchPicker
+  props
+    id: string
+    label: string
+    swatches: Swatch[]
+    value: string
+    chosenLabel: string
+    choose: action
+  view
+    row testId=id role="group" aria-label=label gap=8 flex-wrap="wrap"
+      for s in swatches key=s.id
+        button press=choose(s.id) testId=`${id}-${s.id}` aria-label=(s.id == value ? `${s.name}, ${chosenLabel}` : s.name)
+          aria-pressed=(s.id == value)
+          width="2rem" height="2rem" border-radius="1rem"
+          background-color=s.paint
+          border-width=(s.id == value ? "3px" : "0px") border-style="solid" border-color="-exact-label"
+
+// One timed span.
+shape Span
+  id: string
+  label: string
+  start: number
+  duration: number
+  said: string
+
+// A waterfall of timed spans, drawn: to a screen reader each row is one image
+// that says its timing in the app's words (`said`). An agent reads the spans
+// as data through the app's tool, never from the bars.
+component Waterfall
+  props
+    id: string
+    spans: Span[]
+    total: number
+  view
+    column testId=id gap=8
+      for s in spans key=s.id
+        row testId=`${id}-${s.id}` role="img" aria-label=s.said gap=8 align-items="center"
+          text s.label width="6rem" font="-exact-footnote"
+          row flex=1 height="0.6rem" background-color="-exact-secondary-background" border-radius="0.3rem"
+            box width=`${round(s.start / total * 1000) / 10}%`
+            box width=`${round(s.duration / total * 1000) / 10}%` background-color="AccentColor" border-radius="0.3rem"
+
+// One dated entry.
+shape TimelineEntry
+  id: string
+  when: string
+  title: string
+  detail: string
+
+// Dated entries, newest first.
+component Timeline
+  props
+    id: string
+    entries: TimelineEntry[]
+  view
+    column testId=id gap=8
+      for e in entries key=e.id
+        row testId=`${id}-${e.id}` gap=8 align-items="flex-start"
+          text e.when color="-exact-secondary-label" font="-exact-footnote" font-variant-numeric="tabular-nums"
+          column flex=1 min-width=0
+            text e.title
+            text e.detail color="-exact-secondary-label" font="-exact-footnote"
+
+// The examples' sample data.
+fn folderIds(): string[] = ["docs", "specs", "api", "ui", "notes", "photos", "y2026"]
+fn folderTitle(id: string): string = id == "docs" ? "Documents" : id == "specs" ? "Specs" : id == "api" ? "API" : id == "ui" ? "UI" : id == "notes" ? "Notes" : id == "photos" ? "Photos" : "2026"
+fn folderParent(id: string): string = id == "specs" or id == "notes" ? "docs" : id == "api" or id == "ui" ? "specs" : id == "y2026" ? "photos" : ""
+fn node(id: string, depth: number, kids: bool, open: string[]): TreeNode = TreeNode(id=id, title=folderTitle(id), depth=depth, hasChildren=kids, expanded=open.includes(id))
+fn visibleFolders(open: string[]): TreeNode[] = [node("docs", 0, true, open)].concat(open.includes("docs") ? [node("specs", 1, true, open)].concat(open.includes("specs") ? [node("api", 2, false, open), node("ui", 2, false, open)] : []).concat([node("notes", 1, false, open)]) : []).concat([node("photos", 0, true, open)]).concat(open.includes("photos") ? [node("y2026", 1, false, open)] : [])
+fn swatches(): Swatch[] = [Swatch(id="blue", name="Blue", paint="-exact-system-blue"), Swatch(id="green", name="Green", paint="-exact-system-green"), Swatch(id="orange", name="Orange", paint="-exact-system-orange"), Swatch(id="pink", name="Pink", paint="-exact-system-pink"), Swatch(id="purple", name="Purple", paint="-exact-system-purple")]
+fn span(id: string, label: string, start: number, duration: number): Span = Span(id=id, label=label, start=start, duration=duration, said=`${label}: starts at ${start} ms, takes ${duration} ms`)
+fn timings(): Span[] = [span("html", "page", 0, 120), span("css", "styles", 110, 60), span("js", "script", 115, 240), span("api", "data", 360, 180), span("img", "images", 380, 300)]
+fn history(): TimelineEntry[] = [TimelineEntry(id="h3", when="18 Nov", title="Two-step approval turned on", detail="By you"), TimelineEntry(id="h2", when="12 Nov", title="Sam Lee made admin", detail="By you"), TimelineEntry(id="h1", when="3 Nov", title="Account created", detail="Sample data")]
+fn starsSaid(value: number): string[] = [1, 2, 3, 4, 5].map(n => n == value ? `${n} of 5 stars, selected` : `${n} of 5 stars`)

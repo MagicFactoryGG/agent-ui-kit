@@ -1,0 +1,82 @@
+// The person's door. The agent's door for the same end states is
+// both-doors.json, run by tools/both-doors.mjs (a tool `call` is not a test
+// step in Exact). `book.values.<n>` is the n-th sample value, in
+// model.contract's startValues order: 0 digest, 4 quiet, 5 displayName,
+// 6 goal, 7 volume, 8 start, 9 units, 10 theme, 11 apiKey, 14 role:m1,
+// 15 member:m2, 19 city, 20 teamName, 21 rating, 22 folder, 23 accent.
+
+test "a person turns the weekly digest off: no mark, nothing recorded"
+  expect state book.values.0.value == "on"
+  type "digest" "false"
+  expect state book.values.0.value == "off"
+  expect tree missing "digest-mark"
+  expect state book.changes.length == 0
+
+test "the activity list starts empty, and nothing waits"
+  expect tree has "activity-empty"
+  expect state book.waiting.length == 0
+
+test "a person edits every profile control"
+  tap "tab-profile"
+  type "displayName" "Ada"
+  expect state book.values.5.value == "Ada"
+  type "goal" "9500"
+  type "goal" key "Enter"
+  expect state book.values.6.value == "9500"
+  type "volume" "70"
+  expect state book.values.7.value == "70"
+  type "start" "2026-12-01"
+  expect state book.values.8.value == "2026-12-01"
+  type "units" "imperial"
+  expect state book.values.9.value == "imperial"
+  tap "theme-dark"
+  expect state book.values.10.value == "dark"
+
+test "a person fills a secret, changes a role and removes a member"
+  tap "tab-account"
+  type "apiKey" "sample-key"
+  expect state book.values.11.value == "sample-key"
+  type "m1-role" "admin"
+  expect state book.values.14.value == "admin"
+  tap "m2-remove"
+  expect state book.values.15.value == ""
+  expect tree missing "m2-row"
+
+test "a person chooses a city, sees a field's error and runs a command"
+  tap "tab-more"
+  type "city-input" "Mel"
+  type "city-input" key "Enter"
+  expect state book.values.19.value == "Melbourne"
+  type "teamName" "A"
+  expect text "teamName-error" == "Use at least 3 characters."
+  tap "commands-digest"
+  expect state book.values.0.value == "off"
+  tap "commands-quiet"
+  expect state book.values.4.value == "on"
+
+test "a person raises a tool's mode, then sets it back to its floor"
+  tap "tab-assistant"
+  type "permits-setSetting" "proposed"
+  expect state book.raised.0.mode == "proposed"
+  type "permits-setSetting" "recorded"
+  expect state book.raised.0.mode == "recorded"
+
+test "a person lets the assistant answer its own suggestions"
+  tap "tab-assistant"
+  expect state book.asksNeverAnswers == true
+  type "agentAnswers" "true"
+  expect state book.asksNeverAnswers == false
+
+test "a person rates, opens a folder, selects one and chooses an accent"
+  tap "tab-examples"
+  tap "stars-star-4"
+  expect state book.values.21.value == "4"
+  expect tree missing "tree-api"
+  tap "tree-specs-toggle"
+  expect tree has "tree-api"
+  tap "tree-api"
+  expect state book.values.22.value == "api"
+  tap "swatches-green"
+  expect state book.values.23.value == "green"
+  tap "advanced"
+  expect tree has "advanced-body"

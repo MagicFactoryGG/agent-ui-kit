@@ -1,0 +1,65 @@
+// The gallery's words, its one tool list and its sample values. Every word a
+// person reads is here or in a screen, never in a package.
+use Value, AgentTool, AnswerWords, Act, Ledger, isMarked from "@agent-ui-kit/agent"
+
+fn onOff(on: bool): string = on ? "on" : "off"
+fn titleOf(key: string): string = key == "digest" ? "Weekly digest" : key == "failures" ? "Deploy failures" : key == "marketing" ? "Product news" : key == "twoStep" ? "Two-step approval" : key == "quiet" ? "Quiet hours" : key == "displayName" ? "Display name" : key == "goal" ? "Daily step goal" : key == "volume" ? "Volume" : key == "start" ? "Start date" : key == "units" ? "Units" : key == "theme" ? "Appearance" : key == "apiKey" ? "API key" : key == "code" ? "Pairing code" : key == "city" ? "City" : key == "teamName" ? "Team name" : key == "rating" ? "Rating" : key == "folder" ? "Folder" : key == "accent" ? "Accent" : key
+
+// The answer words for each mode.
+fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
+fn modeLabels(): string[] = ["At once", "Recorded, with undo", "After 5 seconds", "Asks you first", "Off"]
+fn markFor(l: Ledger, key: string): string = isMarked(l, key) ? "Set by your assistant" : ""
+
+// One act, said three ways: done, asking, and about to happen.
+fn setAct(tool: string, key: string, value: string, shown: string): Act = Act(tool=tool, door="agent", key=key, title=titleOf(key), value=value, did=`Your assistant set ${titleOf(key)} to ${shown}.`, asks=`Your assistant suggests setting ${titleOf(key)} to ${shown}.`, will=`Your assistant will set ${titleOf(key)} to ${shown} in 5 seconds.`)
+fn switchAct(tool: string, key: string, on: bool): Act = Act(tool=tool, door="agent", key=key, title=titleOf(key), value=onOff(on), did=`Your assistant turned ${titleOf(key)} ${onOff(on)}.`, asks=`Your assistant suggests turning ${titleOf(key)} ${onOff(on)}.`, will=`Your assistant will turn ${titleOf(key)} ${onOff(on)} in 5 seconds.`)
+fn secretAct(key: string, value: string): Act = Act(tool="setSecret", door="agent", key=key, title=titleOf(key), value=value, did=`Your assistant filled the ${titleOf(key)}.`, asks=`Your assistant suggests filling the ${titleOf(key)}.`, will=`Your assistant will fill the ${titleOf(key)} in 5 seconds.`)
+fn memberName(l: Ledger, id: string): string = l.values.filter(v => v.key == `member:${id}`).map(v => v.value).join("")
+fn roleAct(l: Ledger, id: string, role: string): Act = Act(tool="setRole", door="agent", key=`role:${id}`, title=memberName(l, id), value=role, did=`Your assistant made ${memberName(l, id)} ${role}.`, asks=`Your assistant suggests making ${memberName(l, id)} ${role}.`, will=`Your assistant will make ${memberName(l, id)} ${role} in 5 seconds.`)
+fn addAct(id: string, name: string): Act = Act(tool="addMember", door="agent", key=`member:${id}`, title=name, value=name, did=`Your assistant added ${name}.`, asks=`Your assistant suggests adding ${name}.`, will=`Your assistant will add ${name} in 5 seconds.`)
+fn removeAct(l: Ledger, id: string): Act = Act(tool="removeMember", door="agent", key=`member:${id}`, title=memberName(l, id), value="", did=`Your assistant removed ${memberName(l, id)}.`, asks=`Your assistant suggests removing ${memberName(l, id)}.`, will=`Your assistant will remove ${memberName(l, id)} in 5 seconds.`)
+
+// The app's one tool list: the palette, the permit list and the activity are
+// its three views. Each floor is at or above what the tool line allows
+// (tools/modes.mjs holds it): a change only this person sees is recorded; one
+// other people see, or anything `destroys`, is proposed; a write-only secret
+// is direct. Two-step approval and quiet hours are stricter by the app's choice.
+fn agentTools(): AgentTool[] = [
+  AgentTool(name="setSetting", title="Email settings", sentence="Turns an email setting on or off.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setSecurity", title="Two-step approval", sentence="Turns two-step approval on or off.", floor="proposed", reach="self", secret=false),
+  AgentTool(name="setQuietHours", title="Quiet hours", sentence="Turns quiet hours on or off.", floor="delayed", reach="self", secret=false),
+  AgentTool(name="setText", title="Display name", sentence="Changes the name other people see.", floor="proposed", reach="others", secret=false),
+  AgentTool(name="setNumber", title="Goal and volume", sentence="Sets the step goal or the volume.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setDate", title="Start date", sentence="Sets the start date.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setChoice", title="Units and appearance", sentence="Sets the units or the appearance.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setSecret", title="Secrets", sentence="Fills the API key or the pairing code. It can never read them.", floor="direct", reach="self", secret=true),
+  AgentTool(name="setRole", title="Member roles", sentence="Makes a member a member or an admin.", floor="proposed", reach="others", secret=false),
+  AgentTool(name="addMember", title="Add members", sentence="Adds a member to the account.", floor="proposed", reach="others", secret=false),
+  AgentTool(name="removeMember", title="Remove members", sentence="Removes a member from the account.", floor="proposed", reach="others", secret=false),
+  AgentTool(name="setCity", title="City", sentence="Sets the city.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setTeamName", title="Team name", sentence="Renames the team.", floor="proposed", reach="others", secret=false),
+  AgentTool(name="setRating", title="Rating", sentence="Rates the gallery.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="selectFolder", title="Folder", sentence="Selects a folder.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setAccent", title="Accent", sentence="Sets the accent colour.", floor="recorded", reach="self", secret=false)
+]
+
+fn startValues(): Value[] = [
+  Value(key="digest", value="on"), Value(key="failures", value="on"), Value(key="marketing", value="off"), Value(key="twoStep", value="on"), Value(key="quiet", value="off"),
+  Value(key="displayName", value="Sample Person"), Value(key="goal", value="8000"), Value(key="volume", value="40"), Value(key="start", value="2026-11-19"), Value(key="units", value="metric"), Value(key="theme", value="auto"),
+  Value(key="apiKey", value=""), Value(key="code", value=""),
+  Value(key="member:m1", value="Priya Shah"), Value(key="role:m1", value="member"), Value(key="member:m2", value="Tom Becker"), Value(key="role:m2", value="member"), Value(key="member:m3", value="Sam Lee"), Value(key="role:m3", value="admin"),
+  Value(key="city", value="Brisbane"), Value(key="teamName", value="Platform"), Value(key="rating", value="0"), Value(key="folder", value="notes"), Value(key="accent", value="blue")
+]
+
+// The members, by id, in the order they were added; a removed one is "".
+fn memberIds(l: Ledger): string[] = l.values.filter(v => v.key.slice(0, 7) == "member:" and v.value != "").map(v => v.key.slice(7))
+fn roleOf(l: Ledger, id: string): string = l.values.filter(v => v.key == `role:${id}`).length == 0 ? "member" : l.values.filter(v => v.key == `role:${id}`).map(v => v.value).join("")
+// The act that waits on a member's row: its role first, else its removal.
+fn rowKey(l: Ledger, id: string): string = l.waiting.filter(w => w.key == `role:${id}`).length > 0 ? `role:${id}` : `member:${id}`
+
+// Sample data for the More screen and its one shared check.
+fn cities(): string[] = ["Adelaide", "Brisbane", "Canberra", "Darwin", "Hobart", "Melbourne", "Perth", "Sydney"]
+// One check, two voices: the agent gets the word, the person the sentence.
+fn teamNameProblem(v: string): string = v.trim().length < 3 ? "too-short" : v.trim().length > 30 ? "too-long" : ""
+fn teamNameMessage(word: string): string = word == "too-short" ? "Use at least 3 characters." : word == "too-long" ? "Use 30 characters or fewer." : ""
+fn isDay(v: string): bool = v.length == 10 and v.slice(4, 5) == "-" and v.slice(7, 8) == "-"

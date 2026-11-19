@@ -1,0 +1,90 @@
+// The app's state and the person's door to it. The values an agent may reach
+// live in the ledger (`book`), which the app owns; each control reads them and
+// writes them through `personSet`, the same record the agent's tools write.
+use Ledger, ledger, personSet, answer, answerKey, acceptAll, rejectAll, undo, undoLatest, settle, quiet, noteYes, noteNo, raise, setAsksNeverAnswers, valueOf from "@agent-ui-kit/agent"
+use startValues, agentTools, answerWords, onOff, rowKey from "./model.contract"
+
+members App
+  // The gallery turns on "the door that asks never answers".
+  state book: Ledger = setAsksNeverAnswers(ledger(startValues(), agentTools(), answerWords()), true)
+  // What the agent last searched for with findCity.
+  state findQuery = ""
+  // The person's view only: which folders are open, whether Advanced is open.
+  state openFolders: string[] = ["docs"]
+  state advancedOpen = false
+
+  // One action per kind of value, for every control of that kind.
+  action setByPerson(key: string, on: bool)
+    book = personSet(book, key, onOff(on))
+  action editByPerson(key: string, v: string)
+    book = personSet(book, key, v)
+  action rangeByPerson(key: string, v: number)
+    book = personSet(book, key, `${v}`)
+  action numberByPerson(key: string, v: string)
+    match parseNumber(v)
+      case some(n)
+        book = personSet(book, key, `${n}`)
+      case none
+        book = book
+  action pickByPerson(key: string, v: string)
+    book = personSet(book, key, v)
+  action rateByPerson(n: number)
+    book = personSet(book, "rating", `${n}`)
+  action removeByPerson(id: string)
+    book = personSet(book, `member:${id}`, "")
+
+  // The person answers: on a control, a member's row, the notice or the sheet.
+  action answerKeyByPerson(key: string, yes: bool)
+    book = answerKey(book, key, yes, "person")
+  action answerRowByPerson(id: string, yes: bool)
+    book = answerKey(book, rowKey(book, id), yes, "person")
+  action acceptByPerson(id: string)
+    book = answer(book, id, true, "person")
+  action rejectByPerson(id: string)
+    book = answer(book, id, false, "person")
+  action acceptAllByPerson
+    book = acceptAll(book, "person")
+  action rejectAllByPerson
+    book = rejectAll(book, "person")
+  action undoByPerson(id: string)
+    book = undo(book, id)
+  action noteYesByPerson
+    book = noteYes(book, "person")
+  action noteNoByPerson
+    book = noteNo(book, "person")
+  action raiseByPerson(tool: string, mode: string)
+    book = raise(book, tool, mode, "person")
+  action letAgentAnswer(on: bool)
+    book = setAsksNeverAnswers(book, not on)
+  action review
+    showModal("approvals")
+
+  // The notice goes after 5 seconds; a delayed act applies after 5 seconds
+  // unless someone stopped it.
+  action quietNow
+    book = quiet(book)
+  action settleNow
+    book = settle(book)
+  task hideNotice when book.note.sentence != "" key=book.seq
+    after(5000, quietNow)
+  task applyDelayed when book.waiting.filter(w => w.mode == "delayed").length > 0 key=book.seq
+    after(5000, settleNow)
+
+  // The More screen's view state.
+  action toggleFolder(id: string)
+    openFolders = openFolders.includes(id) ? openFolders.filter(f => f != id) : openFolders.concat([id])
+  action toggleAdvanced
+    advancedOpen = not advancedOpen
+
+  // The command palette runs the same jobs as the controls, by the person's door.
+  action runCommand(id: string)
+    if id == "review"
+      review()
+    else if id == "undo"
+      book = undoLatest(book)
+    else if id == "digest"
+      book = personSet(book, "digest", valueOf(book, "digest") == "on" ? "off" : "on")
+    else if id == "quiet"
+      book = personSet(book, "quiet", valueOf(book, "quiet") == "on" ? "off" : "on")
+    else if id == "reject-all"
+      book = rejectAll(book, "person")
