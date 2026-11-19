@@ -1,15 +1,18 @@
-// StatTiles: a row of the numbers a person checks first, as many as the app brings. Each tile is one stat on the
-// Theme's surface: its label in the caption ink, the value in the title type with tabular figures (the group's
-// largest words, its one focal point), and the change beside a drawn arrow in the positive or critical ink the
-// trend names — the sign and the arrow say the direction, never the colour alone. Grouping is by surface and
-// space, never a frame around a box, and the tiles share one rhythm: flex tiles that wrap at
-// blocks.stat-tile-min, two by two on a phone, four across on a desktop, the row capped at blocks.stat-max so it
-// never stretches thin.
+// StatTiles: a row of the numbers a person checks first, as many as the app brings. Each tile is one stat on a
+// card of the kit's language (the surface, a hairline line, the card's corner — Section's card, not a new idea):
+// its label in the caption ink, the value in the title type with tabular figures (the group's largest words, its
+// one focal point), and the change pinned to the tile's bottom edge beside a drawn arrow in the positive or
+// critical ink the trend names — the sign and the arrow say the direction, never the colour alone. The tiles
+// share one rhythm: flex tiles that wrap at blocks.stat-tile-min with box-sizing="border-box" (the
+// responsive-columns pattern without its literal, which a package may not hold), two by two on a phone, four
+// across on a desktop, and the row fills the width the app gives it — a screen's column caps itself; a block
+// does not cap the app.
 //
-// - data many|loading|failed. Loading keeps the group's shape: the platform's activity cue and its words above
-//   ghost tiles of the resting shape, drawn in the fill token and hidden from a reader. Failed stands in the
-//   tiles' place on one surface: the words in the error's ink (role="alert") and the way on, `retryLabel`'s
-//   button. No tile lies with a stale number in either state.
+// - data many|loading|failed. Loading keeps the group's shape: its words beside the platform's own activity bar
+//   (EntryGate's busy line), above ghost tiles of the resting shape drawn in the fill token and hidden from a
+//   reader. Failed stands in the tiles' place as one banner: a mark in the error's ink, the words in the same
+//   ink (role="alert") and the way on, `retryLabel`'s button at the banner's end. No tile lies with a stale
+//   number in either state.
 // - agent none|proposed|changed|waiting: `agentKey` names the stat the agent touched; that tile carries the
 //   kit's mark (an accent edge, caution while the person is waited on) and `agentNote`'s sentence under the
 //   change, in the ink LinkRow gives its note. Nothing is marked when no key matches.
@@ -31,7 +34,8 @@ shape Stat
 // The change's ink: positive going up, critical going down, muted at flat.
 fn trendInk(t: string): string = t == "up" ? "theme.color.positive-text" : t == "down" ? "theme.color.critical-text" : "theme.color.ink-muted"
 
-// One stat on the surface: the label, the value large, the change with its arrow; an agent's edge and note when
+// One stat on the card: the label, the value large, the change with its arrow pinned to the bottom edge (a
+// delta is a footnote, and the row of tiles then shares its bottom line); an agent's edge and note when
 // `marked`, in the waiting ink while the person is waited on.
 component StatTile
   props
@@ -44,12 +48,12 @@ component StatTile
     note: string
     testId: string
   view
-    column testId=testId role="listitem" position="relative" flex=1 min-width="blocks.stat-tile-min" box-sizing="border-box" gap="theme.space.xs" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card"
+    column testId=testId role="listitem" position="relative" flex=1 min-width="blocks.stat-tile-min" box-sizing="border-box" gap="theme.space.xs" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
       if marked
         box position="absolute" left=0 top="theme.space.md" bottom="theme.space.md" width="blocks.stat-mark-line" background-color=(waiting ? "theme.color.caution" : "theme.color.accent") border-radius="theme.radius.pill" aria-hidden=true
       Words(text=label, kind="caption", outcome="none", level=0, testId=`${testId}-label`)
       text value testId=`${testId}-value` font="theme.type.title" color="theme.color.ink" font-variant-numeric="tabular-nums"
-      row align-items="center" gap="theme.space.xs"
+      row align-items="center" gap="theme.space.xs" margin-top="auto"
         if trend != "flat"
           svg viewBox="0 0 12 12" width="blocks.stat-trend" height="blocks.stat-trend" fill="none" stroke=trendInk(trend) aria-hidden=true flex-shrink=0
             path d=(trend == "up" ? "M3 9 L9 3 M5.5 3 H9 V6.5" : "M3 3 L9 9 M5.5 9 H9 V5.5") stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
@@ -57,14 +61,14 @@ component StatTile
       if marked
         text note testId=`${testId}-note` font="theme.type.caption" color=(waiting ? "theme.color.caution-text" : "theme.color.accent")
 
-// A tile still coming: the resting shape's shell with fill bars where the label, the value and the change will
+// A tile still coming: the resting shape's card with fill bars where the label, the value and the change will
 // be. Drawn in the loading row only, hidden from a reader.
 component StatGhost
   view
-    column flex=1 min-width="blocks.stat-tile-min" box-sizing="border-box" gap="theme.space.xs" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" aria-hidden=true
+    column flex=1 min-width="blocks.stat-tile-min" box-sizing="border-box" gap="theme.space.xs" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" aria-hidden=true
       box width="blocks.stat-ghost-label" height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
       box width="blocks.stat-ghost-value" height="theme.space.xl" background-color="theme.color.fill" border-radius="theme.radius.pill"
-      box width="blocks.stat-ghost-change" height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
+      box width="blocks.stat-ghost-change" height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill" margin-top="auto"
 
 component StatTiles
   props
@@ -80,19 +84,22 @@ component StatTiles
     agentNote: string
     testId: string
   view
-    column testId=testId gap="theme.space.sm" max-width="blocks.stat-max"
+    column testId=testId gap="theme.space.sm"
       if title != ""
-        Words(text=title, kind="heading", outcome="none", level=2, testId=`${testId}-title`)
+        Words(text=title, kind="label", outcome="none", level=2, testId=`${testId}-title`)
       if data == "failed"
-        column role="alert" background-color="theme.color.surface" border-radius="theme.radius.card" padding="theme.space.lg" gap="theme.space.md"
-          Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed`)
+        row role="alert" align-items="center" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+          box background-color="theme.color.critical-text" border-radius="theme.radius.pill" align-self="stretch" width="blocks.stat-mark-line" aria-hidden=true
+          column flex=1 min-width=0
+            Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed`)
           if retryLabel != ""
             ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
       else if data == "loading"
         column gap="theme.space.md"
           row role="status" align-items="center" gap="theme.space.sm"
-            progress aria-label=loadingText width="blocks.stat-glyph" flex-shrink=0
-            Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-loading`)
+            column flex=1 min-width=0
+              Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-loading`)
+            progress aria-label=loadingText width="blocks.stat-bar" flex-shrink=0
           row flex-wrap="wrap" gap="theme.space.md" aria-hidden=true
             for i in [0, 1, 2, 3] key=i
               StatGhost()
