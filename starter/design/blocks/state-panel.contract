@@ -1,10 +1,10 @@
 // One block for a whole area's empty, loading and failed states: a calm centred panel, its card, shape and type
 // all Theme tokens (no image file). The drawn shape says the state: an empty tray (empty), a broken arc in the
-// accent, the one active colour (loading), a filled alert form (failed). Loading
-// keeps the title (so a reader hears what loads, role=status) and stands in three stepped skeleton lines for the
-// rest; the one action is primary whenever it shows, the retry in failed as in empty. `size` "full" is the whole
-// area's panel; "compact" keeps the type and claims less width, for a card's body or a side panel. No agent axis,
-// as Section: nothing here for an agent to change or wait on; the app's notice says it.
+// accent, the one active colour (loading), a filled alert form (failed). Loading keeps the title (so a reader
+// hears what loads, role=status) and stands in three stepped skeleton lines for the rest; the one action is
+// primary whenever it shows, the retry in failed as in empty. `size` "full" is the whole area's panel; "compact"
+// keeps the type and claims less width, for a card's body or a side panel. No agent axis, as Section: nothing
+// here for an agent to change or wait on; the app's notice says it.
 use Words, ActionButton from "__SCOPE__/components"
 
 component StatePanel
