@@ -1,7 +1,8 @@
 // A data table of records: a header row of column labels, the sorted column marked (its label in ink, an arrow,
 // `aria-sort`), a status shown as a Tag, a checkbox a row (a name of `selectLabel` and the record's title; the
 // app owns the selection, `toggle` gets the row's key, `toggleAll` the whole set) and a select-all checkbox in
-// the header. Cells sit edge to edge (`border-spacing=0`: the separated model's own gap would stripe a washed
+// the header. A long title wraps where it is (never cut: Exact's check reads a cut as clipped content, and the
+// person keeps every word). Cells sit edge to edge (`border-spacing=0`: the separated model's own gap would stripe a washed
 // row), so a checked row takes one fill band and the rules run the card's width. Rows an agent changed carry
 // the accent mark at their start while `agentNote` says so under the table. On a desktop row the title is the
 // one affordance (its own link); a chevron would spend a column to say what the link already says, so the
@@ -131,7 +132,7 @@ component DataTable
                   link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
                     :hover
                       color="theme.color.accent"
-                    text r.title font="theme.type.label" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+                    text r.title font="theme.type.label"
                   Tag(text=r.status, outcome="none")
                 text `${r.owner} · ${r.updated}` font="theme.type.caption" color="theme.color.ink-muted"
               svg viewBox="0 0 12 12" width="blocks.glyph" height="blocks.glyph" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
