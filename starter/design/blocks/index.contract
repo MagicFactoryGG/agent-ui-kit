@@ -6,6 +6,7 @@ use Words, ActionButton from "__SCOPE__/components"
 use DetailPanel, Fact, Event from "./detail-panel.contract"
 use StatePanel from "./state-panel.contract"
 use DataTable, Record, Checked, Marks, Viewport from "./data-table.contract"
+use SettingsGroup, Setting from "./settings-group.contract"
 
 // The bar at the top of a screen: the title, then the slot's actions. While an agent waits for the person,
 // `agentNote` says so under the title.

@@ -1,0 +1,254 @@
+// A titled group of settings rows on one card, the way a settings page groups them: a switch row, a value row
+// that opens a choice, a link row, and a destructive row at the end (in the critical ink, never a filled red
+// block). The rows come in as data; the app owns every value and word. Both doors — the person's press and the
+// agent's tool — reach the app's same actions, each with the row's key: `toggle` (a switch; the app flips its
+// own value), `choose` (a value row's choice), `open` (a link row), `remove` (the destructive row; the app may
+// confirm it in a sheet first), and `retry` when a load failed, with the app's own word.
+//
+// Width: the group is a responsive pair. On a wide window the title and its `footer` stand in a side column
+// beside the card (the way a settings page reads: what this group is, then its rows), the title level with the
+// first row's label; on a phone the pair wraps to one column, title and note above the card.
+// `blocks.settings-max` caps the pair so a row's label and its control stay within one glance.
+//
+// States, declared once as axes: `data` draws the rows; while loading, a skeleton predicts them row for row —
+// the same paddings and seams, a label bar and a detail bar of the lengths a row's words really take, and the
+// trailing switch, value or chevron where it will land — and breathes slowly (its status names the skeleton to a
+// screen reader); empty keeps the card's height and centres in it: a soft disc holding the sliders mark, the
+// muted line; failed keeps the height too, leads with an alert mark level with its sentence in the critical ink,
+// `failedDetail` under it and the app's retry under that — the state's one filled element, so the way on reads
+// on the raised card in dark as in light — while the footer stands down (a note about applying changes would
+// argue with a load that changed nothing). `interaction` (idle, disabled, busy) stills the group without dimming
+// a word below what a person can read. `outcome` (success, error) says one line under the card. `agent` follows
+// person's answer (docs/recipes/one-sentence-two-words.md): `proposed` draws the kit's Proposal look under the
+// group — `proposalText` as one sentence with the two answer words `acceptLabel` and `declineLabel`, bound to
+// `accept` and `decline` — and marks the row it is about (`proposalKey` names the row) with the accent edge line,
+// the way LinkRow marks an agent's act; `changed` keeps the card's accent edge mark and says `changedText` under
+// it beside a dot of the same ink; `waiting` keeps the caution edge and says `waitingText` — that it waits for
+// the person — in the same place under the group. (The Proposal block itself lives in this package's
+// index.contract, which imports this file back, so its pieces — Words and ActionButton on an accent-edged
+// surface — are drawn here, the way @agent-ui-kit/forms draws its own: docs/recipes/exact-workarounds.md, 4.)
+//
+// Rows part on one seam only, a hairline inset to the text's edges; the destructive row ends the card behind a
+// seam one step heavier with more room above it, and only its label carries the critical ink. Every row puts
+// its trailing control level with its label, so a long detail never drags a value or a switch off its line.
+use Swatch from "__SCOPE__/theme"
+use Words, ActionButton from "__SCOPE__/components"
+
+// The skeleton's pulse: opacity alone, shallow enough that any frame still reads.
+keyframes skeleton-breathe
+  50% opacity=0.6
+
+// One row of the group, drawn by its `kind`: a switch keeps its state in `on`; a value row shows `value` and
+// opens a choice; a link row opens by its key; a danger row acts at once. `detail` is its second line, "" for
+// none; `value` is "" on every other kind.
+shape Setting
+  key: string
+  kind: enum<"switch", "value", "link", "danger">
+  label: string
+  detail: string
+  value: string
+  on: bool
+
+// The mark an agent's act leaves on the card: accent for a change, caution while it waits. A proposal does not
+// mark the card — its row carries the mark, and the proposal under the group carries the ask.
+fn agentLine(a: string): string = a == "changed" ? "theme.color.accent" : a == "waiting" ? "theme.color.caution" : "transparent"
+// True when the row is the one the pending proposal is about.
+fn isMarked(a: string, key: string, about: string): bool = a == "proposed" and key == about
+// A stilled group keeps its words readable: the rows take the muted ink, never a dimmed one.
+fn rowInk(i: string): string = i == "disabled" ? "theme.color.ink-muted" : "theme.color.ink"
+// The destructive row carries the critical ink on its label alone; stilled, it reads like the rest.
+fn dangerInk(i: string): string = i == "disabled" ? "theme.color.ink-muted" : "theme.color.critical-text"
+
+// The one seam between rows: a hairline inset to the text's edges. `apart` gives the destructive row its room
+// and a seam one step heavier, so the step out of ordinary settings reads before its ink does.
+component Seam
+  props
+    apart: bool
+  view
+    box height=(apart ? "blocks.danger-seam" : "theme.line.width") background-color="theme.color.line" margin-left="theme.space.lg" margin-right="theme.space.lg" margin-top=(apart ? "theme.space.md" : "0") aria-hidden=true
+
+// A row's words: its label over its detail, the leading column every kind of row shares. It keeps
+// `blocks.label-min` however long a value beside it runs: the value wraps, the label keeps its room.
+component RowWords
+  props
+    label: string
+    detail: string
+    ink: string
+  view
+    column flex=1 min-width="blocks.label-min" gap="theme.space.xs"
+      text label font="theme.type.label" color=ink
+      if detail != ""
+        text detail font="theme.type.caption" color="theme.color.ink-muted"
+
+// One row of the card that opens or acts — the value, link and danger kinds share it — so the row's chrome
+// (padding, hover, press, focus, the agent's edge mark) is drawn once. Its trailing cluster is the chosen `value`
+// beside the `chevron` that says it opens, level with the label, so the two read as one affordance; a `danger`
+// row has no trailing and carries the critical ink on its label alone. Every row keeps the edge line's width,
+// transparent when nothing marks it, so a marked row never shifts its words. Not exported: only SettingsGroup
+// draws it.
+component SettingRow
+  props
+    label: string
+    detail: string
+    value: string
+    chevron: bool
+    danger: bool
+    mark: bool
+    interaction: enum<"idle", "disabled", "busy">
+    press: action
+    testId: string
+  view
+    button press=press testId=testId disabled=(interaction != "idle") display="flex" flex-direction="row" align-items="flex-start" gap="theme.space.md" text-align="start" min-height="blocks.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" background-color="transparent" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=(mark ? "theme.color.accent" : "transparent")
+      :hover
+        background-color="theme.color.hover"
+      :active
+        background-color="theme.color.fill"
+      :focus-visible
+        box-shadow="inset 0 0 0 2px theme.color.focus"
+      RowWords(label=label, detail=detail, ink=(danger ? dangerInk(interaction) : rowInk(interaction)))
+      if chevron
+        row flex-shrink=1 align-items="center" gap="theme.space.sm" min-width=0 min-height="blocks.label-line"
+          if value != ""
+            text value min-width=0 font="theme.type.body" color="theme.color.ink-muted" text-align="end"
+          svg viewBox="0 0 12 12" width="blocks.chevron" height="blocks.chevron" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
+            path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+
+// A row the skeleton predicts: the real row's paddings and edge width, a label bar and a detail bar of the
+// lengths a row's words really take (fixed, so the silhouette matches the loaded rows), and its trailing shape
+// where the real control will sit (a switch's pill, a value's bar and chevron, a chevron).
+component SkeletonRow
+  props
+    detail: bool
+    trailing: enum<"none", "pill", "value", "chevron">
+  view
+    row align-items="flex-start" gap="theme.space.md" min-height="blocks.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
+      column flex=1 min-width=0 gap="theme.space.sm"
+        row min-height="blocks.label-line" align-items="center"
+          box width="blocks.skeleton-label" height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation="skeleton-breathe 1.6s ease-in-out infinite"
+        if detail
+          row
+            box width="blocks.skeleton-detail" height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation="skeleton-breathe 1.6s ease-in-out infinite"
+      if trailing != "none"
+        row align-items="center" gap="theme.space.sm" min-height="blocks.label-line" flex-shrink=0
+          if trailing == "pill"
+            box width="blocks.skeleton-blob" height="blocks.skeleton-pill" background-color="theme.color.fill" border-radius="theme.radius.pill" animation="skeleton-breathe 1.6s ease-in-out infinite"
+          if trailing == "value"
+            box width="blocks.skeleton-value" height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation="skeleton-breathe 1.6s ease-in-out infinite"
+          if trailing == "value" or trailing == "chevron"
+            svg viewBox="0 0 12 12" width="blocks.chevron" height="blocks.chevron" fill="none" stroke="theme.color.fill" aria-hidden=true
+              path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+
+component SettingsGroup
+  props
+    title: string
+    footer: string
+    emptyText: string
+    loadingText: string
+    failedText: string
+    failedDetail: string
+    retryLabel: string
+    proposalText: string
+    proposalKey: string
+    acceptLabel: string
+    declineLabel: string
+    changedText: string
+    waitingText: string
+    outcomeText: string
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    interaction: enum<"idle", "disabled", "busy">
+    outcome: enum<"none", "success", "error">
+    agent: enum<"none", "proposed", "changed", "waiting">
+    rows: Setting[]
+    toggle: action
+    choose: action
+    open: action
+    remove: action
+    retry: action
+    accept: action
+    decline: action
+    testId: string
+  // The platform's switch says its new state; the app's `toggle` takes the row's key and flips its own value.
+  action flip(key: string, on: bool)
+    toggle(key)
+  // One act, one door: the row's kind decides which of the app's actions it reaches, always with its key.
+  action act(kind: string, key: string)
+    if kind == "value"
+      choose(key)
+    else if kind == "link"
+      open(key)
+    else
+      remove(key)
+  view
+    row testId=testId role="group" aria-label=title flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.sm" width="100%" max-width="blocks.settings-max" box-sizing="border-box" margin-left="auto" margin-right="auto"
+      if title != "" or (footer != "" and data != "failed")
+        column flex=1 min-width="blocks.settings-aside" box-sizing="border-box" gap="theme.space.xs" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="blocks.aside-top"
+          if title != ""
+            Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+          if footer != "" and data != "failed"
+            Words(text=footer, kind="caption", outcome="none", level=0, testId=`${testId}-footer`)
+      column flex=2 min-width="blocks.settings-main" box-sizing="border-box" gap="theme.space.sm"
+        column testId=`${testId}-card` aria-busy=(interaction == "busy") background-color="theme.color.raised" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-left-width=(agent == "changed" or agent == "waiting" ? "blocks.mark-line" : "theme.line.width") border-left-style="solid" border-left-color=(agent == "none" or agent == "proposed" ? "theme.color.line" : agentLine(agent)) overflow="hidden"
+          if data == "empty"
+            // The card keeps its height when the rows are gone: the empty centres in the room the rows would
+            // take, so the group does not jump when data arrives. The mark is the group's own glyph — sliders,
+            // the settings icon — not a broken-picture placeholder.
+            column role="status" align-items="center" justify-content="center" gap="theme.space.md" min-height="blocks.settings-state-min" padding="theme.space.xl"
+              row align-items="center" justify-content="center" width="blocks.empty-disc" height="blocks.empty-disc" border-radius="theme.radius.pill" background-color="theme.color.fill" aria-hidden=true
+                svg viewBox="0 0 16 16" width="blocks.empty-mark" height="blocks.empty-mark" fill="none" stroke="theme.color.ink-muted" aria-hidden=true
+                  path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke-width=1.5 stroke-linecap="round"
+                  circle cx="10.75" cy="4" r="1.75" fill="theme.color.fill" stroke-width=1.5
+                  circle cx="5.25" cy="8" r="1.75" fill="theme.color.fill" stroke-width=1.5
+                  circle cx="8.75" cy="12" r="1.75" fill="theme.color.fill" stroke-width=1.5
+              text emptyText testId=`${testId}-empty` font="theme.type.body" color="theme.color.ink-muted" text-align="center"
+          else if data == "loading"
+            column role="status" aria-label=loadingText
+              SkeletonRow(detail=true, trailing="pill")
+              Seam(apart=false)
+              SkeletonRow(detail=true, trailing="value")
+              Seam(apart=false)
+              SkeletonRow(detail=false, trailing="chevron")
+              Seam(apart=true)
+              SkeletonRow(detail=false, trailing="none")
+          else if data == "failed"
+            // The card keeps its height here too, the alert centred in it, its mark level with its sentence.
+            // The way on is the group's one filled element: the primary button, readable on the raised card in
+            // dark as in light.
+            row role="alert" align-items="center" min-height="blocks.settings-state-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.lg" padding-bottom="theme.space.lg" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
+              column flex=1 min-width=0 gap="theme.space.xs"
+                row align-items="center" gap="theme.space.md"
+                  svg viewBox="0 0 16 16" width="blocks.alert-mark" height="blocks.alert-mark" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
+                    circle cx="8" cy="8" r="6.25" stroke-width=1.5
+                    path d="M8 4.75v3.75M8 11h.01" stroke-width=1.75 stroke-linecap="round"
+                  text failedText testId=`${testId}-failed` font="theme.type.label" color="theme.color.critical-text"
+                if failedDetail != ""
+                  text failedDetail testId=`${testId}-failed-detail` font="theme.type.caption" color="theme.color.ink-muted"
+                if retryLabel != ""
+                  row margin-top="theme.space.sm"
+                    ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "idle" ? "idle" : "disabled"), outcome="none", press=retry, testId=`${testId}-retry`)
+          for r, i in rows key=r.key
+            if i > 0
+              Seam(apart=(r.kind == "danger"))
+            if r.kind == "switch"
+              row align-items="flex-start" gap="theme.space.md" min-height="blocks.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=(isMarked(agent, r.key, proposalKey) ? "theme.color.accent" : "transparent")
+                RowWords(label=r.label, detail=r.detail, ink=rowInk(interaction))
+                row align-items="center" min-height="blocks.label-line" flex-shrink=0
+                  input type="checkbox" switch checked=r.on change=flip(r.key) disabled=(interaction != "idle") aria-label=r.label opacity=(interaction == "disabled" ? 0.5 : interaction == "busy" ? 0.6 : 1) testId=`${testId}-switch-${r.key}`
+            else
+              SettingRow(label=r.label, detail=r.detail, value=r.value, chevron=(r.kind == "value" or r.kind == "link"), danger=(r.kind == "danger"), mark=isMarked(agent, r.key, proposalKey), interaction=interaction, press=act(r.kind, r.key), testId=`${testId}-${r.kind}-${r.key}`)
+        if agent == "proposed"
+          // The ask, under the group: the kit's Proposal look, drawn here from its own pieces (the comment at the
+          // top of this file says why). The sentence and the two answers share the bar when they fit and each
+          // takes its own line when they do not — the answers keep the group's right edge either way — so long
+          // words hold at phone width.
+          row testId=`${testId}-proposal` role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.sm" row-gap="theme.space.sm" padding="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" box-sizing="border-box"
+            Words(text=proposalText, kind="body", outcome="none", level=0, testId=`${testId}-proposal-text`)
+            row flex-wrap="wrap" justify-content="flex-end" column-gap="theme.space.sm" row-gap="theme.space.sm" margin-left="auto" box-sizing="border-box"
+              ActionButton(label=declineLabel, kind="plain", interaction="idle", outcome="none", press=decline, testId=`${testId}-decline`)
+              ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+        else if agent == "changed" or agent == "waiting"
+          row align-items="center" gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg"
+            box width="blocks.agent-dot" height="blocks.agent-dot" border-radius="theme.radius.pill" background-color=(agent == "changed" ? "theme.color.accent" : "theme.color.caution") flex-shrink=0 aria-hidden=true
+            text (agent == "changed" ? changedText : waitingText) testId=`${testId}-agent` min-width=0 font="theme.type.caption" color=(agent == "changed" ? "theme.color.accent" : "theme.color.caution-text")
+        if outcome != "none"
+          column padding-left="theme.space.lg" padding-right="theme.space.lg" role=(outcome == "error" ? "alert" : "status")
+            Words(text=outcomeText, kind="caption", outcome=(outcome == "success" ? "success" : "error"), level=0, testId=`${testId}-outcome`)

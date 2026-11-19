@@ -169,5 +169,34 @@
     "agentNote": "Your assistant changed \u201cMove the 2024 audit log to cold storage\u201d.",
     "retryLabel": "Try again",
     "createLabel": "New record"
-  }
+  },
+  "props:SettingsGroup": {
+    "title": "General",
+    "footer": "Changes apply everywhere at once.",
+    "emptyText": "Nothing to set in this group yet.",
+    "loadingText": "Loading your settings",
+    "failedText": "Your settings could not be loaded.",
+    "failedDetail": "Nothing was changed.",
+    "retryLabel": "Try again",
+    "proposalText": "Your assistant suggests turning the weekly digest off.",
+    "proposalKey": "digest",
+    "acceptLabel": "Accept",
+    "declineLabel": "Decline",
+    "changedText": "Your assistant turned the weekly digest on.",
+    "waitingText": "One change is waiting for your answer.",
+    "outcomeText": "How your last change ended."
+  },
+  "Setting:many": [
+    { "key": "digest", "kind": "switch", "label": "Weekly digest", "detail": "A summary of your week, each Monday.", "value": "", "on": true },
+    { "key": "units", "kind": "value", "label": "Units", "detail": "Used wherever something is measured.", "value": "Metric", "on": false },
+    { "key": "help", "kind": "link", "label": "Help and support", "detail": "Guides, answers and a way to reach us.", "value": "", "on": false },
+    { "key": "reset", "kind": "danger", "label": "Reset all settings", "detail": "Every setting back the way it began.", "value": "", "on": false }
+  ],
+  "Setting:one": [
+    { "key": "digest", "kind": "switch", "label": "Weekly digest", "detail": "A summary of your week, each Monday.", "value": "", "on": true }
+  ],
+  "Setting:long": [
+    { "key": "units", "kind": "value", "label": "A very long label for one setting, the way a person might really name it, running past the width a designer planned", "detail": "A very long detail line, as a person might really write it, that has to wrap instead of pushing the row apart", "value": "A very long chosen value", "on": false },
+    { "key": "digest", "kind": "switch", "label": "A very long label for a switch row, written the way a person might really write it, going past the width of a narrow phone", "detail": "A very long detail line under the switch, as a person might really write it, that wraps to keep the switch in reach", "value": "", "on": true }
+  ]
 }
