@@ -1,0 +1,116 @@
+{
+ "$schema": "brand-intake/preset@1",
+ "name": "GitHub Primer",
+ "source": {
+  "package": "@primer/primitives@11.10.0",
+  "themes": {
+   "light": "default",
+   "dark": "default"
+  }
+ },
+ "licence": {
+  "spdx": "MIT",
+  "url": "https://github.com/primer/primitives/blob/main/LICENSE",
+  "notice": "Values from GitHub Primer (@primer/primitives@11.10.0), MIT.",
+  "acceptBeforeUse": true
+ },
+ "tokens": {
+  "color.background": {
+   "light": "#ffffff",
+   "dark": "#0d1117",
+   "origin": "style",
+   "from": "--bgColor-default"
+  },
+  "color.card": {
+   "light": "#ffffff",
+   "dark": "#0d1117",
+   "origin": "style",
+   "from": "--bgColor-default"
+  },
+  "color.popover": {
+   "light": "#ffffff",
+   "dark": "#010409",
+   "origin": "style",
+   "from": "--overlay-bgColor"
+  },
+  "color.foreground": {
+   "light": "#1f2328",
+   "dark": "#f0f6fc",
+   "origin": "style",
+   "from": "--fgColor-default"
+  },
+  "color.muted-foreground": {
+   "light": "#59636e",
+   "dark": "#9198a1",
+   "origin": "style",
+   "from": "--fgColor-muted"
+  },
+  "color.border": {
+   "light": "#d1d9e0",
+   "dark": "#3d444d",
+   "origin": "style",
+   "from": "--borderColor-default"
+  },
+  "color.muted": {
+   "light": "#f6f8fa",
+   "dark": "#151b23",
+   "origin": "style",
+   "from": "--bgColor-muted"
+  },
+  "color.accent": {
+   "light": "#f2f3f4",
+   "dark": "#1f232a",
+   "origin": "style",
+   "from": "--control-transparent-bgColor-hover"
+  },
+  "color.primary": {
+   "light": "#1f883d",
+   "dark": "#238636",
+   "origin": "style",
+   "from": "--button-primary-bgColor-rest"
+  },
+  "color.primary-foreground": {
+   "light": "#ffffff",
+   "dark": "#ffffff",
+   "origin": "style",
+   "from": "--button-primary-fgColor-rest"
+  },
+  "color.ring": {
+   "light": "#0969da",
+   "dark": "#1f6feb",
+   "origin": "style",
+   "from": "--focus-outlineColor"
+  },
+  "color.success": {
+   "light": "#1a7f37",
+   "dark": "#3fb950",
+   "origin": "style",
+   "from": "--fgColor-success"
+  },
+  "color.warning": {
+   "light": "#9a6700",
+   "dark": "#d29922",
+   "origin": "style",
+   "from": "--fgColor-attention"
+  },
+  "color.destructive": {
+   "light": "#d1242f",
+   "dark": "#f85149",
+   "origin": "style",
+   "from": "--fgColor-danger"
+  },
+  "color.destructive-foreground": {
+   "light": "#ffffff",
+   "dark": "#ffffff",
+   "origin": "style",
+   "from": "--fgColor-onEmphasis"
+  },
+  "font.sans": {
+   "light": "\"Mona Sans VF\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans Backtick Fix\", \"Noto Sans\", Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+   "dark": "\"Mona Sans VF\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans Backtick Fix\", \"Noto Sans\", Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+   "origin": "copied",
+   "from": "--fontStack-sansSerif",
+   "note": "a font name: the font's own licence applies to its files"
+  }
+ }
+}

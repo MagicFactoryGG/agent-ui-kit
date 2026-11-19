@@ -32,10 +32,10 @@ p("");
 table(["Product", "Kind", "Pages", "Canvas light / dark", "Text light / dark", "Font", "Follows system scheme", "Evidence"], theme.products.map(r => [r.id, r.kind, r.pages, `${r.light.canvas} / ${r.dark.canvas}`, `${r.light.text ?? "-"} / ${r.dark.text ?? "-"}`, r.light.font ?? "-", r.followsSystemScheme === false ? "**no**" : "yes", ev(r.evidence)]));
 if (theme.skippedPages?.length) { p("Pages not used for scales:"); p(""); for (const s of theme.skippedPages) p(`- ${s.url}: ${s.why}`); p(""); }
 
-p("## 1. Guide against its own rules");
+p("## 1. Guide against its own rules, and what the Distiller decided");
 p("");
 for (const d of by("guide-vs-rule")) p(`- **${d.token}**: the rule says ${d.rule ?? "otherwise"}; the code does ${d.value}. Chosen: ${d.chosen}.`);
-for (const d of by("guide-contrast")) p(`- **${d.token}** (${d.mode}): ${d.value}, low contrast. ${d.chosen}. Proposed: ${d.proposed ? `${d.proposed.token} ${d.mode} = ${d.proposed.value} (${d.proposed.contrast}:1)${d.proposed.note ? `, ${d.proposed.note}` : ""}` : "none found"}.`);
+for (const d of by("contrast")) p(`- **${d.token}** (${d.mode}): ${d.value}, low contrast. Decided: ${d.chosen}.`);
 p("");
 
 p(theme.presets.harmonised.reference.guide ? "## 2. Products against the guide" : "## 2. Products against the reference");

@@ -39,7 +39,44 @@ try {
             return page.goto(url, { waitUntil: "load", timeout: 30000 });
           });
           await page.waitForTimeout(800);
-          const data = await page.evaluate(`(${probe})()`);
+          let data = await page.evaluate(`(${probe})()`);
+          // A stylesheet from another origin hides its rules from the page, so its token names are read from its
+          // text; their values are still the page's own (resolved at <body>).
+          if (data.crossOriginSheets) {
+            const hrefs = await page.evaluate(() => [...document.styleSheets].map(s => { try { s.cssRules; return null; } catch { return s.href; } }).filter(Boolean));
+            const names = new Set();
+            for (const h of hrefs) { const t = await page.request.get(h).then(r => r.text()).catch(() => ""); for (const m of t.matchAll(/(--[\w-]+)\s*:/g)) names.add(m[1]); }
+            const extra = await page.evaluate(ns => { const cs = getComputedStyle(document.body); return Object.fromEntries(ns.map(n => [n, cs.getPropertyValue(n).trim()]).filter(([n, v]) => v && !n.startsWith("--tw-"))); }, [...names]);
+            data.resolvedCustomProperties = { ...extra, ...data.resolvedCustomProperties };
+            data.crossOriginNames = names.size;
+          }
+          // A site that ignores the system's dark setting may still have a dark mode behind a switch: try the
+          // common ones and keep the first that changes the page.
+          if (scheme === "dark" && page_.modes.light?.page && data.page.bodyBackground === page_.modes.light.page.bodyBackground && data.page.bodyColor === page_.modes.light.page.bodyColor) {
+            const toggles = [
+              ["class dark", h => h.classList.add("dark")],
+              ["data-theme=dark", h => h.setAttribute("data-theme", "dark")],
+              ["data-mode=dark", h => h.setAttribute("data-mode", "dark")],
+              ["data-color-mode=dark", h => { h.setAttribute("data-color-mode", "dark"); h.setAttribute("data-dark-theme", "dark"); }],
+              ["data-bs-theme=dark", h => h.setAttribute("data-bs-theme", "dark")],
+            ];
+            for (const [label, fn] of toggles) {
+              await page.evaluate(`(${fn.toString()})(document.documentElement)`);
+              await page.waitForTimeout(300);
+              const again = await page.evaluate(`(${probe})()`);
+              if (again.page.bodyBackground !== data.page.bodyBackground || again.page.bodyColor !== data.page.bodyColor) {
+                data = { ...again, resolvedCustomProperties: { ...data.resolvedCustomProperties, ...again.resolvedCustomProperties }, forcedDark: label };
+                break;
+              }
+              await page.reload({ waitUntil: "load" }).catch(() => {});
+              await page.waitForTimeout(500);
+            }
+            if (data.forcedDark && data.crossOriginNames) { // re-resolve the hidden names under the switch
+              const names = Object.keys(page_.modes.light.resolvedCustomProperties ?? {});
+              const extra = await page.evaluate(ns => { const cs = getComputedStyle(document.body); return Object.fromEntries(ns.map(n => [n, cs.getPropertyValue(n).trim()]).filter(([, v]) => v)); }, names);
+              data.resolvedCustomProperties = { ...data.resolvedCustomProperties, ...extra };
+            }
+          }
           const shot = join(outDir, "evidence", `${slug(url)}.${scheme}.png`);
           await page.screenshot({ path: shot });
           page_.modes[scheme] = { status: resp?.status() ?? null, finalUrl: page.url(), screenshot: relative(outDir, shot), ...data };

@@ -12,6 +12,7 @@ import { join, relative, isAbsolute } from "node:path";
 import * as C from "./color.mjs";
 import { samplePixels } from "./pixels.mjs";
 import { launch } from "./chromium.mjs";
+import { discoverRole, DISCOVERABLE, familyOf, familyEvidence, familyCoverage } from "./roles.mjs";
 
 export async function distil({ cfg, runDir, reference = null, useGuide = true }) {
   const SAME = 0.02; // OKLab distance under which two colours count as the same (a just-visible step is ~0.02)
@@ -54,7 +55,8 @@ export async function distil({ cfg, runDir, reference = null, useGuide = true })
       const o = prod.modes[m];
       for (const [k, v] of Object.entries(d.counts)) merge((o.counts[k] ??= {}), v);
       (o.canvas ??= []).push({ hex: px[d.screenshot]?.canvas, shot: d.screenshot, url: p.url });
-      o.tokens = { ...(o.tokens ?? {}), ...d.resolvedCustomProperties };
+      o.tokens = { ...(o.tokens ?? {}), ...Object.fromEntries(Object.entries(d.resolvedCustomProperties ?? {}).map(([k, v]) => [k, C.pickScheme(v, m)])) };
+      if (d.forcedDark) o.forcedDark = d.forcedDark;
       o.fonts = [...new Set([...(o.fonts ?? []), ...d.page.fontsLoaded])];
     }
   }
@@ -95,18 +97,53 @@ export async function distil({ cfg, runDir, reference = null, useGuide = true })
   const refName = `Harmonised: ${[...(guideUsed ? ["guide"] : []), ...refIds].join(" + ")}`;
   // ---------- no guide (absent, or not ticked): the published tokens most reference apps share stand in for it ----------
   const SEMANTIC = ["background", "foreground", "card", "card-foreground", "popover", "popover-foreground", "primary", "primary-foreground", "secondary", "secondary-foreground", "muted", "muted-foreground", "accent", "accent-foreground", "destructive", "destructive-foreground", "border", "input", "ring", "success", "warning"];
+  let vocab = null;
   if (!guideUsed) {
     guide = { ...(realGuide ?? { themeAliases: {}, literals: [], keyframes: {} }), id: refName, tokens: { light: {}, dark: {} } };
     const refProducts = Object.values(products).filter(p => inRef(p.id));
     const refSrc = nativeSrc.filter(n => inRef(n.product));
     const names = [...new Set([...SEMANTIC.map(n => `--${n}`), ...Object.keys(realGuide?.tokens.light ?? {}), ...Object.keys(realGuide?.tokens.dark ?? {})])];
+    // When a page carries several token vocabularies, the one whose values match what it draws is its own.
+    vocab = {};
+    for (const p of refProducts) for (const m of MODES) {
+      const o = p.modes[m];
+      const drawn = [o.canvasHex, ...o.text.map(x => x.hex), ...o.border.map(x => x.hex), ...(o.controls ?? []).map(c => C.toHex(c.split(" | ")[0]))].filter(Boolean);
+      (vocab[p.id] ??= {})[m] = { evidence: familyEvidence(o.tokens, drawn) };
+    }
+    // one vocabulary per product, in both schemes: evidence from both, plus two points per role it names
+    for (const p of refProducts) {
+      const fams = new Set(MODES.flatMap(m => Object.keys(vocab[p.id][m].evidence)));
+      const score = f => MODES.reduce((s, m) => s + (vocab[p.id][m].evidence[f] ?? 0), 0) + 2 * familyCoverage(p.modes.light.tokens, f);
+      const best = [...fams].sort((a, b) => score(b) - score(a))[0] ?? "";
+      for (const m of MODES) Object.assign(vocab[p.id][m], { best, score: score(best) });
+    }
+    const ownTokens = (p, m) => { const v = vocab[p.id][m]; return Object.fromEntries(Object.entries(p.modes[m].tokens ?? {}).filter(([k]) => familyOf(k) === v.best)); };
     for (const m of MODES) for (const name of names) {
       const n = name.slice(2);
-      // authority 2: published tokens of the reference apps (a native token file counts as published)
-      const votes = [...refProducts.map(p => p.modes[m].tokens?.[name] ?? p.modes[m].tokens?.[`--color-${n}`]), ...refSrc.map(s => s.tokens[m]?.[name])]
+      // authority 2: published tokens of the reference apps (a native token file counts as published), in each
+      // app's own vocabulary
+      const votes = [...refProducts.map(p => { const t = ownTokens(p, m); return t[name] ?? t[`--color-${n}`]; }), ...refSrc.map(s => s.tokens[m]?.[name])]
         .filter(v => v && C.parse(v)).map(v => (C.parse(v).alpha < 1 ? C.over(v, m === "dark" ? "#000000" : "#ffffff") : C.toHex(v)));
       const tieNote = vs => { const c = {}; for (const v of vs) c[v] = (c[v] ?? 0) + 1; const n = Object.values(c).sort((x, y) => y - x); return n.length > 1 && n[0] === n[1] ? " (a tie: the first app in the reference order wins)" : ""; };
       let pick = mostCommon(votes), at = pick && `published by ${votes.filter(v => v === pick).length} of ${refProducts.length + refSrc.length} reference apps${tieNote(votes)}`;
+      // still authority 2: the reference apps' own vocabulary (names unknown), found by role words
+      if (!pick && DISCOVERABLE.includes(n)) {
+        const found = refProducts.map(p => {
+          const o = p.modes[m];
+          const drawn = n === "background" ? o.canvasHex : n === "foreground" ? o.text[0]?.hex : n === "border" ? o.border[0]?.hex : null;
+          const other = m === "dark" ? "light" : "dark";
+          const canvasSwitched = o.canvasHex && p.modes[other].canvasHex && C.deltaE(o.canvasHex, p.modes[other].canvasHex) > 0.3;
+          const ot = p.modes[other].tokens ?? {}, changed = Object.keys(o.tokens ?? {}).filter(k => ot[k] != null && ot[k] !== o.tokens[k]).length;
+          const tokensSwitched = changed >= 10;
+          const otherTokens = canvasSwitched || tokensSwitched ? ot : null;
+          // tokens that switched while the canvas did not: the drawn colour is no evidence for this scheme
+          const evidence = !canvasSwitched && tokensSwitched && m === "dark" ? null : drawn;
+          return discoverRole(n, ownTokens(p, m), evidence, otherTokens) ?? discoverRole(n, o.tokens, evidence, otherTokens);
+        }).filter(Boolean);
+        const vals = found.map(f => (C.parse(f.value).alpha < 1 ? C.over(f.value, m === "dark" ? "#000000" : "#ffffff") : C.toHex(f.value)));
+        pick = mostCommon(vals);
+        if (pick) at = `published as ${[...new Set(found.filter((f, i) => vals[i] === pick).map(f => f.name))].join(", ")} by ${vals.filter(v => v === pick).length} of ${refProducts.length} reference apps (found by role words)${tieNote(vals)}`;
+      }
       // authority 3: what the reference apps draw
       if (!pick) {
         const drawn = refProducts.map(p => {
@@ -230,13 +267,14 @@ export async function distil({ cfg, runDir, reference = null, useGuide = true })
   const pubVotes = {};
   for (const p of Object.values(products)) if (p.kind === "web" && inRef(p.id)) { const v = p.modes.light.tokens?.["--font-sans"]; if (v) (pubVotes[v] ??= []).push(p.id); }
   const pubRank = Object.entries(pubVotes).sort((a, b) => b[1].length - a[1].length);
-  const chosenFont = pubRank[0]?.[0] ?? fontRank[0]?.[0] ?? (nativeFonts[0] ? nativeFonts[0] : "system-ui, sans-serif");
+  const guideFont = useGuide ? cfg.guide?.font : null;
+  const chosenFont = guideFont ?? pubRank[0]?.[0] ?? fontRank[0]?.[0] ?? (nativeFonts[0] ? nativeFonts[0] : "system-ui, sans-serif");
   const tie = pubRank.length > 1 && pubRank[0][1].length === pubRank[1][1].length;
   theme.tokens["font.sans"] = {
     type: "fontFamily", light: chosenFont, dark: chosenFont, schemeIndependent: true,
-    confidence: "low",
-    sources: [...pubRank.map(([v, ps]) => ({ kind: "published", value: v, products: ps })), ...fontRank.flatMap(([f, v]) => v.map(x => ({ kind: "observed", product: x.product, value: f }))), ...nativeSrc.map(n => ({ kind: "native-source", product: n.product, value: Object.keys(n.fonts).join(", ") }))],
-    why: `the guide sets no font. Published --font-sans: ${pubRank.map(([v, ps]) => `${firstFamily(v)} (${ps.join(", ")})`).join("; ")}${tie ? " (a tie)" : ""}. Drawn: ${fontRank.map(([f, v]) => `${f} (${v.map(x => x.product).join(", ")})`).join("; ")}${nativeFonts.length ? `; native source ships ${[...new Set(nativeFonts)].join(", ")}` : ""}. Published tokens come before what most apps draw. Low confidence: the guide does not name a font.`,
+    confidence: guideFont ? "high" : "low",
+    sources: [...(guideFont ? [{ kind: "guide", value: guideFont }] : []), ...pubRank.map(([v, ps]) => ({ kind: "published", value: v, products: ps })), ...fontRank.flatMap(([f, v]) => v.map(x => ({ kind: "observed", product: x.product, value: f }))), ...nativeSrc.map(n => ({ kind: "native-source", product: n.product, value: Object.keys(n.fonts).join(", ") }))],
+    why: guideFont ? `the guide names it. Live use: ${fontRank.map(([f, v]) => `${f} (${v.map(x => x.product).join(", ")})`).join("; ")}.` : `the guide sets no font. Published --font-sans: ${pubRank.map(([v, ps]) => `${firstFamily(v)} (${ps.join(", ")})`).join("; ")}${tie ? " (a tie)" : ""}. Drawn: ${fontRank.map(([f, v]) => `${f} (${v.map(x => x.product).join(", ")})`).join("; ")}${nativeFonts.length ? `; native source ships ${[...new Set(nativeFonts)].join(", ")}` : ""}. Published tokens come before what most apps draw. Low confidence: the guide does not name a font.`,
   };
   for (const p of Object.values(products)) if (p.kind === "web" && firstFamily(chosenFont) !== p.modes.light.font) divergences.push({ kind: "font", product: p.id, inReference: inRef(p.id), value: p.modes.light.font, chosen: firstFamily(chosenFont), evidence: evidenceOf(p, "light") });
   // type scale, weights, spacing: union of the most-used values across live products, kept where >= 2 products use them
@@ -257,7 +295,7 @@ export async function distil({ cfg, runDir, reference = null, useGuide = true })
   // both schemes (a brand mark does not change with the scheme), so both values are written.
   const norm = x => x.replace(/\s+/g, " ").trim();
   const fixed = (k, v, at, why) => { theme.tokens[k] = { type: typeof v === "string" && C.parse(v) ? "color" : "value", light: v, dark: v, schemeIndependent: true, confidence: "high", sources: [{ kind: "guide", at: `${guide.id}:${at}` }], why }; };
-  for (const comp of guide ? cfg.guide.components ?? [] : []) {
+  for (const comp of cfg.guide?.components ?? []) {
     const decls = guide.literals.filter(d => norm(d.selector) === norm(comp.selector));
     for (const [tok, [prop, nth]] of Object.entries(comp.props)) {
       const d = decls.find(x => x.prop === prop);
@@ -266,7 +304,7 @@ export async function distil({ cfg, runDir, reference = null, useGuide = true })
       fixed(`${comp.prefix}.${tok}`, v, d.at, comp.why ?? "component value from the guide");
     }
   }
-  for (const [tok, k] of Object.entries(guide ? cfg.guide.keyframes ?? {} : {})) {
+  for (const [tok, k] of Object.entries(cfg.guide?.keyframes ?? {})) {
     const frames = guide.keyframes[k.name] ?? [];
     const stops = frames.map(f => f[k.prop]).filter(Boolean);
     theme.tokens[tok] = { type: "cycle", light: stops, dark: stops, schemeIndependent: true, confidence: stops.length ? "high" : "low", sources: [{ kind: "guide", at: `${guide.id}: @keyframes ${k.name}` }], why: k.why ?? "colour cycle from the guide's keyframes" };
@@ -280,7 +318,8 @@ export async function distil({ cfg, runDir, reference = null, useGuide = true })
     const r = C.contrast(t[m], surf[m]); return r < 4.5 ? { token: k, mode: m, contrast: +r.toFixed(2), on: surf[m] } : null;
   })).filter(Boolean);
   theme.checks.textContrastAtLeast4_5 = { pass: lowText.length === 0, failing: lowText };
-  // Not adopted (the guide wins), only proposed: the nearest value with the same hue that reaches 4.5:1.
+  // Decided here, not asked: a text pair under 4.5:1 takes the nearest value with the same hue that reaches it
+  // (the ink moves; for white or near-white words, the face darkens instead). The report gives the reasoning.
   for (const f of lowText) {
     const t = theme.tokens[f.token], surf = surfaceToken(f.token);
     const ink = t[f.mode], face = surf[f.mode];
@@ -288,9 +327,44 @@ export async function distil({ cfg, runDir, reference = null, useGuide = true })
     let prop = null;
     if (C.oklch(ink).L < 0.98) { const dir = C.oklch(face).L > 0.5 ? -1 : 1; for (let l = L; l >= 0 && l <= 1; l += dir * 0.005) { const h = C.fromOklch(l, ch, H); if (C.contrast(h, face) >= 4.5) { prop = { token: f.token, mode: f.mode, value: h, contrast: +C.contrast(h, face).toFixed(2) }; break; } } }
     if (!prop || C.oklch(ink).L >= 0.98) { const s2 = C.oklch(face); for (let l = s2.L; l >= 0; l -= 0.005) { const h = C.fromOklch(l, s2.C, s2.H); if (C.contrast(ink, h) >= 4.5) { prop = { token: Object.entries(theme.tokens).find(([, v]) => v === surf)[0], mode: f.mode, value: h, contrast: +C.contrast(ink, h).toFixed(2), note: "darken the face; white words stay" }; break; } } }
-    (t.proposed ??= []).push(prop);
-    divergences.push({ kind: "guide-contrast", token: f.token, mode: f.mode, value: `${ink} on ${face} = ${f.contrast}:1`, chosen: `${ink} (guide wins; not changed)`, proposed: prop });
+    if (!prop) { divergences.push({ kind: "contrast", token: f.token, mode: f.mode, value: `${ink} on ${face} = ${f.contrast}:1`, chosen: "unchanged: no value with this hue reaches 4.5:1" }); continue; }
+    const target = theme.tokens[prop.token];
+    const was = target[f.mode];
+    target[f.mode] = prop.value;
+    (target.decided ??= []).push({ mode: f.mode, was, now: prop.value, why: `${f.token} on its surface was ${f.contrast}:1 in ${f.mode}; ${prop.note ? "the face darkened and the white words stay" : "the ink moved"}: now ${prop.contrast}:1, same hue` });
+    divergences.push({ kind: "contrast", token: f.token, mode: f.mode, value: `${ink} on ${face} = ${f.contrast}:1`, chosen: `${prop.token} ${f.mode}: ${was} → ${prop.value} (${prop.contrast}:1, same hue${prop.note ? `; ${prop.note}` : ""})` });
   }
+  // Status colours used as words on a surface: a fill or a face behind white words cannot also be dark-enough
+  // (or light-enough) words on the card, so each gets a text token of the same hue that reads at 4.5:1 or more on
+  // the card and the page in both schemes. The fill and face values stay.
+  for (const st of ["success", "warning", "destructive"]) {
+    const t = theme.tokens[`color.${st}`];
+    if (!t || t.type !== "color") continue;
+    const text = { type: "color", light: null, dark: null, confidence: t.confidence, sources: [{ kind: "decided", from: `color.${st}` }], decided: [] };
+    for (const m of MODES) {
+      const surfaces = ["color.card", "color.background"].map(k => theme.tokens[k]?.[m]).filter(Boolean);
+      const worst = () => Math.min(...surfaces.map(sf => C.contrast(text[m], sf)));
+      text[m] = t[m];
+      const before = +worst().toFixed(2);
+      if (before < 4.5) {
+        const { L, C: ch, H } = C.oklch(t[m]);
+        const dir = C.oklch(surfaces[0]).L > 0.5 ? -1 : 1;
+        for (let l = L; l >= 0 && l <= 1 && worst() < 4.5; l += dir * 0.005) text[m] = C.fromOklch(l, ch, H);
+      }
+      const after = +worst().toFixed(2);
+      if (text[m] !== t[m]) text.decided.push({ mode: m, was: t[m], now: text[m], why: `${st} as words on the card or page was ${before}:1 in ${m}; same hue, now ${after}:1. color.${st} stays for fills and faces.` });
+    }
+    text.why = text.decided.length ? `decided: ${st} as words, at least 4.5:1 on card and page` : `the same as color.${st}: it already reads at 4.5:1`;
+    theme.tokens[`color.${st}-text`] = text;
+    for (const d of text.decided) divergences.push({ kind: "contrast", token: `color.${st}-text`, mode: d.mode, value: `${d.was} as words`, chosen: `${d.now} (${d.why})` });
+  }
+  theme.checks.textContrastAtLeast4_5.before = theme.checks.textContrastAtLeast4_5.failing;
+  theme.checks.textContrastAtLeast4_5.failing = Object.entries(theme.tokens).filter(([k, t]) => /foreground/.test(k) && t.type === "color").flatMap(([k, t]) => MODES.map(m => { const sf = surfaceToken(k); const r = C.contrast(t[m], sf[m]); return r < 4.5 ? { token: k, mode: m, contrast: +r.toFixed(2), on: sf[m] } : null; })).filter(Boolean);
+  for (const [k, t] of Object.entries(theme.tokens)) if (/-text$/.test(k) && t.type === "color") for (const m of MODES) for (const sk of ["color.card", "color.background"]) {
+    const sf = theme.tokens[sk]?.[m]; if (!sf) continue;
+    const r = C.contrast(t[m], sf); if (r < 4.5) theme.checks.textContrastAtLeast4_5.failing.push({ token: k, mode: m, contrast: +r.toFixed(2), on: sf });
+  }
+    theme.checks.textContrastAtLeast4_5.pass = theme.checks.textContrastAtLeast4_5.failing.length === 0;
   theme.derived = derivedList;
   
   // ---------- product vs product, scheme support ----------
@@ -326,7 +400,7 @@ export async function distil({ cfg, runDir, reference = null, useGuide = true })
     theme.checks[`nativeTokensMatchGuide:${n.product}`] = { pass: drift.length === 0, failing: drift };
   }
   // The brand's written rules against its own code (guide.rules: [{ selector (regex), prop, value (regex), rule, chosen }]).
-  for (const r of guide ? cfg.guide.rules ?? [] : []) for (const d of guide.literals.filter(x => new RegExp(r.selector).test(x.selector) && x.prop === r.prop && new RegExp(r.value ?? ".").test(x.value)))
+  for (const r of cfg.guide?.rules ?? []) for (const d of guide.literals.filter(x => new RegExp(r.selector).test(x.selector) && x.prop === r.prop && new RegExp(r.value ?? ".").test(x.value)))
     divergences.push({ kind: "guide-vs-rule", token: r.token ?? r.selector, value: `${d.value} at ${guide.id}:${d.at}`, rule: r.rule, chosen: r.chosen });
   
   divergences.push(...offScale);
@@ -380,6 +454,7 @@ export async function distil({ cfg, runDir, reference = null, useGuide = true })
     apps[n.product] = { kind: "native-source", read: [rel(n.file)], note: "read from source: no simulator build could be launched", tokens: set };
   }
   theme.presets = { harmonised: { name: refName, description: `One look for ${cfg.brand}, worked out from: ${guideUsed ? "the guide, then " : ""}${refIds.join(", ")}.`, reference: { apps: refIds, guide: guideUsed }, tokens: harmonised }, apps };
+  theme.vocabulary = vocab;
   theme.harmonise = {
     sources: [...(realGuide ? [{ id: "guide", kind: "guide", label: realGuide.id }] : []), ...Object.values(products).map(p => ({ id: p.id, kind: p.kind, label: p.id })), ...nativeSrc.map(n => ({ id: n.product, kind: "native-source", label: n.product }))],
     reference: { apps: refIds, guide: guideUsed },

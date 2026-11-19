@@ -52,10 +52,13 @@ test("components and colour cycles come from the config, the same in both scheme
 });
 test("divergences: the rule broken by the code, contrast, a product that ignores the scheme, off-scale greys", () => {
   const kinds = new Set(divergences.map(d => d.kind));
-  for (const k of ["guide-vs-rule", "guide-contrast", "scheme", "off-scale"]) expect(kinds.has(k)).toBe(true);
+  for (const k of ["guide-vs-rule", "contrast", "scheme", "off-scale"]) expect(kinds.has(k)).toBe(true);
   expect(divergences.find(d => d.kind === "scheme").product).toBe("site-b");
   expect(divergences.filter(d => d.kind === "off-brand-hue")).toEqual([]); // site-a's blue primary is the guide's
-  expect(divergences.find(d => d.kind === "guide-contrast" && d.token === "color.muted-foreground")).toBeTruthy();
+  // a low-contrast pair is decided, not proposed: same hue, at least 4.5:1, with the reason
+  expect(divergences.find(d => d.kind === "contrast" && d.token === "color.muted-foreground")).toBeTruthy();
+  expect(theme.tokens["color.muted-foreground"].decided[0]).toMatchObject({ mode: "light", was: "#737373" });
+  expect(theme.checks.textContrastAtLeast4_5.pass).toBe(true);
 });
 test("presets: one per app as it looks today, plus Harmonised", () => {
   expect(Object.keys(theme.presets.apps).sort()).toEqual(["site-a", "site-b"]);
@@ -64,7 +67,7 @@ test("presets: one per app as it looks today, plus Harmonised", () => {
   expect(theme.presets.harmonised.tokens["color.foreground"]).toEqual({ light: "#000000", dark: "#ffffff" });
 });
 test("the report has every section and an evidence screenshot per page and scheme", () => {
-  for (const h of ["## Notes", "## 1. Guide against its own rules", "## 2. Products against the guide", "## 3. Product against product", "## 4. Chosen values", "## 5. Presets", "## 6. Derived values"]) expect(report).toContain(h);
+  for (const h of ["## Notes", "## 1. Guide against its own rules, and what the Distiller decided", "## 2. Products against the guide", "## 3. Product against product", "## 4. Chosen values", "## 5. Presets", "## 6. Derived values"]) expect(report).toContain(h);
   expect(theme.products.flatMap(p => p.evidence).filter(e => e.endsWith(".png")).length).toBe(4);
 });
 

@@ -15,3 +15,11 @@ Industries, Inc. (Expo):
 
 Prior work on components that are ready for an agent shaped the idea of this
 library. No code of it is in this repository.
+
+tools/distiller/presets/ holds token values (colours and font names) taken from
+published design systems; each preset names its source and licence:
+- GitHub Primer, @primer/primitives, MIT License, Copyright (c) 2018 GitHub Inc.
+- IBM Carbon, @carbon/styles, Apache License 2.0, Copyright IBM Corp. 2015, 2026
+- Cloudflare Kumo, @cloudflare/kumo, MIT License, Copyright (c) 2026 Cloudflare, Inc.
+No code of these systems is in this repository; tools/distiller/bench reads
+their published packages at run time.

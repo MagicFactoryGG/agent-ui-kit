@@ -1,0 +1,18 @@
+{
+  "id": "kumo", "system": "Cloudflare Kumo", "package": "@cloudflare/kumo", "licence": "MIT",
+  "licenceUrl": "https://github.com/cloudflare/kumo/blob/main/LICENSE",
+  "sites": [{ "id": "kumo-site", "pages": ["https://kumo-ui.com/"], "discover": "^https://kumo-ui\\.com/[^?#]*$", "maxPages": 5 }],
+  "domains": ["kumo-ui.com"],
+  "truth": [
+    { "file": "dist/styles/theme-kumo.css", "scheme": "light", "selector": "^:root,\\s*\\[data-theme=\"kumo\"\\]$" },
+    { "file": "dist/styles/theme-kumo.css", "scheme": "dark", "selector": "^:root\\[data-mode=\"dark\"\\]" }
+  ],
+  "roles": {
+    "background": "--color-kumo-base", "card": "--color-kumo-elevated", "popover": "--color-kumo-elevated",
+    "foreground": "--text-color-kumo-default", "muted-foreground": "--text-color-kumo-subtle", "border": "--color-kumo-line",
+    "muted": "--color-kumo-recessed", "accent": "--color-kumo-fill-hover",
+    "primary": "--color-kumo-brand", "primary-foreground": "--text-color-kumo-inverse",
+    "ring": "--color-kumo-focus", "success": "--color-kumo-success", "warning": "--color-kumo-warning",
+    "destructive": "--color-kumo-danger", "destructive-foreground": "--text-color-kumo-inverse"
+  }
+}

@@ -36,7 +36,7 @@ launch, no window, light then dark, shut down after; uses [agent-device](https:/
   "brand": "Example",
   "ownership": { "mode": "provider", "provider": "./my-provider.mjs", "domains": ["example.com"], "session": {} },
   "guide": {
-    "id": "example-ui", "root": "../ui", "css": ["src/theme.css"], "darkSelector": ".dark",
+    "id": "example-ui", "root": "../ui", "css": ["src/theme.css"], "darkSelector": ".dark", "font": "Inter, sans-serif",
     "components": [{ "prefix": "brand.button", "selector": ".brand-button", "why": "the same in both schemes",
                      "props": { "face": ["background", 0], "ink": ["color"], "height": ["height"] } }],
     "keyframes": { "brand.cycle": { "name": "brand-cycle", "prop": "stop-color" } },
@@ -49,7 +49,7 @@ launch, no window, light then dark, shut down after; uses [agent-device](https:/
 }
 ```
 
-Paths are relative to the config file. Without a `guide`, the tokens most products publish stand in for it.
+Paths are relative to the config file. `guide.font` names the brand font (a guide's CSS often does not). Without a `guide`, the tokens most products publish stand in for it.
 `components` and `keyframes` turn guide literals into tokens (`[property, nth colour in the value]`);
 `rules` are the brand's written rules, checked against its own CSS.
 
@@ -70,6 +70,28 @@ bun harmonise.mjs brand.json run/ --reference website,exchange --save "Harmonise
 `theme.json` → `harmonise.sources` lists what can be ticked. `distill.mjs` and `analyse.mjs` take the same
 `--reference` and `--guide` flags. In code: `distil({ cfg, runDir, reference, useGuide })` from `lib/distil.mjs`.
 
+## Presets from published design systems, and blends
+
+`presets/` holds starting presets made from published design systems' own token values (GitHub Primer, IBM
+Carbon, Cloudflare Kumo; `bun bench/presets.mjs` remakes them). Each shows its licence and is accepted before
+use (`licence.acceptBeforeUse`). Each token says where it came from (`from`) and what it is: `style` (a colour,
+spacing, corner or type-scale value) or `copied` (a font name, icon, component or trademark).
+
+```sh
+bun blend.mjs run/theme.json presets/carbon.json --weight 0.3 --keep color.primary --out blend.json
+```
+
+A blend mixes the base's colours with the other's in OKLab by `--weight`; `--keep` names tokens that stay the
+base's, and `brand.*` always does. Each token says whether it is the base's, the other's or a mix. Style values
+mixed in make the blend its owner's own, with no licence carried; copied material keeps its licence, and its
+notice comes with the blend.
+
+## The benchmark
+
+`bun bench/bench.mjs` distils each system in `bench/systems/` from its public site as if it were unknown, and
+scores the result against the system's published tokens; run it after each change. Scores and what each change
+did: [bench/RESULTS.md](bench/RESULTS.md).
+
 ## Doors: who may distil what (`lib/doors.mjs`)
 
 | `ownership.mode` | Who | May read |
@@ -78,6 +100,7 @@ bun harmonise.mjs brand.json run/ --reference website,exchange --save "Harmonise
 | `provider` | a plug-in proves the person and what their organisation owns | the proven domains |
 | `first-party` | the operator's own brand (`DISTILLER_FIRST_PARTY` lists the domains) | those domains |
 | `dns-txt` | anyone who can set `distiller=<token>` as a TXT record on the domain | that domain |
+| `published-system` | a design system published under an open licence (checked against the npm registry) | its public site, for the benchmark and presets |
 
 Every source must be on a proven domain. A store app must also be named in that domain's
 `/.well-known/apple-app-site-association` or `assetlinks.json`. Applying a Theme is never the Distiller's
@@ -98,7 +121,7 @@ export default {
 
 | Key | What |
 |---|---|
-| `tokens.<name>` | `light`, `dark`, `confidence` (high, medium, low), `sources`, `why`; `derived`, `proposed` (a same-hue suggestion for a low-contrast pair; never applied by the Distiller), `schemeIndependent` |
+| `tokens.<name>` | `light`, `dark`, `confidence` (high, medium, low), `sources`, `why`; `derived`, `decided` (what the Distiller changed and why, e.g. a low-contrast pair moved to 4.5:1 with the same hue), `schemeIndependent` |
 | `presets.harmonised` | `name`, `reference: { apps, guide }`, `tokens`: `{ light, dark }` per token |
 | `presets.saved.<name>` | a saved reference set: `reference`, `tokens` |
 | `harmonise.sources` | `[{ id, kind, label }]`: the guide and every app, for choosing a reference set |
@@ -120,4 +143,6 @@ Colour tokens are named `color.<name>` after the guide's custom properties (`col
 | `collect-native.mjs` | an iOS Simulator app's first screen: accessibility tree and pixels, light then dark |
 | `analyse.mjs` | maps readings to the reference, chooses, derives, builds presets, writes the notes (`lib/distil.mjs`) |
 | `harmonise.mjs` | the same on a saved run, for a chosen reference set; `--json`, `--save` |
+| `blend.mjs` | a brand's look mixed with another preset, with where each value came from |
+| `bench/bench.mjs`, `bench/presets.mjs` | the benchmark, and presets from published systems |
 | `report.mjs` | the divergence report |

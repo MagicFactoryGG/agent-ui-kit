@@ -10,6 +10,16 @@ function hslToRgb(h, s, l) {
   const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
   return [f(0), f(8), f(4)];
 }
+function oklabToRgbRaw(L, a, b) {
+  const l_ = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m_ = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s_ = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  return [
+    4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_,
+    -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_,
+    -0.0041960863 * l_ - 0.7034186147 * m_ + 1.707614701 * s_,
+  ].map(v => (v <= 0.0031308 ? 12.92 * v : 1.055 * Math.sign(v) * Math.abs(v) ** (1 / 2.4) - 0.055));
+}
 function oklabToRgb(L, a, b) {
   const l_ = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
   const m_ = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
@@ -56,6 +66,7 @@ export function parse(input) {
     return { rgb: v.slice(0, 3), alpha: v[3] };
   }
   if (/^[\d.]+(deg)?\s+[\d.]+%\s+[\d.]+%(\s*\/\s*[\d.]+%?)?$/.test(s)) s = `hsl(${s})`; // shadcn bare HSL
+  if (s.startsWith("color-mix(")) return colorMix(s);
   if ((m = s.match(/^([a-z]+)\((.*)\)$/))) {
     const fn = m[1];
     const [main, alphaPart] = m[2].replace(/,/g, " ").split("/");
@@ -85,9 +96,14 @@ export function oklch(s) {
   const [L, a, b] = rgbToOklab(parse(s).rgb);
   return { L, C: Math.hypot(a, b), H: ((Math.atan2(b, a) * 180) / Math.PI + 360) % 360 };
 }
+/** OKLCH to hex; a colour outside sRGB loses chroma (not hue) until it fits. */
 export function fromOklch(L, C, H) {
   const h = (H * Math.PI) / 180;
-  return hex({ rgb: oklabToRgb(L, C * Math.cos(h), C * Math.sin(h)), alpha: 1 });
+  const raw = c => oklabToRgbRaw(L, c * Math.cos(h), c * Math.sin(h));
+  const fits = c => raw(c).every(v => v >= -1e-4 && v <= 1 + 1e-4);
+  let c = C;
+  if (!fits(c)) { let lo = 0, hi = C; for (let i = 0; i < 24; i++) { const mid = (lo + hi) / 2; if (fits(mid)) lo = mid; else hi = mid; } c = lo; }
+  return hex({ rgb: raw(c).map(v => clamp(v)), alpha: 1 });
 }
 /** Blend a colour with alpha over a solid base (for translucent fills). */
 export function over(top, base) {
@@ -111,3 +127,33 @@ export function deriveOther(value, { role, against } = {}) {
   }
   return out;
 }
+
+/** light-dark(a, b) in a value, resolved for one scheme (custom properties keep it unresolved). */
+export function pickScheme(value, scheme) {
+  let v = String(value);
+  for (let i; (i = v.indexOf("light-dark(")) >= 0; ) {
+    let depth = 0, j = i + 10, comma = -1;
+    for (; j < v.length; j++) { if (v[j] === "(") depth++; else if (v[j] === ")" && --depth === 0) break; else if (v[j] === "," && depth === 1 && comma < 0) comma = j; }
+    if (comma < 0) break;
+    v = v.slice(0, i) + (scheme === "dark" ? v.slice(comma + 1, j) : v.slice(i + 11, comma)).trim() + v.slice(j + 1);
+  }
+  return v;
+}
+
+/** color-mix(in <space>, a [p%], b [q%]): mixed in OKLab (close to oklch for nearby hues; exact for srgb-like greys). */
+function colorMix(s) {
+  const inner = s.slice(10, -1);
+  const parts = []; let depth = 0, cur = "";
+  for (const ch of inner) { if (ch === "(") depth++; if (ch === ")") depth--; if (ch === "," && !depth) { parts.push(cur.trim()); cur = ""; } else cur += ch; }
+  parts.push(cur.trim());
+  const [, a, b] = parts;
+  const split = x => { const m = x.match(/^(.*?)(?:\s+([\d.]+)%)?$/); return [m[1].trim(), m[2] != null ? +m[2] / 100 : null]; };
+  let [ca, pa] = split(a), [cb, pb] = split(b);
+  if (pa == null && pb == null) { pa = 0.5; pb = 0.5; } else if (pa == null) pa = 1 - pb; else if (pb == null) pb = 1 - pa;
+  const A = parse(ca), B = parse(cb);
+  if (!A || !B) return null;
+  const la = rgbToOklab(A.rgb), lb = rgbToOklab(B.rgb), t = pb / (pa + pb);
+  const mix = la.map((v, i) => v * (1 - t) + lb[i] * t);
+  return { rgb: oklabToRgb(...mix), alpha: A.alpha * (1 - t) + B.alpha * t };
+}
+export const fromOklabHex = lab => hex({ rgb: oklabToRgb(...lab), alpha: 1 });

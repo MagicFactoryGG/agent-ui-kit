@@ -1,0 +1,21 @@
+{
+  "id": "primer", "system": "GitHub Primer", "package": "@primer/primitives", "licence": "MIT",
+  "licenceUrl": "https://github.com/primer/primitives/blob/main/LICENSE",
+  "sites": [{ "id": "primer-site", "pages": ["https://primer.style/product/"], "discover": "^https://primer\\.style/product/[^?#]*$", "maxPages": 5 }],
+  "domains": ["primer.style"],
+  "truth": [
+    { "file": "dist/css/functional/themes/light.css", "scheme": "light", "selector": "data-light-theme=\"light\"", "notIn": "prefers-color-scheme" },
+    { "file": "dist/css/functional/themes/dark.css", "scheme": "dark", "selector": "data-dark-theme=\"dark\"", "notIn": "prefers-color-scheme" },
+    { "file": "dist/css/functional/typography/typography.css", "scheme": "light", "selector": ":root" },
+    { "file": "dist/css/functional/typography/typography.css", "scheme": "dark", "selector": ":root" }
+  ],
+  "roles": {
+    "background": "--bgColor-default", "card": "--bgColor-default", "popover": "--overlay-bgColor",
+    "foreground": "--fgColor-default", "muted-foreground": "--fgColor-muted", "border": "--borderColor-default",
+    "muted": "--bgColor-muted", "accent": "--control-transparent-bgColor-hover",
+    "primary": "--button-primary-bgColor-rest", "primary-foreground": "--button-primary-fgColor-rest",
+    "ring": "--focus-outlineColor", "success": "--fgColor-success", "warning": "--fgColor-attention",
+    "destructive": "--fgColor-danger", "destructive-foreground": "--fgColor-onEmphasis"
+  },
+  "font": "--fontStack-sansSerif"
+}

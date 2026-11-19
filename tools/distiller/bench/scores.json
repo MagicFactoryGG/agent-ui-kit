@@ -1,0 +1,64 @@
+{
+ "primer": {
+  "system": "GitHub Primer",
+  "package": "@primer/primitives@11.10.0",
+  "score": 0.806,
+  "colours": {
+   "n": 30,
+   "hits": 24,
+   "near": 0,
+   "missing": 0,
+   "meanDE": 0.09
+  },
+  "font": {
+   "truth": "mona sans",
+   "distilled": "mona sans",
+   "hit": true
+  },
+  "truthTheme": {
+   "light": "default",
+   "dark": "default"
+  },
+  "at": "2026-11-19T06:50:25.927Z"
+ },
+ "carbon": {
+  "system": "IBM Carbon",
+  "package": "@carbon/styles@1.120.0",
+  "score": 0.355,
+  "colours": {
+   "n": 30,
+   "hits": 11,
+   "near": 0,
+   "missing": 4,
+   "meanDE": 0.25
+  },
+  "font": {
+   "truth": "ibm plex sans",
+   "distilled": "geistsans",
+   "hit": false
+  },
+  "truthTheme": {
+   "light": "white",
+   "dark": "g90"
+  },
+  "at": "2026-11-19T06:50:27.315Z"
+ },
+ "kumo": {
+  "system": "Cloudflare Kumo",
+  "package": "@cloudflare/kumo@2.19.0",
+  "score": 0.5,
+  "colours": {
+   "n": 30,
+   "hits": 15,
+   "near": 0,
+   "missing": 4,
+   "meanDE": 0.099
+  },
+  "font": null,
+  "truthTheme": {
+   "light": "default",
+   "dark": "default"
+  },
+  "at": "2026-11-19T06:50:28.265Z"
+ }
+}

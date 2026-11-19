@@ -6,6 +6,7 @@
 // one launch, light and dark) → analyse → report. Each step writes into <run-dir>; a later run is a drift check.
 import { execFileSync } from "node:child_process";
 import { join, dirname } from "node:path";
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { assertOwnership } from "./lib/doors.mjs";
 import { loadConfig } from "./lib/config.mjs";
@@ -17,6 +18,7 @@ console.log("doors:", JSON.stringify(await assertOwnership(loadConfig(cfg))));
 const step = (file, ...args) => execFileSync("bun", [join(here, file), ...args], { stdio: "inherit" });
 step("collect-guide.mjs", cfg, run);
 if (!rest.includes("--skip-web")) step("collect-web.mjs", cfg, run);
+else if (!existsSync(join(run, "web/pages.json"))) { console.error("--skip-web: no saved web readings in this run"); process.exit(2); }
 step("collect-native-source.mjs", cfg, run);
 const n = rest.indexOf("--native");
 if (n >= 0) step("collect-native.mjs", run, rest[n + 1], rest[n + 2], rest[n + 3]);

@@ -1,0 +1,67 @@
+{
+  "id": "carbon",
+  "system": "IBM Carbon",
+  "package": "@carbon/styles",
+  "licence": "Apache-2.0",
+  "licenceUrl": "https://github.com/carbon-design-system/carbon/blob/main/LICENSE",
+  "sites": [
+    {
+      "id": "carbon-site",
+      "pages": [
+        "https://carbondesignsystem.com/"
+      ],
+      "discover": "^https://(www\\.)?carbondesignsystem\\.com/[^?#]*$",
+      "maxPages": 5
+    }
+  ],
+  "domains": [
+    "carbondesignsystem.com"
+  ],
+  "truth": [
+    {
+      "file": "css/styles.css",
+      "scheme": "light",
+      "theme": "white",
+      "selector": "^\\.cds--white$"
+    },
+    {
+      "file": "css/styles.css",
+      "scheme": "light",
+      "theme": "g10",
+      "selector": "^\\.cds--g10$"
+    },
+    {
+      "file": "css/styles.css",
+      "scheme": "dark",
+      "theme": "g100",
+      "selector": "^\\.cds--g100$"
+    },
+    {
+      "file": "css/styles.css",
+      "scheme": "dark",
+      "theme": "g90",
+      "selector": "^\\.cds--g90$"
+    }
+  ],
+  "roles": {
+    "background": "--cds-background",
+    "card": "--cds-layer-01",
+    "popover": "--cds-layer-01",
+    "foreground": "--cds-text-primary",
+    "muted-foreground": "--cds-text-secondary",
+    "border": "--cds-border-subtle-01",
+    "muted": "--cds-layer-01",
+    "accent": "--cds-layer-hover-01",
+    "primary": "--cds-button-primary",
+    "primary-foreground": "--cds-text-on-color",
+    "ring": "--cds-focus",
+    "success": "--cds-support-success",
+    "warning": "--cds-support-warning",
+    "destructive": "--cds-support-error",
+    "destructive-foreground": "--cds-text-on-color"
+  },
+  "fontLiteral": {
+    "value": "IBM Plex Sans",
+    "source": "css/styles.css font-family (the most-used)"
+  }
+}

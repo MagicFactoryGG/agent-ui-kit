@@ -1,0 +1,116 @@
+{
+ "$schema": "brand-intake/preset@1",
+ "name": "IBM Carbon",
+ "source": {
+  "package": "@carbon/styles@1.120.0",
+  "themes": {
+   "light": "white",
+   "dark": "g100"
+  }
+ },
+ "licence": {
+  "spdx": "Apache-2.0",
+  "url": "https://github.com/carbon-design-system/carbon/blob/main/LICENSE",
+  "notice": "Values from IBM Carbon (@carbon/styles@1.120.0), Apache-2.0.",
+  "acceptBeforeUse": true
+ },
+ "tokens": {
+  "color.background": {
+   "light": "#ffffff",
+   "dark": "#161616",
+   "origin": "style",
+   "from": "--cds-background"
+  },
+  "color.card": {
+   "light": "#f4f4f4",
+   "dark": "#262626",
+   "origin": "style",
+   "from": "--cds-layer-01"
+  },
+  "color.popover": {
+   "light": "#f4f4f4",
+   "dark": "#262626",
+   "origin": "style",
+   "from": "--cds-layer-01"
+  },
+  "color.foreground": {
+   "light": "#161616",
+   "dark": "#f4f4f4",
+   "origin": "style",
+   "from": "--cds-text-primary"
+  },
+  "color.muted-foreground": {
+   "light": "#525252",
+   "dark": "#c6c6c6",
+   "origin": "style",
+   "from": "--cds-text-secondary"
+  },
+  "color.border": {
+   "light": "#c6c6c6",
+   "dark": "#525252",
+   "origin": "style",
+   "from": "--cds-border-subtle-01"
+  },
+  "color.muted": {
+   "light": "#f4f4f4",
+   "dark": "#262626",
+   "origin": "style",
+   "from": "--cds-layer-01"
+  },
+  "color.accent": {
+   "light": "#e8e8e8",
+   "dark": "#333333",
+   "origin": "style",
+   "from": "--cds-layer-hover-01"
+  },
+  "color.primary": {
+   "light": "#0f62fe",
+   "dark": "#0f62fe",
+   "origin": "style",
+   "from": "--cds-button-primary"
+  },
+  "color.primary-foreground": {
+   "light": "#ffffff",
+   "dark": "#ffffff",
+   "origin": "style",
+   "from": "--cds-text-on-color"
+  },
+  "color.ring": {
+   "light": "#0f62fe",
+   "dark": "#ffffff",
+   "origin": "style",
+   "from": "--cds-focus"
+  },
+  "color.success": {
+   "light": "#24a148",
+   "dark": "#42be65",
+   "origin": "style",
+   "from": "--cds-support-success"
+  },
+  "color.warning": {
+   "light": "#f1c21b",
+   "dark": "#f1c21b",
+   "origin": "style",
+   "from": "--cds-support-warning"
+  },
+  "color.destructive": {
+   "light": "#da1e28",
+   "dark": "#fa4d56",
+   "origin": "style",
+   "from": "--cds-support-error"
+  },
+  "color.destructive-foreground": {
+   "light": "#ffffff",
+   "dark": "#ffffff",
+   "origin": "style",
+   "from": "--cds-text-on-color"
+  },
+  "font.sans": {
+   "light": "IBM Plex Sans",
+   "dark": "IBM Plex Sans",
+   "origin": "copied",
+   "from": "css/styles.css font-family (the most-used)",
+   "note": "a font name: the font's own licence applies to its files"
+  }
+ }
+}

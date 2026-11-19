@@ -7,6 +7,9 @@
 //                moveGuestDraft?(draftId, entity) }. ownsDomain answers { ok, why?, stub?, willCheck? }.
 //   first-party  the operator's own brand: every domain must be in the file named by DISTILLER_FIRST_PARTY.
 //   dns-txt      each domain (or _distiller.<domain>) has a TXT record "distiller=<ownership.token>".
+//   published-system  a design system published under an open licence (ownership.package, ownership.licence,
+//                checked against the npm registry): read for the benchmark and offered as a preset that shows
+//                its licence.
 //
 // Store apps (`storeApps[]`): an owned domain must name the app in its apple-app-site-association (iOS) or
 // assetlinks.json (Android). Applying a Theme is never the Distiller's: apply() always refuses.
@@ -15,6 +18,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 const hostOf = u => new URL(u).hostname;
+const OPEN = ["MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "MPL-2.0"];
 const under = (host, domain) => host === domain || host.endsWith(`.${domain}`);
 export const refuse = (why, todo) => {
   const e = new Error(`REFUSED by the Distiller's ownership doors: ${why}${todo ? ` ${todo}` : ""}`);
@@ -98,6 +102,12 @@ export async function checkOwnership(cfg, opts = {}) {
       if (!own.token || !recs.includes(`distiller=${own.token}`)) refuse(`${d} has no TXT record distiller=<token>.`);
       checks.push({ door: "dns-txt", domain: d });
     }
+  } else if (own.mode === "published-system") {
+    // A design system its owners publish under an open licence: its public site may be read to benchmark the
+    // Distiller and to offer the system as a preset. The registry must state the licence the config names.
+    const meta = await fetch(`https://registry.npmjs.org/${own.package}/latest`).then(r => r.json()).catch(() => ({}));
+    if (!OPEN.includes(meta.license) || meta.license !== own.licence) refuse(`${own.package}: the registry says licence "${meta.license ?? "none"}", the config says "${own.licence}"; only an open licence (${OPEN.join(", ")}) is read.`);
+    checks.push({ door: "published-system", package: own.package, licence: meta.license, version: meta.version });
   } else refuse(`unknown ownership mode "${own.mode}".`);
   for (const a of apps) {
     const r = await storeAppNamed(a.domain, a, { origin: opts.storeOrigin });
