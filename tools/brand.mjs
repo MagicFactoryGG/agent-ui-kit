@@ -199,7 +199,8 @@ export function check(dir, design = dir) {
         if (JSON.stringify(lock.assets?.[a.id] ?? []) !== JSON.stringify(now.assets[a.id])) say(`${a.dir}#${a.component}`, `the registered ${a.id} is drawn differently from its registration`);
         for (const f of now.assets[a.id]) own.set(f, a.id);
       }
-      for (const [id, h] of Object.entries(lock.references ?? {})) {
+      // References live in the design repo; an app's vendored copy has none to compare.
+      if (existsSync(join(design, 'brand-references'))) for (const [id, h] of Object.entries(lock.references ?? {})) {
         const ref = join(design, 'brand-references', `${id}.png`);
         if (!existsSync(ref) || sha(readFileSync(ref)) !== h) say(`brand-references/${id}.png`, 'is not the registered reference (only register captures references)');
       }
