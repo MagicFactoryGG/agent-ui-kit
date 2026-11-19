@@ -8,7 +8,9 @@
 // optional Skip ("" hides it) and Continue, which right-clusters at a named width on a desktop (a Gutter takes the
 // spare width, so the space between the zones reads as deliberate, not a stretched slab) and fills its own row on
 // a phone; the frame's one filled element a state is the way on, and it carries the busy state in whichever branch
-// draws it; a state with no steps and one way on fills the row. The frame groups by surface and space alone: one
+// draws it; a state with no steps and one way on keeps the loaded footer's own place — the gutter stands in
+// for the secondaries the state lacks, so the way on right-clusters and caps on a desktop and wraps to its own
+// full-width row on a phone, exactly as every loaded footer does. The frame groups by surface and space alone: one
 // raised panel whose line edge is lifted a tenth toward the muted ink, so the edge holds on a near-black page (a
 // fill alone can vanish in a theme that paints page and surface one colour), one gap token between every zone —
 // the actions belong to the last gap as the slot does to its own, with no rule between (two look runs read a
@@ -80,11 +82,14 @@ component StepSeg
     box flex=1 height=(tall ? "blocks.step-line" : "theme.line.width") background-color=ink
 
 // The gutter between the secondary and primary zones: it takes nearly all the spare width (1000 to the
-// primary's 1), so on one line the primary keeps its basis; once the primary wraps to its own line (a phone)
-// the gutter stays behind and the primary fills that line alone.
+// primary's 1), so on one line the primary keeps its basis. `share` is the room its line needs before the way
+// on wraps to its own row — none where real secondaries already fill it; the primary's own width where the
+// state has none, so a lone way on wraps on a phone exactly as the loaded footer does.
 component Gutter
+  props
+    share: string
   view
-    box flex="1000 1 0"
+    box flex=share
 
 // A bar of text still loading: breathing, never a control. It takes `share` of its line's width against
 // `rest` (a width share in a row: a flex share inside the column would size its height, and drew nothing).
@@ -220,7 +225,7 @@ component OnboardingSteps
             row gap="theme.space.sm" align-items="center"
               SkBtn(basis="none", max="none")
               SkBtn(basis="none", max="none")
-            Gutter()
+            Gutter(share="1000 1 0")
             SkBtn(basis="1 1 blocks.primary-max", max="none")
       if data != "loading" or outcome == "error"
         column gap="theme.space.md"
@@ -230,12 +235,15 @@ component OnboardingSteps
             row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
               if skipLabel != ""
                 ActionButton(label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
-              Gutter()
+              Gutter(share="1000 1 0")
               if retryLabel != ""
                 column flex="1 1 blocks.primary-max"
                   ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
           else if not hasSteps
-            ActionButton(label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)
+            row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
+              Gutter(share="1000 1 blocks.primary-max")
+              column flex="1 1 blocks.primary-max"
+                ActionButton(label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)
           else
             row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
               row gap="theme.space.sm" align-items="center"
@@ -243,6 +251,6 @@ component OnboardingSteps
                   ActionButton(label=backLabel, kind="plain", interaction="idle", outcome="none", press=back, testId=`${testId}-back`)
                 if skipLabel != ""
                   ActionButton(label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
-              Gutter()
+              Gutter(share="1000 1 0")
               column flex="1 1 blocks.primary-max"
                 ActionButton(label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)
