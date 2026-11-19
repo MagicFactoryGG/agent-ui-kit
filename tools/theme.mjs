@@ -28,6 +28,8 @@ export const REQUIRED = {
     'page', 'surface', 'raised', 'ink', 'ink-muted', 'line', 'fill', 'hover',
     'accent', 'accent-ink', 'focus', 'positive', 'caution', 'critical', 'critical-ink',
     'positive-text', 'caution-text', 'critical-text',
+    // The on state of a switch (its track), under the platform's white thumb.
+    'control-tint',
   ],
   type: ['title', 'heading', 'body', 'label', 'caption'],
   space: ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'],
@@ -126,6 +128,16 @@ export function problems(theme) {
       const open = (theme.$open ?? []).some((o) => o.pair === `${fg} on ${bg}` && o.mode === mode);
       if (r < 4.5 && !open) say(`color.${fg} on color.${bg} (${mode})`, `${r.toFixed(2)}:1, under 4.5:1; change one of the two, or list it in $open (not decided yet)`);
     }
+  }
+  // A switch's on track: its white thumb on it, and it on the page, each at least 3:1 (WCAG 2.2, 1.4.11, non-text).
+  for (const mode of ['light', 'dark']) {
+    const tint = c['control-tint']?.[mode];
+    const page = c.page?.[mode];
+    if (!HEX.test(String(tint)) || !HEX.test(String(page))) continue;
+    const thumb = contrast('#ffffff', tint);
+    const track = contrast(tint, page);
+    if (thumb < 3) say(`color.control-tint (${mode})`, `a white switch thumb on it is ${thumb.toFixed(2)}:1, under 3:1`);
+    if (track < 3) say(`color.control-tint (${mode})`, `on color.page it is ${track.toFixed(2)}:1, under 3:1: the on track would not show`);
   }
   return out;
 }

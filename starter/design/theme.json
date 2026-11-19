@@ -74,6 +74,10 @@
     "critical-text": {
       "light": "#c62828",
       "dark": "#f87171"
+    },
+    "control-tint": {
+      "light": "#2f5bd3",
+      "dark": "#3b63d8"
     }
   },
   "type": {
