@@ -23,19 +23,20 @@
 // - The places: NavEntry rows grouped by `group` in first-seen order ("" no heading); a group's own name is its
 //   heading. The current place is the panel's one filled thing, and selection is one device: the fill, the
 //   label's heavier type in the accent, aria-current="page". A badge counts, as a fill pill (surface on the
-//   current row's fill): no border, so it holds on any row and in both schemes, and a truncating label keeps a
-//   whole gap (theme.space.lg) before its count.
+//   current row's fill): no border, so it holds on any row and in both schemes; a row with no count keeps the
+//   count's room, so every label holds its line on the same edge.
 // - An agent that added or reordered an entry (agent "changed"): the entry `agentKey` names gets an accent edge
 //   at its start and `agentNote`'s words under its label (the kit's LinkRow language).
 // - The states that stand where the places stand speak where the rows speak — no heading of their own, so a
-//   state never reads as a copy change: loading's drawn cue beside its words at a heading's place (role=status),
-//   over ghost rows in the places' own anatomy — the row's own height and insets, a fill bar where the label
-//   will be and a fill pill where the count sits — so what arrives does not jump. Empty centres its line and
-//   its way on in the menu's home (a quiet text action when the app gives `emptyLabel`: the emptier state
-//   keeps the lighter gesture). Failed is the kit's outcome language, as ActionButton draws it: a raised panel
-//   ringed by the critical's hair and washed with the critical at a breath (8%, the same opacity shading the
-//   kit's own buttons), the drawn mark beside the words in the error's ink, `retryLabel`'s compact bordered
-//   button below.
+//   state never reads as a copy change. Loading says its line once (role=status, for the ear: the eye needs no
+//   second signal — the menu's own shape is arriving below it) and then shows the shape coming: a ghost for the
+//   group's own label and ghosts for the rows, each the row's own height and insets with a fill bar where the
+//   label will be and a fill pill where the count sits, so what arrives does not jump. Empty centres its line
+//   and its way on in the menu's home (a compact bordered button when the app gives `emptyLabel`). Failed is
+//   the kit's outcome language, as ActionButton draws it: a raised panel ringed by the critical's hair and
+//   washed with the critical at a breath (8%, the same opacity shading the kit's own buttons), the drawn mark
+//   beside the words in the error's ink, and `retryLabel`'s compact filled button below — the way on is the
+//   panel's one filled thing.
 // - The landmark's name, `navLabel`, is what a reader hears; the words a person sees above the rows are the
 //   data's own group names.
 // - Long: everything the panel draws holds one line with an ellipsis; the slot's content is the app's.
@@ -63,7 +64,8 @@ component NavHeading
   view
     text text testId=testId font="theme.type.heading" color="theme.color.ink-muted" padding-left="theme.space.md" padding-right="theme.space.md" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
 
-// One place: its label on one line (an ellipsis a whole gap before its count), the current place's fill and
+// One place: its label on one line (an ellipsis a whole gap before its count; a row with no count keeps the
+// count's room, so every label in the panel holds its line on the same edge), the current place's fill and
 // weight, an agent's edge and note.
 component NavItem
   props
@@ -84,7 +86,7 @@ component NavItem
         box-shadow="inset 0 0 0 2px theme.color.focus"
       if marked
         box position="absolute" left=0 top="theme.space.sm" bottom="theme.space.sm" width="blocks.nav-mark-line" background-color="theme.color.accent" border-radius="theme.radius.pill" aria-hidden=true
-      column flex=1 min-width=0
+      column flex=1 min-width=0 padding-right=(badge > 0 ? "0" : "blocks.nav-count-space")
         text label font=(current ? "theme.type.label" : "theme.type.body") color=(current ? "theme.color.accent" : "theme.color.ink") white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
         if marked
           text note testId=`${testId}-mark` font="theme.type.caption" color="theme.color.accent" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
@@ -144,15 +146,15 @@ component SideNav
               column flex=1 min-width=0
                 Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
             row
-              ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+              ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
       else if data == "loading"
         column gap="theme.space.xs"
-          row role="status" align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md"
-            svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" aria-hidden=true flex-shrink=0
-              path d="M12 3.5 A8.5 8.5 0 1 1 3.5 12" stroke="theme.color.ink-muted" stroke-width=2.5 stroke-linecap="round"
+          row role="status" padding-left="theme.space.md" padding-right="theme.space.md" padding-bottom="theme.space.xs"
             column flex=1 min-width=0
-              Words(text=loadingText, kind="heading", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+              Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-${data}`)
           column aria-hidden=true gap="theme.space.xs"
+            row padding-left="theme.space.md" padding-right="theme.space.md"
+              box width="blocks.nav-ghost-head" height="theme.space.sm" background-color="theme.color.fill" border-radius="theme.radius.pill"
             NavGhost()
             NavGhost()
             NavGhost()
@@ -163,12 +165,7 @@ component SideNav
           Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
           if emptyLabel != ""
             row
-              button press=empty testId=`${testId}-add` min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="0" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" background-color="transparent" border-width="0" border-radius="theme.radius.control"
-                :hover
-                  background-color="theme.color.hover"
-                :focus-visible
-                  box-shadow="inset 0 0 0 2px theme.color.focus"
-                text emptyLabel font="theme.type.label" color="theme.color.accent"
+              ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
       else
         column gap="theme.space.lg"
           for g in groups key=g

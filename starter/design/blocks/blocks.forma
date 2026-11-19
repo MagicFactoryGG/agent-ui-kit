@@ -10,5 +10,7 @@ theme
   blocks.nav-mark-line: length = 3px
   blocks.nav-glyph: length = 20px
   blocks.nav-badge-min: length = 24px
+  blocks.nav-count-space: length = 56px
   blocks.nav-places-min: length = 320px
   blocks.nav-places-half: length = 160px
+  blocks.nav-ghost-head: length = 96px
