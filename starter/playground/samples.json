@@ -25,6 +25,7 @@
     "skipLabel": "Skip for now",
     "errorText": "That didn't save. Check the highlighted answers and try again.",
     "emptyText": "Nothing needs setting up right now. You can go straight in.",
+    "completeText": "All steps complete",
     "loadingText": "Loading the steps…",
     "failedText": "The steps could not be loaded.",
     "retryLabel": "Try again",
