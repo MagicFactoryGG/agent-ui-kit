@@ -11,7 +11,9 @@
 // (the primary act running: its words stay, it cannot be pressed), outcome none|error (`errorText` under the
 // actions, role alert, on the page), agent none|proposed|changed — the hero's act through the other door: proposed
 // waits in an accent-edged band with one sentence and two answer words (both plain, so the primary stays the one
-// fill); changed marks what the agent did with the accent line at its start and one answer (undo). Every word is a
+// fill); changed marks what the agent did with the accent line at its start and one answer (undo). The proposal
+// band is drawn here, not the kit's Proposal: that one lives inline in blocks/index.contract, which imports this
+// file (a use cycle), and its yes is a filled button, which would give the hero two focal fills. Every word is a
 // prop; every value a Theme token or a blocks.* size.
 use Words, ActionButton from "__SCOPE__/components"
 
