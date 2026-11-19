@@ -138,7 +138,7 @@ component SkelRow
           box flex=1 height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
           box width="blocks.skel-when" height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" flex-shrink=0 animation=pulse
         row align-items="center" min-height="blocks.row-line"
-          box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
+          box width="70%" height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
         box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
 
 // The one focal point of a state with nothing to show: a glyph in a circle, the state's own line at title size
