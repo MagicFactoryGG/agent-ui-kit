@@ -140,9 +140,11 @@ export function check(dir, design = dir) {
     }
     if (inRegistered) continue;
     const text = readFileSync(f, 'utf8').toLowerCase();
+    const lines = text.split('\n');
     for (const [w, a] of words) {
-      const at = text.indexOf(w);
-      if (at >= 0) say(`${rel}:${text.slice(0, at).split('\n').length}`, `says "${w}", the words of the registered ${a.id}: use ${a.component} from ${a.package}`);
+      // The words on a line that calls the registered component are that asset's own label.
+      const at = lines.findIndex((l) => l.includes(w) && !l.includes(`${a.component.toLowerCase()}(`));
+      if (at >= 0) say(`${rel}:${at + 1}`, `says "${w}", the words of the registered ${a.id}: use ${a.component} from ${a.package}`);
     }
   }
   return findings;

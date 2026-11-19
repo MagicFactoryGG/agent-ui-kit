@@ -306,6 +306,8 @@ export function generate(designDir, playDir) {
   const pages = [];
   const view = [];
   const nav = [];
+  let brandFile;
+  let brandSet = null;
   const marks = (p) => {
     const f = join(designDir, p.layer, 'states.json');
     const w = join(playDir, 'wip', 'states.json');
@@ -322,6 +324,22 @@ export function generate(designDir, playDir) {
     view.push(`            if find == "" or ${quote(`theme-${name}`)}.includes(find)`, `              TokenRow(name=${quote(human(name))}, testId=${quote(`theme-${name}`)})`);
     for (const scheme of ['light', 'dark']) {
       view.push(`                TokenSwatch(scheme="${scheme}", testId=${quote(`theme-${name}-${scheme}`)})`, `                  Swatch(token=${quote(name)}, label="")`);
+    }
+
+  }
+  // The Brand layer (tools/brand.mjs): each registered asset (or, before the first registration, the draft's), drawn
+  // by its own component's example, light and dark; the look check compares these cells with the references.
+  brandFile = [join(designDir, 'brand.json'), join(designDir, 'brand.draft.json')].find((f) => existsSync(f));
+  brandSet = brandFile ? JSON.parse(readFileSync(brandFile, 'utf8')) : null;
+  if (brandSet?.assets?.length) {
+    pages.push('brand');
+    nav.push(`            option "Brand" value="brand"`);
+    view.push(`      if page == "brand"`, `        Page(title="Brand", note=${quote(brandFile.endsWith('draft.json') ? `${brandSet.owner?.name ?? ''}: pending registration by the Distiller` : `${brandSet.owner?.name ?? ''}: registered (record ${brandSet.owner?.proof ?? ''})`)})`);
+    for (const a of brandSet.assets) {
+      view.push(`          MatrixRow(label=${quote(a.id)}, testId=${quote(`brand-${a.id}`)})`);
+      for (const scheme of ['light', 'dark']) {
+        view.push(`            if find == "" or ${quote(`brand-${a.id}-${scheme}`)}.includes(find)`, `              MatrixCell(scheme="${scheme}", testId=${quote(`brand-${a.id}-${scheme}`)})`, `                ${a.example}`);
+      }
     }
   }
 
@@ -371,6 +389,7 @@ export function generate(designDir, playDir) {
     // samples.json "overlay": {"piece", "package"}: one piece of the playground's own (an agent dock, say) placed once
     // over every page, as an app places it; it holds its own state.
     ...(overlay ? [`use ${overlay.piece} from ${quote(overlay.package)}`] : []),
+    ...(brandSet?.assets?.length ? Object.entries(Object.groupBy(brandSet.assets, (a) => a.package)).map(([pkg, list]) => `use ${[...new Set(list.map((a) => a.component))].join(', ')} from ${quote(pkg)}`) : []),
     '',
     'component App',
     '  state page = "theme"',
