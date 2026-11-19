@@ -100,3 +100,17 @@ theme
   blocks.skel-title: length = 16px
   blocks.skel-when: length = 56px
   blocks.skel-chip: length = 120px
+  blocks.footer-max: length = 1120px
+  blocks.footer-air: length = 48px
+  blocks.footer-gap: length = 48px
+  blocks.footer-brand-min: length = 240px
+  blocks.footer-col-min: length = 172px  // two columns need 368px with their gap: more than a 390px phone's 358px, less than a desktop's quarter
+  blocks.footer-link-min: length = 32px
+  blocks.footer-head-min: length = 17px  // the heading type's own line (13px at 1.3)
+  blocks.footer-bone: length = 10px
+  blocks.footer-dot: length = 6px
+  blocks.footer-mark: length = 32px
+  blocks.footer-mark-icon: length = 24px
+  blocks.footer-alert: length = 16px
+  blocks.footer-measure: length = 320px
+  blocks.footer-rule: length = 3px

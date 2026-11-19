@@ -1,0 +1,195 @@
+// SiteFooter: a site's closing band. It is the page's contentinfo landmark, on the surface with a hairline above it
+// (a theme may give page and surface one colour, so the band never relies on its fill alone to show its edge), its
+// content on a centred column no wider than blocks.footer-max.
+//
+// - The brand: the product's mark (initials on the accent, the band's one filled thing in every state) beside its
+//   name in the title type, then the tagline in the muted body type on a short reading measure.
+// - The link columns, one navigation landmark (`navLabel`): each LinkGroup a column, its title an eyebrow heading,
+//   its links a list of rows (never cards) in the body type, muted, that turn ink under a hover. Width, with no
+//   breakpoint (Exact has no media query; the kit's responsive pair, see AGENTS): the brand and the columns share
+//   a wrapping row, and the columns wrap among themselves, each flex=1 over a named least width
+//   (blocks.footer-col-min). At 1280 the brand stands beside four columns; narrower, the columns fall to two
+//   under the brand; at a phone's 390 every column takes the whole width, one under the other.
+// - The bottom row, under a hairline: the legal line, small and muted, wrapping whole.
+//
+// States (the brand and the legal line stay in every one; only the columns are data):
+//   data   many|one|empty|loading|failed|long — loading says `loadingText` (role status) above four breathing ghost
+//          columns, a heading bar and link bars each, in the columns' own grid, so what arrives does not jump; empty
+//          draws an open dashed ring and `emptyText` with `emptyLabel`'s plain button as its way on; failed draws a
+//          warning mark in the critical hue beside `failedText` (role alert, in ink: status ink is only promised on
+//          the page and the surface) and a plain `retryLabel` that wears the error's ring. long: every word wraps
+//          inside its own column (overflow-wrap) and nothing is cut.
+//   agent  none|proposed|changed — the footer's links through the other door. proposed: a band above the columns,
+//          edged in the accent, with one sentence and two answer words (both plain, so the mark stays the one
+//          fill); changed: the link `agentKey` names carries the accent dot and the accent ink, and a line above the
+//          columns, marked by the accent rule at its start, says `agentNote` with one answer (undo).
+// The kit's Proposal is drawn inline in blocks/index.contract, which imports this file (a use cycle), and its yes
+// is filled: the band is drawn here. Every word is a prop; every value a Theme token or a blocks.footer-* size.
+use ActionButton from "__SCOPE__/components"
+
+// One link in a footer column.
+shape FooterLink
+  key: string
+  label: string
+  href: string
+
+// One column of the footer: its title and its links.
+shape LinkGroup
+  key: string
+  title: string
+  links: FooterLink[]
+
+// The ghosts breathe, so loading reads as on its way rather than as drawn shapes.
+keyframes footerBreathe
+  50% opacity=0.55
+
+// One link row: the label, muted until a hover; the agent's link wears the accent dot and the accent ink.
+component FooterLinkRow
+  props
+    label: string
+    href: string
+    marked: bool
+    note: string
+    testId: string
+  view
+    row role="listitem" align-items="center" min-height="blocks.footer-link-min"
+      link href=href testId=testId title=(marked ? note : "") display="flex" flex-direction="row" align-items="center" gap="theme.space.sm" min-width=0 padding-top="theme.space.xs" padding-bottom="theme.space.xs" border-radius="theme.radius.control" text-decoration-line="none" color=(marked ? "theme.color.accent" : "theme.color.ink-muted")
+        :hover
+          color="theme.color.ink"
+        :focus-visible
+          box-shadow="0 0 0 2px theme.color.focus"
+        text label min-width=0 overflow-wrap="break-word" font="theme.type.body"
+        if marked
+          svg viewBox="0 0 8 8" width="blocks.footer-dot" height="blocks.footer-dot" aria-hidden=true flex-shrink=0
+            circle cx=4 cy=4 r=4 fill="theme.color.accent"
+
+// One column: the group's title as an eyebrow heading, then its links as rows.
+component FooterColumn
+  props
+    group: LinkGroup
+    agentKey: string
+    agentNote: string
+    agent: enum<"none", "proposed", "changed">
+    testId: string
+  view
+    column testId=testId flex=1 min-width="blocks.footer-col-min" box-sizing="border-box" gap="theme.space.sm"
+      text group.title role="heading" aria-level=2 overflow-wrap="break-word" font="theme.type.heading" color="theme.color.ink" padding-bottom="theme.space.xs"
+      column role="list" aria-label=group.title
+        for l in group.links key=l.key
+          FooterLinkRow(label=l.label, href=l.href, marked=(agent == "changed" and l.key == agentKey), note=agentNote, testId=`${testId}-${l.key}`)
+
+// A column still loading: a heading bar and link bars at the rows' own pitch, never a control.
+component FooterBone
+  props
+    head: string
+  view
+    column flex=1 min-width="blocks.footer-col-min" box-sizing="border-box" gap="theme.space.sm" aria-hidden=true
+      row min-height="blocks.footer-head-min" align-items="center" padding-bottom="theme.space.xs"
+        box width=head height="blocks.footer-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+      column
+        row min-height="blocks.footer-link-min" align-items="center"
+          box width="70%" height="blocks.footer-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+        row min-height="blocks.footer-link-min" align-items="center"
+          box width="55%" height="blocks.footer-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+        row min-height="blocks.footer-link-min" align-items="center"
+          box width="62%" height="blocks.footer-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+
+// The columns' word in their place: a drawn mark, one line, then the slot's way on. Failed draws a warning in the
+// critical hue and speaks as an alert, in ink; empty draws an open ring and speaks as a status.
+component FooterNote
+  props
+    text: string
+    kind: enum<"empty", "failed">
+    testId: string
+  slot
+  view
+    row flex=1 min-width=0 gap="theme.space.md" align-items="flex-start"
+      box width="blocks.footer-mark-icon" height="blocks.footer-mark-icon" flex-shrink=0 display="flex" align-items="center" justify-content="center" aria-hidden=true
+        if kind == "failed"
+          svg viewBox="0 0 16 16" width="blocks.footer-alert" height="blocks.footer-alert" fill="none" stroke="theme.color.critical" flex-shrink=0
+            path d="M8 2.5L14.5 13.5H1.5Z" stroke-width=1.5 stroke-linejoin="round"
+            path d="M8 6.5v3.2" stroke-width=1.5 stroke-linecap="round"
+            path d="M8 11.4v0.01" stroke-width=1.5 stroke-linecap="round"
+        else
+          svg viewBox="0 0 24 24" width="blocks.footer-mark-icon" height="blocks.footer-mark-icon" fill="none" stroke="theme.color.ink-muted" flex-shrink=0
+            circle cx=12 cy=12 r=10.5 stroke-width=1.5 stroke-dasharray="3 3"
+      column flex=1 min-width=0 gap="theme.space.md" align-items="flex-start" max-width="blocks.footer-measure"
+        text text testId=testId role=(kind == "failed" ? "alert" : "status") overflow-wrap="break-word" font="theme.type.body" color=(kind == "failed" ? "theme.color.ink" : "theme.color.ink-muted")
+        children
+
+component SiteFooter
+  props
+    productName: string
+    productMark: string
+    tagline: string
+    navLabel: string
+    groups: LinkGroup[]
+    legal: string
+    emptyText: string
+    emptyLabel: string
+    loadingText: string
+    failedText: string
+    retryLabel: string
+    agentKey: string
+    agentNote: string
+    proposedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    undoLabel: string
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed">
+    add: action
+    retry: action
+    accept: action
+    reject: action
+    undo: action
+    testId: string
+  derive shown = data == "many" or data == "one" or data == "long"
+  view
+    column testId=testId role="contentinfo" width="100%" box-sizing="border-box" background-color="theme.color.surface" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+      column width="100%" max-width="blocks.footer-max" box-sizing="border-box" margin-left="auto" margin-right="auto" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="blocks.footer-air" padding-bottom="theme.space.xl" gap="theme.space.xxl"
+        row flex-wrap="wrap" align-items="flex-start" column-gap="blocks.footer-gap" row-gap="theme.space.xxl"
+          // The brand: the mark, the name, the line.
+          column flex=1 min-width="blocks.footer-brand-min" box-sizing="border-box" gap="theme.space.md"
+            row align-items="flex-start" gap="theme.space.md"
+              if productMark != ""
+                box width="blocks.footer-mark" height="blocks.footer-mark" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.control" background-color="theme.color.accent" aria-hidden=true
+                  text productMark.slice(0, 2) white-space="nowrap" font="theme.type.label" color="theme.color.accent-ink"
+              text productName testId=`${testId}-name` flex=1 min-width=0 padding-top="theme.space.xs" overflow-wrap="break-word" font="theme.type.title" color="theme.color.ink"
+            if tagline != ""
+              text tagline testId=`${testId}-tagline` max-width="blocks.footer-measure" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
+          // The columns (or the state that stands in their place), and the agent's band above them.
+          column testId=`${testId}-nav` role="navigation" aria-label=navLabel flex=4 min-width="blocks.footer-col-min" box-sizing="border-box" gap="theme.space.xl"
+            if agent == "proposed"
+              column testId=`${testId}-proposal` role="status" gap="theme.space.md" padding="theme.space.lg" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" background-color="theme.color.page"
+                text proposedNote testId=`${testId}-agent` overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+                row flex-wrap="wrap" gap="theme.space.sm"
+                  ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+                  ActionButton(label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+            if agent == "changed"
+              row testId=`${testId}-changed` role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.sm" padding-left="theme.space.md" border-left-width="blocks.footer-rule" border-left-style="solid" border-left-color="theme.color.accent"
+                text agentNote testId=`${testId}-agent` flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+                ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+            if shown
+              row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.xl"
+                for g in groups key=g.key
+                  FooterColumn(group=g, agentKey=agentKey, agentNote=agentNote, agent=agent, testId=`${testId}-group-${g.key}`)
+            else if data == "loading"
+              column gap="theme.space.lg"
+                text loadingText testId=`${testId}-loading` role="status" overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
+                row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.xl" animation="footerBreathe 1.8s ease-in-out infinite"
+                  FooterBone(head="45%")
+                  FooterBone(head="35%")
+                  FooterBone(head="50%")
+                  FooterBone(head="40%")
+            else if data == "failed"
+              FooterNote(text=failedText, kind="failed", testId=`${testId}-failed`)
+                if retryLabel != ""
+                  ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
+            else
+              FooterNote(text=emptyText, kind="empty", testId=`${testId}-empty`)
+                if emptyLabel != ""
+                  ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=add, testId=`${testId}-add`)
+        // The bottom row: the legal line under a hairline.
+        row padding-top="theme.space.lg" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+          text legal testId=`${testId}-legal` flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
