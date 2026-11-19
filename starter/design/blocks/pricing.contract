@@ -30,6 +30,8 @@
 //   `undoLabel`, a plain button that reaches `undo` (the plan is already the person's, so its own action would
 //   say nothing); waiting: `waitingText`, then the plan's own action, filled, for the person to take. While the
 //   agent asks or waits, its answer is the state's one filled control and the featured action steps down to plain.
+//   The same sentence stands once more under the lead as the section's short notice (role status, the place a
+//   voice reads it), so on a phone, where the chosen plan may be the third card down, the person knows at once.
 // Both doors reach the same actions: a plan's button calls `choose` with the plan's key, as an agent's tool does.
 // The kit's Proposal and EntryChoice live inline in this package's index.contract, which imports this file back,
 // so a plan card and the ask are drawn here from the same components (Words, ActionButton); StatePanel has its
@@ -143,6 +145,8 @@ component Pricing
     undo: action
     testId: string
   derive lone = plans.length == 1
+  derive shown = data != "loading" and data != "empty" and data != "failed" and plans.length > 0
+  derive actSentence = agent == "proposed" ? proposalText : agent == "changed" ? changedText : waitingText
   // While the agent asks or waits for the person, its answer is the section's one filled control.
   derive asks = agent == "proposed" or agent == "waiting"
   // One door for the person's press; an agent's tool calls the app's same `choose` with the same key.
@@ -162,6 +166,12 @@ component Pricing
           text loadingText testId=`${testId}-loading` role="status" font="theme.type.body" color="theme.color.ink-muted"
         else if lead != ""
           text lead testId=`${testId}-lead` max-width="blocks.lead-max" font="theme.type.body" color="theme.color.ink-muted"
+        if shown and agent != "none"
+          // The short notice: the agent's act said once where the section starts, so a person on a phone hears and
+          // sees it before scrolling to the plan it is about, whose card holds the answers.
+          row testId=`${testId}-notice` role="status" align-items="baseline" gap="theme.space.sm" max-width="blocks.lead-max" margin-top="theme.space.xs" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" box-sizing="border-box" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color=markInk(agent) text-align="start"
+            box width="blocks.agent-dot" height="blocks.agent-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color=markInk(agent) aria-hidden=true
+            text actSentence min-width=0 font="theme.type.caption" color=markWords(agent)
       if data == "loading"
         row flex-wrap="wrap" justify-content="center" gap="theme.space.lg"
           GhostPlan()
@@ -193,10 +203,10 @@ component Pricing
                 if p.key == chosenKey and agent != "none"
                   // The agent's act on this plan, the kit's Proposal look inside the card: one sentence beside a dot
                   // of its ink, then its answers in place of the plan's action.
-                  column testId=`${testId}-agent` role="status" gap="theme.space.md" padding="theme.space.md" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color=markInk(agent) background-color="theme.color.surface"
+                  column testId=`${testId}-agent` role="group" aria-label=actSentence gap="theme.space.md" padding="theme.space.md" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color=markInk(agent) background-color="theme.color.surface"
                     row align-items="baseline" gap="theme.space.sm"
                       box width="blocks.agent-dot" height="blocks.agent-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color=markInk(agent) aria-hidden=true
-                      text (agent == "proposed" ? proposalText : agent == "changed" ? changedText : waitingText) testId=`${testId}-agent-text` flex=1 min-width=0 font="theme.type.caption" color=markWords(agent)
+                      text actSentence testId=`${testId}-agent-text` flex=1 min-width=0 font="theme.type.caption" color=markWords(agent)
                     if agent == "proposed"
                       row flex-wrap="wrap" gap="theme.space.sm"
                         column flex=1
