@@ -6,14 +6,15 @@
 // confirm it in a sheet first), and `retry` when a load failed, with the app's own word.
 //
 // States, declared once as axes: `data` draws the rows, a skeleton in the rows' own shape while loading (its
-// line says so under the card), or its own empty or failed line on the card (failed says its line and offers
-// the retry); `interaction` (idle, disabled, busy) stills the group without dimming a word below what a person
-// can read (disabled rows take the muted ink, the switch sleeps); `outcome` (success, error) says one line
-// under the group; `agent` (proposed, changed, waiting) marks the card's start and says `agentNote` under it,
-// the way LinkRow and TopBar do. The destructive row stands a hair off the last row above it, the way a
-// settings page sets it apart. `blocks.settings-max` keeps the card a sensible width on a wide window and
-// centres it there, the same width in every state; on a phone every label, detail and value wraps, so the
-// edges stay aligned and nothing is cut off.
+// line names the skeleton to a screen reader), or its own empty line on the card (centred, at a row's height —
+// the honest quiet of nothing to show) or its failed line, which offers the app's retry; `interaction` (idle,
+// disabled, busy) stills the group without dimming a word below what a person can read (disabled rows take the
+// muted ink, the switch sleeps); `outcome` (success, error) says one line under the group; `agent` (proposed,
+// changed, waiting) marks the card's start and says `agentNote` under it, the way LinkRow and TopBar do. The
+// destructive row stands a hair off the last row above it, the way a settings page sets it apart.
+// `blocks.settings-max` keeps the card a sensible width on a wide window and centres it there, the same width
+// in every state; on a phone every label, detail and value wraps, so the edges stay aligned and nothing is cut
+// off.
 use Swatch from "__SCOPE__/theme"
 use Words, ActionButton from "__SCOPE__/components"
 
@@ -64,25 +65,26 @@ component SettingsGroup
           Words(text=title, kind="heading", outcome="none", level=2, testId=`${testId}-title`)
       column testId=`${testId}-card` aria-busy=(interaction == "busy") background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=agentLine(agent) overflow="hidden"
         if data == "empty"
-          column padding="theme.space.lg" role="status"
-            Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-empty`)
+          row padding-left="theme.space.lg" padding-right="theme.space.lg" min-height="blocks.row-min" align-items="center" role="status"
+            text emptyText testId=`${testId}-empty` flex=1 font="theme.type.body" color="theme.color.ink-muted" text-align="center"
         else if data == "loading"
-          column
+          column role="status" aria-label=loadingText
             for j in [0, 1, 2] key=j
               column padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" gap="theme.space.xs" border-top-width=(j > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
                 row gap="theme.space.sm" align-items="center"
-                  box flex=5 height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
-                  box flex=6
-                row gap="theme.space.sm" align-items="center"
-                  box flex=7 height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
-                  box flex=3
+                  box flex=(j == 0 ? 5 : j == 1 ? 4 : 6) height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+                  box flex=1
+                  box width="blocks.skeleton-blob" height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill" flex-shrink=0
+                if j < 2
+                  row gap="theme.space.sm" align-items="center"
+                    box flex=7 height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+                    box flex=3
         else if data == "failed"
           column padding="theme.space.lg" gap="theme.space.md"
-            column role="alert"
-              Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed`)
+            text failedText testId=`${testId}-failed` role="alert" font="theme.type.body" color="theme.color.critical-text"
             if retryLabel != ""
               row
-                ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "idle" ? "idle" : "disabled"), outcome="none", press=retry, testId=`${testId}-retry`)
+                ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "idle" ? "idle" : "disabled"), outcome="none", press=retry, testId=`${testId}-retry`)
         for r, i in rows key=r.key
           if r.kind == "switch"
             row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
@@ -134,9 +136,6 @@ component SettingsGroup
                 text r.label font="theme.type.body" color=(interaction == "disabled" ? "theme.color.ink-muted" : "theme.color.critical-text")
                 if r.detail != ""
                   text r.detail font="theme.type.caption" color=(interaction == "disabled" ? "theme.color.ink-muted" : "theme.color.critical-text")
-      if data == "loading"
-        column padding-left="theme.space.lg" padding-right="theme.space.lg" role="status"
-          Words(text=loadingText, kind="caption", outcome="none", level=0, testId=`${testId}-loading`)
       if agent != "none"
         column padding-left="theme.space.lg" padding-right="theme.space.lg"
           text agentNote testId=`${testId}-agent` font="theme.type.caption" color=(agent == "waiting" ? "theme.color.caution-text" : "theme.color.accent")
