@@ -181,6 +181,10 @@ fn rejectAll(l: Ledger, door: string): Ledger = Ledger(l, waiting=l.waiting.filt
 // Applies every delayed act that nobody stopped. The app calls it from a task
 // after its delay.
 fn settle(l: Ledger): Ledger = Ledger(l, values=putAll(l.values, l.waiting.filter(w => w.mode == "delayed")), changes=l.waiting.filter(w => w.mode == "delayed").map(w => receipt(l, w, "")).concat(l.changes), waiting=l.waiting.filter(w => w.mode != "delayed"), marked=l.marked.filter(m => l.waiting.filter(w => w.mode == "delayed" and w.key == m).length == 0).concat(l.waiting.filter(w => w.mode == "delayed").map(w => w.key)), note=(l.note.mode == "delayed" ? quietNote() : l.note))
+// The acts that took effect between two ledgers, newest first: what an app
+// sends, pays or posts after an answer or a settle (acts that reach outside
+// the app; docs/recipes/acts-that-reach-outside.md).
+fn newChanges(before: Ledger, after: Ledger): Change[] = after.changes.filter(c => before.changes.filter(b => b.id == c.id).length == 0)
 fn hasDelayed(l: Ledger): bool = l.waiting.filter(w => w.mode == "delayed").length > 0
 
 // --- Undo -----------------------------------------------------------------

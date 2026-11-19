@@ -27,6 +27,14 @@ with the smallest app that shows it. Nothing here is sent anywhere.
 6. **The driver's `type` into a password field** leaves `•••` as the value on
    the web, where a test's `type` step writes the text. Workaround: the
    person's door for a secret is tested in `app.test.contract` only.
+7. **On macOS a driver `call` can still be waiting** when the next op runs, so
+   a tap after a call acts on the screen as it was before the call; on the
+   web the call has landed. Workaround: `tools/lib.mjs` puts `clock settle`
+   after each call that another kind of op follows.
+8. **Each driver run launches the app**, so a check with many cases launches
+   it many times. On the iOS Simulator that is too slow and too heavy, so
+   `tools/check.mjs ios` runs only each app's own tests. Ask: a reset of the
+   app's state inside one launch, for every host.
 
 The block below is the workaround for 2 and 3 in one app: two doors, one
 function, and no action called with arguments from a tool.

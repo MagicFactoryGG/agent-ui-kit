@@ -40,9 +40,16 @@ export function settings(app) {
   };
 }
 
+/** A `clock settle` after each tool call that another kind of op follows: on
+ * macOS a call can still be waiting when the next op runs (the web's has
+ * landed), so a tap would act on the screen before the call. */
+export function settled(ops) {
+  return ops.flatMap((op, i) => (op.startsWith("call ") && ops[i + 1] && !ops[i + 1].startsWith("call ") ? [op, "clock settle"] : [op]));
+}
+
 /** Runs `ops` in one drive and answers every JSON reply, the last a `state`. */
 export function driveAll(app, host, ops) {
-  const run = spawnSync("bun", ["exact.mjs", "agent", host, "--json", ...ops, "clock settle", "state"], { cwd: app, encoding: "utf8", timeout: 600_000, maxBuffer: 256 * 1024 * 1024 });
+  const run = spawnSync("bun", ["exact.mjs", "agent", host, "--json", ...settled(ops), "clock settle", "state"], { cwd: app, encoding: "utf8", timeout: 600_000, maxBuffer: 256 * 1024 * 1024 });
   if (run.status !== 0) throw new Error(`drive failed (${run.status}): ${(run.stderr || run.stdout).slice(-2000)}`);
   return run.stdout.split("\n").filter((l) => l.startsWith("{")).map((l) => JSON.parse(l));
 }

@@ -7,7 +7,8 @@ values in a ledger. Each takes the app's directory and a host:
     bun tools/palette-link.mjs <app> web|macos|ios
     bun tools/modes.mjs        <app> web|macos|ios
     bun tools/tree-only.mjs    <app> web|macos|ios
-    bun tools/check.mjs        web|macos|ios        (all of this repo's checks)
+    bun tools/check.mjs        web|macos|ios        (all of this repo's checks; on ios only the
+                                                     apps' own tests, one launch each)
 
 | Check | It fails when |
 |---|---|

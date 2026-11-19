@@ -8,7 +8,7 @@
 
 use Value, Change, Waiting, Note, AgentTool, Raise, AnswerWords, Act, Ledger from "./ledger.contract"
 use ledger, quietNote, valueOf, valueOr, isOn, numberOf, isMarked, waitingSentence, waitingId, waitingValue, waitingYes, waitingNo from "./ledger.contract"
-use modes, rank, floorOf, raisedOf, modeOf, raise, put, act, personSet, answer, answerKey, acceptAll, rejectAll, settle, hasDelayed, undo, undoLatest, noteYes, noteNo, quiet, setAsksNeverAnswers from "./ledger.contract"
+use modes, rank, floorOf, raisedOf, modeOf, raise, put, act, personSet, answer, answerKey, acceptAll, rejectAll, settle, newChanges, hasDelayed, undo, undoLatest, noteYes, noteNo, quiet, setAsksNeverAnswers from "./ledger.contract"
 use ChangeMark, ProposalBar from "./marks.contract"
 use Notice from "./notice.contract"
 use ActivityList from "./activity.contract"

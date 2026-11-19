@@ -13,6 +13,8 @@ your task here. There is no second required read.
   compiler's IR says) and a line in its test; `bun tools/library-gate.mjs` holds them.
 - **A new tool in the gallery** gets a row in `agentTools()` (its floor), a face in `app.json`, a sample
   in `agent-checks.json` and a case in `both-doors.json`.
-- **Done** means `bun tools/check.mjs <host>` passes on web, macos and ios.
+- **Done** means `bun tools/check.mjs web`, then `macos`, then `ios` pass, in that order. Run ios last
+  and once per piece of work: there it runs each app's own tests once, with no Simulator window, and
+  the checks that launch the app once per case stay on web and macos. Shut the Simulator down after.
 - Cite Exact's public guide by its section names.
 - When Exact surprised you, record it: `bun exact.mjs feedback note "…"` in the app. Send nothing.

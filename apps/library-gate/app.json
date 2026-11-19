@@ -1,4 +1,28 @@
 {
+  "host": {
+    "web": {},
+    "macos": {
+      "minimumOS": "14.0",
+      "window": {
+        "width": 900,
+        "height": 700
+      }
+    },
+    "ios": {
+      "minimumOS": "17.0",
+      "deviceFamily": [
+        "iphone",
+        "ipad"
+      ]
+    }
+  },
+  "deploy": {
+    "store": {
+      "web": "0",
+      "macos": "0",
+      "ios": "0"
+    }
+  },
   "$schema": "../../../../forks/expo/exact/scripts/app.schema.json",
   "name": "Library gate",
   "short_name": "Library gate",
@@ -8,13 +32,5 @@
   "app": {
     "id": "com.example.agent-ui-kit.library-gate",
     "name": "Library gate"
-  },
-  "host": {
-    "web": {}
-  },
-  "deploy": {
-    "store": {
-      "web": "0"
-    }
   }
 }

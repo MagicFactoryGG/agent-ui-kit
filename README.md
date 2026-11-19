@@ -36,14 +36,36 @@ authentication provider decide that ([proposed is not a security boundary](docs/
 
 ## Run it
 
-Exact needs Bun 1.4.2 and the Rust toolchain on `PATH`. The apps find Exact at
-`../../../../forks/expo/exact`, or where `EXACT` says. Pinned: Exact `51002ee77`.
+You need a checkout of Exact at commit `51002ee77` (the version this repository is tested against),
+Bun 1.4.2 and the Rust toolchain on `PATH`, and Xcode for macOS and the iOS Simulator. Point the apps at
+your Exact checkout with `EXACT` (each app's `exact.mjs` was written by Exact's `exact new`, and its
+default path is only the authors' folder layout):
 
+    export EXACT=/path/to/exact
     cd apps/agent-gallery && bun install && bun exact.mjs test web     # or macos, ios
-    bun tools/check.mjs web                                            # every check, one host
+    cd ../library-gate && bun install && bun exact.mjs test web
+    cd ../.. && bun tools/check.mjs web                                # every check, one host
+
+## Use it in your app
+
+The packages are not on a registry. Add them by path, as Exact's own guide does for a local library:
+
+    "dependencies": {
+      "@agent-ui-kit/agent": "file:<this repo>/packages/agent",
+      "@agent-ui-kit/forms": "file:<this repo>/packages/forms",
+      "@agent-ui-kit/commands": "file:<this repo>/packages/commands"
+    }
+
+Start with [one ledger, two doors](docs/recipes/one-ledger-two-doors.md); run the checks on your app with
+[run the checks](docs/recipes/run-the-checks.md).
 
 Every check and its settings: [run the checks](docs/recipes/run-the-checks.md). What Exact blocks today,
 and the workaround for each: [Exact asks](docs/recipes/exact-asks.md).
+
+## Status
+
+Version 1. Exact changes quickly; this repository follows one pinned Exact commit and moves it on purpose.
+Issues are welcome. A gap in Exact itself goes to Exact's own issues, with the smallest app that shows it.
 
 ## The name
 
