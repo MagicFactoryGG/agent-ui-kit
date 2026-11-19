@@ -4,6 +4,8 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
+  blocks.stat-max: length = 960px
+  blocks.stat-fail-max: length = 480px
   blocks.stat-tile-min: length = 160px
   blocks.stat-trend: length = 12px
   blocks.stat-bar: length = 96px
