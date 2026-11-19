@@ -5,8 +5,9 @@ theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
   blocks.mail-max: length = 1100px
-  blocks.state-min: length = 240px
-  blocks.card-min: length = 520px
+  blocks.mail-floor: length = 812px
+  blocks.mail-frame: length = 424px
+  blocks.state-min: length = 320px
   blocks.glyph: length = 56px
   blocks.icon: length = 16px
   blocks.dot: length = 8px
@@ -16,3 +17,4 @@ theme
   blocks.skel-title: length = 16px
   blocks.skel-when: length = 56px
   blocks.skel-tail: length = 96px
+  blocks.skel-cut: length = 140px
