@@ -14,6 +14,6 @@ theme
   blocks.nav-badge-min: length = 24px
   blocks.nav-count-space: length = 56px
   blocks.nav-places-min: length = 320px
-  blocks.nav-ghost-head: length = 96px
+  blocks.nav-ghost-word: length = 96px
   blocks.nav-ghost-badge: length = 32px
   blocks.nav-role-max: length = 150px
