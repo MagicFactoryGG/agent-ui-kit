@@ -1,5 +1,5 @@
 {
-  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only.",
+  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only; a prop for one data state as \"<prop>@<data>\" (\"interaction@failed\": \"disabled\").",
   "props:DetailPanel": {
     "title": "Aurora Desk Lamp",
     "statusLabel": "In production",
@@ -16,7 +16,9 @@
     "activityTitle": "Activity",
     "activityEmptyText": "No activity yet.",
     "loadingText": "Loading this record…",
-    "failedText": "This record did not load. Check your connection and try again."
+    "failedText": "This record did not load. Check your connection and try again.",
+    "interaction@failed": "disabled",
+    "interaction@loading": "disabled"
   },
   "Fact:one": [
     { "key": "item", "label": "Item code", "value": "AUR-DL-8841" },
