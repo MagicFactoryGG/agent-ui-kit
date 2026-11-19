@@ -64,6 +64,15 @@ theme
   blocks.skel-line: length = 12px
   blocks.skel-btn: length = 96px
   blocks.skel-btn-tall: length = 44px
+  blocks.hero-max: length = 1120px
+  blocks.hero-air: length = 56px
+  blocks.hero-gap: length = 56px
+  blocks.hero-copy-min: length = 320px
+  blocks.hero-panel-min: length = 300px
+  blocks.hero-display: length = 44px  // the headline: the theme's title style (weight, line, family) at a display size
+  blocks.hero-lead: length = 18px  // the lead: the theme's body style a step up, between body and title
+  blocks.hero-art: length = 168px
+  blocks.hero-tick: length = 24px
   blocks.nav-min: length = 304px
   blocks.nav-page-min: length = 240px
   blocks.nav-row-min: length = 44px

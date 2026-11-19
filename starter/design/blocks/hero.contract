@@ -1,0 +1,182 @@
+// Hero: a landing page's opening. The copy column holds a short kicker, the headline at a display size drawn from
+// the theme's title style (its weight, line and family; only the size is the block's own, blocks.hero-display), a
+// lead paragraph on a reading measure (the headline's lines balanced, so no word stands alone on its last line;
+// every text breaks a word wider than its box rather than spill), and the way on: the primary action (the one filled control in every state)
+// beside a quiet secondary. Beside it on a desktop (under it on a phone: a wrapping row of two columns, each with a
+// named least width) stands the drawn panel: a picture band of the theme's own accent rings, then the panel's rows,
+// the points the page makes ("In every plan"), each a row with a drawn tick, never a card.
+// States: data many|one|empty|loading|failed|long — the rows are the data: loading breathes three skeleton rows
+// under `loadingText` (role status) and the picture breathes with them, so the whole panel reads as on its way;
+// empty draws an open dashed ring at the ticks' column (a row with nothing in it yet) beside `emptyText`; failed
+// draws a warning there beside `failedText` (role alert, in ink; the panel's edge in the critical hue) with a
+// plain Try again that wears the error ring, aligned under its sentence (HeroNote draws both, one shape);
+// the copy and its way on stay in every state, for the page is known while its rows are not. interaction idle|busy
+// (the primary act running: its words stay, it cannot be pressed), outcome none|error (`errorText` under the
+// actions, role alert, on the page), agent none|proposed|changed — the hero's act through the other door: proposed
+// waits in an accent-edged band with one sentence and two answer words (both plain, so the primary stays the one
+// fill); changed marks what the agent did with the accent line at its start and one answer (undo). The proposal
+// band is drawn here, not the kit's Proposal: that one lives inline in blocks/index.contract, which imports this
+// file (a use cycle), and its yes is a filled button, which would give the hero two focal fills. Every word is a
+// prop; every value a Theme token or a blocks.* size.
+use Words, ActionButton from "__SCOPE__/components"
+
+// One point the hero makes: its key, a short title and a line of detail.
+shape HeroPoint
+  key: string
+  title: string
+  detail: string
+
+// The skeleton breathes, so loading reads as in progress, not as drawn shapes.
+keyframes heroBreathe
+  50% opacity=0.55
+
+// A drawn tick on a quiet disc: the mark of each row.
+component HeroTick
+  view
+    box width="blocks.hero-tick" height="blocks.hero-tick" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.pill" background-color="color-mix(in srgb, theme.color.accent 14%, theme.color.surface)" aria-hidden=true
+      svg viewBox="0 0 12 12" width="blocks.glyph" height="blocks.glyph" fill="none" stroke="theme.color.accent" flex-shrink=0
+        path d="M2.5 6.5L5 9l4.5-5" stroke-width=2 stroke-linecap="round" stroke-linejoin="round"
+
+// One row of the panel: the tick, the title, its detail.
+component HeroRow
+  props
+    title: string
+    detail: string
+    testId: string
+  view
+    row testId=testId role="listitem" align-items="flex-start" gap="theme.space.md"
+      HeroTick()
+      column flex=1 min-width=0 gap="theme.space.xs"
+        text title overflow-wrap="break-word" font="theme.type.label" color="theme.color.ink"
+        if detail != ""
+          text detail overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
+
+// A row still loading: the disc and two bars, breathing, never a control.
+component HeroBone
+  props
+    share: string
+  view
+    row align-items="flex-start" gap="theme.space.md" aria-hidden=true
+      box width="blocks.hero-tick" height="blocks.hero-tick" flex-shrink=0 border-radius="theme.radius.pill" background-color="theme.color.fill"
+      column flex=1 min-width=0 gap="theme.space.sm"
+        box width=share height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+        box width="85%" height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+
+// The panel's word in place of its rows: a drawn mark at the rows' tick column, then one line. Failed draws a
+// warning in the critical hue and speaks as an alert, in ink (status ink is only promised on the page and
+// surface); empty draws an open ring, the shape of a row's tick with nothing in it yet, and speaks as a status.
+component HeroNote
+  props
+    text: string
+    kind: enum<"empty", "failed">
+    testId: string
+  slot
+  view
+    row gap="theme.space.md" align-items="flex-start"
+      box width="blocks.hero-tick" height="blocks.hero-tick" flex-shrink=0 display="flex" align-items="center" justify-content="center" aria-hidden=true
+        if kind == "failed"
+          svg viewBox="0 0 16 16" width="blocks.alert" height="blocks.alert" fill="none" stroke="theme.color.critical" flex-shrink=0
+            path d="M8 2.5L14.5 13.5H1.5Z" stroke-width=1.5 stroke-linejoin="round"
+            path d="M8 6.5v3.2" stroke-width=1.5 stroke-linecap="round"
+            path d="M8 11.4v0.01" stroke-width=1.5 stroke-linecap="round"
+        else
+          svg viewBox="0 0 24 24" width="blocks.hero-tick" height="blocks.hero-tick" fill="none" stroke="theme.color.ink-muted" flex-shrink=0
+            circle cx=12 cy=12 r=10.5 stroke-width=1.5 stroke-dasharray="3 3"
+      column flex=1 min-width=0 gap="theme.space.lg" align-items="flex-start"
+        text text testId=testId role=(kind == "failed" ? "alert" : "status") overflow-wrap="break-word" font="theme.type.body" color=(kind == "failed" ? "theme.color.ink" : "theme.color.ink-muted")
+        children
+
+component Hero
+  props
+    kicker: string
+    headline: string
+    lead: string
+    primaryLabel: string
+    secondaryLabel: string
+    pictureLabel: string
+    panelTitle: string
+    items: HeroPoint[]
+    emptyText: string
+    loadingText: string
+    failedText: string
+    retryLabel: string
+    errorText: string
+    proposedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    changedNote: string
+    undoLabel: string
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    interaction: enum<"idle", "busy">
+    outcome: enum<"none", "error">
+    agent: enum<"none", "proposed", "changed">
+    primary: action
+    secondary: action
+    retry: action
+    accept: action
+    reject: action
+    undo: action
+    testId: string
+  derive shown = data == "many" or data == "one" or data == "long"
+  view
+    column testId=testId role="region" aria-label=headline width="100%" max-width="blocks.hero-max" box-sizing="border-box" margin-left="auto" margin-right="auto" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="blocks.hero-air" padding-bottom="blocks.hero-air"
+      row flex-wrap="wrap" align-items="center" column-gap="blocks.hero-gap" row-gap="theme.space.xxl"
+        // The copy: kicker, headline, lead, the way on.
+        column flex=1 min-width="blocks.hero-copy-min" box-sizing="border-box" gap="theme.space.xl"
+          column gap="theme.space.md"
+            if kicker != ""
+              row align-items="baseline" gap="theme.space.sm"
+                svg viewBox="0 0 8 8" width="blocks.note-dot" height="blocks.note-dot" aria-hidden=true flex-shrink=0
+                  circle cx=4 cy=4 r=4 fill="theme.color.accent"
+                text kicker testId=`${testId}-kicker` flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.label" color="theme.color.accent"
+            text headline testId=`${testId}-headline` role="heading" aria-level=1 padding-top="theme.space.xs" padding-bottom="theme.space.xs" text-wrap="balance" overflow-wrap="break-word" font="theme.type.title" font-size="blocks.hero-display" color="theme.color.ink"
+            if lead != ""
+              text lead testId=`${testId}-lead` max-width="blocks.measure" overflow-wrap="break-word" font="theme.type.body" font-size="blocks.hero-lead" color="theme.color.ink-muted"
+          column gap="theme.space.md"
+            row flex-wrap="wrap" gap="theme.space.md" align-items="center"
+              ActionButton(label=primaryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=primary, testId=`${testId}-primary`)
+              if secondaryLabel != ""
+                ActionButton(label=secondaryLabel, kind="plain", interaction="idle", outcome="none", press=secondary, testId=`${testId}-secondary`)
+            if outcome == "error"
+              text errorText testId=`${testId}-error` role="alert" overflow-wrap="break-word" font="theme.type.caption" color="theme.color.critical-text"
+          if agent == "proposed"
+            column testId=`${testId}-proposal` role="status" gap="theme.space.md" padding="theme.space.lg" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" background-color="theme.color.surface"
+              text proposedNote testId=`${testId}-agent` overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+              row flex-wrap="wrap" gap="theme.space.sm"
+                ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+                ActionButton(label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+          if agent == "changed"
+            row testId=`${testId}-changed` role="status" flex-wrap="wrap" align-items="center" gap="theme.space.md" padding-left="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="theme.color.accent"
+              text changedNote testId=`${testId}-agent` flex-shrink=1 min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.accent"
+              ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+        // The panel: a drawn picture, then the rows (or the state that stands in their place).
+        column testId=`${testId}-panel` flex=1 min-width="blocks.hero-panel-min" box-sizing="border-box" overflow="hidden" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(data == "failed" ? "theme.color.critical" : "theme.color.line")
+          box role="img" aria-label=pictureLabel height="blocks.hero-art" background-color="color-mix(in srgb, theme.color.accent 9%, theme.color.surface)" overflow="hidden" animation=(data == "loading" ? "heroBreathe 1.8s ease-in-out infinite" : "none")
+            svg viewBox="0 0 320 160" width="100%" height="100%" fill="none" aria-hidden=true
+              circle cx=236 cy=80 r=96 stroke="theme.color.accent" stroke-opacity=0.14 stroke-width=1.5
+              circle cx=236 cy=80 r=70 stroke="theme.color.accent" stroke-opacity=0.24 stroke-width=1.5
+              circle cx=236 cy=80 r=44 stroke="theme.color.accent" stroke-opacity=0.4 stroke-width=1.5
+              circle cx=236 cy=80 r=18 fill="theme.color.accent" fill-opacity=0.85
+              rect x=36 y=52 width=112 height=10 rx=5 fill="theme.color.accent" fill-opacity=0.35
+              rect x=36 y=75 width=84 height=10 rx=5 fill="theme.color.accent" fill-opacity=0.22
+              rect x=36 y=98 width=100 height=10 rx=5 fill="theme.color.accent" fill-opacity=0.22
+          column padding="theme.space.xl" gap="theme.space.lg"
+            if panelTitle != ""
+              Words(text=panelTitle, kind="heading", outcome="none", level=2, testId=`${testId}-panel-title`)
+            if shown
+              column role="list" gap="theme.space.lg"
+                for h in items key=h.key
+                  HeroRow(title=h.title, detail=h.detail, testId=`${testId}-row-${h.key}`)
+            else if data == "loading"
+              column gap="theme.space.lg"
+                text loadingText testId=`${testId}-loading` role="status" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
+                column gap="theme.space.lg" animation="heroBreathe 1.8s ease-in-out infinite"
+                  HeroBone(share="60%")
+                  HeroBone(share="45%")
+                  HeroBone(share="55%")
+            else if data == "failed"
+              HeroNote(text=failedText, kind="failed", testId=`${testId}-failed`)
+                if retryLabel != ""
+                  ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
+            else
+              HeroNote(text=emptyText, kind="empty", testId=`${testId}-empty`)

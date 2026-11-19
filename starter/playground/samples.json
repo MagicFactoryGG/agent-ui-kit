@@ -232,6 +232,33 @@
     "acceptLabel": "Keep it",
     "rejectLabel": "Clear it"
   },
+  "props:Hero": {
+    "kicker": "New in version 4",
+    "headline": "Plan the week your whole team will keep",
+    "lead": "Shared calendars, honest estimates and one list of what matters. Set it up in an afternoon and change it whenever plans do.",
+    "primaryLabel": "Start free trial",
+    "secondaryLabel": "See how it works",
+    "pictureLabel": "A calm week, drawn",
+    "panelTitle": "In every plan",
+    "emptyText": "Your plan's features appear here once you pick one. Start a trial to see them.",
+    "loadingText": "Loading what's in your plan…",
+    "failedText": "We couldn't load what's in your plan. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "errorText": "The trial didn't start. Your details are kept; try again in a moment.",
+    "proposedNote": "Your assistant suggests starting the free trial for your team of 8.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "changedNote": "Your assistant started the free trial for your team of 8.",
+    "undoLabel": "Undo"
+  },
+  "HeroPoint:many": [
+    { "key": "calendars", "title": "Shared calendars", "detail": "Everyone's week on one page, with time off and focus blocks." },
+    { "key": "estimates", "title": "Honest estimates", "detail": "Plans that learn from how long work really took." },
+    { "key": "assistant", "title": "An assistant that asks first", "detail": "It suggests; you decide. Every change can be undone." }
+  ],
+  "HeroPoint:one": [
+    { "key": "calendars", "title": "Shared calendars", "detail": "Everyone's week on one page, with time off and focus blocks." }
+  ],
   "NavEntry:many": [
     { "key": "naventry-1", "label": "Overview", "href": "/", "group": "Workspace", "badge": 0, "current": true },
     { "key": "naventry-2", "label": "Reports", "href": "/reports", "group": "Workspace", "badge": 12, "current": false },
