@@ -263,5 +263,140 @@
     { "key": "feature-1", "title": "Works offline, on every device you carry, even on a long flight with no connection at all", "detail": "Edits save on the device first and sync the moment you are back online; nothing you write is lost, even when two people change the same page while both are offline." },
     { "key": "feature-2", "title": "Shared spaces", "detail": "Invite your team to one space and decide who can view, comment or edit." },
     { "key": "feature-3", "title": "Version history", "detail": "Every change is kept for a year, so any earlier draft is one step away." }
+  ],
+  "NavEntry:many": [
+    { "key": "naventry-1", "label": "Overview", "href": "/", "group": "Workspace", "badge": 0, "current": true },
+    { "key": "naventry-2", "label": "Reports", "href": "/reports", "group": "Workspace", "badge": 12, "current": false },
+    { "key": "naventry-3", "label": "Invoices", "href": "/invoices", "group": "Workspace", "badge": 0, "current": false },
+    { "key": "naventry-4", "label": "Expenses", "href": "/expenses", "group": "Workspace", "badge": 0, "current": false },
+    { "key": "naventry-5", "label": "Team", "href": "/team", "group": "People", "badge": 0, "current": false },
+    { "key": "naventry-6", "label": "Guests", "href": "/guests", "group": "People", "badge": 3, "current": false },
+    { "key": "naventry-7", "label": "Permissions", "href": "/permissions", "group": "People", "badge": 0, "current": false },
+    { "key": "naventry-8", "label": "Billing", "href": "/billing", "group": "Admin", "badge": 5, "current": false },
+    { "key": "naventry-9", "label": "Integrations", "href": "/integrations", "group": "Admin", "badge": 0, "current": false },
+    { "key": "naventry-10", "label": "Settings", "href": "/settings", "group": "Admin", "badge": 0, "current": false }
+  ],
+  "NavEntry:one": [
+    { "key": "naventry-2", "label": "Overview", "href": "/", "group": "Workspace", "badge": 0, "current": true }
+  ],
+  "NavEntry:long": [
+    { "key": "naventry-1", "label": "A very long line of text, as a person might really write it, that runs past the width a designer planned for and has to wrap or be cut short", "href": "/reports", "group": "Workspace", "badge": 2, "current": false },
+    { "key": "naventry-2", "label": "Another very long line of text that a person wrote without thinking about the side panel's width at all", "href": "/archive", "group": "Archive", "badge": 0, "current": true }
+  ],
+  "props:SideNav": {
+    "productName": "Acme Console",
+    "productMark": "AC",
+    "navLabel": "Main menu",
+    "emptyText": "Nothing here yet.",
+    "emptyLabel": "Add a place",
+    "loadingText": "Loading the menu…",
+    "failedText": "The menu could not be loaded.",
+    "retryLabel": "Try again",
+    "accountName": "Ada Lovelace",
+    "accountDetail": "Workspace admin",
+    "agentKey": "naventry-2",
+    "agentNote": "Added by your assistant"
+  },
+  "props:MessageList": {
+    "title": "Inbox",
+    "unreadLabel": "unread",
+    "emptyText": "No messages yet.",
+    "failedText": "Your messages did not load.",
+    "composeLabel": "Write a message",
+    "retryLabel": "Try again",
+    "orderLabel": "Newest first",
+    "paneLabel": "Message preview",
+    "paneEmptyText": "Choose a message to read it here.",
+    "paneQuietText": "When a message arrives, it opens here.",
+    "openLabel": "Open message",
+    "agentNote": "Your assistant filed the invoice from ACME.",
+    "chosenKey": "message-2",
+    "agentKey": "message-4"
+  },
+  "Message:many": [
+    {
+      "key": "message-1",
+      "from": "Priya Nair",
+      "subject": "Design review notes",
+      "snippet": "Three small changes before we cut the release, all in the section you wrote last week.",
+      "when": "09:41",
+      "unread": true,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-2",
+      "from": "Jonas Weber",
+      "subject": "Q3 report is ready to file",
+      "snippet": "The numbers are reconciled and the summary page waits on your sign-off before Friday.",
+      "when": "08:15",
+      "unread": false,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-3",
+      "from": "Maya Okafor",
+      "subject": "Lunch on Thursday?",
+      "snippet": "There is a new place two streets down with a good menu and a table big enough for eight.",
+      "when": "Wed 14:05",
+      "unread": true,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-4",
+      "from": "ACME Supplies",
+      "subject": "Invoice 4821 for the studio order",
+      "snippet": "Your order shipped on Monday; the invoice is attached and due at the end of the month.",
+      "when": "Tue 09:12",
+      "unread": false,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-5",
+      "from": "Sam Delacroix",
+      "subject": "Fwd: the venue contract",
+      "snippet": "Flagging this one so it does not get lost before the deposit is due.",
+      "when": "Mon 16:20",
+      "unread": false,
+      "flagged": true,
+      "href": "/"
+    }
+  ],
+  "Message:one": [
+    {
+      "key": "message-2",
+      "from": "Jonas Weber",
+      "subject": "Q3 report is ready to file",
+      "snippet": "The numbers are reconciled and the summary page waits on your sign-off before Friday.",
+      "when": "08:15",
+      "unread": false,
+      "flagged": false,
+      "href": "/"
+    }
+  ],
+  "Message:long": [
+    {
+      "key": "message-1",
+      "from": "Constance Beauregard-Villeneuve at the regional licensing office",
+      "subject": "A subject line that keeps going because the sender put the whole question in it and expected nobody to mind",
+      "snippet": "The snippet is one line in the list, cut with an ellipsis, and wraps to several lines in the reading pane, which is as it should be: a preview may never push the layout around, it holds.",
+      "when": "Wed 14:05",
+      "unread": true,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-2",
+      "from": "Sam Delacroix",
+      "subject": "Fwd: the venue contract, with the rider the venue's own lawyer added after the last call we all had together",
+      "snippet": "Flagging this one so it does not get lost before the deposit is due at the end of the month, which is closer than the last note made it sound.",
+      "when": "Mon 16:20",
+      "unread": false,
+      "flagged": true,
+      "href": "/"
+    }
   ]
 }

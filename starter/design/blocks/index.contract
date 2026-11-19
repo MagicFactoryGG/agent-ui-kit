@@ -9,6 +9,8 @@ use DataTable, Record, Checked, Marks, Viewport from "./data-table.contract"
 use SettingsGroup, Setting from "./settings-group.contract"
 use OnboardingSteps, Step from "./onboarding-steps.contract"
 use FeatureGrid, Feature from "./feature-grid.contract"
+use SideNav, NavEntry from "./side-nav.contract"
+use MessageList, Message, ListViewport from "./message-list.contract"
 
 // The bar at the top of a screen: the title, then the slot's actions. While an agent waits for the person,
 // `agentNote` says so under the title.
