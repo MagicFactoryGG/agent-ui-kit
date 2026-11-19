@@ -1,7 +1,9 @@
 // SideNav: an app's side navigation, drawn as its own panel. Width: the panel fills the column a shell gives it
 // and never grows past blocks.nav-max (the shell decides the column's real width — a side column at a desktop,
 // the window at a phone; a shell wanting a narrow rail gives it a narrower column, and the rows' own truncation
-// holds); the shell decides when the panel shows at all.
+// holds). Height is the shell's too: given a definite height the account pins to the panel's bottom (a spacer
+// takes what is left); alone in a window the panel is as tall as what it holds. The shell decides when the
+// panel shows at all.
 //
 // One gutter holds everything: the panel pads by theme.space.sm and every row inside pads its words by
 // theme.space.md, so the brand, a group's heading, each place's label, the states' words and the account all
@@ -19,12 +21,14 @@
 //   holds on any row and in both schemes.
 // - An agent that added or reordered an entry (agent "changed"): the entry `agentKey` names gets an accent edge
 //   at its start and `agentNote`'s words under its label (the kit's LinkRow language).
-// - Loading: a drawn cue beside its words at a heading's place (role="status"), over ghost rows in the places'
-//   own shape — a full row's height, span and corner, each with a badge's ghost at the end — so what arrives
-//   does not jump. Empty says its line, and, when the app gives `emptyLabel`, its compact button below (the way
-//   on). Failed says its line in the error's ink, the drawn mark beside it, inside a raised panel with the
-//   critical's edge at its start, and `retryLabel`'s compact button below it (the way on). Both keep the
-//   heading (`navLabel`, the same words a reader hears for the landmark) at a group heading's place.
+// - The three states that stand where the places stand all keep the heading (`navLabel`, the same words a
+//   reader hears for the landmark) at a group heading's place, so the panel never loses its shape. Loading: a
+//   drawn cue beside its words (role="status"), over ghost rows in the places' own anatomy — the row's own
+//   height and insets, a bar where the label will be, a small pill where some counts sit — so what arrives
+//   does not jump. Empty: its line, then, when the app gives `emptyLabel`, the way on as a quiet text action,
+//   the emptier state keeping the lighter gesture. Failed: its line in the error's ink with the drawn mark
+//   beside it, inside a raised panel cut by the critical's border, and `retryLabel`'s compact bordered button
+//   below it (the way on).
 // - Long: everything the panel draws holds one line with an ellipsis; the slot's content is the app's.
 //
 // States:
@@ -78,13 +82,16 @@ component NavItem
       if badge > 0
         text `${badge}` testId=`${testId}-badge` flex-shrink=0 min-width="blocks.nav-badge-min" box-sizing="border-box" text-align="center" font="theme.type.caption" color=(current ? "theme.color.ink" : "theme.color.ink-muted") font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color=(current ? "theme.color.surface" : "theme.color.fill") border-radius="theme.radius.pill" white-space="nowrap"
 
-// A place still coming: the row's own shape (height, span, corner) in the fill, the badge's ghost a surface
-// pill at the row's end, so what arrives does not jump.
+// A place still coming: the row's own height and insets, a bar where the label will be and — on some rows, as
+// some real rows carry counts — a small pill where the count sits, so what arrives does not jump.
 component NavGhost
+  props
+    badge: bool
   view
-    row align-items="center" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.control" aria-hidden=true
-      row flex=1
-      box width="blocks.nav-badge-min" height="blocks.nav-badge-min" flex-shrink=0 background-color="theme.color.surface" border-radius="theme.radius.pill"
+    row align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" aria-hidden=true
+      box flex=1 height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
+      if badge
+        box width="blocks.nav-badge-min" height="theme.space.md" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 component SideNav
   props
@@ -123,8 +130,7 @@ component SideNav
       if data == "failed"
         column role="alert" gap="theme.space.sm"
           NavHeading(text=navLabel, testId=`${testId}-heading`)
-          row position="relative" background-color="theme.color.raised" border-radius="theme.radius.card"
-            box position="absolute" left=0 top="theme.space.sm" bottom="theme.space.sm" width="blocks.nav-mark-line" background-color="theme.color.critical" border-radius="theme.radius.pill" aria-hidden=true
+          row background-color="theme.color.raised" border-left-width="blocks.nav-mark-line" border-left-style="solid" border-left-color="theme.color.critical" border-radius="theme.radius.card"
             column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
               row align-items="flex-start" gap="theme.space.sm"
                 svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
@@ -134,27 +140,32 @@ component SideNav
                 column flex=1 min-width=0
                   Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
               row
-                ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+                ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
       else if data == "loading"
         column gap="theme.space.sm"
+          NavHeading(text=navLabel, testId=`${testId}-heading`)
           row role="status" align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md"
             svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" aria-hidden=true flex-shrink=0
               path d="M12 3.5 A8.5 8.5 0 1 1 3.5 12" stroke="theme.color.ink-muted" stroke-width=2.5 stroke-linecap="round"
             column flex=1 min-width=0
               Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-${data}`)
           column aria-hidden=true gap="theme.space.xs"
-            NavGhost()
-            NavGhost()
-            NavGhost()
-            NavGhost()
+            NavGhost(badge=false)
+            NavGhost(badge=true)
+            NavGhost(badge=false)
+            NavGhost(badge=true)
       else if data == "empty"
         column role="status" gap="theme.space.sm"
           NavHeading(text=navLabel, testId=`${testId}-heading`)
           column gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md"
             Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
             if emptyLabel != ""
-              row
-                ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
+              button press=empty testId=`${testId}-add` min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="0" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" background-color="transparent" border-width="0" border-radius="theme.radius.control"
+                :hover
+                  background-color="theme.color.hover"
+                :focus-visible
+                  box-shadow="inset 0 0 0 2px theme.color.focus"
+                text emptyLabel font="theme.type.label" color="theme.color.accent"
       else
         column gap="theme.space.lg"
           for g in groups key=g
