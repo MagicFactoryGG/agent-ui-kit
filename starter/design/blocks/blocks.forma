@@ -4,14 +4,14 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
-  blocks.list-min: length = 240px
-  blocks.pane-min: length = 240px
+  blocks.mail-max: length = 1100px
+  blocks.state-min: length = 240px
+  blocks.glyph: length = 48px
+  blocks.icon: length = 16px
+  blocks.dot: length = 8px
+  blocks.dot-gutter: length = 16px
+  blocks.dot-line: length = 18px
   blocks.skel-line: length = 10px
   blocks.skel-title: length = 16px
   blocks.skel-when: length = 56px
   blocks.skel-tail: length = 96px
-  blocks.glyph: length = 48px
-  blocks.icon: length = 16px
-  blocks.dot: length = 8px
-  blocks.dot-gutter: length = 20px
-  blocks.dot-line: length = 18px
