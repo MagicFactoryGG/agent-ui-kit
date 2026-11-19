@@ -16,3 +16,4 @@ theme
   blocks.skel-line: length = 10px
   blocks.skel-title: length = 16px
   blocks.skel-when: length = 56px
+  blocks.badge-line: length = 26px

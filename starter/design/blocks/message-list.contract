@@ -1,12 +1,13 @@
 // A mailbox's list of messages, with the pane that reads the chosen one on a wide window, in one card. The card
 // holds one frame — the header, one full state cluster and the footer at the least, its content when the list
 // outgrows that — and the whole window on a phone (a mailbox is the screen there), so a state changes what the
-// panes hold, never the card's rhythm. The header stays one line in every state: the title, the unread count
-// at its end — in the accent's ink while any message waits (it counts the accent dots, so the header's one
-// live number shares their colour), in the muted ink at zero, claiming no state that does not exist — and
-// while the messages arrive, or fail to arrive, the count's place holds a quiet breathing pill the shape of
-// the number it will become, so the slot never goes bare; and an agent's note under the title when it filed
-// or flagged one, the one line that may appear, because an agent's act is worth a change of height.
+// panes hold, never the card's rhythm. The header stays one line in every state: the title, then the unread
+// count as one badge in every state — a pill on the theme's fill, in the accent's ink while any message waits
+// (it counts the accent dots, so the header's one live number shares their colour) and in the muted ink at
+// zero, claiming no state that does not exist — and while the messages arrive, or fail to arrive, the badge's
+// place holds a quiet breathing pill the badge's own size, so the slot never goes bare or jumps; and an
+// agent's note under the title when it filed or flagged one, the one line that may appear, because an agent's
+// act is worth a change of height.
 //
 // The list pane holds the rows, each a band that runs edge to edge: a status rail at the start — a dot when
 // unread, a caution flag when flagged, both slots kept on every row so the words share one left edge — and
@@ -17,20 +18,21 @@
 // choice reads at a glance); an agent's mark is the same line on a quiet band — two actors, one grammar, told
 // apart by the surface behind the line and the note that names the row. The list pane closes with a footer
 // band pinned to its bottom in every state, the app's words for the list's order, so even one row reads as a
-// whole list and the pane's chrome never rearranges itself under a person; loading says its line here,
-// centred over the rows it promises, each one the real row's own grid with every word swapped for a shimmer
-// bar — a breathing dot on some rows and none on others, as a real page mixes read and unread.
+// whole list and the pane's chrome never rearranges itself under a person; loading keeps its peace: the rows
+// breathe in the real row's own grid, every word swapped for a shimmer bar, a breathing dot in the unread's
+// place, and the header's pill says the number is on its way — the state speaks once, in shimmer.
 //
 // The reading pane, headed by a band the pane's own width in the header's rhythm, holds the chosen message:
 // who and when on one line, the subject as the pane's title, the snippet wrapping under; with nothing chosen
 // it rests on its quiet glyph and the app's one line of why, and with no message at all it rests on the glyph
 // alone, a placeholder that claims nothing, so the list's own word for its state is the one focal point;
-// while the messages load, quiet bars in the message's own shape claim nothing either. Empty says its line
-// with a quiet way on; failed says its line in the error's colour, red kept to the glyph and the headline,
-// with the way back as a plain button — calm, the way forward, not a second shout. A phone draws the list
-// alone, the platform's own idiom (a row pushes its detail): the split flips at the window's 640px floor (the
-// responsive-columns recipe: "Else read exactViewport's width"); long words cut with an ellipsis in the rows
-// and wrap in the pane. Every word is the app's.
+// while the messages load, quiet bars in the message's own shape claim nothing either. Empty and failed speak
+// one anatomy — a glyph in a circle, the state's line at title size, one plain button as the way on or the
+// way back — so the two states read as a family; failed's colour lives on its glyph alone, the words stay
+// level, and no element shouts twice. A phone draws the list alone, the platform's own idiom (a row pushes
+// its detail): the split flips at the window's 640px floor (the responsive-columns recipe: "Else read
+// exactViewport's width"); long words cut with an ellipsis in the rows and wrap in the pane. Every word is
+// the app's.
 use Swatch from "__SCOPE__/theme"
 use Words, ActionButton from "__SCOPE__/components"
 
@@ -96,20 +98,18 @@ component MessageRow
         text message.snippet testId=`${testId}-snippet` font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
 
 // One quiet row while the messages load: the real row's own grid, exactly — the same padding, the same status
-// rail (a breathing dot on some rows and none on others, as a real page mixes read and unread, the flag's slot
-// kept empty), the same gaps — with every word swapped for a shimmer bar: the name's bar running to the time
-// bar's place at the right edge, then the subject's line and the snippet's under it. It says "rows are coming",
-// not "nothing is here", and it breathes only when the person has not asked for still.
+// rail with both slots drawn (a breathing dot in the unread's place, the flag's slot kept), the same gaps —
+// with every word swapped for a shimmer bar: the name's bar running to the time bar's place at the right
+// edge, then the subject's line and the snippet's under it. It says "rows are coming", not "nothing is
+// here", and it breathes only when the person has not asked for still.
 component SkelRow
   props
     pulse: string
-    dot: bool
   view
     row align-items="flex-start" gap="theme.space.xs" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md"
       row flex-shrink=0 align-items="flex-start"
         box width="blocks.dot-gutter" height="blocks.dot-line" display="flex" align-items="center"
-          if dot
-            box width="blocks.dot" height="blocks.dot" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
+          box width="blocks.dot" height="blocks.dot" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
         box width="blocks.icon" height="blocks.dot-line" display="flex" align-items="center"
       column flex=1 min-width=0 gap="theme.space.xs"
         row align-items="center" gap="theme.space.lg"
@@ -131,7 +131,6 @@ component ListPane
     marked: bool
     data: enum<"many", "one", "empty", "loading", "failed", "long">
     emptyText: string
-    loadingText: string
     failedText: string
     composeLabel: string
     retryLabel: string
@@ -158,18 +157,17 @@ component ListPane
               circle cx=12 cy=12 r="6.75" fill="none" stroke="theme.color.critical-ink" stroke-width=1.8
               path d="M12 8.2v4.2" stroke="theme.color.critical-ink" stroke-width=1.8 stroke-linecap="round"
               circle cx=12 cy=15.6 r=1 fill="theme.color.critical-ink"
-            Words(text=failedText, kind="title", outcome="error", level=0, testId=`${testId}-failed`)
+            Words(text=failedText, kind="title", outcome="none", level=0, testId=`${testId}-failed`)
             ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
         else
           if data == "loading"
             column margin-top="theme.space.sm"
-              text loadingText testId=`${testId}-loading` role="status" min-width=0 margin-bottom="theme.space.sm" font="theme.type.caption" color="theme.color.ink-muted" text-align="center" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-              SkelRow(pulse=pulse, dot=true)
-              SkelRow(pulse=pulse, dot=false)
-              SkelRow(pulse=pulse, dot=false)
-              SkelRow(pulse=pulse, dot=true)
-              SkelRow(pulse=pulse, dot=false)
-              SkelRow(pulse=pulse, dot=false)
+              SkelRow(pulse=pulse)
+              SkelRow(pulse=pulse)
+              SkelRow(pulse=pulse)
+              SkelRow(pulse=pulse)
+              SkelRow(pulse=pulse)
+              SkelRow(pulse=pulse)
           else
             column flex=1 role="list" margin-top="theme.space.sm"
               for m in messages key=m.key
@@ -237,7 +235,6 @@ component MessageList
     title: string
     unreadLabel: string
     emptyText: string
-    loadingText: string
     failedText: string
     composeLabel: string
     retryLabel: string
@@ -264,15 +261,15 @@ component MessageList
           if title != ""
             Words(text=title, kind="heading", outcome="none", level=2, testId=`${testId}-title`)
           if data == "loading" or data == "failed"
-            box width="blocks.skel-when" height="blocks.dot-line" margin-left="auto" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse aria-hidden=true
+            box width="blocks.skel-when" height="blocks.badge-line" margin-left="auto" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse aria-hidden=true
           else
             if data != "failed"
-              text `${unreadCount} ${unreadLabel}` testId=`${testId}-count` margin-left="auto" min-width=0 font="theme.type.caption" color=(unreadCount > 0 ? "theme.color.accent" : "theme.color.ink-muted") font-variant-numeric="tabular-nums" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+              text `${unreadCount} ${unreadLabel}` testId=`${testId}-count` margin-left="auto" min-width=0 font="theme.type.caption" color=(unreadCount > 0 ? "theme.color.accent" : "theme.color.ink-muted") background-color="theme.color.fill" border-radius="theme.radius.pill" padding-top="theme.space.xs" padding-bottom="theme.space.xs" padding-left="theme.space.sm" padding-right="theme.space.sm" font-variant-numeric="tabular-nums" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
         if agent == "changed"
           text agentNote testId=`${testId}-agent` font="theme.type.caption" color="theme.color.accent"
       if narrow
-        ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), data=data, emptyText=emptyText, loadingText=loadingText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, compose=compose, retry=retry, pulse=pulse, testId=testId)
+        ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, compose=compose, retry=retry, pulse=pulse, testId=testId)
       else
         row flex=1 align-items="stretch"
-          ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), data=data, emptyText=emptyText, loadingText=loadingText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, compose=compose, retry=retry, pulse=pulse, testId=testId)
+          ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, compose=compose, retry=retry, pulse=pulse, testId=testId)
           Reader(paneLabel=paneLabel, paneEmptyText=paneEmptyText, messages=messages, chosenKey=chosenKey, loading=(data == "loading"), pulse=pulse, testId=testId)

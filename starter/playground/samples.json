@@ -4,7 +4,6 @@
     "title": "Inbox",
     "unreadLabel": "unread",
     "emptyText": "No messages yet.",
-    "loadingText": "Loading your messages…",
     "failedText": "Your messages did not load.",
     "composeLabel": "Write a message",
     "retryLabel": "Try again",
