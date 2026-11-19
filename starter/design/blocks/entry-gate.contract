@@ -3,17 +3,18 @@
 // here) and continue as a guest (its line says what a guest can do, and that a guest's work moves into their
 // account when they authenticate) — side by side on a wide window, stacked on a phone (a card wraps at
 // blocks.gate-choice), then a small legal or help line. Busy shows on one choice only, the one `busyChoice`
-// names: its button keeps its words and dims, and under it the platform's own activity indicator runs, named
-// `busyText` — the other choice stays pressable, for busy marks what is running, not what is allowed. An
-// outcome draws `outcomeText` as a banner beside the cards (surface, the outcome's ink as its left mark,
-// words in the same ink), close to the cards it answers and never turning a button red: after a cancelled
-// attempt both buttons stay pressable, for a person who cancelled can try again, and the banner says what
-// happened. Given a definite height the gate fills and centres itself in it (min-height 100%, contents
-// centred); in flowing content it sits at rest where it is laid — a window's vertical axis belongs to the
-// screen, and the app centres the gate there. The two cards are drawn here, not with EntryChoice: a file in a
-// package cannot import from its own index.contract (contract-use-cycle), and the wrap width is the card's
-// own. States: interaction idle|busy, outcome none|error|blocked|cancelled, busyChoice auth|guest (which
-// choice busy is on).
+// names: its button keeps its words and dims, and under it a line says `busyText` beside the platform's own
+// activity indicator — the other choice stays pressable, for busy marks what is running, not what is allowed.
+// An outcome that fails the person (error, blocked) draws `outcomeText` as a banner beside the cards: the
+// surface, the cards' own padding and corner, a small mark in the outcome's ink and the words in the same ink
+// — close to the cards it answers, never turning a button red. A cancelled attempt is a quieter thing: a bare
+// status line in muted ink, no banner, for the person backed out and both buttons stay pressable — the words
+// say what happened either way. Given a definite height the gate fills and centres itself in it (min-height
+// 100%, contents centred); in flowing content it sits at rest where it is laid — a window's vertical axis
+// belongs to the screen, and the app centres the gate there. The two cards are drawn here, not with
+// EntryChoice: a file in a package cannot import from its own index.contract (contract-use-cycle), and the
+// wrap width is the card's own. States: interaction idle|busy, outcome none|error|blocked|cancelled,
+// busyChoice auth|guest (which choice busy is on).
 use Words, ActionButton, outcomeInk from "__SCOPE__/components"
 
 component EntryGate
@@ -48,16 +49,28 @@ component EntryGate
               Words(text=authNote, kind="caption", outcome="none", level=0, testId=`${testId}-auth-note`)
             ActionButton(label=authLabel, kind="primary", interaction=(interaction == "busy" and busyChoice == "auth" ? "busy" : "idle"), outcome="none", press=auth, testId=`${testId}-auth-action`)
             if interaction == "busy" and busyChoice == "auth"
-              progress aria-label=busyText testId=`${testId}-auth-busy`
+              row align-items="center" gap="theme.space.sm"
+                column flex=1 min-width=0
+                  Words(text=busyText, kind="caption", outcome="none", level=0, testId=`${testId}-auth-busy`)
+                progress aria-label=busyText width="blocks.gate-bar" flex-shrink=0
           column testId=`${testId}-guest` flex=1 min-width="blocks.gate-choice" box-sizing="border-box" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
             Words(text=guestTitle, kind="label", outcome="none", level=2, testId=`${testId}-guest-title`)
             if guestNote != ""
               Words(text=guestNote, kind="caption", outcome="none", level=0, testId=`${testId}-guest-note`)
             ActionButton(label=guestLabel, kind="plain", interaction=(interaction == "busy" and busyChoice == "guest" ? "busy" : "idle"), outcome="none", press=guest, testId=`${testId}-guest-action`)
             if interaction == "busy" and busyChoice == "guest"
-              progress aria-label=busyText testId=`${testId}-guest-busy`
+              row align-items="center" gap="theme.space.sm"
+                column flex=1 min-width=0
+                  Words(text=busyText, kind="caption", outcome="none", level=0, testId=`${testId}-guest-busy`)
+                progress aria-label=busyText width="blocks.gate-bar" flex-shrink=0
         if outcome != "none"
-          row role=(outcome == "cancelled" ? "status" : "alert") align-items="center" padding="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.card" border-left-width="blocks.gate-mark" border-left-style="solid" border-left-color=outcomeInk(outcome)
-            Words(text=outcomeText, kind="label", outcome=outcome, level=0, testId=`${testId}-outcome`)
+          if outcome == "cancelled"
+            column role="status"
+              Words(text=outcomeText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-outcome`)
+          else
+            row role="alert" align-items="center" gap="theme.space.sm" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card"
+              box background-color=outcomeInk(outcome) border-radius="theme.radius.pill" align-self="stretch" width="blocks.gate-mark"
+              column flex=1 min-width=0
+                Words(text=outcomeText, kind="label", outcome=outcome, level=0, testId=`${testId}-outcome`)
       if legal != ""
         Words(text=legal, kind="caption", outcome="none", level=0, testId=`${testId}-legal`)

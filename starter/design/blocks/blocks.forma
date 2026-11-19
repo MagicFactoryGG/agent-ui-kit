@@ -7,3 +7,4 @@ theme
   blocks.gate-max: length = 560px
   blocks.gate-choice: length = 240px
   blocks.gate-mark: length = 3px
+  blocks.gate-bar: length = 96px
