@@ -7,11 +7,12 @@
 // note, and the bones below — so every element shares one column, and a message wraps at the same width the
 // skeleton stands in for. The state line is body size in the muted ink in every state that shows one, and each
 // state says its own: empty's `message`, failed's `failedText` — Section's own naming for the line a failed area
-// says, so no empty promise sits under an alert. The failed state's colour is carried by its disc and its way
-// back — the retry is the kit's own error-ring button, ActionButton's plain on the surface with the critical
-// line, the affordance its `outcome` already draws for an act that ended in error — and the card wears the
+// says, so no empty promise sits under an alert. The failed state's colour is carried by its disc and its
+// card's line, and its way back is the strongest control on the panel: the primary fill, wearing its own
+// words, `retryLabel` — the label says retry, a red fill would say a destructive act, and an outlined button
+// loses the way exactly when it matters most — while the card wears the
 // state's own line in the critical hue, Proposal's own convention for a stateful card, so the state is said in
-// colour at the card's edge and in its way back (role=alert speaks it in failed). The title is the area's own
+// colour at the card's edge (role=alert speaks it in failed). The title is the area's own
 // name, the same ink in every state, so the state matrix reads true: a state changes its declared axes only.
 // In loading the skeleton is the line, and the live words are the title's — role=status speaks what is loading —
 // and the note's when an agent started the load. Each element holds one job, said once: the disc is the data
@@ -23,9 +24,8 @@
 // anchored where its sentence would sit; the action's own footprint is held below it, one bone in the action's
 // own height and corner, a placeholder not a promise (nothing is pressable, the box is aria-hidden), so the
 // card does not reflow when the state turns. The card is Section's own card — surface ground, the theme's 1px
-// line, the card's corner. The one action is the way in every state that shows it: empty's own way on,
-// `actionLabel`, the accent's fill; failed's own way back, `retryLabel`, the error's ring — a red fill would
-// say a destructive act. `agent` "changed" marks a load an
+// line, the card's corner. The one action is the way in every state that shows it, the primary fill with its
+// own words: empty's own way on, `actionLabel`; failed's own way back, `retryLabel`. `agent` "changed" marks a load an
 // agent started — its tool calls the same action the button does, one ledger, two doors — and `agentNote` is
 // the mark's one sentence, under the title in every state that shows it: the accent ink and a small accent disc
 // on a fill pill, the Notice's own way with an area's sentence and this panel's own disc grammar in miniature —
@@ -44,8 +44,9 @@ component Bone
   view
     box height="blocks.bone" width=share background-color="theme.color.fill" border-radius="theme.radius.pill"
 
-// The agent's mark: a small accent disc and one sentence on a fill pill, the Notice's own way with an area's
-// words. Drawn once here and placed once, under the title in every state that shows it — TopBar's own placement
+// The agent's mark: a small accent disc and one sentence at body size on a fill pill, the Notice's own way with
+// an area's words — a state a person notices (the kit's first question), never mistaken for the action or for a
+// link. Drawn once here and placed once, under the title in every state that shows it — TopBar's own placement
 // for an agent's line — so it never competes with the action below.
 component Mark
   props
@@ -55,7 +56,7 @@ component Mark
     row testId=testId align-items="center" gap="theme.space.xs" margin-top="theme.space.sm" background-color="theme.color.fill" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
       svg viewBox="0 0 6 6" width="blocks.note-dot" height="blocks.note-dot" aria-hidden=true flex-shrink=0
         circle cx=3 cy=3 r=3 fill="theme.color.accent"
-      text note font="theme.type.caption" color="theme.color.accent"
+      text note font="theme.type.body" color="theme.color.accent"
 
 component StatePanel
   props
@@ -100,4 +101,4 @@ component StatePanel
           box aria-hidden=true height="blocks.action-min" width="blocks.bone-action" background-color="theme.color.fill" border-radius="theme.radius.control"
       if data != "loading" and (data == "failed" ? retryLabel : actionLabel) != ""
         column margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md")
-          ActionButton(label=(data == "failed" ? retryLabel : actionLabel), kind=(data == "failed" ? "plain" : "primary"), interaction="idle", outcome=(data == "failed" ? "error" : "none"), press=press, testId=`${testId}-action`)
+          ActionButton(label=(data == "failed" ? retryLabel : actionLabel), kind="primary", interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
