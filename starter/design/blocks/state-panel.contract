@@ -12,10 +12,11 @@
 // words, `retryLabel` — the label says retry, a red fill would say a destructive act, and an outlined button
 // loses the way exactly when it matters most — while the card wears the
 // state's own line in the critical hue, Proposal's own convention for a stateful card, so the state is said in
-// colour at the card's edge (role=alert speaks it in failed). The title is the area's own
-// name, the same ink in every state, so the state matrix reads true: a state changes its declared axes only.
-// In loading the skeleton is the line, and the live words are the title's — role=status speaks what is loading —
-// and the note's when an agent started the load. Each element holds one job, said once: the disc is the data
+// colour at the card's edge (role=alert speaks it in failed). The title is the area's own name, the same size
+// in the same place in every state, resting in the muted ink while loading - pending words, so the one live
+// accent under them (the arc) is the state's focal and role=status still speaks the name of what is loading.
+// In loading the skeleton is the line, and the live words are the title's and the note's when an agent
+// started the load. Each element holds one job, said once: the disc is the data
 // state's own glyph, the spinner in every loading state (the agent axis is the mark's, not the disc's); the
 // bones are the content the line stands for; the mark is who acted. Loading
 // stands the content in three bones in the state line's own place — the line's own gap above them, the
@@ -87,7 +88,7 @@ component StatePanel
           rect x=7.5 y=7.5 width=9 height=9 rx=2.1 fill="none" stroke="theme.color.ink-muted" stroke-width=1.5
           path d="M7.5 12.6h2.55l1.05 1.65h1.8L13.95 12.6h2.55" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
       column width="100%" max-width="blocks.measure" align-items="center" gap="theme.space.sm"
-        Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+        Words(text=title, kind="title", outcome=(data == "loading" ? "cancelled" : "none"), level=2, testId=`${testId}-title`)
         if data != "loading" and (data == "failed" ? failedText : message) != ""
           column width="100%" align-items="center" margin-top="theme.space.sm"
             Words(text=(data == "failed" ? failedText : message), kind="body", outcome="cancelled", level=0, testId=`${testId}-message`)
