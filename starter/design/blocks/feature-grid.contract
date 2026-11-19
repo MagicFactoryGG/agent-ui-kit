@@ -25,8 +25,8 @@
 //          one sentence, `proposalText`, and two answer words, `rejectLabel` and `acceptLabel` — sits under the
 //          heading where it is seen first, the feature it is about wears the accent ring on its mark, and the way on
 //          steps back to plain so the answer is the state's one filled element), changed (an agent changed that
-//          feature: a band of the accent's wash under the heading says `changedText` after the accent dot, and the
-//          feature wears the ring on its mark and the same dot after its title, so a person sees what changed
+//          feature: a band of the accent's wash under the heading says `changedText` in the ink (on a tint the accent's
+//          contrast is another theme's to keep, the ink's is ours) after the accent dot, and the feature wears the ring on its mark and the same dot after its title, so a person sees what changed
 //          without watching). The person's answer and the agent's tool
 //          reach the app's same actions (one ledger, two doors); the app's Notice offers the undo.
 // Every word is the app's; every value a Theme token or a blocks.* size.
@@ -173,7 +173,7 @@ component FeatureGrid
           row position="relative" max-width="blocks.feature-grid-lead" align-items="baseline" gap="theme.space.sm" min-width=0 padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-radius="theme.radius.control"
             box aria-hidden=true position="absolute" inset=0 background-color="theme.color.accent" opacity=0.1 border-radius="theme.radius.control"
             FeatureGridDot()
-            text changedText position="relative" min-width=0 font="theme.type.body" color="theme.color.accent"
+            text changedText position="relative" min-width=0 font="theme.type.body" color="theme.color.ink"
       if data == "loading"
         column testId=`${testId}-loading` role="status" aria-label=loadingText margin-top="theme.space.lg" gap="theme.space.lg"
           Words(text=loadingText, kind="caption", outcome="none", level=0, testId=`${testId}-loading-text`)
