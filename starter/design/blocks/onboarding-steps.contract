@@ -67,7 +67,7 @@ component SkTrack
   view
     column gap="theme.space.md" aria-hidden=true animation="breathe 1.8s ease-in-out infinite"
       row gap="theme.space.md" align-items="center"
-        box min-width="blocks.skel-count" height="blocks.skel-line" border-radius="theme.radius.pill" background-color="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)"
+        box min-width="blocks.skel-count" height="blocks.skel-head" border-radius="theme.radius.pill" background-color="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)"
         for j in [0, 1, 2, 3] key=j
           StepDot(fill="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)", edge="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)", ring=false, testId="")
           if j < 3
