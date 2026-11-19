@@ -165,24 +165,25 @@ component NotificationList
         // The failure is the list's: one band on the card, its severity said once in the critical line at its start
         // and the mark at the line's own start - the copy carries no colour, and the one filled way back is the
         // block's single accent.
-        column testId=`${testId}-failed` role="alert" gap="theme.space.md" border-radius="theme.radius.card" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.alert-line" border-left-style="solid" border-left-color="theme.color.critical" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md"
+        column testId=`${testId}-failed` role="alert" gap="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.card" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.alert-line" border-left-style="solid" border-left-color="theme.color.critical" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md"
           row align-items="flex-start" gap="theme.space.md"
             svg viewBox="0 0 20 20" width="blocks.kind-mark" height="blocks.kind-mark" fill="none" stroke="theme.color.critical" aria-hidden=true flex-shrink=0
               path d="M10 3.1L18.1 16.9H1.9Z" stroke-width=1.5 stroke-linejoin="round"
               path d="M10 8.1v3.9" stroke-width=1.6 stroke-linecap="round"
               circle cx=10 cy=14.4 r=0.9 fill="theme.color.critical" stroke="none"
-            text failedText testId=`${testId}-failed-text` flex=1 min-width=0 overflow-wrap="break-word" hyphens="none" font="theme.type.body" color="theme.color.ink"
-          if retryLabel != ""
-            row
-              ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+            column flex=1 min-width=0 gap="theme.space.sm"
+              text failedText testId=`${testId}-failed-text` overflow-wrap="break-word" hyphens="none" font="theme.type.body" color="theme.color.ink"
+              if retryLabel != ""
+                row
+                  ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
       else if data == "empty"
         // The tray, where the new group's rows would land: its mark, the line that says what will arrive, and the
         // way on. No group label above it - the zero state is the whole list's, not one group's.
         column role="status" testId=`${testId}-empty` background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
           row align-items="flex-start" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-left-width="components.mark-line" border-left-style="solid" border-left-color="transparent"
-            svg viewBox="0 0 24 24" width="blocks.kind-mark" height="blocks.kind-mark" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
-              rect x=7.5 y=7.5 width=9 height=9 rx=2.1 stroke-width=1.5
-              path d="M7.5 12.6h2.55l1.05 1.65h1.8L13.95 12.6h2.55" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+            svg viewBox="0 0 20 20" width="blocks.kind-mark" height="blocks.kind-mark" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
+              rect x=2.75 y=3.75 width=14.5 height=12.5 rx=2.5 stroke-width=1.5
+              path d="M2.75 11h4l1.25 2h4l1.25-2h4" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
             column flex=1 min-width=0 gap="theme.space.sm"
               text emptyText testId=`${testId}-empty-text` overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
               if emptyActionLabel != ""
