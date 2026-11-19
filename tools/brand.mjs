@@ -33,7 +33,8 @@ const sha = (s) => createHash('sha256').update(s).digest('hex');
 function contracts(dir, out = []) {
   if (!existsSync(dir)) return out;
   for (const name of readdirSync(dir)) {
-    if (SKIP.has(name) || name.startsWith('dist.')) continue;
+    // Hidden folders (a scratch copy of the playground, say) are not the design.
+    if (SKIP.has(name) || name.startsWith('dist.') || name.startsWith('.')) continue;
     const p = join(dir, name);
     if (statSync(p).isDirectory()) contracts(p, out);
     else if (name.endsWith('.contract') && !name.endsWith('.test.contract')) out.push(p);

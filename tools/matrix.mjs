@@ -375,16 +375,74 @@ export function generate(designDir, playDir) {
     }
   }
 
+  // Arrange (agent-ui-kit ARRANGE): start from one of the screens package's layouts (a layout file's piece with a
+  // slot), fill its region from the components and blocks, reorder (drag, or Up and Down), pick each piece's state
+  // (its matrix cells), and see it drawn. The page's line (layout|Piece:cell,…) is what `play.mjs promote` turns into
+  // a new Block or Screen in the design repo. Arrangement is made here, never in an app.
+  const arrangedView = [];
+  const arrangedPer = [];
+  const layouts = all.filter((p) => p.layer === 'screens' && p.slot && /layouts\.contract$/.test(p.at.split(':')[0]));
+  const palette = all.filter((p) => ['components', 'blocks', 'wip'].includes(p.layer)).sort((a, b) => a.name.localeCompare(b.name));
+  const arrangeCells = new Map(palette.map((p) => [p.name, cells(p, marks(p)).map((c) => [cellName(p, c), c])]));
+  if (layouts.length && palette.length) {
+    pages.push('arrange');
+    nav.push(`            option "Arrange" value="arrange"`);
+    view.push(`      if page == "arrange"`, `        Page(title="Arrange", note="Start from a layout, fill it, reorder it, pick each piece's state. The line below is what play.mjs promote saves as a Block or Screen.")`);
+    view.push(`          NavField(label="Layout")`, `            select value=arrLayout change=arrPickLayout aria-label="Layout" testId="arrange-layout"`);
+    for (const l of layouts) view.push(`              option ${quote(human(l.name))} value=${quote(l.name)}`);
+    view.push(`          NavField(label="Add a piece")`, `            select value="" change=arrAdd aria-label="Add a piece" testId="arrange-add"`, `              option "Choose a piece" value="" disabled=true`);
+    for (const p of palette) view.push(`              option ${quote(`${human(p.name)} (${p.layer})`)} value=${quote(p.name)}`);
+    view.push(`          list id="arrange-items" appearance="none" virtualized=true reorderdrop=arrReorder max-height="frame.row-max" testId="arrange-items"`, `            for it in arrItems key=it.key`, `              column gap="frame.small" padding="frame.small" testId=\`arrange-\${it.key}\``, `                text it.piece font="frame.type-item" color="frame.ink"`, `                row gap="frame.small" flex-wrap="wrap" align-items="center"`);
+    for (const p of palette) {
+      view.push(`                  if it.piece == ${quote(p.name)}`, `                    select value=it.cell change=arrCell(it.key) aria-label="State" testId=\`arrange-\${it.key}-state\``);
+      for (const [n] of arrangeCells.get(p.name)) view.push(`                      option ${quote(n)} value=${quote(n)}`);
+    }
+    view.push(
+      `                  button press=arrUp(it.key) aria-label="Up" testId=\`arrange-\${it.key}-up\``, `                    text "Up"`,
+      `                  button press=arrDown(it.key) aria-label="Down" testId=\`arrange-\${it.key}-down\``, `                    text "Down"`,
+      `                  button press=arrRemove(it.key) aria-label="Remove" testId=\`arrange-\${it.key}-remove\``, `                    text "Remove"`,
+    );
+    view.push(`          text arrLine font="frame.type-small" color="frame.ink" overflow-wrap="anywhere" testId="arrange-line"`);
+    for (const l of layouts) {
+      const lc = screenCells(l, [])[0];
+      const [call] = placement(l, lc, 'arrange-preview-layout', ctx, '              ');
+      view.push(`          if arrLayout == ${quote(l.name)}`, `            ScreenCell(scheme=(scheme == "dark" ? "dark" : "light"), testId="arrange-preview")`, call, `                ArrangedPieces(items=arrItems, ARRANGED_NOOPS)`);
+    }
+    // Each piece in each of its states, drawn once: a small component per piece chooses the state (Arranged<Piece>),
+    // ArrangedPieces chooses the piece; one long chain was too slow for the checker.
+    for (const p of palette) {
+      const body = [];
+      // The resting state is drawn; the chosen state is recorded for promote and named beside the piece (drawing
+      // every state of every piece here doubled the playground's build).
+      const [, rest] = arrangeCells.get(p.name)[0];
+      body.push(...placement(p, rest, 'arrange-piece', ctx, '      '));
+      arrangedPer.push({ name: `Arranged${p.name}`, piece: p.name, body });
+    }
+  }
+
   const argActions = [...ctx.needs].filter((n) => n.startsWith('action:')).sort().flatMap((n) => {
     const [, name, arity] = n.split(':');
     return [`  action ${name}(${Array.from({ length: Number(arity) || 1 }, (_, i) => `v${i}`).join(', ')})`, '    find = find'];
   });
+  const allNoops = ['noop', ...[...ctx.needs].filter((n) => n.startsWith('action:')).map((n) => n.split(':')[1])];
+  const usesNoop = (lines, n) => lines.some((v) => v.includes(`=${n},`) || v.includes(`=${n})`));
+  for (const a of arrangedPer) a.noops = allNoops.filter((n) => usesNoop(a.body, n));
+  // Sample data stays in App (a resource under a for over data would be asked per row): it is passed down as props.
+  const resourceTypes = new Map([...ctx.needs].filter((n) => !n.startsWith('action:')).map((n) => {
+    const [shape, data, one] = n.split(':');
+    return one ? [`o_${shape}_${data}`, shape] : [`s_${shape}_${data}`, `${shape}[]`];
+  }));
+  for (const a of arrangedPer) a.res = [...resourceTypes.keys()].filter((r) => usesNoop(a.body, r));
+  const arrangedRes = [...new Set(arrangedPer.flatMap((a) => a.res))];
+  const arrangedNoops = allNoops.filter((n) => arrangedPer.some((a) => a.noops.includes(n)));
+  for (const a of arrangedPer) arrangedView.push(`        if it.piece == ${quote(a.piece)}`, `          ${a.name}(cell=it.cell${[...a.noops, ...a.res].map((n) => `, ${n}=${n}`).join('')})`);
   const resources = [...ctx.needs].filter((n) => !n.startsWith('action:')).sort().map((n) => {
     const [shape, data, one] = n.split(':');
     return one
       ? `  resource o_${shape}_${data} = one${shape}(${quote(data)}) as shape ${shape}`
       : `  resource s_${shape}_${data} = rows${shape}(${quote(data)}) as shape ${shape}[]`;
   });
+  for (let k = 0; k < view.length; k++) if (view[k].includes('ARRANGED_NOOPS')) view[k] = view[k].replace('ARRANGED_NOOPS', [...arrangedNoops, ...arrangedRes].map((n) => `${n}=${n}`).join(', '));
   const presetNames = Object.keys(presets);
   const overlay = ctx.props?.overlay?.piece && ctx.props?.overlay?.package ? ctx.props.overlay : null;
   const app = [
@@ -397,11 +455,24 @@ export function generate(designDir, playDir) {
     ...(overlay ? [`use ${overlay.piece} from ${quote(overlay.package)}`] : []),
     ...(brandSet?.assets?.length ? Object.entries(Object.groupBy(brandSet.assets, (a) => a.package)).map(([pkg, list]) => `use ${[...new Set(list.map((a) => a.component))].join(', ')} from ${quote(pkg)}`) : []),
     '',
+    ...(pages.includes('arrange') ? [
+      '// One piece on the Arrange page: its key, the piece and the cell (state) it shows.',
+      'shape ArrangeItem', '  key: string', '  piece: string', '  cell: string', '',
+      '// Moves the item with this key before the item with key `before` ("" moves it to the end).',
+      'fn arrMove(items: ArrangeItem[], key: string, before: string): ArrangeItem[] = arrPlace(items.filter(i => i.key != key), items.filter(i => i.key == key), before == "" ? items.filter(i => i.key != key).length : items.filter(i => i.key != key).map(i => i.key).indexOf(before))',
+      'fn arrPlace(rest: ArrangeItem[], moved: ArrangeItem[], at: number): ArrangeItem[] = rest.slice(0, at).concat(moved).concat(rest.slice(at))', '',
+    ] : []),
     'component App',
     '  state page = "theme"',
     `  state preset = ${quote(presetNames[0] ?? 'theme')}`,
     '  state scheme = "system"',
     '  state find = ""',
+    ...(pages.includes('arrange') ? [
+      `  state arrLayout = ${quote(layouts[0].name)}`, '  state arrItems: ArrangeItem[] = []', '  state arrSeq = 0',
+      '  derive arrLine = `${arrLayout}|${arrItems.map(i => `${i.piece}:${i.cell}`).join(",")}`',
+      '  tool readArrangement reads "The arrangement on the playground\'s Arrange page, as layout|Piece:cell,…: what play.mjs promote saves as a Block or Screen." = readArrangement',
+      '    returns arrLine',
+    ] : []),
     ...resources,
     '  action show(p: string)',
     '    page = p',
@@ -409,6 +480,20 @@ export function generate(designDir, playDir) {
     ...argActions,
     '  action setFind(v: string)',
     '    find = v',
+    ...(pages.includes('arrange') ? [
+      '  action readArrangement',
+      '  action arrPickLayout(v: string)', '    arrLayout = v',
+      '  action arrAdd(v: string)', '    arrSeq = arrSeq + 1',
+      ...['    if v == ""', '      arrSeq = arrSeq'],
+      ...palette.map((p) => `    if v == ${quote(p.name)}\n      arrItems = arrItems.concat([ArrangeItem(key=\`i\${arrSeq}\`, piece=v, cell=${quote(arrangeCells.get(p.name)[0][0])})])`).flatMap((x) => x.split('\n')),
+      '  action arrCell(key: string, v: string)', '    arrItems = arrItems.map(i => i.key == key ? ArrangeItem(key=i.key, piece=i.piece, cell=v) : i)',
+      '  action arrRemove(key: string)', '    arrItems = arrItems.filter(i => i.key != key)',
+      '  action arrReorder(key: string, before: option<string>)', '    arrItems = arrMove(arrItems, key, match before { case some(b) => b, case none => "" })',
+      '  action arrUp(key: string)', '    let at = arrItems.map(i => i.key).indexOf(key)',
+      '    if at > 0', '      arrItems = arrMove(arrItems, key, arrItems.map(i => i.key).slice(at - 1, at).join(""))',
+      '  action arrDown(key: string)', '    let at = arrItems.map(i => i.key).indexOf(key)',
+      '    if at >= 0 and at < arrItems.length - 1', '      arrItems = arrMove(arrItems, key, arrItems.map(i => i.key).slice(at + 2, at + 3).join(""))',
+    ] : []),
     ...(presetNames.length > 1 ? ['  action pickPreset(p: string)', '    preset = p', '    setMode("preset", p)'] : []),
     ...Object.entries(theme.options ?? {}).flatMap(([group, choices]) => {
       const v = slug(group).replace(/-/g, '_');
@@ -438,6 +523,31 @@ export function generate(designDir, playDir) {
     ...view,
     // Not on the Brand page: there each registered asset is compared with its reference, with nothing over it.
     ...(overlay ? [`      if page != "brand"`, `        ${overlay.piece}()`] : []),
+    ...(arrangedView.length ? [
+      '',
+      '// The arranged pieces, each in its chosen state (the Arrange page), drawn once for every layout.',
+      'component ArrangedPieces',
+      '  props',
+      '    items: ArrangeItem[]',
+      // App's no-ops come in as action props: a child's own untyped no-op could not be inferred.
+      ...arrangedNoops.map((n) => `    ${n}: action`),
+      ...arrangedRes.map((r) => `    ${r}: ${resourceTypes.get(r)}`),
+      '  view',
+      '    column gap="frame.gap" testId="arranged-pieces"',
+      '      for it in items key=it.key',
+      ...arrangedView,
+      ...arrangedPer.flatMap((a) => [
+        '',
+        `component ${a.name}`,
+        '  props',
+        '    cell: string',
+        ...a.noops.map((n) => `    ${n}: action`),
+        ...a.res.map((r) => `    ${r}: ${resourceTypes.get(r)}`),
+        '  view',
+        '    column',
+        ...a.body,
+      ]),
+    ] : []),
     '',
   ].join('\n');
   const firstColour = Object.keys(theme.color)[0];
