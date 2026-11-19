@@ -9,9 +9,10 @@
 // state says its own: empty's `message`, failed's `failedText` — Section's own naming for the line a failed area
 // says, so no empty promise sits under an alert. The failed state's colour is carried by its disc and its way
 // back — the retry is the kit's own error-ring button, ActionButton's plain on the surface with the critical
-// line, the affordance its `outcome` already draws for an act that ended in error — while the card keeps the
-// theme's own line, calm in every state: two carriers are the state said once in colour (role=alert speaks it
-// in failed). The title is the area's own name, the same ink in every state. In
+// line, the affordance its `outcome` already draws for an act that ended in error — and the card wears the
+// state's own line in the critical hue, Proposal's own convention for a stateful card, so the state is said in
+// colour at the card's edge and in its way back (role=alert speaks it in failed). The title is the area's own
+// name, the same ink in every state. In
 // loading the skeleton is the line, and the live words are the title's — role=status speaks what is loading —
 // and the note's when an agent started the load: the disc rests neutral then and the accent stays with the
 // mark, so no live sentence sits above placeholders to read half-loaded, and loading is said once. Loading
@@ -26,8 +27,9 @@
 // say a destructive act. `agent` "changed" marks a load an
 // agent started — its tool calls the same action the button does, one ledger, two doors — and `agentNote` says
 // so as the text block's last line, a breath of air above it: the accent ink and a small accent disc on a fill
-// pill with the muted ink's own edge, Tag's own way with a status word, so the chip reads on the card in dark —
-// a mark a person notices, never mistaken for the action or for a link. `size` "full" claims the width it is
+// pill, the Notice's own way with an area's sentence and this panel's own disc grammar in miniature — the dot
+// is the mark's edge, no border to read as a control — a mark a person notices, never mistaken for the action
+// or for a link. `size` "full" claims the width it is
 // given up to blocks.panel-max — the area's own surface at a phone, a capped card on a wide window — and the
 // words sit on blocks.measure, a generous column that leaves the card breathing room at both sides;
 // "compact" insets to a narrower card for a side panel or a card's body. The three bones are one small local
@@ -55,7 +57,7 @@ component StatePanel
     press: action
     testId: string
   view
-    column testId=testId role=(data == "failed" ? "alert" : data == "loading" ? "status" : "none") width="100%" max-width=(size == "full" ? "blocks.panel-max" : "blocks.panel-compact") margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(size == "full" ? "theme.space.xxl" : "theme.space.lg") align-items="center" text-align="center" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+    column testId=testId role=(data == "failed" ? "alert" : data == "loading" ? "status" : "none") width="100%" max-width=(size == "full" ? "blocks.panel-max" : "blocks.panel-compact") margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(size == "full" ? "theme.space.xxl" : "theme.space.lg") align-items="center" text-align="center" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(data == "failed" ? "theme.color.critical" : "theme.color.line")
       svg viewBox="0 0 24 24" width=(size == "full" ? "blocks.shape-full" : "blocks.shape-compact") height=(size == "full" ? "blocks.shape-full" : "blocks.shape-compact") aria-hidden=true flex-shrink=0 margin-bottom=(size == "full" ? "theme.space.lg" : "theme.space.md")
         if data == "failed"
           circle cx=12 cy=12 r=11 fill="theme.color.critical"
@@ -78,7 +80,7 @@ component StatePanel
             Bone(share="100%")
             Bone(share="100%")
         if agent == "changed"
-          row testId=`${testId}-agent` align-items="center" gap="theme.space.xs" margin-top="theme.space.sm" background-color="theme.color.fill" border-radius="theme.radius.pill" border-width="theme.line.width" border-style="solid" border-color="theme.color.ink-muted" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
+          row testId=`${testId}-agent` align-items="center" gap="theme.space.xs" margin-top="theme.space.sm" background-color="theme.color.fill" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
             svg viewBox="0 0 6 6" width="blocks.note-dot" height="blocks.note-dot" aria-hidden=true flex-shrink=0
               circle cx=3 cy=3 r=3 fill="theme.color.accent"
             text agentNote font="theme.type.caption" color="theme.color.accent"
