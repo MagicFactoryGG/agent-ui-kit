@@ -11,7 +11,7 @@
 //   bun play.mjs save <n>   keep theme.json's current values as presets/<n>.json in the design repo
 //   bun play.mjs stop       end what this playground started
 import { spawn, spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, watch, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, watch, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -35,8 +35,21 @@ function link() {
   }
 }
 
+// The theme's bundled faces, copied where Exact reads them (the app's own assets/; a link out of the app is refused).
+function fonts() {
+  const from = join(DESIGN, 'theme', 'assets', 'fonts');
+  if (!existsSync(from)) return;
+  const to = join(HERE, 'assets', 'fonts');
+  mkdirSync(to, { recursive: true });
+  for (const f of readdirSync(from)) {
+    const a = readFileSync(join(from, f));
+    if (!existsSync(join(to, f)) || !a.equals(readFileSync(join(to, f)))) writeFileSync(join(to, f), a);
+  }
+}
+
 function gen() {
   if (run('bun', [join(TOOLS, 'theme.mjs'), 'build', join(DESIGN, 'theme.json'), join(DESIGN, 'theme')]).status !== 0) return false;
+  fonts();
   return run('bun', [join(TOOLS, 'matrix.mjs'), 'gen', DESIGN, HERE]).status === 0;
 }
 

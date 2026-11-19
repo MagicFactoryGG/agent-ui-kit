@@ -56,7 +56,7 @@ component SheetBody
     outcome: enum<"none", "success", "error", "blocked", "cancelled">
   slot
   view
-    column gap="theme.space.lg" padding="theme.space.xl" max-width="blocks.sheet-max" box-sizing="border-box" background-color="theme.color.raised" color="theme.color.ink" font-family="theme.family"
+    column gap="theme.space.lg" padding="theme.space.xl" max-width="blocks.sheet-max" box-sizing="border-box" background-color="theme.color.raised" color="theme.color.ink"
       Words(text=title, kind="title", outcome="none", level=2, testId="sheet-title")
       if note != ""
         Words(text=note, kind="caption", outcome="none", level=0, testId="sheet-note")
@@ -86,4 +86,23 @@ component EntryChoice
       ActionButton(label=actionLabel, kind=(kind == "primary" ? "primary" : "plain"), interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=press, testId=`${testId}-action`)
       if outcome != "none"
         Words(text=outcomeText, kind="caption", outcome=(outcome == "error" ? "error" : "blocked"), level=0, testId=`${testId}-outcome`)
+
+// An agent's proposal, waiting for the person: one sentence and two answers. Nothing changes until the person
+// accepts; "Not now" drops it. (The agent layer's rule: one sentence, at most two answer words.)
+component Proposal
+  props
+    id: string
+    sentence: string
+    yesLabel: string
+    noLabel: string
+    agent: enum<"none", "proposed">
+    yes: action
+    no: action
+  view
+    if agent == "proposed"
+      row testId=`${id}-proposal` role="status" align-items="center" gap="theme.space.md" padding="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent"
+        Words(text=sentence, kind="body", outcome="none", level=0, testId=`${id}-sentence`)
+        row flex=1
+        ActionButton(label=noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId=`${id}-no`)
+        ActionButton(label=yesLabel, kind="primary", interaction="idle", outcome="none", press=yes, testId=`${id}-yes`)
 

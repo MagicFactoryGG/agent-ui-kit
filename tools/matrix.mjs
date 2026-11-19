@@ -276,11 +276,11 @@ export function generate(designDir, playDir) {
   // Theme: every colour token on one line, light and dark.
   pages.push('theme');
   nav.push(`        NavHeading(label="Theme")`, `        NavItem(label=${quote(theme.name)}, on=(page == "theme"), press=show("theme"), testId="nav-theme")`);
-  view.push(`      if page == "theme"`, `        Page(title=${quote(theme.name)}, note=${quote('Each colour, light and dark.')})`);
+  view.push(`      if page == "theme"`, `        Page(title=${quote(theme.name)}, note=${quote('Each colour, light and dark.')})`, `          TokenGrid()`);
   for (const name of Object.keys(theme.color)) {
-    view.push(`          if find == "" or ${quote(`theme-${name}`)}.includes(find)`, `            TokenRow(name=${quote(human(name))}, testId=${quote(`theme-${name}`)})`);
+    view.push(`            if find == "" or ${quote(`theme-${name}`)}.includes(find)`, `              TokenRow(name=${quote(human(name))}, testId=${quote(`theme-${name}`)})`);
     for (const scheme of ['light', 'dark']) {
-      view.push(`              TokenSwatch(scheme="${scheme}", testId=${quote(`theme-${name}-${scheme}`)})`, `                Swatch(token=${quote(name)}, label="")`);
+      view.push(`                TokenSwatch(scheme="${scheme}", testId=${quote(`theme-${name}-${scheme}`)})`, `                  Swatch(token=${quote(name)}, label="")`);
     }
   }
 
@@ -320,7 +320,7 @@ export function generate(designDir, playDir) {
   const app = [
     HEADER,
     `// ${all.length} pieces, ${total} cells, each light and dark. Pages: ${pages.length}.`,
-    `use Shell, NavList, NavItem, NavHeading, Page, MatrixRow, MatrixCell, ScreenCell, ModeChoice, TokenRow, TokenSwatch from "${packageOf(join(designDir, 'frame')).name}"`,
+    `use Shell, NavList, NavItem, NavHeading, Page, MatrixRow, MatrixCell, ScreenCell, ModeChoice, TokenRow, TokenSwatch, TokenGrid from "${packageOf(join(designDir, 'frame')).name}"`,
     ...uses,
     '',
     'component App',
@@ -335,6 +335,10 @@ export function generate(designDir, playDir) {
     '  action setFind(v: string)',
     '    find = v',
     ...(presetNames.length > 1 ? ['  action pickPreset(p: string)', '    preset = p', '    setMode("preset", p)'] : []),
+    ...Object.entries(theme.options ?? {}).flatMap(([group, choices]) => {
+      const v = slug(group).replace(/-/g, '_');
+      return [`  state opt_${v} = ${quote(slug(Object.keys(choices)[0]))}`, `  action pick_${v}(c: string)`, `    opt_${v} = c`, `    setMode(${quote(slug(group))}, c)`];
+    }),
     '  action light',
     '    scheme = "light"',
     '    setScheme("light")',
@@ -348,7 +352,8 @@ export function generate(designDir, playDir) {
     `    Shell(title=${quote(`${theme.name} playground`)})`,
     `      NavList(title=${quote(`${theme.name} playground`)})`,
     `        input type="search" value=find input=setFind placeholder="Find a state" aria-label="Find a state" testId="find"`,
-    ...(presetNames.length > 1 ? [`        NavHeading(label="Preset")`, ...presetNames.map((n) => `        NavItem(label=${quote(presets[n].$label ?? (n === 'theme' ? 'Theme' : presets[n].name ?? word(n)))}, on=(preset == ${quote(n)}), press=pickPreset(${quote(n)}), testId=${quote(`preset-${id(n)}`)})`)] : []),
+    ...(presetNames.length > 1 ? [`        NavHeading(label="Preset")`, `        select value=preset change=pickPreset aria-label="Preset" testId="preset"`, ...presetNames.map((n) => `          option ${quote(presets[n].$label ?? (n === 'theme' ? 'Theme' : presets[n].name ?? word(n)))} value=${quote(n)}`)] : []),
+    ...Object.entries(theme.options ?? {}).flatMap(([group, choices]) => [`        NavHeading(label=${quote(group)})`, `        select value=opt_${slug(group).replace(/-/g, '_')} change=pick_${slug(group).replace(/-/g, '_')} aria-label=${quote(group)} testId=${quote(`option-${slug(group)}`)}`, ...Object.keys(choices).map((c) => `          option ${quote(c)} value=${quote(slug(c))}`)]),
     `        NavHeading(label="Look")`,
     `        ModeChoice(scheme=(scheme == "light" ? "light" : scheme == "dark" ? "dark" : "system"), lightLabel="Light", darkLabel="Dark", systemLabel="Auto", groupLabel="Look", light=light, dark=dark, system=system)`,
     ...nav,
@@ -374,7 +379,8 @@ export function generate(designDir, playDir) {
     '  clock settle',
     `  expect tree missing "theme-${firstColour}"`,
     `  expect tree has ${quote(`theme-${Object.keys(theme.color).at(-1)}-dark`)}`,
-    ...(presetNames.length > 1 ? ['', 'test "a preset switches every token at once"', '  clock data', `  tap "preset-${id(presetNames[1])}"`, '  clock settle', `  expect state preset == ${quote(presetNames[1])}`] : []),
+    ...(presetNames.length > 1 ? ['', 'test "a preset switches every token at once"', '  clock data', `  type "preset" ${quote(presetNames[1])}`, '  clock settle', `  expect state preset == ${quote(presetNames[1])}`] : []),
+    ...Object.entries(theme.options ?? {}).flatMap(([group, choices]) => Object.keys(choices).length < 2 ? [] : ['', `test ${quote(`the ${group.toLowerCase()} choice changes it everywhere`)}`, '  clock data', `  type ${quote(`option-${slug(group)}`)} ${quote(slug(Object.keys(choices)[1]))}`, '  clock settle', `  expect state opt_${slug(group).replace(/-/g, '_')} == ${quote(slug(Object.keys(choices)[1]))}`]),
     '',
   ].join('\n');
   const own = Object.fromEntries(Object.entries(existsSync(join(playDir, 'samples.json')) ? JSON.parse(readFileSync(join(playDir, 'samples.json'), 'utf8')) : {}).filter(([, v]) => Array.isArray(v)));
@@ -403,23 +409,59 @@ export function presetsOf(designDir) {
   return out;
 }
 
+// An option group's axis name and its values' names: "Corners" → corners, "Very round" → very-round.
+export const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+// The tokens one option changes, each as its forma line's value: the family and every type token for a family, a
+// length for space, radius and line.
+function optionTokens(theme, change) {
+  const out = {};
+  const family = change.family ?? theme.family;
+  if (change.family !== undefined || change.type) {
+    out['theme.family: family'] = family;
+    for (const [name, t] of Object.entries(theme.type)) {
+      const v = { ...t, ...(change.type?.[name] ?? {}) };
+      out[`theme.type.${name}: type`] = `${v.weight} ${v.size}px/${v.line} ${family}`;
+    }
+  }
+  for (const group of ['space', 'radius', 'line']) {
+    for (const [name, v] of Object.entries(change[group] ?? {})) out[`theme.${group}.${name}: length`] = `${v}px`;
+  }
+  return out;
+}
+
 export function presetForma(theme, presets) {
   const names = Object.keys(presets);
-  const lines = [HEADER, `// The playground's presets as one axis: ${names.length ? names.join(', ') : '(none: presets/*.json)'}. theme.json is the one an app ships.`, 'forma playground', ''];
-  if (names.length < 2) return `${lines.join('\n')}\ntheme\n  playground.unused = light-dark(#000000, #ffffff)\n`;
-  lines.push('axes', `  preset = ${names.join(' | ')}`, '', 'theme');
+  const options = theme.options ?? {};
+  const lines = [HEADER, `// The playground's choices as mode axes: the presets (colours) and each option group in theme.json. theme.json is the one an app ships.`, 'forma playground', ''];
+  const axes = [];
+  if (names.length > 1) axes.push(`  preset = ${names.join(' | ')}`);
+  for (const [group, choices] of Object.entries(options)) axes.push(`  ${slug(group)} = ${Object.keys(choices).map(slug).join(' | ')}`);
+  if (!axes.length) return `${lines.join('\n')}\ntheme\n  playground.unused = light-dark(#000000, #ffffff)\n`;
+  // Exact holds at most 64 mode combinations in one design (forma-tuples): say it here, with the counts.
+  const combos = (names.length > 1 ? names.length : 1) * Object.values(options).reduce((n, c) => n * Object.keys(c).length, 1);
+  if (combos > 64) throw new Error(`the presets (${names.length}) and option groups (${Object.entries(options).map(([g, c]) => `${g} ${Object.keys(c).length}`).join(', ')}) make ${combos} combinations; Exact's design holds at most 64: drop a preset or a choice`);
+  lines.push('axes', ...axes, '', 'theme');
+  // Each option group's tokens: the theme's own value first, then one `when` line per other choice.
+  for (const [group, choices] of Object.entries(options)) {
+    const entries = Object.entries(choices);
+    const touched = new Set(entries.flatMap(([, c]) => Object.keys(optionTokens(theme, c))));
+    const own = optionTokens(theme, { family: theme.family, type: {}, space: theme.space, radius: theme.radius, line: theme.line });
+    for (const key of touched) {
+      lines.push(`  ${key} = ${own[key]}`);
+      for (const [choice, change] of entries.slice(1)) {
+        const v = optionTokens(theme, change)[key];
+        if (v !== undefined) lines.push(`    when ${slug(group)}=${slug(choice)}: ${v}`);
+      }
+    }
+  }
+  if (names.length < 2) return `${lines.join('\n')}\n`;
   for (const [name, c] of Object.entries(theme.color)) {
     const first = presets[names[0]].color?.[name] ?? c;
     lines.push(`  theme.color.${name} = light-dark(${first.light}, ${first.dark})`);
     for (const n of names.slice(1)) {
       const v = presets[n].color?.[name] ?? c;
       lines.push(`    when preset=${n}: light-dark(${v.light}, ${v.dark})`);
-    }
-  }
-  for (const group of ['space', 'radius', 'line']) {
-    for (const [name, v] of Object.entries(theme[group])) {
-      lines.push(`  theme.${group}.${name}: length = ${presets[names[0]][group]?.[name] ?? v}px`);
-      for (const n of names.slice(1)) lines.push(`    when preset=${n}: ${presets[n][group]?.[name] ?? v}px`);
     }
   }
   return `${lines.join('\n')}\n`;
@@ -449,10 +491,12 @@ function main(argv) {
       for (const x of out.bad) console.error(`  ${x}`);
       return 1;
     }
-    writeFileSync(join(b, 'app.contract'), out.app);
-    writeFileSync(join(b, 'app.ts'), out.ts);
-    writeFileSync(join(b, 'app.forma'), out.forma);
-    writeFileSync(join(b, 'app.test.contract'), out.tests);
+    // Only what changes is written, so a running build is not made stale by a write that changed nothing.
+    const put = (name, text) => { if (!existsSync(join(b, name)) || readFileSync(join(b, name), 'utf8') !== text) writeFileSync(join(b, name), text); };
+    put('app.contract', out.app);
+    put('app.ts', out.ts);
+    put('app.forma', out.forma);
+    put('app.test.contract', out.tests);
     console.log(`matrix: ${out.pieces} pieces, ${out.cells} cells, ${out.pages} pages, light and dark: ${join(b, 'app.contract')}`);
     return 0;
   }

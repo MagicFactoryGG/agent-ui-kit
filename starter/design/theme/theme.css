@@ -17,6 +17,9 @@
   --theme-color-caution: light-dark(#9a5b00, #fbbf24);
   --theme-color-critical: light-dark(#c62828, #f87171);
   --theme-color-critical-ink: light-dark(#ffffff, #0b0b0c);
+  --theme-color-positive-text: light-dark(#1a7f45, #4ade80);
+  --theme-color-caution-text: light-dark(#9a5b00, #fbbf24);
+  --theme-color-critical-text: light-dark(#c62828, #f87171);
   --theme-family: system-ui, sans-serif;
   --theme-type-title-size: 20px;
   --theme-type-title-weight: 600;

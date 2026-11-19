@@ -81,6 +81,13 @@ component ModeButton
     button press=press testId=testId aria-pressed=on flex=1 min-width=0 padding-top="frame.small" padding-bottom="frame.small" border-radius="frame.corner" border-width=0 background-color=(on ? "frame.panel" : "transparent") color=(on ? "frame.ink" : "frame.ink-muted")
       text label font="frame.type-small" white-space="nowrap"
 
+// The colour tokens, side by side in as many columns as the page holds.
+component TokenGrid
+  slot
+  view
+    row flex-wrap="wrap" gap="frame.small" align-items="flex-start"
+      children
+
 // One colour token on one line: the colour in light and in dark, then its name.
 component TokenRow
   props
@@ -88,7 +95,7 @@ component TokenRow
     testId: string
   slot
   view
-    row testId=testId align-items="center" gap="frame.gap" max-width="frame.row-max" padding-left="frame.small" padding-right="frame.gap" padding-top="frame.small" padding-bottom="frame.small" border-radius="frame.corner"
+    row testId=testId align-items="center" gap="frame.gap" width="frame.row-max" padding-left="frame.small" padding-right="frame.gap" padding-top="frame.small" padding-bottom="frame.small" border-radius="frame.corner"
       :hover
         background-color="frame.on"
       children
@@ -123,7 +130,7 @@ component MatrixCell
     testId: string
   slot
   view
-    column testId=testId color-scheme=(scheme == "dark" ? "dark" : "light") flex=1 min-width="frame.cell-min" padding="frame.pad" background-color="theme.color.page" color="theme.color.ink" font-family="theme.family" border-radius="frame.corner" border-width=1 border-style="solid" border-color="frame.line"
+    column testId=testId color-scheme=(scheme == "dark" ? "dark" : "light") flex=1 min-width="frame.cell-min" padding="frame.pad" background-color="theme.color.page" color="theme.color.ink" border-radius="frame.corner" border-width=1 border-style="solid" border-color="frame.line"
       children
 
 // A screen's cell: a window-sized box the screen fills (a screen lays itself out at inset 0).
@@ -133,5 +140,5 @@ component ScreenCell
     testId: string
   slot
   view
-    column testId=testId color-scheme=(scheme == "dark" ? "dark" : "light") position="relative" width=480 height=640 flex-shrink=0 overflow="hidden" background-color="theme.color.page" color="theme.color.ink" font-family="theme.family" border-radius="frame.corner" border-width=1 border-style="solid" border-color="frame.line"
+    column testId=testId color-scheme=(scheme == "dark" ? "dark" : "light") position="relative" width=480 height=640 flex-shrink=0 overflow="hidden" background-color="theme.color.page" color="theme.color.ink" border-radius="frame.corner" border-width=1 border-style="solid" border-color="frame.line"
       children

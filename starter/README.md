@@ -38,12 +38,26 @@ properties with `light-dark()`) and `theme/tailwind.css` (a Tailwind v4 `@theme`
 
 - Every colour has a light and a dark value; one value fails.
 - Text that reads poorly on its background (under WCAG's 4.5:1) is either changed or listed in `$open`, which the
-  check prints on every run until the brand decides.
+  check prints on every run until it is decided. Status as words has its own colours (`positive-text`,
+  `caution-text`, `critical-text`): a fill need not read as text, and one red cannot both carry white words and
+  read as words on a dark page.
+- A brand font is bundled: `fonts` in `theme.json` names the files in `theme/assets/fonts/` (with their licence);
+  the theme tool writes the `font` block, and the playground and `tools/vendor.mjs` copy the files into each app's
+  `assets/fonts/`, where Exact reads them. A family name alone falls back to each system's own font.
 - Type sizes are px on purpose: a rem is 16px on the web and 13px on macOS (Exact 51002ee77), so rem type
   would not look the same. Exact warns of px type (`forma-type-fixed`): it does not follow the person's text
   size. That is the price of parity, said here.
 - The Distiller's output (`tools/distiller`) becomes a theme with `bun tools/theme.mjs from-distiller
-  <distilled.json> <design dir>`: Harmonised as `theme.json`, each app as it is today in `presets/`.
+  <distilled.json> <design dir>`: Harmonised as `theme.json`, each app as it is today in `presets/`. The Distiller
+  decides contrast; its reasons are copied into `$derived`. Labels, preset names, fonts and options set by hand stay.
+
+## Every choice a control
+
+`options` in `theme.json` are groups of named choices, the first being the theme's own:
+`{"Corners": {"Brand": {}, "Round": {"radius": {"control": 14, "card": 20}}}}`. A choice changes the family, type,
+space, radius or line. The playground gives each group, and the presets, a dropdown: one Exact mode axis each, so a
+choice changes every piece at once; Exact's design tool pins an axis on every running host at once. Exact holds at
+most 64 combinations of all axes in one design; the generator says so with the counts.
 
 ## Presets
 

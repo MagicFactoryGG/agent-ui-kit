@@ -10,7 +10,9 @@
 // press and focus still draw the same looks live (the :hover, :active and :focus-visible parts).
 use Swatch from "__SCOPE__/theme"
 
-fn outcomeInk(o: string): string = o == "success" ? "theme.color.positive" : o == "error" ? "theme.color.critical" : o == "blocked" ? "theme.color.caution" : o == "cancelled" ? "theme.color.ink-muted" : "theme.color.ink"
+// Status as words takes the -text colours (they read on a surface); fills and outlines take the status colours.
+fn outcomeInk(o: string): string = o == "success" ? "theme.color.positive-text" : o == "error" ? "theme.color.critical-text" : o == "blocked" ? "theme.color.caution-text" : o == "cancelled" ? "theme.color.ink-muted" : "theme.color.ink"
+fn outcomeFill(o: string): string = o == "success" ? "theme.color.positive" : o == "error" ? "theme.color.critical" : o == "blocked" ? "theme.color.caution" : o == "cancelled" ? "theme.color.ink-muted" : "theme.color.ink"
 fn wordsInk(kind: string, o: string): string = o != "none" ? outcomeInk(o) : kind == "heading" or kind == "caption" ? "theme.color.ink-muted" : "theme.color.ink"
 fn rowWash(i: string): string = i == "hover" ? "theme.color.hover" : i == "pressed" ? "theme.color.fill" : "transparent"
 fn agentLine(a: string): string = a == "proposed" ? "theme.color.accent" : a == "changed" ? "theme.color.accent" : a == "waiting" ? "theme.color.caution" : "transparent"
@@ -50,7 +52,7 @@ component LinkRow
         if detail != ""
           text detail font="theme.type.caption" color="theme.color.ink-muted"
         if agent != "none"
-          text agentNote font="theme.type.caption" color=(agent == "waiting" ? "theme.color.caution" : "theme.color.accent")
+          text agentNote font="theme.type.caption" color=(agent == "waiting" ? "theme.color.caution-text" : "theme.color.accent")
       svg viewBox="0 0 12 12" width="components.chevron" height="components.chevron" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
         path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
 
@@ -69,7 +71,7 @@ component ValueRow
         text label flex=1 min-width=0 font="theme.type.body" color="theme.color.ink"
         text value testId=testId font="theme.type.body" color=outcomeInk(outcome) text-align="end"
       if agent != "none"
-        text agentNote font="theme.type.caption" color=(agent == "waiting" ? "theme.color.caution" : "theme.color.accent")
+        text agentNote font="theme.type.caption" color=(agent == "waiting" ? "theme.color.caution-text" : "theme.color.accent")
 
 // Two lines that stack, a title and its detail, with a short trailing word in the outcome's ink.
 component TextRow
@@ -96,7 +98,7 @@ component Meter
     outcome: enum<"none", "success", "error", "blocked", "cancelled">
   view
     row height="components.meter-height" background-color="theme.color.fill" border-radius="theme.radius.pill" overflow="hidden" role="meter" aria-label=label
-      box width=share background-color=(outcome == "none" ? "theme.color.ink-muted" : outcomeInk(outcome)) border-radius="theme.radius.pill"
+      box width=share background-color=(outcome == "none" ? "theme.color.ink-muted" : outcomeFill(outcome)) border-radius="theme.radius.pill"
 
 // A short status word in a pill, in the outcome's ink.
 component Tag
@@ -117,7 +119,7 @@ component ActionButton
     press: action
     testId: string
   view
-    button press=press testId=testId disabled=(interaction == "disabled" or interaction == "busy") aria-busy=(interaction == "busy") min-height="components.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color=(outcome != "none" ? outcomeInk(outcome) : kind == "primary" ? "theme.color.accent" : "theme.color.line") background-color=(kind == "primary" ? "theme.color.accent" : interaction == "hover" ? "theme.color.hover" : interaction == "pressed" ? "theme.color.fill" : "theme.color.surface") color=(kind == "primary" ? "theme.color.accent-ink" : "theme.color.ink") opacity=(interaction == "disabled" ? 0.5 : interaction == "busy" ? 0.7 : kind == "primary" and interaction == "hover" ? 0.9 : kind == "primary" and interaction == "pressed" ? 0.8 : 1) box-shadow=(interaction == "focus" ? "0 0 0 2px theme.color.focus" : "none")
+    button press=press testId=testId disabled=(interaction == "disabled" or interaction == "busy") aria-busy=(interaction == "busy") min-height="components.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color=(outcome != "none" ? outcomeFill(outcome) : kind == "primary" ? "theme.color.accent" : "theme.color.line") background-color=(kind == "primary" ? "theme.color.accent" : interaction == "hover" ? "theme.color.hover" : interaction == "pressed" ? "theme.color.fill" : "theme.color.surface") color=(kind == "primary" ? "theme.color.accent-ink" : "theme.color.ink") opacity=(interaction == "disabled" ? 0.5 : interaction == "busy" ? 0.7 : kind == "primary" and interaction == "hover" ? 0.9 : kind == "primary" and interaction == "pressed" ? 0.8 : 1) box-shadow=(interaction == "focus" ? "0 0 0 2px theme.color.focus" : "none")
       :hover
         opacity=0.9
       :active
@@ -191,7 +193,7 @@ component Field
       text label testId=`${id}-label` font="theme.type.label" color="theme.color.ink"
       children
       if outcome == "error"
-        text error testId=`${id}-error` role="alert" font="theme.type.caption" color="theme.color.critical"
+        text error testId=`${id}-error` role="alert" font="theme.type.caption" color="theme.color.critical-text"
       else if hint != ""
         text hint testId=`${id}-hint` font="theme.type.caption" color="theme.color.ink-muted"
 

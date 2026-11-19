@@ -16,6 +16,9 @@
   --color-caution: var(--theme-color-caution);
   --color-critical: var(--theme-color-critical);
   --color-critical-ink: var(--theme-color-critical-ink);
+  --color-positive-text: var(--theme-color-positive-text);
+  --color-caution-text: var(--theme-color-caution-text);
+  --color-critical-text: var(--theme-color-critical-text);
   --font-sans: var(--theme-family);
   --text-title: var(--theme-type-title-size);
   --text-title--line-height: var(--theme-type-title-line);

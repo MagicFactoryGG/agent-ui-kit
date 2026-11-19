@@ -129,7 +129,9 @@ function main() {
   delete app.deploy; // nothing ships from a playground
   writeFileSync(join(play, 'app.json'), `${JSON.stringify(app, null, 2)}\n`);
   const ignore = join(play, '.gitignore');
-  if (!readFileSync(ignore, 'utf8').includes('/app.contract.d.ts')) writeFileSync(ignore, `${readFileSync(ignore, 'utf8')}/app.contract.d.ts\n`);
+  for (const line of ['/app.contract.d.ts', '/assets/fonts/']) {
+    if (!readFileSync(ignore, 'utf8').split('\n').includes(line)) writeFileSync(ignore, `${readFileSync(ignore, 'utf8')}${line}\n`);
+  }
   // No `bun install` here: play.mjs links each design package into node_modules, so a save there is live.
   run('bun', ['play.mjs', 'gen'], play);
   run('bun', ['play.mjs', 'check'], play);

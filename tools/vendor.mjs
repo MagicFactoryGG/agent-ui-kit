@@ -47,7 +47,7 @@ function main(argv) {
     const to = join(vendor, name);
     rmSync(to, { recursive: true, force: true });
     mkdirSync(to, { recursive: true });
-    cpSync(dir, to, { recursive: true, filter: (src) => !/node_modules|bun\.lock|\.DS_Store/.test(src) });
+    cpSync(dir, to, { recursive: true, filter: (src) => !/node_modules|bun\.lock|\.DS_Store|assets\/fonts/.test(src) });
     // A workspace's own links become peers, which the app's own file: entries satisfy: one copy of each package
     // (two copies of the theme would ship one design twice, which Exact refuses: forma-package-name).
     const pj = join(to, 'package.json');
@@ -62,6 +62,15 @@ function main(argv) {
     writeFileSync(pj, `${JSON.stringify(p, null, 2)}\n`);
     pkg.dependencies[p.name] = `file:./vendor/${name}`;
     for (const f of walk(to)) files[relative(vendor, f)] = createHash('sha256').update(readFileSync(f)).digest('hex');
+  }
+  // The theme's bundled faces go where Exact reads them: the app's own assets/fonts/ (listed as ../assets/fonts/…).
+  const fonts = join(DESIGN, 'theme', 'assets', 'fonts');
+  if (layers.includes('theme') && existsSync(fonts)) {
+    mkdirSync(join(app, 'assets', 'fonts'), { recursive: true });
+    for (const f of readdirSync(fonts)) {
+      writeFileSync(join(app, 'assets', 'fonts', f), readFileSync(join(fonts, f)));
+      files[`../assets/fonts/${f}`] = createHash('sha256').update(readFileSync(join(fonts, f))).digest('hex');
+    }
   }
   // The guard travels with the packages, so the app's own tests can hold it (import { guard } from vendor/ui-guard.mjs).
   const guardSrc = join(DESIGN, 'tools', 'ui-guard.mjs');

@@ -27,6 +27,7 @@ export const REQUIRED = {
   color: [
     'page', 'surface', 'raised', 'ink', 'ink-muted', 'line', 'fill', 'hover',
     'accent', 'accent-ink', 'focus', 'positive', 'caution', 'critical', 'critical-ink',
+    'positive-text', 'caution-text', 'critical-text',
   ],
   type: ['title', 'heading', 'body', 'label', 'caption'],
   space: ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'],
@@ -38,8 +39,11 @@ export const REQUIRED = {
 // Foreground on background, both modes: at least 4.5:1 (WCAG 2.2, 1.4.3, normal text).
 export const PAIRS = [
   ['ink', 'page'], ['ink', 'surface'], ['ink', 'raised'], ['ink-muted', 'surface'], ['ink-muted', 'page'],
-  ['accent-ink', 'accent'], ['critical-ink', 'critical'], ['critical', 'surface'], ['positive', 'surface'],
-  ['caution', 'surface'],
+  ['accent-ink', 'accent'], ['critical-ink', 'critical'],
+  // Status as words has its own colours: a fill (positive, caution, critical) need not read as text, and one red
+  // cannot both carry white words and read as words on a dark page.
+  ['positive-text', 'surface'], ['caution-text', 'surface'], ['critical-text', 'surface'],
+  ['positive-text', 'page'], ['caution-text', 'page'], ['critical-text', 'page'],
 ];
 
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -67,7 +71,7 @@ export function problems(theme) {
   if (typeof theme !== 'object' || theme === null) return ['theme.json: not a JSON object'];
   if (typeof theme.name !== 'string' || theme.name.trim() === '') say('name', 'give the theme a name');
   for (const group of Object.keys(theme)) {
-    if (group !== 'name' && !group.startsWith('$') && group !== 'family' && !(group in REQUIRED)) say(group, `unknown group; the groups are name, family, ${Object.keys(REQUIRED).join(', ')}`);
+    if (group !== 'name' && !group.startsWith('$') && group !== 'family' && group !== 'fonts' && group !== 'options' && !(group in REQUIRED)) say(group, `unknown group; the groups are name, family, ${Object.keys(REQUIRED).join(', ')}`);
   }
   if (typeof theme.family !== 'string' || !FAMILY.test(theme.family)) say('family', 'a font stack such as "system-ui, sans-serif"');
   for (const [group, names] of Object.entries(REQUIRED)) {
@@ -97,6 +101,21 @@ export function problems(theme) {
       }
     }
   }
+  // Option groups: each choice a name and what it changes (family, type, space, radius, line); the first is the
+  // theme's own. The playground gives each group a dropdown (a mode axis).
+  for (const [group, choices] of Object.entries(theme.options ?? {})) {
+    if (typeof choices !== 'object' || Object.keys(choices).length < 2) { say(`options.${group}`, 'two or more choices, the first being the theme\'s own ({})'); continue; }
+    for (const [choice, change] of Object.entries(choices)) {
+      for (const key of Object.keys(change ?? {})) if (!['family', 'type', 'space', 'radius', 'line'].includes(key)) say(`options.${group}.${choice}.${key}`, 'an option changes family, type, space, radius or line');
+    }
+  }
+  for (const [family, faces] of Object.entries(theme.fonts ?? {})) {
+    if (!/^[A-Za-z0-9 -]+$/.test(family)) say(`fonts.${family}`, 'a family name is letters, digits, spaces and hyphens');
+    for (const [weight, file] of Object.entries(faces ?? {})) {
+      if (!/^[1-9]00( italic)?$/.test(weight)) say(`fonts.${family}.${weight}`, 'a face is a weight (400, 600) or a weight and italic ("400 italic")');
+      if (!/^[\w.-]+\.(ttf|otf)$/.test(String(file))) say(`fonts.${family}.${weight}`, 'a TTF or OTF file name in the theme package\'s assets/fonts/');
+    }
+  }
   const c = theme.color ?? {};
   for (const [fg, bg] of PAIRS) {
     for (const mode of ['light', 'dark']) {
@@ -105,7 +124,7 @@ export function problems(theme) {
       if (!HEX.test(String(a)) || !HEX.test(String(b))) continue;
       const r = contrast(a, b);
       const open = (theme.$open ?? []).some((o) => o.pair === `${fg} on ${bg}` && o.mode === mode);
-      if (r < 4.5 && !open) say(`color.${fg} on color.${bg} (${mode})`, `${r.toFixed(2)}:1, under 4.5:1; change one of the two, or list it in $open as an owner decision still to make`);
+      if (r < 4.5 && !open) say(`color.${fg} on color.${bg} (${mode})`, `${r.toFixed(2)}:1, under 4.5:1; change one of the two, or list it in $open (not decided yet)`);
     }
   }
   return out;
@@ -176,6 +195,36 @@ export function tailwind(t) {
   ].join('\n');
 }
 
+// The brand's own faces, bundled: Exact draws a family the same on every host only when the app ships its files, under
+// the app's own assets/fonts/ (vendor.mjs and the playground copy them there).
+const FONTS_OPEN = '// <fonts> generated from theme.json by tools/theme.mjs: the brand\'s own faces, bundled, so every host draws them.';
+const FONTS_CLOSE = '// </fonts>';
+export function fontBlock(theme) {
+  const lines = [FONTS_OPEN];
+  // Option groups: each choice a name and what it changes (family, type, space, radius, line); the first is the
+  // theme's own. The playground gives each group a dropdown (a mode axis).
+  for (const [group, choices] of Object.entries(theme.options ?? {})) {
+    if (typeof choices !== 'object' || Object.keys(choices).length < 2) { say(`options.${group}`, 'two or more choices, the first being the theme\'s own ({})'); continue; }
+    for (const [choice, change] of Object.entries(choices)) {
+      for (const key of Object.keys(change ?? {})) if (!['family', 'type', 'space', 'radius', 'line'].includes(key)) say(`options.${group}.${choice}.${key}`, 'an option changes family, type, space, radius or line');
+    }
+  }
+  for (const [family, faces] of Object.entries(theme.fonts ?? {})) {
+    lines.push(`font "${family}"`);
+    for (const [weight, file] of Object.entries(faces)) lines.push(`  ${weight} = "assets/fonts/${file}"`);
+  }
+  lines.push(FONTS_CLOSE);
+  return lines.join('\n');
+}
+export function withFonts(index, theme) {
+  const block = fontBlock(theme);
+  const a = index.indexOf(FONTS_OPEN);
+  const b = index.indexOf(FONTS_CLOSE);
+  if (a >= 0 && b > a) return index.slice(0, a) + block + index.slice(b + FONTS_CLOSE.length);
+  const at = index.search(/^(fn|component) /m);
+  return at < 0 ? `${index}\n${block}\n` : `${index.slice(0, at)}${block}\n\n${index.slice(at)}`;
+}
+
 export function outputs(theme) {
   return { 'theme.forma': forma(theme), 'theme.css': css(theme), 'tailwind.css': tailwind(theme) };
 }
@@ -195,6 +244,7 @@ export const FROM_SHADCN = {
   'ink-muted': 'color.muted-foreground', line: 'color.border', fill: 'color.muted', hover: 'color.accent',
   accent: 'color.primary', 'accent-ink': 'color.primary-foreground', focus: 'color.ring', positive: 'color.success',
   caution: 'color.warning', critical: 'color.destructive', 'critical-ink': 'color.destructive-foreground',
+  'positive-text': 'color.success-text', 'caution-text': 'color.warning-text', 'critical-text': 'color.destructive-text',
 };
 
 const hex6 = (h) => { let x = h.slice(1); if (x.length === 3) x = [...x].map((c) => c + c).join(''); return `#${x.slice(0, 6).toLowerCase()}`; };
@@ -223,6 +273,10 @@ export function fromDistiller(d, base, { applyProposed = false } = {}) {
   if (d.$schema !== 'brand-intake/theme@1') throw new Error(`not the Distiller's output (brand-intake/theme@1): ${d.$schema}`);
   const derived = [];
   const tokens = Object.fromEntries(Object.entries(d.tokens).map(([k, v]) => [k, { light: v.light, dark: v.dark }]));
+  // The Distiller decides contrast as a system: its values already carry each fix, and `decided` says why.
+  for (const [k, v] of Object.entries(d.tokens)) {
+    for (const x of v.decided ?? []) derived.push(`${k} (${x.mode}): ${x.was} → ${x.now}. The Distiller: ${x.why}`);
+  }
   for (const [k, v] of Object.entries(applyProposed ? d.tokens : {})) {
     for (const p of v.proposed ?? []) {
       tokens[p.token][p.mode] = p.value;
@@ -231,9 +285,12 @@ export function fromDistiller(d, base, { applyProposed = false } = {}) {
     void k;
   }
   const color = { ...base.color, ...colours(tokens) };
-  // A pair under 4.5:1 stays as the brand has it, listed as an owner decision, unless asked to change it.
+  // A pair under 4.5:1 stays as the brand has it, listed as an owner decision, unless asked to change it. Asked:
+  // text on a surface first (the text moves), then words on a fill: the fill moves, unless that breaks a text pair
+  // already settled, and then the words become black or white, whichever reads.
   const open = [];
-  for (const [fg, bg] of PAIRS) {
+  const ordered = [...PAIRS.filter(([fg]) => !fg.endsWith('-ink')), ...PAIRS.filter(([fg]) => fg.endsWith('-ink'))];
+  for (const [fg, bg] of ordered) {
     for (const mode of ['light', 'dark']) {
       const [a, b] = [color[fg][mode], color[bg][mode]];
       if (contrast(a, b) >= 4.5) continue;
@@ -242,12 +299,23 @@ export function fromDistiller(d, base, { applyProposed = false } = {}) {
         open.push({ pair: `${fg} on ${bg}`, mode, contrast: +contrast(a, b).toFixed(2), proposal: proposal ? `${proposal.token} = ${proposal.value} (${proposal.contrast}:1)` : 'none from the Distiller' });
         continue;
       }
-      // An ink on a fill (accent-ink, critical-ink) moves the fill; any other foreground moves itself.
       const fill = fg.endsWith('-ink');
-      const next = reach(a, b, fill ? 'bg' : 'fg');
-      const target = fill ? bg : fg;
-      derived.push(`color ${target} (${mode}) = ${next}: derived so ${fg} on ${bg} reaches 4.5:1 (was ${color[target][mode]}, ${contrast(a, b).toFixed(2)}:1)`);
-      color[target] = { ...color[target], [mode]: next };
+      if (fill) {
+        const next = reach(a, b, 'bg');
+        const breaks = PAIRS.filter(([f, g]) => !f.endsWith('-ink') && (f === bg || g === bg)).some(([f, g]) => contrast(f === bg ? next : color[f][mode], g === bg ? next : color[g][mode]) < 4.5);
+        if (!breaks) {
+          derived.push(`color ${bg} (${mode}) = ${next}: derived so ${fg} on ${bg} reaches 4.5:1 (was ${b}, ${contrast(a, b).toFixed(2)}:1)`);
+          color[bg] = { ...color[bg], [mode]: next };
+          continue;
+        }
+        const ink = contrast('#000000', b) >= contrast('#ffffff', b) ? '#000000' : '#ffffff';
+        derived.push(`color ${fg} (${mode}) = ${ink}: ${bg} is also text on a surface, so its words change instead (${contrast(ink, b).toFixed(2)}:1; was ${a}, ${contrast(a, b).toFixed(2)}:1)`);
+        color[fg] = { ...color[fg], [mode]: ink };
+        continue;
+      }
+      const next = reach(a, b, 'fg');
+      derived.push(`color ${fg} (${mode}) = ${next}: derived so ${fg} on ${bg} reaches 4.5:1 (was ${a}, ${contrast(a, b).toFixed(2)}:1)`);
+      color[fg] = { ...color[fg], [mode]: next };
     }
   }
   const family = d.tokens['font.sans']?.light?.replace(/"/g, "'") ?? base.family;
@@ -294,6 +362,10 @@ function main(argv) {
     const base = load(baseAt);
     if (base.__error) { console.error(`theme: a base theme is needed for what the Distiller does not set: ${base.__error}`); return 2; }
     const { theme, presets } = fromDistiller(load(file), base, { applyProposed: argv.includes('--apply-proposed') });
+    // What people set by hand stays: the theme's label and its bundled faces (the files are the design repo's).
+    if (base.$label) { theme.$label = base.$label; theme.name = base.name ?? theme.name; }
+    if (base.fonts) theme.fonts = base.fonts;
+    if (base.options) theme.options = base.options;
     const found = problems(theme);
     if (found.length) {
       console.error(`${RULE}: the distilled theme has ${found.length} problem${found.length === 1 ? '' : 's'}.`);
@@ -302,10 +374,15 @@ function main(argv) {
     }
     writeFileSync(join(dir, 'theme.json'), `${JSON.stringify(theme, null, 2)}\n`);
     mkdirSync(join(dir, 'presets'), { recursive: true });
-    for (const [app, p] of Object.entries(presets)) writeFileSync(join(dir, 'presets', `${app}.json`), `${JSON.stringify(p, null, 2)}\n`);
+    for (const [app, p] of Object.entries(presets)) {
+      // A name people gave a preset ("Studio on iPhone today") is kept; the Distiller's ids are not names.
+      const at = join(dir, 'presets', `${app}.json`);
+      const had = existsSync(at) ? load(at) : {};
+      writeFileSync(at, `${JSON.stringify({ ...p, name: had.name ?? p.name }, null, 2)}\n`);
+    }
     console.log(`theme: ${theme.name} from the Distiller: theme.json (Harmonised, ${theme.$derived.length} derived value${theme.$derived.length === 1 ? '' : 's'}) and ${Object.keys(presets).length} presets (${Object.keys(presets).join(', ')})`);
     for (const x of theme.$derived) console.log(`  derived: ${x}`);
-    for (const o of theme.$open) console.log(`  open (owner): ${o.pair} (${o.mode}) ${o.contrast}:1; proposal: ${o.proposal}`);
+    for (const o of theme.$open) console.log(`  open, not decided: ${o.pair} (${o.mode}) ${o.contrast}:1; proposal: ${o.proposal}`);
     return 0;
   }
   if (!['build', 'check'].includes(verb) || !file || !dir) {
@@ -321,9 +398,18 @@ function main(argv) {
     return 1;
   }
   const want = outputs(theme);
+  if (existsSync(join(dir, 'index.contract'))) want['index.contract'] = withFonts(readFileSync(join(dir, 'index.contract'), 'utf8'), theme);
+  const missing = Object.values(theme.fonts ?? {}).flatMap((faces) => Object.values(faces)).filter((f) => !existsSync(join(dir, 'assets', 'fonts', f)));
+  if (missing.length) {
+    console.error(`${RULE}: ${missing.join(', ')} not in ${join(dir, 'assets', 'fonts')}: put each font file there (with its licence).`);
+    return 1;
+  }
   if (verb === 'build') {
     mkdirSync(dir, { recursive: true });
-    for (const [name, text] of Object.entries(want)) writeFileSync(join(dir, name), text);
+    // Only what changes is written: a watcher (the playground's) must not see a write that changed nothing.
+    for (const [name, text] of Object.entries(want)) {
+      if (!existsSync(join(dir, name)) || readFileSync(join(dir, name), 'utf8') !== text) writeFileSync(join(dir, name), text);
+    }
     console.log(`theme: ${theme.name}: wrote ${Object.keys(want).join(', ')} in ${dir}`);
     return 0;
   }
@@ -334,8 +420,8 @@ function main(argv) {
     return 1;
   }
   const open = theme.$open ?? [];
-  console.log(`theme: ${theme.name}: clean (light and dark, files current; ${PAIRS.length * 2 - open.length} of ${PAIRS.length * 2} text pairs at 4.5:1 or more${open.length ? `, ${open.length} an open owner decision` : ''})`);
-  for (const o of open) console.log(`  open (owner): ${o.pair} (${o.mode}) ${o.contrast}:1; proposal: ${o.proposal}`);
+  console.log(`theme: ${theme.name}: clean (light and dark, files current; ${PAIRS.length * 2 - open.length} of ${PAIRS.length * 2} text pairs at 4.5:1 or more${open.length ? `, ${open.length} not decided yet` : ''})`);
+  for (const o of open) console.log(`  open, not decided: ${o.pair} (${o.mode}) ${o.contrast}:1; proposal: ${o.proposal}`);
   return 0;
 }
 

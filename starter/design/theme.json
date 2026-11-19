@@ -3,34 +3,160 @@
   "name": "Starter",
   "family": "system-ui, sans-serif",
   "color": {
-    "page":         { "light": "#f7f7f8", "dark": "#0b0b0c" },
-    "surface":      { "light": "#ffffff", "dark": "#18181b" },
-    "raised":       { "light": "#ffffff", "dark": "#232326" },
-    "ink":          { "light": "#18181b", "dark": "#fafafa" },
-    "ink-muted":    { "light": "#63636b", "dark": "#a1a1aa" },
-    "line":         { "light": "#e4e4e7", "dark": "#2e2e33" },
-    "fill":         { "light": "#ececef", "dark": "#2e2e33" },
-    "hover":        { "light": "#f1f1f3", "dark": "#26262a" },
-    "accent":       { "light": "#2f5bd3", "dark": "#7aa2ff" },
-    "accent-ink":   { "light": "#ffffff", "dark": "#0b0b0c" },
-    "focus":        { "light": "#2f5bd3", "dark": "#7aa2ff" },
-    "positive":     { "light": "#1a7f45", "dark": "#4ade80" },
-    "caution":      { "light": "#9a5b00", "dark": "#fbbf24" },
-    "critical":     { "light": "#c62828", "dark": "#f87171" },
-    "critical-ink": { "light": "#ffffff", "dark": "#0b0b0c" }
+    "page": {
+      "light": "#f7f7f8",
+      "dark": "#0b0b0c"
+    },
+    "surface": {
+      "light": "#ffffff",
+      "dark": "#18181b"
+    },
+    "raised": {
+      "light": "#ffffff",
+      "dark": "#232326"
+    },
+    "ink": {
+      "light": "#18181b",
+      "dark": "#fafafa"
+    },
+    "ink-muted": {
+      "light": "#63636b",
+      "dark": "#a1a1aa"
+    },
+    "line": {
+      "light": "#e4e4e7",
+      "dark": "#2e2e33"
+    },
+    "fill": {
+      "light": "#ececef",
+      "dark": "#2e2e33"
+    },
+    "hover": {
+      "light": "#f1f1f3",
+      "dark": "#26262a"
+    },
+    "accent": {
+      "light": "#2f5bd3",
+      "dark": "#7aa2ff"
+    },
+    "accent-ink": {
+      "light": "#ffffff",
+      "dark": "#0b0b0c"
+    },
+    "focus": {
+      "light": "#2f5bd3",
+      "dark": "#7aa2ff"
+    },
+    "positive": {
+      "light": "#1a7f45",
+      "dark": "#4ade80"
+    },
+    "caution": {
+      "light": "#9a5b00",
+      "dark": "#fbbf24"
+    },
+    "critical": {
+      "light": "#c62828",
+      "dark": "#f87171"
+    },
+    "critical-ink": {
+      "light": "#ffffff",
+      "dark": "#0b0b0c"
+    },
+    "positive-text": {
+      "light": "#1a7f45",
+      "dark": "#4ade80"
+    },
+    "caution-text": {
+      "light": "#9a5b00",
+      "dark": "#fbbf24"
+    },
+    "critical-text": {
+      "light": "#c62828",
+      "dark": "#f87171"
+    }
   },
   "type": {
-    "title":   { "size": 20, "weight": 600, "line": 1.25 },
-    "heading": { "size": 13, "weight": 600, "line": 1.3 },
-    "body":    { "size": 15, "weight": 400, "line": 1.4 },
-    "label":   { "size": 15, "weight": 500, "line": 1.2 },
-    "caption": { "size": 13, "weight": 400, "line": 1.35 }
+    "title": {
+      "size": 20,
+      "weight": 600,
+      "line": 1.25
+    },
+    "heading": {
+      "size": 13,
+      "weight": 600,
+      "line": 1.3
+    },
+    "body": {
+      "size": 15,
+      "weight": 400,
+      "line": 1.4
+    },
+    "label": {
+      "size": 15,
+      "weight": 500,
+      "line": 1.2
+    },
+    "caption": {
+      "size": 13,
+      "weight": 400,
+      "line": 1.35
+    }
   },
-  "space": { "xs": 4, "sm": 8, "md": 12, "lg": 16, "xl": 24, "xxl": 32 },
-  "radius": { "control": 8, "card": 12, "pill": 999 },
-  "line": { "width": 1 },
+  "space": {
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "xxl": 32
+  },
+  "radius": {
+    "control": 8,
+    "card": 12,
+    "pill": 999
+  },
+  "line": {
+    "width": 1
+  },
   "motion": {
-    "fast": { "duration": 150, "easing": "ease-out" },
-    "base": { "duration": 200, "easing": "ease-in-out" }
+    "fast": {
+      "duration": 150,
+      "easing": "ease-out"
+    },
+    "base": {
+      "duration": 200,
+      "easing": "ease-in-out"
+    }
+  },
+  "options": {
+    "Font": {
+      "System": {},
+      "Serif": {
+        "family": "ui-serif, Georgia, serif"
+      }
+    },
+    "Corners": {
+      "Brand": {},
+      "Round": {
+        "radius": {
+          "control": 14,
+          "card": 20
+        }
+      }
+    },
+    "Density": {
+      "Brand": {},
+      "Compact": {
+        "space": {
+          "xs": 2,
+          "sm": 6,
+          "md": 8,
+          "lg": 12,
+          "xl": 16,
+          "xxl": 24
+        }
+      }
+    }
   }
 }

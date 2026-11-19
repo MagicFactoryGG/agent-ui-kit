@@ -1,6 +1,9 @@
 // The Theme's one component: a token shown as a chip, for the playground's Theme page. A package's tokens reach
 // the packages that `use` something from it, so every other layer uses Swatch.
 
+// <fonts> generated from theme.json by tools/theme.mjs: the brand's own faces, bundled, so every host draws them.
+// </fonts>
+
 fn swatchFill(token: string): string = `theme.color.${token}`
 
 component Swatch

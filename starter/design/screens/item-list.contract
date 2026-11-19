@@ -22,7 +22,7 @@ component ItemList
     data: enum<"many", "one", "empty", "loading", "failed", "long">
     items: Item[]
   view
-    column testId="item-list" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink" font-family="theme.family"
+    column testId="item-list" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
       TopBar(title=title, agentNote="", agent="none")
       scroll id="item-list-scroll" flex=1 min-height=0
         column width="100%" max-width="screens.column-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding="theme.space.lg" gap="theme.space.xl"
