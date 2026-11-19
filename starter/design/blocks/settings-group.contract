@@ -3,17 +3,18 @@
 // block). The rows come in as data; the app owns every value and word. Both doors — the person's press and the
 // agent's tool — reach the app's same actions, each with the row's key: `toggle` (a switch; the app flips its
 // own value), `choose` (a value row's choice), `open` (a link row), `remove` (the destructive row; the app may
-// confirm it in a sheet first).
+// confirm it in a sheet first), and `retry` when a load failed, with the app's own word.
 //
-// States, declared once as axes: `data` draws the rows, a skeleton with its line while loading, or its own
-// empty or failed line on the card; `interaction` (idle, disabled, busy) stills the group without dimming a
-// word below what a person can read (disabled rows take the muted ink, the switch sleeps); `outcome` (success,
-// error) says one line under the group; `agent` (proposed, changed, waiting) marks the card's start and says
-// `agentNote` under it, the way LinkRow and TopBar do. `blocks.settings-max` keeps the card a sensible width
-// on a wide window and centres it there; on a phone every label, detail and value wraps, so the edges stay
-// aligned and nothing is cut off.
+// States, declared once as axes: `data` draws the rows, a skeleton in the rows' own shape while loading, or
+// its own empty or failed line on the card (failed says its line and offers the retry); `interaction` (idle,
+// disabled, busy) stills the group without dimming a word below what a person can read (disabled rows take
+// the muted ink, the switch sleeps); `outcome` (success, error) says one line under the group; `agent`
+// (proposed, changed, waiting) marks the card's start and says `agentNote` under it, the way LinkRow and TopBar
+// do. `blocks.settings-max` keeps the card a sensible width on a wide window and centres it there, the same
+// width in every state; on a phone every label, detail and value wraps, so the edges stay aligned and nothing
+// is cut off.
 use Swatch from "__SCOPE__/theme"
-use Words from "__SCOPE__/components"
+use Words, ActionButton from "__SCOPE__/components"
 
 // One row of the group, drawn by its `kind`: a switch keeps its state in `on`; a value row shows `value` and
 // opens a choice; a link row opens by its key; a danger row acts at once. `detail` is its second line, "" for
@@ -38,6 +39,7 @@ component SettingsGroup
     emptyText: string
     loadingText: string
     failedText: string
+    retryLabel: string
     agentNote: string
     outcomeText: string
     data: enum<"many", "one", "empty", "loading", "failed", "long">
@@ -49,12 +51,13 @@ component SettingsGroup
     choose: action
     open: action
     remove: action
+    retry: action
     testId: string
   // The platform's switch says its new state; the app's `toggle` takes the row's key and flips its own value.
   action flip(key: string, on: bool)
     toggle(key)
   view
-    column testId=testId role="group" aria-label=title gap="theme.space.sm" max-width="blocks.settings-max" margin-left="auto" margin-right="auto"
+    column testId=testId role="group" aria-label=title gap="theme.space.sm" width="100%" max-width="blocks.settings-max" box-sizing="border-box" margin-left="auto" margin-right="auto"
       if title != ""
         column padding-left="theme.space.lg" padding-right="theme.space.lg"
           Words(text=title, kind="heading", outcome="none", level=2, testId=`${testId}-title`)
@@ -63,15 +66,23 @@ component SettingsGroup
           column padding="theme.space.lg" role="status"
             Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-empty`)
         else if data == "loading"
-          column padding="theme.space.lg" role="status" gap="theme.space.md"
-            row gap="theme.space.sm" align-items="center"
-              box flex=2 height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
-              box flex=1 height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
-            box height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
-            Words(text=loadingText, kind="caption", outcome="none", level=0, testId=`${testId}-loading`)
+          column role="status"
+            for j in [0, 1, 2] key=j
+              column padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" gap="theme.space.xs" border-top-width=(j > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                row gap="theme.space.sm" align-items="center"
+                  box flex=2 height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+                  box flex=3
+                row gap="theme.space.sm" align-items="center"
+                  box flex=3 height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
+                  box flex=1
+            column padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.md"
+              Words(text=loadingText, kind="caption", outcome="none", level=0, testId=`${testId}-loading`)
         else if data == "failed"
-          column padding="theme.space.lg" role="alert"
-            Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed`)
+          column padding="theme.space.lg" gap="theme.space.md"
+            column role="alert"
+              Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed`)
+            if retryLabel != ""
+              ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "idle" ? "idle" : "disabled"), outcome="none", press=retry, testId=`${testId}-retry`)
         for r, i in rows key=r.key
           if r.kind == "switch"
             row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
