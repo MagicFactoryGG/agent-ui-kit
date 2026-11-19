@@ -1,0 +1,49 @@
+// A grouped list's row with a setting that is on or off: the platform's own
+// switch, plus the change mark and the proposal bar. The app owns the value
+// and the actions; its tool runs the same ledger function as the switch.
+//
+// `mark` is "" or the words that say an agent set this value last;
+// `sentence` is "" or the sentence of an act that waits on this setting, with
+// its two answer words. Every word is the app's.
+component ToggleRow
+  params
+    markInk: color = "forms.mark" control = "token" group = "Color" priority = 2 label = "Change mark"
+    proposalInk: color = "forms.proposal" control = "token" group = "Color" priority = 1 label = "Proposal"
+  props
+    // Names its testIds: the switch is `id`; `<id>-row`, `<id>-mark`,
+    // `<id>-proposed`, `<id>-accept`, `<id>-reject`.
+    id: string
+    title: string
+    checked: bool
+    set: action
+    mark: string
+    sentence: string
+    yesLabel: string
+    noLabel: string
+    yes: action
+    no: action
+  parts
+    switch: control
+    mark: text
+    sentence: text
+  view
+    column testId=`${id}-row` gap="forms.gap"
+      row gap="forms.gap" align-items="center"
+        column flex=1 min-width=0
+          text title
+          if mark != ""
+            text mark part="mark" testId=`${id}-mark` color="param.markInk" font="-exact-footnote"
+        input part="switch" type="checkbox" switch
+          testId=id
+          checked=checked
+          change=set
+          aria-label=title
+      if sentence != ""
+        text sentence part="sentence" testId=`${id}-proposed` color="param.proposalInk" font="-exact-footnote"
+        row gap="forms.gap"
+          if noLabel != ""
+            button press=no testId=`${id}-reject` aria-label=`${noLabel}: ${sentence}`
+              text noLabel
+          if yesLabel != ""
+            button press=yes buttonStyle="filled" testId=`${id}-accept` aria-label=`${yesLabel}: ${sentence}`
+              text yesLabel

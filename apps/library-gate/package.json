@@ -1,0 +1,9 @@
+{
+  "name": "library-gate",
+  "private": true,
+  "dependencies": {
+    "@agent-ui-kit/agent": "file:../../packages/agent",
+    "@agent-ui-kit/forms": "file:../../packages/forms",
+    "@agent-ui-kit/commands": "file:../../packages/commands"
+  }
+}

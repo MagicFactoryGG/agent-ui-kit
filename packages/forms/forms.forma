@@ -1,0 +1,11 @@
+// The design of @agent-ui-kit/forms: the tokens its components' params
+// default to. Neutral colours are platform roles; an app sets any of them by
+// full name in its own design.
+forma forms
+
+theme
+  forms.mark = -exact-secondary-label
+  forms.proposal = AccentColor
+  forms.hint = -exact-secondary-label
+  forms.error = -exact-system-red
+  forms.gap: length = space.sm

@@ -1,0 +1,25 @@
+// A labelled control with a hint and an error. The error sentence comes from
+// the same `fn` that gives the app's tool its refusal word, so a person and an
+// agent hear the same reason (docs/recipes/one-check-two-voices.md).
+component Field
+  params
+    hintInk: color = "forms.hint" control = "token" group = "Color" priority = 2 label = "Hint"
+    errorInk: color = "forms.error" control = "token" group = "Color" priority = 1 label = "Error"
+  props
+    // Names its testIds: `<id>-field`, `<id>-label`, `<id>-hint`, `<id>-error`.
+    id: string
+    label: string
+    hint: string
+    error: string
+  parts
+    hint: text
+    error: text
+  slot
+  view
+    column testId=`${id}-field` gap="forms.gap"
+      text label testId=`${id}-label` font="-exact-subheadline"
+      children
+      if error != ""
+        text error part="error" testId=`${id}-error` color="param.errorInk" font="-exact-footnote" role="alert"
+      else if hint != ""
+        text hint part="hint" testId=`${id}-hint` color="param.hintInk" font="-exact-footnote"

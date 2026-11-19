@@ -1,0 +1,45 @@
+// The two marks an agent's act leaves on a control: the change mark (an agent
+// set this value last) and the proposal bar (an agent's act waits here for
+// the person). An app places them beside any of the platform's own controls;
+// the control stays as the platform draws it. Every word is the app's.
+
+// "" draws nothing; else the words that say an agent set this value last.
+component ChangeMark
+  params
+    ink: color = "agent.mark" control = "token" group = "Color" priority = 2 label = "Change mark"
+  props
+    // Names its testId `<id>-mark`.
+    id: string
+    words: string
+  parts
+    mark: text
+  view
+    if words != ""
+      text words part="mark" testId=`${id}-mark` color="param.ink" font="-exact-footnote"
+
+// An act that waits, said in one sentence, with its two answer words. ""
+// sentence draws nothing; "" for a word hides its button.
+component ProposalBar
+  params
+    ink: color = "agent.proposal" control = "token" group = "Color" priority = 1 label = "Proposal"
+  props
+    // Names its testIds: `<id>-proposed`, `<id>-accept`, `<id>-reject`.
+    id: string
+    sentence: string
+    yesLabel: string
+    noLabel: string
+    yes: action
+    no: action
+  parts
+    sentence: text
+  view
+    if sentence != ""
+      column testId=`${id}-bar` gap="agent.gap"
+        text sentence part="sentence" testId=`${id}-proposed` color="param.ink" font="-exact-footnote"
+        row gap="agent.gap"
+          if noLabel != ""
+            button press=no testId=`${id}-reject` aria-label=`${noLabel}: ${sentence}`
+              text noLabel
+          if yesLabel != ""
+            button press=yes buttonStyle="filled" testId=`${id}-accept` aria-label=`${yesLabel}: ${sentence}`
+              text yesLabel

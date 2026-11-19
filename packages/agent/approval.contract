@@ -1,0 +1,48 @@
+// Every act that waits, in one sheet: answer each with its own two words, or
+// all at once. The app opens it with showModal(id). `accept` is a plain
+// action prop, so an app can put its own check in front of it (a second
+// factor, or its authentication provider's check). A proposal is not a
+// security boundary: see docs/recipes/proposed-is-not-a-boundary.md.
+use Waiting from "./ledger.contract"
+
+component ApprovalSheet
+  params
+    detailInk: color = "agent.detail" control = "token" group = "Color" priority = 2 label = "Detail"
+  props
+    // Names its testIds: `id`, `<id>-empty`, `<id>-<act>`, `<id>-<act>-accept`,
+    // `<id>-<act>-reject`, `<id>-close`, `<id>-accept-all`, `<id>-reject-all`.
+    id: string
+    title: string
+    items: Waiting[]
+    empty: string
+    acceptAllLabel: string
+    rejectAllLabel: string
+    closeLabel: string
+    accept: action
+    reject: action
+    acceptAll: action
+    rejectAll: action
+  parts
+    detail: text
+  view
+    dialog id=id testId=id
+      column gap="agent.gap" padding="agent.pad"
+        text title role="heading" aria-level=2
+        if items.length == 0
+          text empty testId=`${id}-empty` color="param.detailInk"
+        for p in items key=p.id
+          row testId=`${id}-${p.id}` gap="agent.gap" align-items="center"
+            column flex=1 min-width=0
+              text p.title
+              text p.sentence part="detail" color="param.detailInk" font="-exact-footnote"
+            button press=reject(p.id) testId=`${id}-${p.id}-reject` aria-label=`${p.no}: ${p.sentence}`
+              text p.no
+            button press=accept(p.id) buttonStyle="filled" testId=`${id}-${p.id}-accept` aria-label=`${p.yes}: ${p.sentence}`
+              text p.yes
+        row gap="agent.gap"
+          button command="close" commandfor=id testId=`${id}-close`
+            text closeLabel
+          button press=rejectAll testId=`${id}-reject-all` disabled=(items.length == 0)
+            text rejectAllLabel
+          button press=acceptAll buttonStyle="filled" testId=`${id}-accept-all` disabled=(items.length == 0)
+            text acceptAllLabel

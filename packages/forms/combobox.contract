@@ -1,0 +1,61 @@
+// A field that filters its options as a person types (Exact's combobox
+// recipe). The component owns what a person sees while choosing (the query,
+// whether the list is open, the highlighted option); the app owns the chosen
+// value. An agent never drives this: the app's tool sets the value by key,
+// and its find tool lists the options.
+component Combobox
+  props
+    // Names its testIds: `id` (the field), `<id>-options`, `<id>-option-<n>`.
+    id: string
+    label: string
+    value: string
+    options: string[]
+    placeholder: string
+    choose: action
+  parts
+    field: control
+  state query = value
+  state open = false
+  state chosen = 0
+  derive hits = options.filter(name => name.toLowerCase().includes(query.toLowerCase()))
+  action edit(text: string)
+    query = text
+    chosen = 0
+    open = true
+  action began
+    open = true
+  action ended
+    open = false
+  action pick(name: string)
+    query = name
+    open = false
+    chosen = 0
+    choose(name)
+  action searchKey(k: string, e: KeyboardEvent)
+    if not e.isComposing
+      if hits.length > 0 and (k == "ArrowDown" or k == "ArrowUp" or k == "Home" or k == "End")
+        preventDefault()
+        let next = k == "Home" ? 0 : k == "End" ? hits.length - 1 : k == "ArrowDown" ? min(chosen + 1, hits.length - 1) : max(chosen - 1, 0)
+        chosen = next
+        open = true
+      else if k == "Enter" and open
+        match hits.at(chosen)
+          case some(name)
+            preventDefault()
+            pick(name)
+          case none
+            chosen = 0
+      else if k == "Escape"
+        preventDefault()
+        open = false
+        chosen = 0
+  view
+    column
+      input part="field" id=id testId=id role="combobox" aria-label=label placeholder=placeholder value=query input=edit key=searchKey focus=began blur=ended
+        aria-expanded=(open and hits.length > 0) aria-controls=`${id}-options`
+        aria-activedescendant=(open ? `${id}-option-${chosen}` : "")
+      if open and hits.length > 0
+        column id=`${id}-options` role="listbox" aria-label=label testId=`${id}-options`
+          for name, i in hits key=name
+            button id=`${id}-option-${i}` testId=`${id}-option-${i}` role="option" aria-selected=(i == chosen) tabindex=-1 retainFocus=true press=pick(name)
+              text name

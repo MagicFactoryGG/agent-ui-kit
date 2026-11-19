@@ -1,0 +1,27 @@
+// What an agent changed, newest first, each with an undo: the review view of
+// the ledger's changes. Each entry is said by its own sentence.
+use Change from "./ledger.contract"
+
+component ActivityList
+  params
+    detailInk: color = "agent.detail" control = "token" group = "Color" priority = 2 label = "Detail"
+  props
+    // Names its testIds: `id`, `<id>-empty`, `<id>-<change>`, `<id>-<change>-undo`.
+    id: string
+    entries: Change[]
+    empty: string
+    undoLabel: string
+    undo: action
+  parts
+    detail: text
+  view
+    column testId=id gap="agent.gap"
+      if entries.length == 0
+        text empty testId=`${id}-empty` color="param.detailInk"
+      for e in entries key=e.id
+        row testId=`${id}-${e.id}` gap="agent.gap" align-items="center"
+          column flex=1 min-width=0
+            text e.title
+            text e.sentence part="detail" color="param.detailInk" font="-exact-footnote"
+          button press=undo(e.id) testId=`${id}-${e.id}-undo` aria-label=`${undoLabel}: ${e.sentence}`
+            text undoLabel

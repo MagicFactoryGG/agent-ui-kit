@@ -1,0 +1,6 @@
+// The design of @agent-ui-kit/commands. An app sets any token by full name.
+forma commands
+
+theme
+  commands.detail = -exact-secondary-label
+  commands.gap: length = space.sm

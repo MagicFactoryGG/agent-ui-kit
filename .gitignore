@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+target/
+dist/
+dist.*
+dist-windows/
+.exact/
+.recipes/
+app.contract.d.ts
+.env.local
+.vscode/

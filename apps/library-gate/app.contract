@@ -1,0 +1,58 @@
+// The library gate, in the form of Exact's apps/library-gate: every exported
+// component of @agent-ui-kit/agent, /forms and /commands, once per value of
+// each variant prop as the compiler marks them (one varied at a time, the
+// others at their first value; a bool's first is false), and a component with
+// none once. Cells whose id starts `sample-` show other states (a mark, an
+// act that waits), which drive structure, not a variant. Every component with
+// a slot holds a fixed-size marker, a box that switches the glyph when
+// pressed, so the gate sees the slot render. tools/library-gate.mjs holds the
+// cells to the compiler's IR. No `if`, `for` or `match` in this view: every
+// cell renders.
+use ChangeMark, ProposalBar, Notice, ActivityList, ApprovalSheet, PermitList, Note, Change, Waiting, AgentTool, Raise from "@agent-ui-kit/agent"
+use Field, Combobox, ToggleRow, AgentRow from "@agent-ui-kit/forms"
+use CommandPalette, Command from "@agent-ui-kit/commands"
+
+component App
+  state glyph = "A"
+  state pressed = 0
+  state switched = false
+  action toggle
+    glyph = (glyph == "A" ? "B" : "A")
+  action press
+    pressed = pressed + 1
+  action flip(on: bool)
+    switched = on
+  action pick(id: string)
+    pressed = pressed + 1
+  action choose(id: string, mode: string)
+    pressed = pressed + 1
+  view
+    scroll testId="root" flex=1 background-color="gate.ground"
+      column gap=12 padding=16 padding-bottom=40
+        box testId="gate-top" width=40 height=12 background-color="gate.mark"
+        ChangeMark(id="cm-base", words="Set by an agent")
+        ProposalBar(id="pb-base", sentence="An agent suggests turning this off.", yesLabel="Accept", noLabel="Reject", yes=press, no=press)
+        Notice(id="nt-base", note=Note(ref="a1", mode="recorded", sentence="An agent turned the digest off.", yes="Keep", no="Undo"), yes=press, no=pick("x"))
+        Notice(id="sample-nt-proposed", note=Note(ref="a2", mode="proposed", sentence="An agent suggests a new name.", yes="Accept", no="Reject"), yes=press, no=press)
+        Notice(id="sample-nt-direct", note=Note(ref="a3", mode="direct", sentence="An agent filled the key.", yes="", no=""), yes=press, no=press)
+        ActivityList(id="al-base", entries=[Change(id="a2", tool="setSetting", door="agent", mode="recorded", key="digest", title="Digest", sentence="Turned off.", was="on", now="off", answeredBy="")], empty="No changes yet.", undoLabel="Undo", undo=pick)
+        ActivityList(id="sample-al-empty", entries=[], empty="No changes yet.", undoLabel="Undo", undo=pick)
+        ApprovalSheet(id="as-base", title="Waiting", items=[Waiting(id="a4", tool="setText", door="agent", mode="proposed", key="name", title="Name", sentence="Change to Ada.", did="Changed to Ada.", value="Ada", yes="Accept", no="Reject")], empty="Nothing waiting.", acceptAllLabel="Accept all", rejectAllLabel="Reject all", closeLabel="Close", accept=pick, reject=pick, acceptAll=press, rejectAll=press)
+        PermitList(id="pl-base", tools=[AgentTool(name="setSetting", title="Settings", sentence="Turns a setting on or off.", floor="recorded", reach="self", secret=false), AgentTool(name="removeMember", title="Members", sentence="Removes a member.", floor="proposed", reach="others", secret=false)], raised=[Raise(tool="setSetting", mode="delayed")], modeLabels=["At once", "Recorded", "After a pause", "Asks first", "Off"], set=choose)
+        Field(id="fd-base", label="Team name", hint="Other people see it.", error="")
+          box testId="marker-fd-base" press=toggle width=24 height=24
+            text glyph
+        Field(id="sample-fd-error", label="Team name", hint="Other people see it.", error="Use at least 3 characters.")
+          box testId="marker-sample-fd-error" press=toggle width=24 height=24
+            text glyph
+        Combobox(id="cb-base", label="City", value="Brisbane", options=["Brisbane", "Perth"], placeholder="Search", choose=pick)
+        ToggleRow(id="tr-base", title="Digest", checked=switched, set=flip, mark="", sentence="", yesLabel="Accept", noLabel="Reject", yes=press, no=press)
+        ToggleRow(id="sample-tr-marked", title="Digest", checked=true, set=flip, mark="Set by an agent", sentence="", yesLabel="Accept", noLabel="Reject", yes=press, no=press)
+        ToggleRow(id="sample-tr-proposed", title="Digest", checked=true, set=flip, mark="", sentence="An agent suggests turning this off.", yesLabel="Accept", noLabel="Reject", yes=press, no=press)
+        AgentRow(id="ar-base", title="Goal", mark="", sentence="", yesLabel="Accept", noLabel="Reject", yes=press, no=press)
+          box testId="marker-ar-base" press=toggle width=24 height=24
+            text glyph
+        AgentRow(id="sample-ar-marked", title="Goal", mark="Set by an agent", sentence="An agent suggests 9000.", yesLabel="Accept", noLabel="Reject", yes=press, no=press)
+          box testId="marker-sample-ar-marked" press=toggle width=24 height=24
+            text glyph
+        CommandPalette(id="cp-base", label="Commands", placeholder="Search", commands=[Command(id="undo", title="Undo the last change", detail="Same as the notice", tool="undoChange"), Command(id="review", title="Review", detail="Opens the sheet", tool="")], agentLabel="An agent can do this too", run=pick)

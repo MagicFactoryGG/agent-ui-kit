@@ -1,0 +1,16 @@
+// The design of @agent-ui-kit/agent: the tokens its components' params
+// default to. Neutral colours are platform roles, so the views look native
+// where no app sets them; spacing and corners are base names. An app sets any
+// of them by full name in its own design.
+forma agent
+
+theme
+  agent.mark = -exact-secondary-label
+  agent.proposal = AccentColor
+  // A card on a grouped page, so it stands out on iOS's grouped background too.
+  agent.notice-ground = -exact-secondary-grouped-background
+  agent.notice-ink = -exact-label
+  agent.detail = -exact-secondary-label
+  agent.gap: length = space.sm
+  agent.pad: length = space.md
+  agent.corner: length = radius.lg

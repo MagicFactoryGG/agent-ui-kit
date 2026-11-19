@@ -1,0 +1,40 @@
+// A row that holds any of the platform's own controls (a text field, a number
+// field, a slider, a date, a select, a segmented choice) in its slot, and adds
+// the change mark and the proposal bar around it. The control stays exactly as
+// the platform draws it; this row never re-draws a native control.
+component AgentRow
+  params
+    markInk: color = "forms.mark" control = "token" group = "Color" priority = 2 label = "Change mark"
+    proposalInk: color = "forms.proposal" control = "token" group = "Color" priority = 1 label = "Proposal"
+  props
+    // Names its testIds: `<id>-row`, `<id>-mark`, `<id>-proposed`,
+    // `<id>-accept`, `<id>-reject`.
+    id: string
+    title: string
+    mark: string
+    sentence: string
+    yesLabel: string
+    noLabel: string
+    yes: action
+    no: action
+  parts
+    mark: text
+    sentence: text
+  slot
+  view
+    column testId=`${id}-row` gap="forms.gap"
+      row gap="forms.gap" align-items="center"
+        column flex=1 min-width=0
+          text title
+          if mark != ""
+            text mark part="mark" testId=`${id}-mark` color="param.markInk" font="-exact-footnote"
+        children
+      if sentence != ""
+        text sentence part="sentence" testId=`${id}-proposed` color="param.proposalInk" font="-exact-footnote"
+        row gap="forms.gap"
+          if noLabel != ""
+            button press=no testId=`${id}-reject` aria-label=`${noLabel}: ${sentence}`
+              text noLabel
+          if yesLabel != ""
+            button press=yes buttonStyle="filled" testId=`${id}-accept` aria-label=`${yesLabel}: ${sentence}`
+              text yesLabel

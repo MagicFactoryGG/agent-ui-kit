@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../../forks/expo/exact/scripts/app.schema.json",
+  "name": "Library gate",
+  "short_name": "Library gate",
+  "id": "com.example.agent-ui-kit.library-gate",
+  "start_url": "/",
+  "display": "standalone",
+  "app": {
+    "id": "com.example.agent-ui-kit.library-gate",
+    "name": "Library gate"
+  },
+  "host": {
+    "web": {}
+  },
+  "deploy": {
+    "store": {
+      "web": "0"
+    }
+  }
+}

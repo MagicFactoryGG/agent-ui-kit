@@ -1,0 +1,34 @@
+// A short-lived line that says the latest act in one sentence, with its two
+// answer words: keep or undo a recorded change, accept or reject a proposal,
+// apply now or stop a delayed act. The app clears it after a few seconds with
+// a task (`quiet`). Every word is the app's, through the note.
+use Note from "./ledger.contract"
+
+component Notice
+  params
+    ground: color = "agent.notice-ground" control = "token" group = "Color" priority = 1 label = "Ground"
+    ink: color = "agent.notice-ink" control = "token" group = "Color" priority = 1 label = "Text"
+  props
+    // Names its testIds: `id`, `<id>-message`, `<id>-yes`, `<id>-no`.
+    id: string
+    note: Note
+    yes: action
+    no: action
+  parts
+    surface: paint shape space
+    message: text
+  view
+    if note.sentence != ""
+      row part="surface" testId=id role="status"
+        gap="agent.gap"
+        align-items="center"
+        padding="agent.pad"
+        border-radius="agent.corner"
+        background-color="param.ground"
+        text note.sentence part="message" testId=`${id}-message` color="param.ink" flex=1
+        if note.no != ""
+          button press=no testId=`${id}-no` aria-label=`${note.no}: ${note.sentence}`
+            text note.no
+        if note.yes != ""
+          button press=yes testId=`${id}-yes` aria-label=`${note.yes}: ${note.sentence}`
+            text note.yes

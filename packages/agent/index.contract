@@ -1,0 +1,16 @@
+// @agent-ui-kit/agent: the layer between an agent and a person. The ledger
+// (ledger.contract) is the record of what an agent did and what waits for a
+// person, as pure functions over one value the app keeps. The views show it:
+// a change mark and a proposal bar for any control, a notice, the activity
+// list, the approval sheet and the permit list. The app owns every value,
+// action and word; a look is a param over agent.forma's tokens, set by full
+// name in the app's design, never by editing these files.
+
+use Value, Change, Waiting, Note, AgentTool, Raise, AnswerWords, Act, Ledger from "./ledger.contract"
+use ledger, quietNote, valueOf, valueOr, isOn, numberOf, isMarked, waitingSentence, waitingId, waitingValue, waitingYes, waitingNo from "./ledger.contract"
+use modes, rank, floorOf, raisedOf, modeOf, raise, put, act, personSet, answer, answerKey, acceptAll, rejectAll, settle, hasDelayed, undo, undoLatest, noteYes, noteNo, quiet, setAsksNeverAnswers from "./ledger.contract"
+use ChangeMark, ProposalBar from "./marks.contract"
+use Notice from "./notice.contract"
+use ActivityList from "./activity.contract"
+use ApprovalSheet from "./approval.contract"
+use PermitList from "./permit.contract"

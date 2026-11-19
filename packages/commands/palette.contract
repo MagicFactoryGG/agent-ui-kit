@@ -1,0 +1,42 @@
+// One command a person can run. `tool` names the app's tool that does the
+// same job, or is "" for a command that is the person's alone.
+shape Command
+  id: string
+  title: string
+  detail: string
+  tool: string
+
+fn command(id: string, title: string, detail: string, tool: string): Command = Command(id=id, title=title, detail=detail, tool=tool)
+
+// The person's view of the app's tool list: search the commands and run one.
+// An agent calls the same jobs as tools, so the palette adds nothing for an
+// agent and gives the person every job an agent has.
+component CommandPalette
+  params
+    detailInk: color = "commands.detail" control = "token" group = "Color" priority = 2 label = "Detail"
+  props
+    // Names its testIds: `id`, `<id>-search`, `<id>-<command>`,
+    // `<id>-<command>-agent`.
+    id: string
+    label: string
+    placeholder: string
+    commands: Command[]
+    // "" for none, else the words that mark a command an agent can also do.
+    agentLabel: string
+    run: action
+  parts
+    detail: text
+  state query = ""
+  derive shown = commands.filter(c => c.title.toLowerCase().includes(query.toLowerCase()))
+  action edit(text: string)
+    query = text
+  view
+    column testId=id gap="commands.gap"
+      input type="search" value=query input=edit placeholder=placeholder aria-label=label testId=`${id}-search`
+      for c in shown key=c.id
+        button press=run(c.id) testId=`${id}-${c.id}` aria-label=c.title width="100%" justify-content="flex-start" text-align="start"
+          column align-items="flex-start"
+            text c.title
+            text c.detail part="detail" color="param.detailInk" font="-exact-footnote"
+            if agentLabel != "" and c.tool != ""
+              text agentLabel testId=`${id}-${c.id}-agent` color="param.detailInk" font="-exact-caption1"

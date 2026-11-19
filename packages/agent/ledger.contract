@@ -1,0 +1,202 @@
+// The ledger: the record of what an agent did and what waits for a person,
+// as one value the app keeps in its state. Every function here is pure: an
+// app writes `book = act(book, …)` in an action, for either door, and reads
+// the result with the readers below. Nothing here holds a word a person reads:
+// every sentence and label comes from the app.
+//
+// Why one record and pure functions: an action cannot read which door called
+// it, and a tool's action that calls another action with arguments loses its
+// parameters (see the recipes' "Exact asks"). A function has neither problem,
+// so the record, undo, the waiting list and the modes live here once, not in
+// each tool.
+//
+// Modes, lowest first: direct (applied, not recorded), recorded (applied,
+// recorded, can be undone), delayed (waits a short time, then applies, unless
+// stopped), proposed (waits until answered), off (refused). A tool's floor is
+// the lowest mode its tool line allows; a person can raise it, never lower it
+// below the floor.
+
+// One value an agent may reach, by key. The app keeps its reachable values in
+// this list and reads them with `valueOf`.
+shape Value
+  key: string
+  value: string
+
+// One act that took effect: a receipt. `door` is the door it came through
+// ("person" or "agent", as the app passes it); `answeredBy` is "" when no
+// answer was needed, else the door that answered.
+shape Change
+  id: string
+  tool: string
+  door: string
+  mode: string
+  key: string
+  title: string
+  sentence: string
+  was: string
+  now: string
+  answeredBy: string
+
+// One act that waits for an answer: delayed or proposed. `sentence` says it
+// while it waits, `did` once it takes effect; `yes` and `no` are its two
+// answer words, in the app's words for its mode.
+shape Waiting
+  id: string
+  tool: string
+  door: string
+  mode: string
+  key: string
+  title: string
+  sentence: string
+  did: string
+  value: string
+  yes: string
+  no: string
+
+// The latest act, said in one sentence, with its two answer words ("" hides
+// one). `ref` is the change's or the waiting act's id.
+shape Note
+  ref: string
+  mode: string
+  sentence: string
+  yes: string
+  no: string
+
+// One tool an agent may call, as the app lists it once for every view: the
+// palette (do), the permit list (permit) and the activity (review). `floor` is
+// the lowest mode its tool line allows; `reach` is "self" when only this
+// person sees its effect, else "others"; `secret` marks a write-only secret.
+shape AgentTool
+  name: string
+  title: string
+  sentence: string
+  floor: string
+  reach: string
+  secret: bool
+
+// A mode a person chose for a tool, at or above its floor.
+shape Raise
+  tool: string
+  mode: string
+
+// The app's answer words for each mode, set once.
+shape AnswerWords
+  keep: string
+  undo: string
+  accept: string
+  reject: string
+  now: string
+  stop: string
+
+// One act an app asks the ledger to take, with a sentence for each way it can
+// go, all the app's: `did` once done, `asks` while it waits for an answer,
+// `will` while it waits to apply by itself (delayed).
+shape Act
+  tool: string
+  door: string
+  key: string
+  title: string
+  value: string
+  did: string
+  asks: string
+  will: string
+
+shape Ledger
+  values: Value[]
+  changes: Change[]
+  waiting: Waiting[]
+  marked: string[]
+  tools: AgentTool[]
+  raised: Raise[]
+  words: AnswerWords
+  note: Note
+  seq: number
+  answer: string
+  asksNeverAnswers: bool
+
+// --- Making and reading ---------------------------------------------------
+
+fn ledger(values: Value[], tools: AgentTool[], words: AnswerWords): Ledger = Ledger(values=values, changes=[], waiting=[], marked=[], tools=tools, raised=[], words=words, note=quietNote(), seq=0, answer="", asksNeverAnswers=false)
+fn quietNote(): Note = Note(ref="", mode="", sentence="", yes="", no="")
+fn valueOf(l: Ledger, key: string): string = l.values.filter(v => v.key == key).map(v => v.value).join("")
+fn valueOr(l: Ledger, key: string, fallback: string): string = l.values.filter(v => v.key == key).length == 0 ? fallback : valueOf(l, key)
+fn isOn(l: Ledger, key: string): bool = valueOf(l, key) == "on"
+fn numberOf(l: Ledger, key: string): number = match parseNumber(valueOf(l, key)) { case some(n) => n, case none => 0 }
+fn isMarked(l: Ledger, key: string): bool = l.marked.includes(key)
+fn waitingSentence(l: Ledger, key: string): string = l.waiting.filter(w => w.key == key).map(w => w.sentence).join("")
+fn waitingId(l: Ledger, key: string): string = l.waiting.filter(w => w.key == key).map(w => w.id).join("")
+fn waitingValue(l: Ledger, key: string): string = l.waiting.filter(w => w.key == key).map(w => w.value).join("")
+fn waitingYes(l: Ledger, key: string): string = l.waiting.filter(w => w.key == key).map(w => w.yes).join("")
+fn waitingNo(l: Ledger, key: string): string = l.waiting.filter(w => w.key == key).map(w => w.no).join("")
+
+// --- Modes ----------------------------------------------------------------
+
+fn modes(): string[] = ["direct", "recorded", "delayed", "proposed", "off"]
+fn rank(mode: string): number = mode == "direct" ? 0 : mode == "recorded" ? 1 : mode == "delayed" ? 2 : mode == "proposed" ? 3 : 4
+fn floorOf(l: Ledger, tool: string): string = l.tools.filter(t => t.name == tool).length == 0 ? "proposed" : l.tools.filter(t => t.name == tool).map(t => t.floor).join("")
+fn raisedOf(l: Ledger, tool: string): string = l.raised.filter(r => r.tool == tool).map(r => r.mode).join("")
+// The mode in force: the floor, or the person's raise above it. A tool the
+// app did not list is proposed.
+fn modeOf(l: Ledger, tool: string): string = raisedOf(l, tool) != "" and rank(raisedOf(l, tool)) > rank(floorOf(l, tool)) ? raisedOf(l, tool) : floorOf(l, tool)
+// A person (or an agent) sets a tool's mode. Below the floor: `below-floor`.
+// An agent may only make a mode stricter: `person-only` otherwise.
+fn raise(l: Ledger, tool: string, mode: string, door: string): Ledger = rank(mode) < rank(floorOf(l, tool)) ? Ledger(l, answer="below-floor") : door != "person" and rank(mode) < rank(modeOf(l, tool)) ? Ledger(l, answer="person-only") : Ledger(l, raised=l.raised.filter(r => r.tool != tool).concat([Raise(tool=tool, mode=mode)]), answer="saved")
+
+// --- Acts -----------------------------------------------------------------
+
+// Writes `value` at `key`, keeping the list's order.
+fn put(values: Value[], key: string, value: string): Value[] = values.filter(v => v.key == key).length > 0 ? values.map(v => v.key == key ? Value(v, value=value) : v) : values.concat([Value(key=key, value=value)])
+fn putAll(values: Value[], ws: Waiting[]): Value[] = values.map(v => ws.filter(w => w.key == v.key).length > 0 ? Value(v, value=ws.filter(w => w.key == v.key).map(w => w.value).join("")) : v).concat(ws.filter(w => values.filter(v => v.key == w.key).length == 0).map(w => Value(key=w.key, value=w.value)))
+fn withKey(keys: string[], key: string): string[] = keys.filter(k => k != key).concat([key])
+fn yesFor(l: Ledger, mode: string): string = mode == "proposed" ? l.words.accept : mode == "delayed" ? l.words.now : mode == "recorded" ? l.words.keep : ""
+fn noFor(l: Ledger, mode: string): string = mode == "proposed" ? l.words.reject : mode == "delayed" ? l.words.stop : mode == "recorded" ? l.words.undo : ""
+
+// An agent's (or a tool's) act, taken in the mode in force for its tool. The
+// answer word is `saved` (direct, recorded), `delayed`, `proposed` or `off`.
+fn act(l: Ledger, a: Act): Ledger = modeOf(l, a.tool) == "off" ? Ledger(l, answer="off") : modeOf(l, a.tool) == "direct" ? applied(l, a, "direct") : modeOf(l, a.tool) == "recorded" ? applied(l, a, "recorded") : held(l, a, modeOf(l, a.tool))
+fn applied(l: Ledger, a: Act, mode: string): Ledger = Ledger(l, values=put(l.values, a.key, a.value), changes=(mode == "recorded" ? [Change(id=`a${l.seq + 1}`, tool=a.tool, door=a.door, mode=mode, key=a.key, title=a.title, sentence=a.did, was=valueOf(l, a.key), now=a.value, answeredBy="")].concat(l.changes) : l.changes), waiting=l.waiting.filter(w => w.key != a.key), marked=withKey(l.marked, a.key), note=Note(ref=`a${l.seq + 1}`, mode=mode, sentence=a.did, yes=yesFor(l, mode), no=noFor(l, mode)), seq=l.seq + 1, answer="saved")
+fn held(l: Ledger, a: Act, mode: string): Ledger = Ledger(l, waiting=l.waiting.filter(w => w.key != a.key).concat([Waiting(id=`a${l.seq + 1}`, tool=a.tool, door=a.door, mode=mode, key=a.key, title=a.title, sentence=(mode == "delayed" ? a.will : a.asks), did=a.did, value=a.value, yes=yesFor(l, mode), no=noFor(l, mode))]), note=Note(ref=`a${l.seq + 1}`, mode=mode, sentence=(mode == "delayed" ? a.will : a.asks), yes=yesFor(l, mode), no=noFor(l, mode)), seq=l.seq + 1, answer=mode)
+
+// A person's own edit: it wins. It writes the value, clears the agent's mark
+// and any act that waits on the same key, and records nothing.
+fn personSet(l: Ledger, key: string, value: string): Ledger = Ledger(l, values=put(l.values, key, value), marked=l.marked.filter(m => m != key), waiting=l.waiting.filter(w => w.key != key), answer="saved")
+
+// --- Answers --------------------------------------------------------------
+
+fn receipt(l: Ledger, w: Waiting, door: string): Change = Change(id=w.id, tool=w.tool, door=w.door, mode=w.mode, key=w.key, title=w.title, sentence=w.did, was=valueOf(l, w.key), now=w.value, answeredBy=door)
+fn quietIf(l: Ledger, ref: string): Note = l.note.ref == ref ? quietNote() : l.note
+// May `door` answer `w`? Not when the app turned on "the door that asks never
+// answers" and the answer comes through the door that asked.
+fn mayAnswer(l: Ledger, w: Waiting, door: string): bool = not (l.asksNeverAnswers and w.door == door)
+fn accepted(l: Ledger, w: Waiting, door: string): Ledger = Ledger(l, values=put(l.values, w.key, w.value), changes=[receipt(l, w, door)].concat(l.changes), waiting=l.waiting.filter(x => x.id != w.id), marked=withKey(l.marked, w.key), note=quietIf(l, w.id), answer="accepted")
+fn rejected(l: Ledger, w: Waiting): Ledger = Ledger(l, waiting=l.waiting.filter(x => x.id != w.id), note=quietIf(l, w.id), answer="rejected")
+// Answer one waiting act by its id. Words: accepted, rejected, unknown-id,
+// answer-elsewhere.
+fn answer(l: Ledger, id: string, yes: bool, door: string): Ledger = match first(l.waiting.filter(w => w.id == id)) { case some(w) => mayAnswer(l, w, door) ? (yes ? accepted(l, w, door) : rejected(l, w)) : Ledger(l, answer="answer-elsewhere"), case none => Ledger(l, answer="unknown-id") }
+// Answer the act waiting on `key` (a control's own Accept or Reject).
+fn answerKey(l: Ledger, key: string, yes: bool, door: string): Ledger = answer(l, waitingId(l, key), yes, door)
+fn answerable(l: Ledger, door: string): Waiting[] = l.waiting.filter(w => mayAnswer(l, w, door))
+fn acceptAll(l: Ledger, door: string): Ledger = Ledger(l, values=putAll(l.values, answerable(l, door)), changes=answerable(l, door).map(w => receipt(l, w, door)).concat(l.changes), waiting=l.waiting.filter(w => not mayAnswer(l, w, door)), marked=l.marked.filter(m => answerable(l, door).filter(w => w.key == m).length == 0).concat(answerable(l, door).map(w => w.key)), note=quietNote(), answer="accepted")
+fn rejectAll(l: Ledger, door: string): Ledger = Ledger(l, waiting=l.waiting.filter(w => not mayAnswer(l, w, door)), note=quietNote(), answer="rejected")
+// Applies every delayed act that nobody stopped. The app calls it from a task
+// after its delay.
+fn settle(l: Ledger): Ledger = Ledger(l, values=putAll(l.values, l.waiting.filter(w => w.mode == "delayed")), changes=l.waiting.filter(w => w.mode == "delayed").map(w => receipt(l, w, "")).concat(l.changes), waiting=l.waiting.filter(w => w.mode != "delayed"), marked=l.marked.filter(m => l.waiting.filter(w => w.mode == "delayed" and w.key == m).length == 0).concat(l.waiting.filter(w => w.mode == "delayed").map(w => w.key)), note=(l.note.mode == "delayed" ? quietNote() : l.note))
+fn hasDelayed(l: Ledger): bool = l.waiting.filter(w => w.mode == "delayed").length > 0
+
+// --- Undo -----------------------------------------------------------------
+
+// Undo one change by its id: its key goes back to the old value. Words:
+// undone, unknown-id.
+fn undo(l: Ledger, id: string): Ledger = match first(l.changes.filter(c => c.id == id)) { case some(c) => Ledger(l, values=put(l.values, c.key, c.was), changes=l.changes.filter(x => x.id != id), marked=(l.changes.filter(x => x.id != id and x.key == c.key).length > 0 ? l.marked : l.marked.filter(m => m != c.key)), note=quietIf(l, id), answer="undone"), case none => Ledger(l, answer="unknown-id") }
+fn undoLatest(l: Ledger): Ledger = match first(l.changes) { case some(c) => undo(l, c.id), case none => Ledger(l, answer="unknown-id") }
+
+// --- The notice's two answers ---------------------------------------------
+
+// The note's first word: keep a recorded change, or accept (or apply now) a
+// waiting act.
+fn noteYes(l: Ledger, door: string): Ledger = l.note.mode == "proposed" or l.note.mode == "delayed" ? answer(l, l.note.ref, true, door) : Ledger(l, note=quietNote())
+// The note's second word: undo a recorded change, or reject (or stop) a
+// waiting act.
+fn noteNo(l: Ledger, door: string): Ledger = l.note.mode == "proposed" or l.note.mode == "delayed" ? answer(l, l.note.ref, false, door) : l.note.mode == "recorded" ? undo(l, l.note.ref) : Ledger(l, note=quietNote())
+fn quiet(l: Ledger): Ledger = Ledger(l, note=quietNote())
+fn setAsksNeverAnswers(l: Ledger, on: bool): Ledger = Ledger(l, asksNeverAnswers=on)

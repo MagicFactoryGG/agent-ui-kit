@@ -1,0 +1,7 @@
+{
+  "name": "@agent-ui-kit/commands",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The command palette for Exact apps: the person's view of the same tool list an agent calls. Each command names its tool.",
+  "exports": { ".": "./index.contract" }
+}

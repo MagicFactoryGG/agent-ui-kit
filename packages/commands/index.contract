@@ -1,0 +1,6 @@
+// @agent-ui-kit/commands: the command palette, the "do" view of the app's one
+// tool list. Each command names the tool that does the same job (the agent's
+// door), or "" for a command that is the person's alone; tools/palette-link.mjs
+// holds the link to the running app's tools.
+
+use Command, CommandPalette, command from "./palette.contract"

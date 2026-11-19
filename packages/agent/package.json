@@ -1,0 +1,7 @@
+{
+  "name": "@agent-ui-kit/agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The layer between an agent and a person for Exact apps: a ledger of what an agent did and what waits (pure functions), and its views: change mark, proposal bar, notice, activity list, approval sheet, permit list.",
+  "exports": { ".": "./index.contract" }
+}

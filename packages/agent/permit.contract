@@ -1,0 +1,31 @@
+// The permit view of the app's one tool list: each tool, its sentence, and
+// the mode in force, which the person can raise and never lower below the
+// tool's floor. `modeLabels` are the app's words for the five modes, in the
+// ledger's order (direct, recorded, delayed, proposed, off).
+use AgentTool, Raise, modes, rank from "./ledger.contract"
+
+fn shownMode(t: AgentTool, raised: Raise[]): string = raised.filter(r => r.tool == t.name and rank(r.mode) > rank(t.floor)).length > 0 ? raised.filter(r => r.tool == t.name).map(r => r.mode).join("") : t.floor
+fn modeLabel(mode: string, labels: string[]): string = match labels.at(rank(mode)) { case some(s) => s, case none => mode }
+
+component PermitList
+  params
+    detailInk: color = "agent.detail" control = "token" group = "Color" priority = 2 label = "Detail"
+  props
+    // Names its testIds: `id`, `<id>-<tool>` (the mode's select).
+    id: string
+    tools: AgentTool[]
+    raised: Raise[]
+    modeLabels: string[]
+    set: action
+  parts
+    detail: text
+  view
+    column testId=id gap="agent.gap"
+      for t in tools key=t.name
+        row testId=`${id}-${t.name}-row` gap="agent.gap" align-items="center"
+          column flex=1 min-width=0
+            text t.title
+            text t.sentence part="detail" color="param.detailInk" font="-exact-footnote"
+          select value=shownMode(t, raised) change=set(t.name) aria-label=t.title testId=`${id}-${t.name}`
+            for m in modes().filter(x => rank(x) >= rank(t.floor)) key=m
+              option modeLabel(m, modeLabels) value=m

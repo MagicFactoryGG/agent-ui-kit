@@ -1,0 +1,11 @@
+// @agent-ui-kit/forms: form rows that a person and an agent use alike. The
+// app owns every value, action and word; an agent never drives a row's view
+// (open, query, highlight): the app's tool sets the value by key. A row's
+// change mark and proposal bar are the same as @agent-ui-kit/agent's
+// ChangeMark and ProposalBar, drawn here because a package cannot use another
+// package by a local path (see docs/recipes/exact-asks.md).
+
+use Field from "./field.contract"
+use Combobox from "./combobox.contract"
+use ToggleRow from "./toggle-row.contract"
+use AgentRow from "./agent-row.contract"

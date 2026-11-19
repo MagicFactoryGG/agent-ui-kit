@@ -1,0 +1,7 @@
+// The library gate's design: the packages' own tokens, as they ship, and the
+// page's own colours.
+forma librarygate
+
+theme
+  gate.ground = -exact-background
+  gate.mark = #ff00ff  scheme=fixed

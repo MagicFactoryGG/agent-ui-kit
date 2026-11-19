@@ -1,0 +1,7 @@
+{
+  "name": "@agent-ui-kit/forms",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Form rows for Exact apps that an agent and a person use alike: Field (label, hint, error), Combobox, ToggleRow (a switch) and AgentRow (any native control), each with the change mark and the proposal bar.",
+  "exports": { ".": "./index.contract" }
+}
