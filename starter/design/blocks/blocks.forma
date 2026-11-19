@@ -4,3 +4,6 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
+  blocks.detail-max: length = 880px
+  blocks.header-min: length = 240px
+  blocks.detail-min: length = 320px
