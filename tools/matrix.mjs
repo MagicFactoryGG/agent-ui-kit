@@ -430,7 +430,8 @@ export function generate(designDir, playDir) {
     `        NavField(label="Look")`,
     `          ModeChoice(scheme=(scheme == "light" ? "light" : scheme == "dark" ? "dark" : "system"), lightLabel="Light", darkLabel="Dark", systemLabel="Auto", groupLabel="Look", light=light, dark=dark, system=system)`,
     ...view,
-    ...(overlay ? [`      ${overlay.piece}()`] : []),
+    // Not on the Brand page: there each registered asset is compared with its reference, with nothing over it.
+    ...(overlay ? [`      if page != "brand"`, `        ${overlay.piece}()`] : []),
     '',
   ].join('\n');
   const firstColour = Object.keys(theme.color)[0];

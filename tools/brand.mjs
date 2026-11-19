@@ -9,14 +9,21 @@
 //   bun tools/brand.mjs register <design dir> --record <run>/ownership.json --brand brand.draft.json
 //   bun tools/brand.mjs check <dir> [--design <design dir>]     any app or the design repo; exit 1 on a finding
 //   bun tools/brand.mjs icon <design dir> <name> <file>:<line>  register a drawing that is not a brand asset
+//   bun tools/brand.mjs look <playground dir> [--design <design dir>]  each asset as drawn now against its reference
+//
+// register --playground <dir> also captures the references: each asset drawn on the playground's Brand page, light and
+// dark (brand-references/, their hashes in brand.lock). look draws them again and fails on more than 0.5% of a cell's
+// pixels differing (8% colour fuzz), so an asset that renders differently from its registration fails.
 //
 // check fails when
 //   - brand.json or a registered asset's drawing changed without a new registration (brand.lock),
 //   - a registered asset's drawing (its SVG fingerprint) or its words appear outside its registered package,
 //   - a piece draws an SVG that is neither a registered asset nor a registered icon (icons.json): a new drawing is
 //     registered on purpose, so a mark drawn by hand (a smiley in place of the logo) cannot slip in.
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { basename, join, relative, resolve } from 'node:path';
 
 const RULE = 'REFUSED by brand (agent-ui-kit starter/README.md, "Brand layer": a mark, logo or provider button comes only from its registered component)';
@@ -77,7 +84,65 @@ function lockOf(design, brand) {
   };
 }
 
-function register(design, recordPath, draftPath) {
+const SIZE = '1280x900';
+/** The playground's Brand page drawn once: its screenshot and each asset cell's box in it. */
+function renderBrand(play, brand, out) {
+  const ids = brand.assets.flatMap((a) => ['light', 'dark'].map((s) => `brand-${a.id}-${s}`));
+  const shot = join(out, 'brand-page.png');
+  const ops = ['clock data', 'type page brand', 'clock settle', ...ids.map((i) => `layout ${i}`), `screenshot ${shot}`];
+  const r = spawnSync('bun', ['exact.mjs', 'agent', 'web', '--json', '--size', SIZE, ...ops], { cwd: play, encoding: 'utf8', maxBuffer: 1 << 30 });
+  const rects = {};
+  const find = (o) => {
+    if (!o || typeof o !== 'object') return;
+    if (ids.includes(o.testId) && o.space?.viewport) rects[o.testId] = o.space.viewport;
+    for (const v of Object.values(o)) if (typeof v === 'object') find(v);
+  };
+  for (const line of (r.stdout ?? '').split('\n')) {
+    try { find(JSON.parse(line)); } catch {}
+  }
+  if (!existsSync(shot) || ids.some((i) => !rects[i])) throw new Error(`brand: the Brand page did not draw every asset (${ids.filter((i) => !rects[i]).join(', ') || 'no screenshot'})`);
+  return { shot, rects, ids };
+}
+const cropOf = (r) => `${Math.round(r.w)}x${Math.round(r.h)}+${Math.round(r.x)}+${Math.round(r.y)}`;
+
+function capture(play, design, brand) {
+  const out = mkdtempSync(join(tmpdir(), 'brand-'));
+  const { shot, rects, ids } = renderBrand(play, brand, out);
+  const dir = join(design, 'brand-references');
+  mkdirSync(dir, { recursive: true });
+  const refs = {};
+  for (const id of ids) {
+    const to = join(dir, `${id}.png`);
+    spawnSync('magick', [`${shot}[${cropOf(rects[id])}]`, '+repage', '-strip', to]);
+    refs[id] = sha(readFileSync(to));
+  }
+  rmSync(out, { recursive: true, force: true });
+  return refs;
+}
+
+function look(play, design) {
+  const brand = readJson(join(design, 'brand.json'));
+  const lock = readJson(join(design, 'brand.lock'));
+  const out = mkdtempSync(join(tmpdir(), 'brand-look-'));
+  const { shot, rects, ids } = renderBrand(play, brand, out);
+  const bad = [];
+  for (const id of ids) {
+    const ref = join(design, 'brand-references', `${id}.png`);
+    if (!existsSync(ref) || sha(readFileSync(ref)) !== lock.references?.[id]) { bad.push(`${id}: no registered reference`); continue; }
+    const r = rects[id];
+    const now = join(out, `${id}.png`);
+    spawnSync('magick', [`${shot}[${cropOf(r)}]`, '+repage', '-strip', now]);
+    const c = spawnSync('magick', ['compare', '-metric', 'AE', '-fuzz', '8%', ref, now, join(out, `${id}.diff.png`)], { encoding: 'utf8' });
+    const differing = Number.parseFloat((c.stderr || '').trim().split(/\s/)[0]);
+    const share = differing / (r.w * r.h);
+    if (!Number.isFinite(share)) bad.push(`${id}: drawn at another size than its reference`);
+    else if (share > 0.005) bad.push(`${id}: ${(share * 100).toFixed(2)}% of its pixels differ from the registered reference`);
+  }
+  if (!bad.length) rmSync(out, { recursive: true, force: true });
+  return { bad, out };
+}
+
+function register(design, recordPath, draftPath, play) {
   // The Distiller run's ownership record (distill.mjs writes <run>/ownership.json): the doors it passed.
   const record = readJson(recordPath);
   const draft = readJson(draftPath);
@@ -101,7 +166,9 @@ function register(design, recordPath, draftPath) {
   }
   const brand = { ...draft, owner: { ...draft.owner, proof: { record: record.id, mode: doors.mode, at: record.at } } };
   writeFileSync(join(design, 'brand.json'), `${JSON.stringify(brand, null, 2)}\n`);
-  writeFileSync(join(design, 'brand.lock'), `${JSON.stringify(lockOf(design, brand), null, 2)}\n`);
+  const lock = lockOf(design, brand);
+  if (play) lock.references = capture(play, design, brand);
+  writeFileSync(join(design, 'brand.lock'), `${JSON.stringify(lock, null, 2)}\n`);
   console.log(`brand: registered ${brand.assets.length} assets for ${domain} (Distiller record ${record.id}, ${doors.mode})`);
 }
 
@@ -131,6 +198,10 @@ export function check(dir, design = dir) {
       for (const a of brand.assets) {
         if (JSON.stringify(lock.assets?.[a.id] ?? []) !== JSON.stringify(now.assets[a.id])) say(`${a.dir}#${a.component}`, `the registered ${a.id} is drawn differently from its registration`);
         for (const f of now.assets[a.id]) own.set(f, a.id);
+      }
+      for (const [id, h] of Object.entries(lock.references ?? {})) {
+        const ref = join(design, 'brand-references', `${id}.png`);
+        if (!existsSync(ref) || sha(readFileSync(ref)) !== h) say(`brand-references/${id}.png`, 'is not the registered reference (only register captures references)');
       }
     }
   }
@@ -178,7 +249,15 @@ if (import.meta.main) {
     const i = rest.indexOf(k);
     return i >= 0 ? rest[i + 1] : undefined;
   };
-  if (cmd === 'register' && dir) register(resolve(dir), opt('--record'), opt('--brand'));
+  if (cmd === 'register' && dir) register(resolve(dir), opt('--record'), opt('--brand'), opt('--playground') && resolve(opt('--playground')));
+  else if (cmd === 'look' && dir) {
+    const { bad, out } = look(resolve(dir), resolve(opt('--design') ?? join(dir, '..', 'accord')));
+    if (bad.length) {
+      console.error(`${RULE}\n${bad.join('\n')}\n(the crops and diffs: ${out})`);
+      process.exit(1);
+    }
+    console.log('brand: every registered asset draws as registered, light and dark');
+  }
   else if (cmd === 'icon' && dir && rest.length >= 2) icon(resolve(dir), rest[0], rest[1]);
   else if (cmd === 'check' && dir) {
     const findings = check(resolve(dir), resolve(opt('--design') ?? dir));
