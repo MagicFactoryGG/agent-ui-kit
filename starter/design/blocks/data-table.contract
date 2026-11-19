@@ -1,13 +1,15 @@
 // A data table of records: a header row of column labels, the sorted column marked (its label in ink, an arrow,
 // `aria-sort`), a status shown as a Tag, a checkbox a row (a name of `selectLabel` and the record's title; the
 // app owns the selection, `toggle` gets the row's key, `toggleAll` the whole set) and a select-all checkbox in
-// the header. A checked row takes the fill wash. Rows an agent changed carry the accent mark at their start
-// while `agentNote` says so under the table. The card centres on a wide window up to `blocks.table-max`; on a
-// window narrower than 640px (the table's comfortable floor) the table becomes a list of compact two-line rows
-// — title, status and a chevron, then owner and date — so the table never scrolls sideways. While empty,
-// loading or failed the table keeps its frame and says the app's line in one full-width row (on a phone, where
-// the list has no header, the line sits on the card). States: data many|one|empty|loading|failed|long,
-// interaction idle|busy (the card says it, and the checkboxes wait), agent none|changed. Every word is a prop.
+// the header. Cells sit edge to edge (`border-spacing=0`: the separated model's own gap would stripe a washed
+// row), so a checked row takes one fill band and the rules run the card's width. Rows an agent changed carry
+// the accent mark at their start while `agentNote` says so under the table. The card centres on a wide window
+// up to `blocks.table-max`; on a window narrower than 640px (the table's comfortable floor) the table becomes a
+// list of compact two-line rows — title, status and a chevron, then owner and date — so the table never scrolls
+// sideways. While empty, loading or failed the table keeps its frame and says the app's line in one full-width
+// row (on a phone, where the list has no header, the line sits on the card). States: data
+// many|one|empty|loading|failed|long, interaction idle|busy (the card says it, and the checkboxes wait),
+// agent none|changed. Every word is a prop.
 use Words, Tag from "__SCOPE__/components"
 
 // One record: its key, what it says, a status word, who owns it, when it changed, where it opens.
@@ -97,7 +99,7 @@ component DataTable
             row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" background-color=(checked.keys.includes(r.key) ? "theme.color.fill" : "transparent") border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(marked(agent, marks, r.key))
               input type="checkbox" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=(interaction == "busy") aria-label=`${selectLabel} ${r.title}` flex-shrink=0 testId=`${testId}-check-${r.key}`
               column flex=1 min-width=0 gap="theme.space.xs"
-                row align-items="center" gap="theme.space.sm"
+                row align-items="flex-start" gap="theme.space.sm"
                   link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
                     :hover
                       color="theme.color.accent"
@@ -107,11 +109,11 @@ component DataTable
               svg viewBox="0 0 12 12" width="blocks.glyph" height="blocks.glyph" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
                 path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
       else
-        table testId=`${testId}-table` width="100%"
+        table testId=`${testId}-table` width="100%" border-spacing=0
           thead
             tr
               if not noRows
-                th scope="col" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+                th scope="col" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
                   input type="checkbox" checked=allOn change=pickAll disabled=(interaction == "busy") aria-label=selectAllLabel testId=`${testId}-check-all`
               th scope="col" aria-sort=(sort == "title" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
                 row align-items="center" gap="theme.space.xs"
@@ -129,14 +131,14 @@ component DataTable
                   if sort == "owner"
                     SortArrow(dir=sortDir, ink="theme.color.ink")
               th scope="col" aria-sort=(sort == "updated" ? sortDir : "none") text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
-                row align-items="center" gap="theme.space.xs" margin-left="auto"
+                row align-items="center" gap="theme.space.xs" justify-content="flex-end"
                   text updatedLabel font="theme.type.caption" color=(sort == "updated" ? "theme.color.ink" : "theme.color.ink-muted")
                   if sort == "updated"
                     SortArrow(dir=sortDir, ink="theme.color.ink")
           if noRows
             tbody
               tr
-                td colspan=4 text-align="start" padding="theme.space.lg" role=(data == "failed" ? "alert" : "status")
+                td colspan=4 text-align="start" padding="theme.space.xl" role=(data == "failed" ? "alert" : "status")
                   Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
           else
             tbody
@@ -150,7 +152,8 @@ component DataTable
                         color="theme.color.accent"
                       text r.title font="theme.type.body"
                   td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                    Tag(text=r.status, outcome="none")
+                    row
+                      Tag(text=r.status, outcome="none")
                   td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
                     text r.owner font="theme.type.body" color="theme.color.ink-muted"
                   td text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
