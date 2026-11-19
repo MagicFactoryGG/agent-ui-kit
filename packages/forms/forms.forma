@@ -6,6 +6,8 @@ forma forms
 theme
   forms.mark = -exact-secondary-label
   forms.proposal = AccentColor
+  // A switch's on track; a theme sets it to its control-tint (white thumb and page both at 3:1 or more).
+  forms.switch = AccentColor
   forms.hint = -exact-secondary-label
   forms.error = -exact-system-red
   forms.gap: length = space.sm

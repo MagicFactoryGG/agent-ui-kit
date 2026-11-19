@@ -21,6 +21,7 @@ theme
   theme.color.positive-text = light-dark(#1a7f45, #4ade80)  pair=theme.color.page
   theme.color.caution-text = light-dark(#9a5b00, #fbbf24)  pair=theme.color.page
   theme.color.critical-text = light-dark(#c62828, #f87171)  pair=theme.color.page
+  theme.color.control-tint = light-dark(#2f5bd3, #3b63d8)
   theme.family: family = system-ui, sans-serif
   theme.type.title: type = 600 20px/1.25 system-ui, sans-serif
   theme.type.heading: type = 600 13px/1.3 system-ui, sans-serif
