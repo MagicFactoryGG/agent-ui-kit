@@ -37,5 +37,13 @@
   ],
   "Event:long": [
     { "key": "note", "who": "Sam Rivera", "what": "Left a long note on the packing slip explaining that the spare bulb travels taped to the lamp's base so it cannot rattle loose on the way to the customer's door", "when": "Today, 14:06" }
-  ]
+  ],
+  "props:StatePanel": {
+    "title": "Your files",
+    "message": "Everything you add to this project will appear here, ready to share.",
+    "failedText": "We couldn't load your files. Check your connection, then try again.",
+    "agentNote": "Your assistant is taking care of this.",
+    "actionLabel": "Add files",
+    "retryLabel": "Try again"
+  }
 }
