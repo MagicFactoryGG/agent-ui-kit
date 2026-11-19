@@ -12,15 +12,16 @@
 // only when the card is truly full — a table that wraps its titles while air sits locked in over-wide columns
 // lies about its room. The status column centres its pills under its label (a chip reads from its middle; the
 // skeleton holds the same axis, so nothing jumps when the rows arrive). On a window narrower than 640px (the
-// table's comfortable floor) the table becomes a list of compact rows — the title with the status pill at the
-// line's top edge, then owner and date alone, their left edge true under the title's — and the table never
-// scrolls sideways. While empty, loading or failed the table keeps its frame — the select-all step is simply
-// absent while there is nothing to select (a waiting box would imply a bulk act that cannot happen) — and
-// while loading four quiet rows hold the loaded rows' own slots and rules (no invented data, still under the
-// person's motion preference, the app's loading line said as the table's own name), so the frame does not
-// move when the rows arrive. Empty offers the app's `create`, failed the app's `retry` under the state's own
-// warning mark — the way on, as the app's own act, and the primary one in a contentless state. On a phone the
-// list has no header, so the line sits on the card. States: data
+// table's comfortable floor) the table becomes a list of compact rows — the title across the card's full
+// width (it wraps only when the card is truly full), then the status pill opening the meta line with owner and
+// date after it — and the table never scrolls sideways. While empty, loading or failed the table keeps its
+// frame — the select-all step is simply absent while there is nothing to select (a waiting box would imply a
+// bulk act that cannot happen) — and the state holds `blocks.state-max` at the card's middle: the failed
+// state's warning mark above its message and the retry, the empty state's message and its `create`, both the
+// primary act of a contentless state. While loading four quiet rows hold the loaded rows' own slots and rules
+// (no invented data, still under the person's motion preference, the app's loading line said as the table's
+// own name), so the frame does not move when the rows arrive. On a phone the list has no header, so the line
+// sits on the card. States: data
 // many|one|empty|loading|failed|long, interaction idle|busy (the card says it, and the checkboxes wait),
 // agent none|changed. Every word is a prop.
 use Words, ActionButton from "__SCOPE__/components"
@@ -155,13 +156,13 @@ component DataTable
                 box width="35%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
         else
           if noRows
-            column padding="theme.space.lg" gap="theme.space.md" role=(data == "failed" ? "alert" : "status") align-items="center" text-align="center"
+            column padding="theme.space.lg" gap="theme.space.md" role=(data == "failed" ? "alert" : "status") align-items="center" text-align="center" max-width="blocks.state-max" margin-left="auto" margin-right="auto" box-sizing="border-box"
               if data == "failed"
                 StateGlyph(ink="theme.color.critical")
               Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
               if data == "failed" and retryLabel != ""
                 row
-                  ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="error", press=retry, testId=`${testId}-retry`)
+                  ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
               if data == "empty" and createLabel != ""
                 row
                   ActionButton(label=createLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=create, testId=`${testId}-create`)
@@ -174,13 +175,13 @@ component DataTable
               row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" background-color=(checked.keys.includes(r.key) ? "theme.color.fill" : "transparent") border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(marked(agent, marks, r.key))
                 input type="checkbox" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=(interaction == "busy") aria-label=`${selectLabel} ${r.title}` flex-shrink=0 testId=`${testId}-check-${r.key}`
                 column flex=1 min-width=0 gap="theme.space.xs"
-                  row align-items="flex-start" gap="theme.space.sm"
-                    link href=r.href color="theme.color.ink" flex=1 min-width=0 testId=`${testId}-link-${r.key}`
-                      :hover
-                        color="theme.color.accent"
-                      text r.title font="theme.type.label"
+                  link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
+                    :hover
+                      color="theme.color.accent"
+                    text r.title font="theme.type.label"
+                  row align-items="center" gap="theme.space.sm"
                     StatusPill(text=r.status, tone=r.tone)
-                  text `${r.owner} · ${r.updated}` font="theme.type.caption" color="theme.color.ink-muted"
+                    text `${r.owner} · ${r.updated}` font="theme.type.caption" color="theme.color.ink-muted" flex=1 min-width=0
                 svg viewBox="0 0 12 12" width="blocks.glyph" height="blocks.glyph" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
                   path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
       else
@@ -231,13 +232,13 @@ component DataTable
               tbody
                 tr
                   td colspan=5 text-align="center" height="blocks.state-min" padding-left="theme.space.lg" padding-right="theme.space.lg" role=(data == "failed" ? "alert" : "status")
-                    column gap="theme.space.md" align-items="center"
+                    column gap="theme.space.md" align-items="center" max-width="blocks.state-max" margin-left="auto" margin-right="auto" box-sizing="border-box"
                       if data == "failed"
                         StateGlyph(ink="theme.color.critical")
                       Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
                       if data == "failed" and retryLabel != ""
                         row
-                          ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="error", press=retry, testId=`${testId}-retry`)
+                          ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
                       if data == "empty" and createLabel != ""
                         row
                           ActionButton(label=createLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=create, testId=`${testId}-create`)

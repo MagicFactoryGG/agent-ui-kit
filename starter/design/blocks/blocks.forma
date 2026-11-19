@@ -8,7 +8,7 @@ theme
   blocks.row-min: length = 44px
   blocks.mark-line: length = 3px
   blocks.glyph: length = 12px
-  blocks.state-glyph: length = 20px
+  blocks.state-glyph: length = 24px
   blocks.select-col: length = 48px
   blocks.col-status: length = 112px
   blocks.col-owner: length = 128px
@@ -17,3 +17,4 @@ theme
   blocks.skel-check: length = 16px
   blocks.tone-dot: length = 6px
   blocks.state-min: length = 176px
+  blocks.state-max: length = 480px
