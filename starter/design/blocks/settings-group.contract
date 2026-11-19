@@ -11,7 +11,7 @@
 // disabled, busy) stills the group without dimming a word below what a person can read (disabled rows take the
 // muted ink, the switch sleeps); `outcome` (success, error) says one line under the group; `agent` (proposed,
 // changed, waiting) marks the card's start and says `agentNote` under it, the way LinkRow and TopBar do. The
-// destructive row stands a hair off the last row above it, the way a settings page sets it apart.
+// destructive row stands theme.space.sm off the last row above it, the way a settings page sets it apart.
 // `blocks.settings-max` keeps the card a sensible width on a wide window and centres it there, the same width
 // in every state; on a phone every label, detail and value wraps, so the edges stay aligned and nothing is cut
 // off.
@@ -80,7 +80,7 @@ component SettingsGroup
                     box flex=7 height="blocks.skeleton-line" background-color="theme.color.fill" border-radius="theme.radius.pill"
                     box flex=3
         else if data == "failed"
-          column padding="theme.space.lg" gap="theme.space.md"
+          column padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" gap="theme.space.md"
             text failedText testId=`${testId}-failed` role="alert" font="theme.type.body" color="theme.color.critical-text"
             if retryLabel != ""
               row
@@ -125,7 +125,7 @@ component SettingsGroup
               svg viewBox="0 0 12 12" width="blocks.chevron" height="blocks.chevron" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
                 path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
           else
-            button press=remove(r.key) disabled=(interaction != "idle") testId=`${testId}-danger-${r.key}` margin-top="theme.space.xs" display="flex" flex-direction="row" align-items="center" gap="theme.space.md" text-align="start" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" background-color="transparent"
+            button press=remove(r.key) disabled=(interaction != "idle") testId=`${testId}-danger-${r.key}` margin-top="theme.space.sm" display="flex" flex-direction="row" align-items="center" gap="theme.space.md" text-align="start" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" background-color="transparent"
               :hover
                 background-color="theme.color.hover"
               :active
