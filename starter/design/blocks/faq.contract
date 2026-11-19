@@ -1,0 +1,279 @@
+// Faq: questions and their answers, the way a help page reads them. A heading over a lead line names the page;
+// every question is a disclosure row (a heading that holds one button, `aria-expanded` on it, the answer its own
+// region under it), the open one showing its answer at a readable measure. The app owns which rows are open (each
+// Question's `open`); a press calls `toggle` with the row's key, so a person's press and an agent's tool reach
+// the same action.
+//
+// Width: on a wide window the heading, lead and the way to a person ("still need a hand?") stand in a side
+// column beside the list (a responsive pair that still wraps when the block is placed in a narrow container);
+// on a phone (the window under 640px: the responsive-columns recipe, "Else read exactViewport's width") it is one
+// column — heading, lead, the questions, then the way to a person after them, where a reader who found no answer
+// arrives. `blocks.faq-max` caps the whole; `blocks.faq-measure` caps a line of the lead and of an answer.
+//
+// The list is rows, not cards: hairline seams between them, no box around each. Each row's glyph is a small disc
+// — the fill with a muted plus when closed, the accent with the accent's own ink and a minus when open — so the
+// open question is the state's one filled focal point and reads by shape as well as colour.
+//
+// States, declared once as axes:
+//   data   many | one | empty | loading | failed | long. Loading draws the rows' own grid with every word a
+//          breathing bar (the first row open, its answer's lines under it), so the real rows arrive into a room
+//          they already fit. Empty and failed are the kit's StatePanel in the list's place: empty's way on is the
+//          app's ask (`contact`, the primary), failed's way back is `retry`. Long words wrap; nothing is cut.
+//   agent  none | proposed | changed | waiting. An agent edits answers (data), never which row is open (view
+//          state). `agentKey` names the question it touched; that row wears the kit's mark line at its start
+//          (accent for proposed and changed, caution while it waits: LinkRow's grammar) and says its note under
+//          the question. A proposal is held in one place, at the head of the list: one sentence and two answer
+//          words (docs/recipes/one-sentence-two-words.md), the kit's Proposal look drawn here from its own pieces
+//          (Proposal lives in this package's index.contract, which imports this file back). When the question is
+//          not in the list (empty, loading, failed), the note stands in that same place.
+use Words, ActionButton from "__SCOPE__/components"
+use StatePanel from "./state-panel.contract"
+
+// One question: its key (the app's toggle and the agent's mark name it), the question, its answer, and whether
+// the person has it open.
+shape Question
+  key: string
+  question: string
+  answer: string
+  open: bool
+
+// The window's width and the person's motion preference: the facts this block reads to lay itself out.
+shape FaqViewport
+  width: number
+  prefersReducedMotion: bool
+
+// The skeleton's quiet breathing, held still when the person prefers no motion.
+keyframes faq-breathe
+  50% opacity=0.45
+
+// The mark an agent's act leaves on a row: accent for a proposal or a change, caution while it waits.
+fn faqMark(a: string): string = a == "waiting" ? "theme.color.caution" : a == "none" ? "transparent" : "theme.color.accent"
+// The words of that mark: status as words in its -text ink on the page.
+fn faqMarkInk(a: string): string = a == "waiting" ? "theme.color.caution-text" : "theme.color.accent"
+
+// The open or closed glyph: a disc with a plus (closed, on the fill) or a minus (open, the accent with its ink).
+component FaqGlyph
+  props
+    open: bool
+  view
+    svg viewBox="0 0 24 24" width="blocks.faq-glyph" height="blocks.faq-glyph" aria-hidden=true flex-shrink=0
+      circle cx=12 cy=12 r=12 fill=(open ? "theme.color.accent" : "theme.color.fill")
+      path d=(open ? "M7.5 12h9" : "M7.5 12h9M12 7.5v9") stroke=(open ? "theme.color.accent-ink" : "theme.color.ink-muted") stroke-width=1.75 stroke-linecap="round"
+
+// An agent's line: a dot and one sentence in the mark's ink, said where a person reads it.
+component FaqNote
+  props
+    text: string
+    agent: enum<"none", "proposed", "changed", "waiting">
+    testId: string
+  view
+    row align-items="baseline" gap="theme.space.sm" min-width=0
+      box width="blocks.agent-dot" height="blocks.agent-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color=faqMark(agent) aria-hidden=true
+      text text testId=testId min-width=0 font="theme.type.caption" color=faqMarkInk(agent)
+
+// One question: a heading holding the disclosure button (the question, then its glyph at the row's end, level
+// with the question's first line), and when open the answer under it at the measure, its right edge clear of the
+// glyph's column. The agent's mark line runs at the row's start; its note sits under the question.
+component FaqRow
+  props
+    item: Question
+    mark: enum<"none", "proposed", "changed", "waiting">
+    note: string
+    toggle: action
+    testId: string
+  view
+    column role="listitem" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.faq-mark" border-left-style="solid" border-left-color=faqMark(mark)
+      column role="heading" aria-level=3
+        button press=toggle(item.key) testId=testId aria-expanded=item.open aria-controls=`${testId}-answer` display="flex" flex-direction="row" align-items="flex-start" gap="theme.space.lg" text-align="start" min-height="blocks.faq-row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.lg" padding-bottom=(item.open or mark != "none" ? "theme.space.sm" : "theme.space.lg") border-width=0 background-color="transparent" color="theme.color.ink"
+          :hover
+            background-color="theme.color.hover"
+          :active
+            background-color="theme.color.fill"
+          :focus-visible
+            box-shadow="inset 0 0 0 2px theme.color.focus"
+          text item.question testId=`${testId}-question` flex=1 min-width=0 padding-top="blocks.faq-glyph-lead" font="theme.type.label" color="theme.color.ink"
+          FaqGlyph(open=item.open)
+      if mark != "none" and note != ""
+        column padding-left="theme.space.lg" padding-right="blocks.faq-glyph-room" padding-bottom=(item.open ? "theme.space.sm" : "theme.space.lg")
+          FaqNote(text=note, agent=mark, testId=`${testId}-agent`)
+      if item.open
+        column id=`${testId}-answer` role="region" aria-label=item.question padding-left="theme.space.lg" padding-right="blocks.faq-glyph-room" padding-bottom="theme.space.xl"
+          text item.answer testId=`${testId}-answer` max-width="blocks.faq-measure" font="theme.type.body" color="theme.color.ink-muted"
+
+// One bar of the skeleton: the fill at a share of its line, breathing unless the person asked for still.
+component FaqBone
+  props
+    share: string
+    tall: string
+    pulse: string
+  view
+    box width=share height=tall background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
+
+// One row while the questions load: the real row's grid (its seam, paddings and the glyph's disc), the question a
+// bar; the first row open, its answer two bars and a ragged third under it.
+component FaqGhost
+  props
+    share: string
+    open: bool
+    pulse: string
+  view
+    column border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.faq-mark" border-left-style="solid" border-left-color="transparent"
+      row align-items="center" gap="theme.space.lg" min-height="blocks.faq-row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.lg" padding-bottom=(open ? "theme.space.sm" : "theme.space.lg")
+        row flex=1 min-width=0
+          FaqBone(share=share, tall="blocks.faq-bone", pulse=pulse)
+        box width="blocks.faq-glyph" height="blocks.faq-glyph" flex-shrink=0 border-radius="theme.radius.pill" background-color="theme.color.fill" animation=pulse
+      if open
+        column gap="theme.space.sm" padding-left="theme.space.lg" padding-right="blocks.faq-glyph-room" padding-bottom="theme.space.xl"
+          FaqBone(share="100%", tall="blocks.faq-bone-thin", pulse=pulse)
+          FaqBone(share="92%", tall="blocks.faq-bone-thin", pulse=pulse)
+          FaqBone(share="56%", tall="blocks.faq-bone-thin", pulse=pulse)
+
+// The page's head: a short eyebrow in the accent, the title, the lead at the measure.
+component FaqHead
+  props
+    eyebrow: string
+    title: string
+    lead: string
+    testId: string
+  view
+    column gap="theme.space.sm" min-width=0
+      if eyebrow != ""
+        text eyebrow testId=`${testId}-eyebrow` font="theme.type.heading" color="theme.color.accent"
+      Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+      if lead != ""
+        text lead testId=`${testId}-lead` max-width="blocks.faq-measure" font="theme.type.body" color="theme.color.ink-muted"
+
+// The way to a person, when no answer fits: a label, a line, one plain button (the list's open answer stays the
+// focal point). A hairline above it parts it from what it follows.
+component FaqContact
+  props
+    title: string
+    text: string
+    label: string
+    press: action
+    testId: string
+  view
+    column gap="theme.space.xs" align-items="flex-start" padding-top="theme.space.lg" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+      if title != ""
+        text title testId=`${testId}-contact-title` font="theme.type.label" color="theme.color.ink"
+      if text != ""
+        text text testId=`${testId}-contact-text` font="theme.type.caption" color="theme.color.ink-muted"
+      if label != ""
+        row margin-top="theme.space.sm"
+          ActionButton(label=label, kind="plain", interaction="idle", outcome="none", press=press, testId=`${testId}-contact`)
+
+// The list's place: the proposal or a note with no row to sit on, then the rows, their skeleton, or the state
+// panel.
+component FaqList
+  props
+    title: string
+    emptyTitle: string
+    emptyText: string
+    failedText: string
+    loadingText: string
+    retryLabel: string
+    contactLabel: string
+    agentKey: string
+    agentNote: string
+    waitingNote: string
+    proposalText: string
+    acceptLabel: string
+    declineLabel: string
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed", "waiting">
+    questions: Question[]
+    toggle: action
+    retry: action
+    contact: action
+    accept: action
+    decline: action
+    pulse: string
+    testId: string
+  derive rows = data == "many" or data == "one" or data == "long"
+  derive agentInList = rows and questions.filter(q => q.key == agentKey).length > 0
+  derive rowNote = agent == "changed" ? agentNote : agent == "waiting" ? waitingNote : ""
+  // The state panel's one way on: back (retry) when the questions failed, the ask (contact) when there are none.
+  action wayOn
+    if data == "failed"
+      retry()
+    else
+      contact()
+  view
+    column flex=1 min-width=0 gap="theme.space.lg"
+      if agent == "proposed"
+        row testId=`${testId}-proposal` role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.sm" padding="theme.space.md" padding-left="theme.space.lg" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent"
+          column flex=1 min-width="blocks.faq-ask-min"
+            Words(text=proposalText, kind="body", outcome="none", level=0, testId=`${testId}-proposal-text`)
+          row flex-wrap="wrap" justify-content="flex-end" column-gap="theme.space.sm" row-gap="theme.space.sm" margin-left="auto"
+            ActionButton(label=declineLabel, kind="plain", interaction="idle", outcome="none", press=decline, testId=`${testId}-decline`)
+            ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+      else if rowNote != "" and not agentInList
+        column role="status" padding-left="theme.space.lg" padding-right="theme.space.lg"
+          FaqNote(text=rowNote, agent=agent, testId=`${testId}-agent`)
+      if data == "empty" or data == "failed"
+        StatePanel(title=(data == "failed" ? title : emptyTitle), message=emptyText, failedText=failedText, agentNote="", actionLabel=contactLabel, retryLabel=retryLabel, data=(data == "failed" ? "failed" : "empty"), agent="none", size="full", press=wayOn, testId=`${testId}-state`)
+      else if data == "loading"
+        column role="status" aria-label=loadingText aria-busy=true border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+          FaqGhost(share="72%", open=true, pulse=pulse)
+          FaqGhost(share="54%", open=false, pulse=pulse)
+          FaqGhost(share="66%", open=false, pulse=pulse)
+          FaqGhost(share="48%", open=false, pulse=pulse)
+      else
+        column role="list" aria-label=title border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+          for q in questions key=q.key
+            FaqRow(item=q, mark=(q.key == agentKey ? agent : "none"), note=(q.key == agentKey ? rowNote : ""), toggle=toggle, testId=`${testId}-q-${q.key}`)
+
+component Faq
+  props
+    eyebrow: string
+    title: string
+    lead: string
+    contactTitle: string
+    contactText: string
+    contactLabel: string
+    emptyTitle: string
+    emptyText: string
+    failedText: string
+    loadingText: string
+    retryLabel: string
+    agentKey: string
+    agentNote: string
+    waitingNote: string
+    proposalText: string
+    acceptLabel: string
+    declineLabel: string
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed", "waiting">
+    questions: Question[]
+    toggle: action
+    retry: action
+    contact: action
+    accept: action
+    decline: action
+    testId: string
+  resource viewport = exactViewport() as shape FaqViewport
+  derive narrow = viewport.width < 640
+  derive pulse = viewport.prefersReducedMotion ? "none" : "faq-breathe 1.6s ease-in-out infinite"
+  // The empty state's own way on is the ask; the side column does not offer it twice.
+  derive askAside = data != "empty"
+  // A row's press names its question: the app's toggle, the same action an agent's tool reaches.
+  action flip(key: string)
+    toggle(key)
+  view
+    column testId=testId width="100%" max-width="blocks.faq-max" margin-left="auto" margin-right="auto" box-sizing="border-box" aria-busy=(data == "loading")
+      if narrow
+        column gap="theme.space.xl"
+          column padding-left="theme.space.lg" padding-right="theme.space.lg"
+            FaqHead(eyebrow=eyebrow, title=title, lead=lead, testId=testId)
+          FaqList(title=title, emptyTitle=emptyTitle, emptyText=emptyText, failedText=failedText, loadingText=loadingText, retryLabel=retryLabel, contactLabel=contactLabel, agentKey=agentKey, agentNote=agentNote, waitingNote=waitingNote, proposalText=proposalText, acceptLabel=acceptLabel, declineLabel=declineLabel, data=data, agent=agent, questions=questions, toggle=flip, retry=retry, contact=contact, accept=accept, decline=decline, pulse=pulse, testId=testId)
+          if askAside
+            column padding-left="theme.space.lg" padding-right="theme.space.lg"
+              FaqContact(title=contactTitle, text=contactText, label=contactLabel, press=contact, testId=testId)
+      else
+        row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xxl" row-gap="theme.space.xl"
+          column flex=1 min-width="blocks.faq-aside" box-sizing="border-box" gap="theme.space.xl" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.lg"
+            FaqHead(eyebrow=eyebrow, title=title, lead=lead, testId=testId)
+            if askAside
+              FaqContact(title=contactTitle, text=contactText, label=contactLabel, press=contact, testId=testId)
+          column flex=2 min-width="blocks.faq-main" box-sizing="border-box"
+            FaqList(title=title, emptyTitle=emptyTitle, emptyText=emptyText, failedText=failedText, loadingText=loadingText, retryLabel=retryLabel, contactLabel=contactLabel, agentKey=agentKey, agentNote=agentNote, waitingNote=waitingNote, proposalText=proposalText, acceptLabel=acceptLabel, declineLabel=declineLabel, data=data, agent=agent, questions=questions, toggle=flip, retry=retry, contact=contact, accept=accept, decline=decline, pulse=pulse, testId=testId)
