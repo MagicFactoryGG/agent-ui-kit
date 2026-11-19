@@ -5,7 +5,7 @@
 // not (a phone, or a shell's own sidebar column) the spacer wraps away and the panel fills the whole width, a
 // full-width list; narrower than its basis it shrinks (min-width 0) and the rows' own truncation holds.
 //
-// Height: the panel is exactly as tall as what it holds — the brand, the slot's field, the places, the
+// Height: the panel is exactly as tall as what it holds — the brand, the app's slot, the places, the
 // account, one stack, no reserved room. A shell that gives the panel a definite height is met half way: the
 // places' own column grows (flex=1, its own scroll room) and the account pins to the pane's bottom, the way a
 // real sidebar's account sits; alone in a window the same column closes to its content and the account sits
@@ -24,7 +24,7 @@
 // theme.space.md, so the brand's mark, a group's heading, each place's label, a state's words and the account
 // all start on one edge; the state cards' corners sit on that same edge (their columns pad the same md), so a
 // state never reads as a different component from the list that surrounds it, while a row's fill (the current
-// place's, a hover's) and the slot's well span the panel's own content width — the content grid. The hairlines
+// place's, a hover's) spans the panel's own content width — the content grid. The hairlines
 // that close the brand and sit above the account stay on that grid too: full-bleed ones were asked for ("keep
 // the header divider full-bleed inside the panel") and tried twice — a negative token margin is refused as a
 // literal (`lower-library-literal`), and calc(0px - theme.space.sm), which the compiler admits (probed), is
@@ -35,30 +35,12 @@
 // not by frames; the line token draws the panel's own frame and those two hairlines, and nothing else.
 //
 // - The brand is its own band, closed by a hairline: the product's mark and name (each optional by being
-//   empty, the name the panel's largest words). The slot (the app's control: a switch, a search) opens
-//   the places' area under the hairline, in a bay that is a field — framed by the muted hairline, the
-//   one the badges' chips share, rounded as a control is, with no ground of its own: an input's outline
-//   (light's #63636b is a native input's own border; dark's #a1a1aa reads at a glance), so whatever the
-//   app puts there reads as a control, never as a label racing the menu's own words (a look round read a
-//   bare slot's words as a second heading and asked for hierarchy; the category is the frame's, not a
-//   bigger font). Every ground and frame has now been tried once and dinged once, two of them by the
-//   same treatment read both ways: the kit's fill sat above the current row's own fill and drowned the
-//   panel's focal point, the page's recess drew its own attention in dark, and the line token's frame
-//   was read as "almost disappears" in dark by one round and a "heavier bordered 'input' look" by the
-//   next — a frame no eye agrees on. The muted hairline is the one outline in this panel no look round
-//   has ever dinged (it is the badges' own), it says "small interactive thing" the way the line token
-//   says "container", and it is what the last round itself asked for: "a hairline border token shared
-//   with badges". The field grows no more:
-//   its height is fixed (blocks.nav-slot-bay, the content box — a control's height and a
-//   hair), the same in every state ("input heights differ between states", a look round's reading; a field
-//   keeps its home), holding two body lines whole — the clip edge lands on the line grid, two lines and a
-//   hair of leading, so no half glyph bleeds — and what the app puts there beyond it wraps and scrolls
-//   inside the well rather than pushing the menu down, so the places start one even rhythm after whatever
-//   the app gives. (Look rounds keep asking for a one-line ellipsis or a clamp on the slot's own words; the
-//   field is drawn here, the words are not — a package cannot take `line-clamp` for another component's
-//   text, and Exact's own check says the same when a nowrap well was tried: "its text is wider than its
-//   box… ask for `line-clamp`", eight findings on the long cell. The bound is the package's honest answer;
-//   the ellipsis belongs to the app's own control.)
+//   empty, the name the panel's largest words). The slot (the app's control: a search field, a workspace
+//   picker) opens the places' area under the hairline, in a plain column on the header's own gutters
+//   (theme.space.md each side) that grows to whatever height the app's content needs: no fixed height, no
+//   scroll, no clip, no frame or ground of its own — the field draws its own frame. (Rounds 21-31 drew a
+//   framed bay of a fixed height to keep every state's geometry; the coordinator's r2 look found it cut the
+//   long state's slot mid-sentence. A slot's content is the app's; the block only gives it room.)
 // - The places: NavEntry rows grouped by `group` in first-seen order ("" no heading); a group's own name is its
 //   heading, an eyebrow — the caption type, muted, uppercase with a little letter-spacing, on a row the height
 //   of every section label (theme.space.xl, so the sections read as names of rooms, not as rows, and the ghost
@@ -79,7 +61,7 @@
 // - An agent that added or reordered an entry (agent "changed"): the entry `agentKey` names gets an accent edge
 //   at its start and `agentNote`'s words under its label (the kit's LinkRow language).
 // - The states' words speak where the rows speak — no heading of their own, so a state never reads as a copy
-//   change — and each state stands in the list's own geometry: the brand, the field, the room, the account,
+//   change — and each state stands in the list's own geometry: the brand, the slot, the room, the account,
 //   in one stack, the card at the first section label's own place (one round asked for it at the rows'
 //   y, a section-label's room lower; the 48px void that left read as "two boxes feel unrelated and leaves
 //   the sidebar looking broken" — the label's place is where the states have read best, and this note
@@ -141,7 +123,8 @@
 //   name, a group's label or the account's byline and the full words appear); the account's name and role
 //   both cut at the same right edge — one column bounds both, no second max-width (a look round read two
 //   lines cut at different x as "uneven character counts… looks broken"; the shared edge is the honest cut);
-//   the slot's content is the app's, bounded by the well, and a package cannot clamp what it does not draw.
+//   the slot's content is the app's: it wraps whole at its own height, and a package cannot clamp what it
+//   does not draw.
 //
 // States:
 //   data   many|empty|loading|failed|long|one
@@ -265,7 +248,7 @@ component SideNav
                 text productMark.trim().slice(0, 2) font="theme.type.heading" color="theme.color.ink" text-align="center" white-space="nowrap"
             if productName != ""
               text productName testId=`${testId}-name` title=productName flex=1 min-width=0 font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-        column min-width=0 height="blocks.nav-slot-bay" overflow="auto" border-width="theme.line.width" border-style="solid" border-color="theme.color.ink-muted" border-radius="theme.radius.control" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.sm"
+        column min-width=0 padding-left="theme.space.md" padding-right="theme.space.md"
           children
         column flex=1 min-width=0 min-height=0 overflow="auto"
           if data == "failed"
