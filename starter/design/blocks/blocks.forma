@@ -4,8 +4,9 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
-  blocks.panel-max: length = 420px
+  blocks.panel-max: length = 480px
   blocks.panel-compact: length = 320px
   blocks.shape-full: length = 56px
   blocks.shape-compact: length = 40px
   blocks.bone: length = 12px
+  blocks.measure: length = 320px

@@ -1,10 +1,10 @@
 // One block for a whole area's empty, loading and failed states: a calm centred panel, its card, shape and type
-// all Theme tokens (no image file). The drawn shape says the state: a ring held open (empty), a broken arc
+// all Theme tokens (no image file). The drawn shape says the state: a plain ring held open (empty), a broken arc
 // (loading), a filled alert form (failed). Loading keeps the title (so a reader hears what loads, role=status) and
-// stands in three skeleton lines for the rest; failed says its one line in the error's ink (role=alert) with the
-// same one action as the retry. `size` "full" is the whole area's panel (its own max width, the larger shape);
-// "compact" is for a card's body or a side panel. No agent axis, as Section: nothing in this panel for an agent to
-// change or wait on; the app's own notice says an act.
+// stands in three skeleton lines, cut to the panel's own measure; failed says its title in the error's ink
+// (role=alert) and offers the same one action as the retry, primary whenever it shows. `size` "full" is the whole
+// area's panel; "compact" is for a card's body or a side panel. No agent axis, as Section: nothing here for an
+// agent to change or wait on; the app's own notice says an act.
 use Words, ActionButton from "__SCOPE__/components"
 
 component StatePanel
@@ -26,14 +26,14 @@ component StatePanel
         else if data == "loading"
           circle cx=12 cy=12 r=10 fill="none" stroke="theme.color.ink-muted" stroke-width=2.5 stroke-linecap="round" stroke-dasharray="47 16" transform="rotate(-90 12 12)"
         else
-          circle cx=12 cy=12 r=10 fill="none" stroke="theme.color.ink-muted" stroke-width=2 stroke-dasharray="3.5 3.5"
-      Words(text=title, kind=(size == "full" ? "title" : "label"), outcome="none", level=2, testId=`${testId}-title`)
+          circle cx=12 cy=12 r=10 fill="none" stroke="theme.color.ink-muted" stroke-width=2
+      Words(text=title, kind=(size == "full" ? "title" : "heading"), outcome=(data == "failed" ? "error" : "none"), level=2, testId=`${testId}-title`)
       if data == "loading"
-        column testId=`${testId}-loading` width="100%" gap="theme.space.sm"
-          box height="blocks.bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
-          box height="blocks.bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
-          box height="blocks.bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+        column testId=`${testId}-loading` width="100%" max-width="blocks.measure" gap="theme.space.md" align-items="center"
+          box height="blocks.bone" width="100%" background-color="theme.color.fill" border-radius="theme.radius.pill"
+          box height="blocks.bone" width="100%" background-color="theme.color.fill" border-radius="theme.radius.pill"
+          box height="blocks.bone" width="60%" background-color="theme.color.fill" border-radius="theme.radius.pill"
       else
-        Words(text=message, kind="caption", outcome=(data == "failed" ? "error" : "none"), level=0, testId=`${testId}-message`)
+        Words(text=message, kind="caption", outcome="none", level=0, testId=`${testId}-message`)
         if actionLabel != ""
-          ActionButton(label=actionLabel, kind=(data == "failed" ? "plain" : "primary"), interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
+          ActionButton(label=actionLabel, kind="primary", interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
