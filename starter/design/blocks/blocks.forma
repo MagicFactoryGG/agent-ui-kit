@@ -6,3 +6,4 @@ theme
   blocks.sheet-max: length = 480px
   blocks.gate-max: length = 560px
   blocks.gate-choice: length = 240px
+  blocks.gate-mark: length = 3px
