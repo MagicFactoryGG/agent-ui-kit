@@ -4,9 +4,11 @@
 // the one active colour, a critical disc for the alert form — so the three read as one family. The panel's
 // words all sit on one measure, blocks.measure, centred — title, state line, agent note, and the bones below —
 // so every element shares one column, and a message wraps at the same width the skeleton stands in for. The
-// state line follows Section's own convention — body size, muted for empty and loading, the error's ink for
-// failed — and shows in every state, so the panel always says in words what its area is (role=status speaks
-// title and line while loading, role=alert in failed). Loading stands the content in three equal bones in the
+// state line follows Section's own convention — body size, muted for empty, the error's ink for failed — and
+// shows in empty and failed, so the panel says in words what its area is (role=alert in failed). In loading the
+// skeleton is the line, as the panel's own spec has it, and the live words are the title's — role=status speaks
+// what is loading — and the note's when an agent started the load: no live sentence sits above placeholders to
+// read half-loaded. Loading stands the content in three equal bones in the
 // action's own place: the same separation above, the same height below (a bone and its gap are a 21px line, and
 // the three make 52, the action's own least height), all one width on the one measure — the calmest placeholder
 // there is, symmetric with the panel's axis — so the card's height does not shift when the state turns. The card
@@ -56,7 +58,7 @@ component StatePanel
           path d="M7.5 12.6h2.55l1.05 1.65h1.8L13.95 12.6h2.55" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
       column width="100%" max-width="blocks.measure" align-items="center" gap="theme.space.sm"
         Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
-        if message != ""
+        if data != "loading" and message != ""
           Words(text=message, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-message`)
         if agent == "changed"
           row testId=`${testId}-agent` align-items="center" gap="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
