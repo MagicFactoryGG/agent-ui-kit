@@ -72,6 +72,7 @@ component MessageRow
     message: Message
     chosen: bool
     marked: bool
+    note: string
     testId: string
   view
     link href=message.href testId=testId aria-current=(chosen ? "true" : "false") display="flex" flex-direction="row" align-items="flex-start" gap="theme.space.xs" min-height="components.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" color="theme.color.ink" text-decoration-line="none" background-color=(chosen ? "theme.color.fill" : "transparent") border-left-width="components.mark-line" border-left-style="solid" border-left-color=(marked or chosen ? "theme.color.accent" : "transparent")
@@ -82,20 +83,23 @@ component MessageRow
       :focus-visible
         box-shadow="inset 0 0 0 2px theme.color.focus"
       row flex-shrink=0 align-items="flex-start"
-        box width="blocks.dot-gutter" height="blocks.dot-line" display="flex" align-items="center"
+        box width="blocks.dot-gutter" height="blocks.row-line" display="flex" align-items="center"
           if message.unread
             box width="blocks.dot" height="blocks.dot" background-color="theme.color.accent" border-radius="theme.radius.pill"
-        box width="blocks.icon" height="blocks.dot-line" display="flex" align-items="center"
+        box width="blocks.icon" height="blocks.row-line" display="flex" align-items="center"
           if message.flagged
             svg viewBox="0 0 12 12" width="components.chevron" height="components.chevron" fill="none" aria-hidden=true
               path d="M3 2v8" stroke="theme.color.caution" stroke-width=1.5 stroke-linecap="round"
               path d="M3.5 4h5.5l-1.8 2 1.8 2H3.5z" fill="theme.color.caution"
       column flex=1 min-width=0 gap="theme.space.xs"
-        row align-items="center" gap="theme.space.lg"
+        row align-items="center" gap="theme.space.lg" min-height="blocks.row-line"
           text message.from testId=`${testId}-from` min-width=0 flex=1 font=(message.unread or chosen ? "theme.type.label" : "theme.type.body") color=rowInk(message.unread or chosen) white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
           text message.when testId=`${testId}-when` min-width=0 flex-shrink=0 font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-        text message.subject testId=`${testId}-subject` font=(message.unread or chosen ? "theme.type.label" : "theme.type.body") color=rowInk(message.unread or chosen) white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+        row align-items="center" min-height="blocks.row-line"
+          text message.subject testId=`${testId}-subject` min-width=0 flex=1 font=(message.unread or chosen ? "theme.type.label" : "theme.type.body") color=rowInk(message.unread or chosen) white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
         text message.snippet testId=`${testId}-snippet` font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+        if marked and note != ""
+          text note testId=`${testId}-agent` font="theme.type.caption" color="theme.color.accent"
 
 // One quiet row while the messages load: the real row's own grid, exactly — the same padding, the same status
 // rail with both slots drawn (a breathing dot in the unread's place, the flag's slot kept), the same gaps —
@@ -108,9 +112,9 @@ component SkelRow
   view
     row align-items="flex-start" gap="theme.space.xs" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md"
       row flex-shrink=0 align-items="flex-start"
-        box width="blocks.dot-gutter" height="blocks.dot-line" display="flex" align-items="center"
+        box width="blocks.dot-gutter" height="blocks.row-line" display="flex" align-items="center"
           box width="blocks.dot" height="blocks.dot" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
-        box width="blocks.icon" height="blocks.dot-line" display="flex" align-items="center"
+        box width="blocks.icon" height="blocks.row-line" display="flex" align-items="center"
       column flex=1 min-width=0 gap="theme.space.xs"
         row align-items="center" gap="theme.space.lg"
           box flex=1 height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
@@ -129,6 +133,7 @@ component ListPane
     chosenKey: string
     agentKey: string
     marked: bool
+    agentNote: string
     data: enum<"many", "one", "empty", "loading", "failed", "long">
     emptyText: string
     failedText: string
@@ -172,9 +177,9 @@ component ListPane
             column flex=1 role="list" margin-top="theme.space.sm"
               for m in messages key=m.key
                 column role="listitem"
-                  MessageRow(message=m, chosen=(m.key == chosenKey), marked=(marked and m.key == agentKey), testId=`${testId}-row-${m.key}`)
+                  MessageRow(message=m, chosen=(m.key == chosenKey), marked=(marked and m.key == agentKey), note=agentNote, testId=`${testId}-row-${m.key}`)
       if footerLabel != ""
-        column min-height="blocks.bar-min" justify-content="center" padding-left="theme.space.lg" padding-right="theme.space.lg" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+        column min-height="blocks.bar-min" box-sizing="border-box" justify-content="center" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
           text footerLabel testId=`${testId}-footer` font="theme.type.caption" color="theme.color.ink-muted"
 
 // The reading pane, drawn on the wide window beside the list: a band the pane's own width heads it, in the
@@ -197,7 +202,7 @@ component Reader
   view
     column flex=1 min-width=0 role="complementary" aria-label=paneLabel border-left-width="theme.line.width" border-left-style="solid" border-left-color="theme.color.line"
       if paneLabel != ""
-        column min-height="blocks.bar-min" justify-content="center" padding-left="theme.space.lg" padding-right="theme.space.lg" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+        column min-height="blocks.bar-min" box-sizing="border-box" justify-content="center" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
           text paneLabel testId=`${testId}-pane-label` font="theme.type.caption" color="theme.color.ink-muted"
       if loading
         column gap="theme.space.md" padding="theme.space.lg" aria-hidden=true
@@ -254,21 +259,24 @@ component MessageList
   derive narrow = viewport.width < 640
   derive pulse = viewport.prefersReducedMotion ? "none" : "breathe 1.6s ease-in-out infinite"
   derive unreadCount = messages.filter(m => m.unread).length
+  derive agentInList = (data == "many" or data == "one" or data == "long") and messages.filter(m => m.key == agentKey).length > 0
   view
     column testId=testId width="100%" max-width="blocks.mail-max" min-height=(narrow ? "blocks.mail-floor" : "blocks.mail-frame") margin-left="auto" margin-right="auto" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden" aria-busy=(data == "loading")
-      column justify-content="center" min-height="blocks.bar-min" padding-left="theme.space.xl" padding-right="theme.space.xl" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+      column justify-content="center" min-height="blocks.bar-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
         row align-items="center" gap="theme.space.md"
-          if title != ""
-            Words(text=title, kind="heading", outcome="none", level=2, testId=`${testId}-title`)
-          if data == "loading" or data == "failed"
-            box width="blocks.skel-when" height="blocks.badge-line" margin-left="auto" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse aria-hidden=true
+          column flex=1 min-width=0 gap="theme.space.xs"
+            if title != ""
+              Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+            if agent == "changed" and not agentInList
+              text agentNote testId=`${testId}-agent` font="theme.type.caption" color="theme.color.accent"
+          if data == "loading"
+            box width="blocks.skel-when" height="blocks.badge-line" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse aria-hidden=true
           else
-            text `${unreadCount} ${unreadLabel}` testId=`${testId}-count` margin-left="auto" min-width=0 font="theme.type.caption" color=(unreadCount > 0 ? "theme.color.accent" : "theme.color.ink-muted") background-color="theme.color.fill" border-radius="theme.radius.pill" padding-top="theme.space.xs" padding-bottom="theme.space.xs" padding-left="theme.space.sm" padding-right="theme.space.sm" font-variant-numeric="tabular-nums" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-        if agent == "changed"
-          text agentNote testId=`${testId}-agent` font="theme.type.caption" color="theme.color.accent"
+            if data != "failed"
+              text `${unreadCount} ${unreadLabel}` testId=`${testId}-count` flex-shrink=0 max-width="blocks.badge-max" box-sizing="border-box" font="theme.type.caption" color=(unreadCount > 0 ? "theme.color.accent" : "theme.color.ink-muted") background-color="theme.color.fill" border-radius="theme.radius.pill" padding-top="theme.space.xs" padding-bottom="theme.space.xs" padding-left="theme.space.sm" padding-right="theme.space.sm" font-variant-numeric="tabular-nums" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
       if narrow
-        ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, compose=compose, retry=retry, pulse=pulse, testId=testId)
+        ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, compose=compose, retry=retry, pulse=pulse, testId=testId)
       else
         row flex=1 align-items="stretch"
-          ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, compose=compose, retry=retry, pulse=pulse, testId=testId)
+          ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, compose=compose, retry=retry, pulse=pulse, testId=testId)
           Reader(paneLabel=paneLabel, paneEmptyText=paneEmptyText, messages=messages, chosenKey=chosenKey, loading=(data == "loading"), pulse=pulse, testId=testId)

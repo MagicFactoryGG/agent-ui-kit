@@ -12,7 +12,8 @@ theme
   blocks.icon: length = 16px
   blocks.dot: length = 8px
   blocks.dot-gutter: length = 16px
-  blocks.dot-line: length = 18px
+  blocks.row-line: length = 21px
+  blocks.badge-max: length = 160px
   blocks.skel-line: length = 10px
   blocks.skel-title: length = 16px
   blocks.skel-when: length = 56px
