@@ -53,14 +53,14 @@ component SkBar
     share: string
     height: string
   view
-    box flex=share height=height background-color="theme.color.fill" border-radius="theme.radius.pill"
+    box flex=share height=height background-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)" border-radius="theme.radius.pill"
 
 // A bar the shape of a button still loading.
 component SkBtn
   props
     basis: string
   view
-    box flex=basis min-width="blocks.skel-btn" min-height="blocks.skel-btn-tall" background-color="theme.color.fill" border-radius="theme.radius.control"
+    box flex=basis min-width="blocks.skel-btn" min-height="blocks.skel-btn-tall" background-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)" border-radius="theme.radius.control"
 
 component OnboardingSteps
   props
@@ -101,11 +101,11 @@ component OnboardingSteps
         text loadingText testId=`${testId}-loading` role="status" font="theme.type.body" color="theme.color.ink-muted"
         column gap="theme.space.md" aria-hidden=true animation="breathe 1.8s ease-in-out infinite"
           row gap="theme.space.md" align-items="center"
-            box min-width="blocks.skel-count" height="blocks.skel-line" border-radius="theme.radius.pill" background-color="theme.color.fill"
+            box min-width="blocks.skel-count" height="blocks.skel-line" border-radius="theme.radius.pill" background-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)"
             for j in [0, 1, 2, 3] key=j
-              StepDot(fill="theme.color.fill", edge="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)", ring=false, testId="")
+              StepDot(fill="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)", edge="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)", ring=false, testId="")
               if j < 3
-                StepSeg(ink="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)")
+                StepSeg(ink="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)")
           SkBar(share="2 1 0", height="blocks.skel-head")
           SkBar(share="1 1 0", height="blocks.skel-line")
           SkBar(share="2 1 0", height="blocks.skel-line")
