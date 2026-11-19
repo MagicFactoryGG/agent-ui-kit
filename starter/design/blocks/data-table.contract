@@ -78,19 +78,19 @@ component SortArrow
       else
         path d="M3.5 7L6 9.5L8.5 7" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
 
-// A record's status as a filled pill: the tone's dot (the neutral's is grey — one component, not a pill with a
-// piece missing) and word on the page's own wash, the lightest ground the theme names and the one every status
-// ink clears 4.5:1 on in both modes (the done ink reads 4.4:1 on the hover wash). A fill, not a border, so it
-// holds on any row background — a checked row's own fill included — and on any party's Theme, for every name it
-// reads is a token the theme tool requires of every theme. It never shrinks (a table cell grows its column
-// instead, a phone title wraps instead), and it is drawn twice (the desktop column, the phone title line), so
+// A record's status as a pill: the tone's dot (the neutral's is grey: one component, not a pill with a piece
+// missing) and its word inside a hairline in the theme's line colour, with no fill of its own. So the pill is the
+// same on every row (a checked row's fill included) and on every party's Theme: a page-coloured fill vanished
+// on a white page and showed only on the checked row (the lead's note, 20 Nov). It never shrinks (a table cell
+// grows its column instead, a phone title wraps instead), and it is drawn twice (the desktop column, the phone
+// title line), so
 // it lives here as the block's one local piece.
 component StatusPill
   props
     text: string
     tone: enum<"neutral", "progress", "done", "attention">
   view
-    row align-items="center" gap="theme.space.xs" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color="theme.color.page" border-radius="theme.radius.pill" flex-shrink=0
+    row align-items="center" gap="theme.space.xs" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.pill" flex-shrink=0
       box width="blocks.tone-dot" height="blocks.tone-dot" border-radius="theme.radius.pill" background-color=toneDot(tone)
       text text font="theme.type.caption" color=toneInk(tone)
 
@@ -176,7 +176,7 @@ component DataTable
                 SortArrow(dir=sortDir, ink="theme.color.ink-muted")
             for r, i in records key=r.key
               row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" background-color=(checked.keys.includes(r.key) ? "theme.color.fill" : "transparent") border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(marked(agent, marks, r.key))
-                input type="checkbox" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=(interaction == "busy") aria-label=`${selectLabel} ${r.title}` flex-shrink=0 testId=`${testId}-check-${r.key}`
+                input type="checkbox" accent-color="theme.color.accent" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=(interaction == "busy") aria-label=`${selectLabel} ${r.title}` flex-shrink=0 testId=`${testId}-check-${r.key}`
                 column flex=1 min-width=0 gap="theme.space.xs"
                   link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
                     :hover
@@ -193,7 +193,7 @@ component DataTable
             tr
               th scope="col" vertical-align="middle" width="blocks.select-col" box-sizing="border-box" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
                 if not noRows
-                  input type="checkbox" checked=allOn change=pickAll disabled=(interaction == "busy") aria-label=selectAllLabel testId=`${testId}-check-all`
+                  input type="checkbox" accent-color="theme.color.accent" checked=allOn change=pickAll disabled=(interaction == "busy") aria-label=selectAllLabel testId=`${testId}-check-all`
               th scope="col" vertical-align="baseline" aria-sort=(sort == "title" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
                 row align-items="center" gap="theme.space.xs"
                   text titleLabel font="theme.type.caption" color=(sort == "title" ? "theme.color.ink" : "theme.color.ink-muted")
@@ -250,7 +250,7 @@ component DataTable
                 for r, i in records key=r.key
                   tr background-color=(checked.keys.includes(r.key) ? "theme.color.fill" : "transparent")
                     td text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(marked(agent, marks, r.key))
-                      input type="checkbox" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=(interaction == "busy") aria-label=`${selectLabel} ${r.title}` testId=`${testId}-check-${r.key}`
+                      input type="checkbox" accent-color="theme.color.accent" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=(interaction == "busy") aria-label=`${selectLabel} ${r.title}` testId=`${testId}-check-${r.key}`
                     td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
                       link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
                         :hover
@@ -264,9 +264,9 @@ component DataTable
                     td text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
                       text r.updated font="theme.type.body" color="theme.color.ink-muted" font-variant-numeric="tabular-nums"
       if agent == "changed" or interaction == "busy" or data == "loading"
-        column gap="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(agent == "changed") padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md"
+        column gap="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md"
           if agent == "changed"
-            text agentNote font="theme.type.caption" color="theme.color.accent" testId=`${testId}-agent`
+            text agentNote font="theme.type.caption" color="theme.color.ink-muted" testId=`${testId}-agent`
           if data == "loading"
             text loadingText role="status" font="theme.type.caption" color="theme.color.ink-muted" testId=`${testId}-loading`
           if interaction == "busy"
