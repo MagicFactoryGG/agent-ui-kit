@@ -4,3 +4,11 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
+  blocks.stat-max: length = 720px
+  blocks.stat-tile-min: length = 160px
+  blocks.stat-trend: length = 12px
+  blocks.stat-glyph: length = 20px
+  blocks.stat-mark-line: length = 3px
+  blocks.stat-ghost-label: length = 96px
+  blocks.stat-ghost-value: length = 128px
+  blocks.stat-ghost-change: length = 72px

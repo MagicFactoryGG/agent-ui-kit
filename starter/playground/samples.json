@@ -1,3 +1,17 @@
 {
-  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types."
+  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A \"props:<Piece>\" object gives one piece's own prop values for its cells.",
+  "Stat:many": [
+    { "key": "revenue", "label": "Revenue", "value": "$48,210", "change": "+12.4%", "trend": "up" },
+    { "key": "signups", "label": "New sign-ups", "value": "1,864", "change": "+8.2%", "trend": "up" },
+    { "key": "aov", "label": "Average order value", "value": "$63.20", "change": "-2.1%", "trend": "down" },
+    { "key": "on-time", "label": "Fulfilled on time", "value": "96.4%", "change": "0.0%", "trend": "flat" }
+  ],
+  "props:StatTiles": {
+    "title": "This week",
+    "loadingText": "Reading this week's numbers…",
+    "failedText": "This week's numbers could not be read.",
+    "retryLabel": "Try again",
+    "agentKey": "revenue",
+    "agentNote": "Your assistant set Revenue to $52,000."
+  }
 }
