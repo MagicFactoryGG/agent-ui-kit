@@ -16,8 +16,8 @@
 // States, declared once:
 // - data many|one|empty|loading|failed|long. Loading keeps the head (the section's name is known; the plans are
 //   not), says `loadingText` as a status line where the lead stood, and stands three breathing ghost cards in the
-//   cards' own geometry — name, price, line, three points, the action's own height — so nothing moves when the
-//   plans arrive. Empty and failed are the kit's StatePanel in the cards' place: empty says `emptyTitle` and
+//   cards' own geometry — each bar in a row its line's own height: name, price, line, four points, the action — so
+//   nothing moves when the plans arrive. Empty and failed are the kit's StatePanel in the cards' place: empty says `emptyTitle` and
 //   `emptyText` with the way on (`contactLabel`, which reaches `contact`); failed says `failedTitle` and
 //   `failedText` with `retryLabel`, which reaches `retry`. Long text wraps inside each card; nothing truncates.
 // - interaction idle|busy: the chosen plan's action (`chosenKey`) keeps its words, is busy and cannot be pressed.
@@ -81,30 +81,34 @@ component PlanPoint
           path d="M2.5 6.5L5 9l4.5-5" stroke-width=1.75 stroke-linecap="round" stroke-linejoin="round"
       text text flex=1 min-width=0 font="theme.type.body" color="theme.color.ink"
 
-// One bar of a ghost card: `share` of its line against `rest`, at the height of the words it stands for.
+// One bar of a ghost card: `share` of its line against `rest`, `height` tall, centred in a row as tall as the
+// line of words it stands for (`line`), so a ghost card stands exactly as tall as the card that replaces it.
 component GhostBar
   props
     share: string
     rest: string
     height: string
+    line: string
   view
-    row
+    row min-height=line align-items="center"
       box flex=share height=height background-color="theme.color.fill" border-radius="theme.radius.pill"
       box flex=rest
 
-// A plan that has not arrived: the card's own frame and rhythm, breathing, never a control.
+// A plan that has not arrived: the card's own frame, gaps and line heights — the name row, the price, the line,
+// four points, the action — breathing, never a control.
 component GhostPlan
   view
     column flex=1 min-width="blocks.plan-min" max-width="blocks.plan-max" box-sizing="border-box" gap="theme.space.lg" padding="theme.space.xl" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" aria-hidden=true animation="plan-breathe 1.8s ease-in-out infinite"
-      column gap="theme.space.md"
-        GhostBar(share="1 1 0", rest="2 1 0", height="blocks.ghost-line")
-        GhostBar(share="1 1 0", rest="1 1 0", height="blocks.ghost-price")
-        GhostBar(share="4 1 0", rest="1 1 0", height="blocks.ghost-line")
       column gap="theme.space.sm"
-        GhostBar(share="3 1 0", rest="1 1 0", height="blocks.ghost-line")
-        GhostBar(share="2 1 0", rest="1 1 0", height="blocks.ghost-line")
-        GhostBar(share="3 1 0", rest="2 1 0", height="blocks.ghost-line")
-      box height="blocks.action-min" background-color="theme.color.fill" border-radius="theme.radius.control"
+        GhostBar(share="1 1 0", rest="2 1 0", height="blocks.ghost-line", line="blocks.plan-head")
+        GhostBar(share="1 1 0", rest="1 1 0", height="blocks.ghost-price", line="blocks.price-line")
+        GhostBar(share="4 1 0", rest="1 1 0", height="blocks.ghost-line", line="blocks.caption-line")
+      column gap="theme.space.sm"
+        GhostBar(share="3 1 0", rest="1 1 0", height="blocks.ghost-line", line="blocks.point-line")
+        GhostBar(share="2 1 0", rest="1 1 0", height="blocks.ghost-line", line="blocks.point-line")
+        GhostBar(share="3 1 0", rest="2 1 0", height="blocks.ghost-line", line="blocks.point-line")
+        GhostBar(share="2 1 0", rest="2 1 0", height="blocks.ghost-line", line="blocks.point-line")
+      box height="blocks.action-min" margin-top="theme.space.lg" background-color="theme.color.fill" border-radius="theme.radius.control"
 
 component Pricing
   props

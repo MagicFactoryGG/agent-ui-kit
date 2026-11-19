@@ -84,4 +84,6 @@ theme
   blocks.point-tick: length = 14px
   blocks.plan-head: length = 28px  // the tag's own height: a caption line, its xs paddings and hairlines
   blocks.ghost-line: length = 12px
-  blocks.ghost-price: length = 24px
+  blocks.ghost-price: length = 20px
+  blocks.price-line: length = 25px  // the title type's own line (20px at 1.25), where a price sits
+  blocks.caption-line: length = 18px  // the caption type's own line (13px at 1.35)
