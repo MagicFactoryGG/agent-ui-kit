@@ -8,7 +8,7 @@
     { "key": "naventry-5", "label": "Billing", "href": "/billing", "group": "Admin", "badge": 3, "current": false }
   ],
   "NavEntry:one": [
-    { "key": "naventry-1", "label": "Overview", "href": "/", "group": "Workspace", "badge": 0, "current": true }
+    { "key": "naventry-2", "label": "Overview", "href": "/", "group": "Workspace", "badge": 0, "current": true }
   ],
   "NavEntry:long": [
     { "key": "naventry-1", "label": "A very long line of text, as a person might really write it, that runs past the width a designer planned for and has to wrap or be cut short", "href": "/reports", "group": "Workspace", "badge": 2, "current": false },
@@ -26,6 +26,6 @@
     "accountName": "Ada Lovelace",
     "accountDetail": "Workspace admin",
     "agentKey": "naventry-2",
-    "agentNote": "Reports was added by your assistant."
+    "agentNote": "Added by your assistant"
   }
 }
