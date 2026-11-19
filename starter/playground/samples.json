@@ -21,6 +21,7 @@
     "emptyText": "Nothing here yet.",
     "loadingText": "Loading the menu…",
     "failedText": "The menu could not be loaded.",
+    "retryLabel": "Try again",
     "accountName": "Ada Lovelace",
     "accountDetail": "Workspace admin",
     "agentKey": "naventry-2",
