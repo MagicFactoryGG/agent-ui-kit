@@ -118,11 +118,11 @@ component SkelRow
         box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
         box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
 
-// The list's own pane: the messages as bands (one listitem each) with air below the header's line; empty,
-// loading and failed say their own line here — one focal cluster, centred in the pane, with the way on — and
-// stretch with the card, so its shape never changes with its state, only its content does. A footer band with
-// the app's words for the list's order pins the pane's bottom in every state, so even one row reads as a whole
-// list.
+// The list's own pane: the messages as bands (one listitem each) with air below the header's line; empty and
+// failed say their own line here — one focal cluster, centred in the pane, with the way on — and loading
+// breathes the rows it is waiting for; all of it stretches with the card, so the pane's shape never changes
+// with its state, only its content does. A footer band with the app's words for the list's order pins the
+// pane's bottom in every state, so even one row reads as a whole list.
 component ListPane
   props
     messages: Message[]
@@ -263,8 +263,7 @@ component MessageList
           if data == "loading" or data == "failed"
             box width="blocks.skel-when" height="blocks.badge-line" margin-left="auto" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse aria-hidden=true
           else
-            if data != "failed"
-              text `${unreadCount} ${unreadLabel}` testId=`${testId}-count` margin-left="auto" min-width=0 font="theme.type.caption" color=(unreadCount > 0 ? "theme.color.accent" : "theme.color.ink-muted") background-color="theme.color.fill" border-radius="theme.radius.pill" padding-top="theme.space.xs" padding-bottom="theme.space.xs" padding-left="theme.space.sm" padding-right="theme.space.sm" font-variant-numeric="tabular-nums" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+            text `${unreadCount} ${unreadLabel}` testId=`${testId}-count` margin-left="auto" min-width=0 font="theme.type.caption" color=(unreadCount > 0 ? "theme.color.accent" : "theme.color.ink-muted") background-color="theme.color.fill" border-radius="theme.radius.pill" padding-top="theme.space.xs" padding-bottom="theme.space.xs" padding-left="theme.space.sm" padding-right="theme.space.sm" font-variant-numeric="tabular-nums" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
         if agent == "changed"
           text agentNote testId=`${testId}-agent` font="theme.type.caption" color="theme.color.accent"
       if narrow
