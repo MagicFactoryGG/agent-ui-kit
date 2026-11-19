@@ -20,3 +20,7 @@ theme
   blocks.note-dot: length = 8px
   blocks.measure: length = 480px
   blocks.action-min: length = 44px  // ActionButton's own least height (components.row-min); a block may not reach into another package's sizes
+  blocks.kind-mark: length = 20px  // a notification's kind mark: one line of the title's type
+  blocks.note-title-min: length = 160px  // a notification's title keeps this much before its time wraps under it
+  blocks.note-head-min: length = 160px  // the list's name keeps this much before "Mark all read" wraps under it
+  blocks.note-when: length = 64px  // the time's stand-in while the notes load

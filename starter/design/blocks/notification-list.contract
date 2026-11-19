@@ -1,0 +1,177 @@
+// What came in for the person, newest first: a header (the list's name, a short count, "Mark all read"), then the
+// notes in two groups by space, the new ones above the earlier ones, each group one card of rows. A row is a small
+// mark of its kind (info, success, warning, agent) at the start, the title with its time at the end of the same
+// line, the detail under it, and up to two answers the note itself names. A list is rows, not cards: the rows of a
+// group share one card (surface ground, the theme's line, the card's corner) and are divided by the one line.
+//
+// States: `data` many, one, long (the rows), loading (the header says `loadingText`; quiet rows stand in the real
+// row's own grid, so completing a load moves nothing), empty and failed (the kit's StatePanel under the header,
+// with the way on: `emptyActionLabel`, or `retryLabel` to try again). `agent`: an agent may mark notes read through
+// the same act as the header's button (one ledger, two doors). "proposed" holds its one sentence (`agentNote`, the
+// ledger's asks) and two answer words under the header; "changed" says what it did (`agentNote`, the ledger's did)
+// with keep or undo. An agent's own note (kind "agent") wears the kit's agent look: the accent mark line at its
+// start, the agent's mark, a light wash of the accent while it waits for an answer, its yes as the one filled
+// button. Every word is a prop or the note's own.
+//
+// Section, Proposal and TopBar live inline in this package's index.contract, which a sibling file cannot import
+// (contract-use-cycle), so the group's card and the agent's band are drawn here, in their manner; StatePanel has
+// its own file and is composed whole.
+use Words, ActionButton from "__SCOPE__/components"
+use StatePanel from "./state-panel.contract"
+
+// One notification: its key, what it says, more about it, when it came, whether the person has read it, its kind
+// ("info", "success", "warning" or "agent"), and the words of its up to two answers ("" for none).
+shape Note
+  key: string
+  title: string
+  detail: string
+  when: string
+  unread: bool
+  kind: string
+  yesLabel: string
+  noLabel: string
+
+// The kind's colour, for its mark: graphics on the surface, never words on a tint.
+fn kindInk(kind: string): string = kind == "success" ? "theme.color.positive" : kind == "warning" ? "theme.color.caution" : kind == "agent" ? "theme.color.accent" : "theme.color.ink-muted"
+
+// A light wash of the accent behind an agent's words: the kit's way out of a theme with no wash token (the accent at
+// low opacity), so it reads in light and dark alike. Its parent is `position="relative"`; what sits on it is too.
+component Wash
+  view
+    box aria-hidden=true position="absolute" inset=0 background-color="theme.color.accent" opacity=0.07
+
+// The small mark of a note's kind, drawn in the kind's colour on the card's surface.
+component KindMark
+  props
+    kind: string
+  view
+    svg viewBox="0 0 20 20" width="blocks.kind-mark" height="blocks.kind-mark" fill="none" stroke=kindInk(kind) aria-hidden=true flex-shrink=0 position="relative"
+      if kind == "success"
+        circle cx=10 cy=10 r=8.25 stroke-width=1.5
+        path d="M6.6 10.2l2.3 2.3 4.5-4.7" stroke-width=1.6 stroke-linecap="round" stroke-linejoin="round"
+      else if kind == "warning"
+        path d="M10 2.6L18 16.6H2Z" stroke-width=1.5 stroke-linejoin="round"
+        path d="M10 7.8v3.9" stroke-width=1.6 stroke-linecap="round"
+        circle cx=10 cy=14 r=0.9 fill=kindInk(kind) stroke="none"
+      else if kind == "agent"
+        path d="M10 1.8l1.9 5.3 5.3 1.9-5.3 1.9L10 16.2l-1.9-5.3L2.8 9l5.3-1.9Z" fill=kindInk(kind) stroke="none"
+        circle cx=16 cy=16 r=1.6 fill=kindInk(kind) stroke="none"
+      else
+        circle cx=10 cy=10 r=8.25 stroke-width=1.5
+        path d="M10 9v4.6" stroke-width=1.6 stroke-linecap="round"
+        circle cx=10 cy=6.3 r=0.9 fill=kindInk(kind) stroke="none"
+
+// One note as a row: the kind's mark, then the title (the heavier type while unread) with the time at the line's
+// end, the detail under it, and its answers. An agent's note carries the accent line at its start, and the wash
+// while it waits for its answer.
+component NoteRow
+  props
+    note: Note
+    first: bool
+    yes: action
+    no: action
+    testId: string
+  view
+    row testId=testId role="listitem" position="relative" align-items="flex-start" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(first ? "0" : "theme.line.width") border-top-style="solid" border-top-color="theme.color.line" border-left-width="components.mark-line" border-left-style="solid" border-left-color=(note.kind == "agent" ? "theme.color.accent" : "transparent")
+      if note.kind == "agent" and note.yesLabel != ""
+        Wash()
+      KindMark(kind=note.kind)
+      column position="relative" flex=1 min-width=0 gap="theme.space.xs"
+        row flex-wrap="wrap" align-items="baseline" column-gap="theme.space.md"
+          text note.title testId=`${testId}-title` flex=1 min-width="blocks.note-title-min" font=(note.unread ? "theme.type.label" : "theme.type.body") color="theme.color.ink"
+          text note.when testId=`${testId}-when` font="theme.type.caption" color="theme.color.ink-muted"
+        if note.detail != ""
+          text note.detail testId=`${testId}-detail` font="theme.type.caption" color="theme.color.ink-muted"
+        if note.yesLabel != "" or note.noLabel != ""
+          row role="group" aria-label=note.title flex-wrap="wrap" gap="theme.space.sm" margin-top="theme.space.sm"
+            if note.yesLabel != ""
+              ActionButton(label=note.yesLabel, kind=(note.kind == "agent" ? "primary" : "plain"), interaction="idle", outcome="none", press=yes, testId=`${testId}-yes`)
+            if note.noLabel != ""
+              ActionButton(label=note.noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId=`${testId}-no`)
+
+// A quiet row while the notes load: the real row's grid (mark, title and time, detail), every word a bar.
+component GhostRow
+  props
+    first: bool
+  view
+    row aria-hidden=true align-items="flex-start" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(first ? "0" : "theme.line.width") border-top-style="solid" border-top-color="theme.color.line" border-left-width="components.mark-line" border-left-style="solid" border-left-color="transparent"
+      box width="blocks.kind-mark" height="blocks.kind-mark" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
+      column flex=1 min-width=0 gap="theme.space.sm"
+        row align-items="center" gap="theme.space.md"
+          box flex=1 height="blocks.bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+          box width="blocks.note-when" height="blocks.bone" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
+        box width="62%" height="blocks.bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+
+component NotificationList
+  props
+    title: string
+    summary: string
+    markAllLabel: string
+    markAll: action
+    newTitle: string
+    earlierTitle: string
+    notes: Note[]
+    answer: action
+    loadingText: string
+    emptyTitle: string
+    emptyText: string
+    emptyActionLabel: string
+    emptyPress: action
+    failedTitle: string
+    failedText: string
+    retryLabel: string
+    retry: action
+    proposedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    accept: action
+    reject: action
+    changedNote: string
+    undoLabel: string
+    undo: action
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed">
+    testId: string
+  view
+    column testId=testId width="100%" max-width="blocks.panel-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.xl"
+      row flex-wrap="wrap" align-items="center" gap="theme.space.md"
+        column flex=1 min-width="blocks.note-head-min" gap="theme.space.xs"
+          Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+          if data == "loading"
+            text loadingText testId=`${testId}-loading` role="status" font="theme.type.caption" color="theme.color.ink-muted"
+          else if data != "empty" and data != "failed" and summary != ""
+            text summary testId=`${testId}-summary` font="theme.type.caption" color="theme.color.ink-muted"
+        if data != "loading" and data != "empty" and data != "failed" and notes.filter(n => n.unread).length > 0
+          ActionButton(label=markAllLabel, kind="plain", interaction="idle", outcome="none", press=markAll, testId=`${testId}-mark-all`)
+      if agent != "none"
+        row testId=`${testId}-agent` role="status" position="relative" flex-wrap="wrap" align-items="center" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-radius="theme.radius.card" overflow="hidden" border-left-width="components.mark-line" border-left-style="solid" border-left-color="theme.color.accent"
+          Wash()
+          row position="relative" flex=1 min-width="blocks.note-title-min" align-items="flex-start" gap="theme.space.md"
+            KindMark(kind="agent")
+            text (agent == "proposed" ? proposedNote : changedNote) testId=`${testId}-agent-note` flex=1 min-width=0 font="theme.type.body" color="theme.color.ink"
+          row position="relative" flex-wrap="wrap" gap="theme.space.sm"
+            if agent == "proposed"
+              ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-agent-reject`)
+              ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-agent-accept`)
+            else
+              ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-agent-undo`)
+      if data == "failed"
+        StatePanel(title=failedTitle, message="", failedText=failedText, agentNote="", actionLabel="", retryLabel=retryLabel, data="failed", agent="none", size="full", press=retry, testId=`${testId}-failed`)
+      else if data == "empty"
+        StatePanel(title=emptyTitle, message=emptyText, failedText="", agentNote="", actionLabel=emptyActionLabel, retryLabel="", data="empty", agent="none", size="full", press=emptyPress, testId=`${testId}-empty`)
+      else if data == "loading"
+        column aria-hidden=true background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden" testId=`${testId}-ghosts`
+          for k in [1, 2, 3] key=k
+            GhostRow(first=(k == 1))
+      else
+        // The new notes, then the earlier ones: each group its label one quiet step above, at the rows' edge, then
+        // its rows on one card. A group with no notes is not drawn.
+        for g in ["new", "earlier"] key=g
+          if notes.filter(n => n.unread == (g == "new")).length > 0
+            column testId=`${testId}-${g}` gap="theme.space.sm"
+              if (g == "new" ? newTitle : earlierTitle) != ""
+                column padding-left="theme.space.lg" padding-right="theme.space.lg"
+                  Words(text=(g == "new" ? newTitle : earlierTitle), kind="heading", outcome="none", level=3, testId=`${testId}-${g}-label`)
+              column role="list" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+                for n, i in notes.filter(n => n.unread == (g == "new")) key=n.key
+                  NoteRow(note=n, first=(i == 0), yes=answer(n.key, true), no=answer(n.key, false), testId=`${testId}-${n.key}`)
