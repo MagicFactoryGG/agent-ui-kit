@@ -91,13 +91,12 @@ theme
   blocks.skel-title: length = 16px
   blocks.skel-when: length = 56px
   blocks.skel-chip: length = 120px
-  blocks.faq-max: length = 1040px
+  blocks.faq-max: length = 992px  // the list column comes to 640px, StatePanel's own full width, so its card meets the seams
   blocks.faq-aside: length = 240px
   blocks.faq-main: length = 320px
   blocks.faq-measure: length = 600px
   blocks.faq-glyph: length = 24px
   blocks.faq-glyph-lead: length = 3px  // the label's line (18px) centred on the glyph's 24px
-  blocks.faq-glyph-room: length = 56px  // the glyph's column: its width, the row's gap and padding, so an answer clears it
   blocks.faq-row-min: length = 56px
   blocks.faq-mark: length = 3px
   blocks.faq-bone: length = 12px
