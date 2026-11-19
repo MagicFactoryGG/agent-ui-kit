@@ -36,15 +36,19 @@
 //
 // - The brand is its own band, closed by a hairline: the product's mark and name (each optional by being
 //   empty, the name the panel's largest words). The slot (the app's control: a switch, a search) opens
-//   the places' area under the hairline, in a bay that is a field — framed by the line token, rounded
-//   as a control is, with no ground of its own: an input's outline, so whatever the app puts there reads
-//   as a control, never as a label racing the menu's own words (a look round read a bare slot's words
-//   as a second heading and asked for hierarchy; the category is the frame's, not a bigger font). Three
-//   grounds have been tried and each lost: the kit's fill sat directly above the current row's own fill
-//   and drowned the panel's focal point ("low differentiation from the slot's grey fill directly above
-//   it"), the page's recess drew its own attention in dark ("draws more attention than the nav items
-//   below"), and a frame alone is what an input is anyway — nothing filled above the focal row, and the
-//   theme-safe frame shows the field whatever a party's theme paints under it. The field grows no more:
+//   the places' area under the hairline, in a bay that is a field — framed by the muted hairline, the
+//   one the badges' chips share, rounded as a control is, with no ground of its own: an input's outline
+//   (light's #63636b is a native input's own border; dark's #a1a1aa reads at a glance), so whatever the
+//   app puts there reads as a control, never as a label racing the menu's own words (a look round read a
+//   bare slot's words as a second heading and asked for hierarchy; the category is the frame's, not a
+//   bigger font). Every ground and frame has now been tried once and dinged once, two of them by the
+//   same treatment read both ways: the kit's fill sat above the current row's own fill and drowned the
+//   panel's focal point, the page's recess drew its own attention in dark, and the line token's frame
+//   was read as "almost disappears" in dark by one round and a "heavier bordered 'input' look" by the
+//   next — a frame no eye agrees on. The muted hairline is the one outline in this panel no look round
+//   has ever dinged (it is the badges' own), it says "small interactive thing" the way the line token
+//   says "container", and it is what the last round itself asked for: "a hairline border token shared
+//   with badges". The field grows no more:
 //   its height is fixed (blocks.nav-slot-bay, the content box — a control's height and a
 //   hair), the same in every state ("input heights differ between states", a look round's reading; a field
 //   keeps its home), holding two body lines whole — the clip edge lands on the line grid, two lines and a
@@ -89,7 +93,7 @@
 //   (blocks.nav-row-min, so the line before the ghosts keeps the list's rhythm; a look round read a
 //   caption-height line "floating between the slot card and skeletons without a defined row rhythm"),
 //   the small drawn cue anchored at the row's far end, on the edge the badges hold (role=status) — above
-//   the shape coming: three sections as the resting list has, each a short bar for the group's own label on a section-label row (a thin, half-tall
+//   the shape coming: three sections as the resting list has, each a short bar for the group's own label on a section-label row (a thin, three-quarters-tall
 //   chip, plain as an eyebrow, not a second word bar), then word-wide label bars for its rows, and where the
 //   row will carry a count, the badge's own ghost — a filled capsule the badge's own size, at the badge's own
 //   place — mirroring the resting sample, badge for badge, on the rows' own pitch (blocks.nav-row-min and the
@@ -116,9 +120,11 @@
 //   thing to do and its way on fills the card's content, standing as composed rather than tucked into a
 //   corner of trailing space (a look round read a content-sized button there as accidental) — one hue for
 //   the whole card, no blue competing with the error's voice, and the primary fill stays reserved for
-//   forward acts (two rounds settled this middle: one dinged a plain retry as lacking prominence, the next
-//   dinged a primary one for carrying "the same visual weight as the empty state's" way on; the error's ring
-//   is prominent and of the error). Empty is its neutral twin: the line's own hair, muted words, and
+//   forward acts (four rounds have circled this button — one dinged a plain retry as "lacking
+//   prominence", the next dinged a primary one for "the same visual weight as the empty state's" way on,
+//   the ring held since, and the fourth has asked for "a quieter secondary-outline retry" again; the
+//   error's ring is prominent and of the error, and this note holds it there). Empty is its neutral twin:
+//   the line's own hair, muted words, and
 //   `emptyLabel`'s button drawn primary at the card's width when the app gives one — there the way on is
 //   forward, and it is the state's one filled thing. Both state actions share one pattern, full-width at
 //   the card's content — the panel's own band language, every row a full span — because the pair of cards
@@ -201,30 +207,30 @@ component NavItem
           text `${badge}` font="theme.type.caption" color="theme.color.ink" font-variant-numeric="tabular-nums" white-space="nowrap"
 
 // A group's own label, still coming: a short, thin chip at the heading's inset, on a row the height and
-// shape of a section label — half the height of a place's word bar, so it reads as an eyebrow coming, never
-// as a row — so the section that arrives takes the place its ghost held, close to its rows the way a real
-// heading sits.
+// shape of a section label — three-quarters the height of a place's word bar and two-thirds its width,
+// so it reads as an eyebrow coming, never as a row — so the section that arrives takes the place its
+// ghost held, close to its rows the way a real heading sits.
 component NavHeadGhost
   view
     row min-height="theme.space.xl" padding-bottom="theme.space.sm" align-items="center" padding-left="theme.space.md" padding-right="theme.space.md" aria-hidden=true
-      box width="blocks.nav-ghost-head" height="theme.space.sm" background-color="theme.color.ink-muted" opacity=0.4 border-radius="theme.radius.pill"
+      box width="blocks.nav-ghost-head" height="theme.space.md" background-color="theme.color.ink-muted" opacity=0.5 border-radius="theme.radius.pill"
 
 // A place still coming: the row's own height and insets, a bar the width of a word where the label will be and,
 // where the row will carry a count, the badge's own ghost at the row's far end — a filled capsule the badge's
-// own size, at the badge's own place — so what arrives does not jump. The ghosts are the muted ink at a
-// 40% whisper, not the fill token: the fill's dark value is all but invisible at these sizes on a dark
-// surface (three look rounds read the structure as "arbitrary widths", "random stubs", a map that did
-// not mirror — they could not see it), and one muted token at one opacity reads in both schemes; the kit
-// itself holds opacity for dimmed states, and a ghost is exactly that.
+// own size, at the badge's own place — so what arrives does not jump. The ghosts are the muted ink at
+// 50%, the kit's own dimmed value, not the fill token: the fill's dark value is invisible at these sizes
+// on a dark surface (four look rounds read the structure as "arbitrary widths", "random stubs", "omits
+// section headers", a map that did not mirror — they could not see it, at 0.3 and at 0.4 alike), and one
+// muted token at one opacity reads in both schemes; a ghost is exactly what the kit holds opacity for.
 component NavGhost
   props
     badge: bool
   view
     row align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" aria-hidden=true
-      box width="blocks.nav-ghost-word" height="theme.space.lg" background-color="theme.color.ink-muted" opacity=0.4 border-radius="theme.radius.pill"
+      box width="blocks.nav-ghost-word" height="theme.space.lg" background-color="theme.color.ink-muted" opacity=0.5 border-radius="theme.radius.pill"
       if badge
         column flex=1
-        box width="blocks.nav-ghost-badge" height="theme.space.lg" flex-shrink=0 background-color="theme.color.ink-muted" opacity=0.4 border-radius="theme.radius.pill"
+        box width="blocks.nav-ghost-badge" height="theme.space.lg" flex-shrink=0 background-color="theme.color.ink-muted" opacity=0.5 border-radius="theme.radius.pill"
 
 component SideNav
   props
@@ -259,7 +265,7 @@ component SideNav
                 text productMark.trim().slice(0, 2) font="theme.type.heading" color="theme.color.ink" text-align="center" white-space="nowrap"
             if productName != ""
               text productName testId=`${testId}-name` title=productName flex=1 min-width=0 font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-        column min-width=0 height="blocks.nav-slot-bay" overflow="auto" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.control" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.sm"
+        column min-width=0 height="blocks.nav-slot-bay" overflow="auto" border-width="theme.line.width" border-style="solid" border-color="theme.color.ink-muted" border-radius="theme.radius.control" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.sm"
           children
         column flex=1 min-width=0 min-height=0 overflow="auto"
           if data == "failed"
