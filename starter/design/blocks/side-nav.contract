@@ -1,9 +1,10 @@
 // SideNav: an app's side navigation, drawn as its own panel. Width: the panel fills the column a shell gives it
-// and never grows past blocks.nav-max (the shell decides the column's real width — a side column at a desktop,
-// the window at a phone; a shell wanting a narrow rail gives it a narrower column, and the rows' own truncation
-// holds). Height is the shell's too: given a definite height the account pins to the panel's bottom (a spacer
-// takes what is left); alone in a window the panel is as tall as what it holds. The shell decides when the
-// panel shows at all.
+// and never grows past blocks.nav-max — a rail's width, not a slab's (the shell may still give it less: the
+// window at a phone; the rows' own truncation holds). Height is the shell's: given a definite height the
+// account pins to the panel's bottom (a spacer takes what is left, and keeps the menu's home while the menu is
+// one place, empty, loading or failed); alone in a window the panel is as tall as what it holds — a package's
+// own sizes are px (Exact refuses viewport units in a library's design), so the rail cannot claim the window
+// itself, and the shell decides when the panel shows at all.
 //
 // One gutter holds everything: the panel pads by theme.space.sm and every row inside pads its words by
 // theme.space.md, so the brand, a group's heading, each place's label, the states' words and the account all
@@ -35,8 +36,9 @@
 //   and its way on in the menu's home (a compact bordered button when the app gives `emptyLabel`). Failed is
 //   the kit's outcome language, as ActionButton draws it: a raised panel ringed by the critical's hair and
 //   washed with the critical at a breath (8%, the same opacity shading the kit's own buttons), the drawn mark
-//   beside the words in the error's ink, and `retryLabel`'s compact filled button below — the way on is the
-//   panel's one filled thing.
+//   beside the words in the error's ink, and `retryLabel`'s button drawn the way the kit draws a control in an
+//   outcome — the critical's own outline, ActionButton's `outcome="error"` — so no second hue competes with
+//   the error's voice.
 // - The landmark's name, `navLabel`, is what a reader hears; the words a person sees above the rows are the
 //   data's own group names.
 // - Long: everything the panel draws holds one line with an ellipsis; the slot's content is the app's.
@@ -146,7 +148,7 @@ component SideNav
               column flex=1 min-width=0
                 Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
             row
-              ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+              ActionButton(label=retryLabel, kind="plain", outcome="error", interaction="idle", press=retry, testId=`${testId}-retry`)
       else if data == "loading"
         column gap="theme.space.xs"
           row role="status" padding-left="theme.space.md" padding-right="theme.space.md" padding-bottom="theme.space.xs"
