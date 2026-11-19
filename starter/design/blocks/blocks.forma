@@ -4,10 +4,19 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
-  blocks.settings-max: length = 560px
+  blocks.settings-max: length = 880px
+  blocks.settings-aside: length = 200px
+  blocks.settings-main: length = 320px
+  blocks.aside-top: length = 10px
+  blocks.label-min: length = 160px
+  blocks.label-line: length = 18px
   blocks.row-min: length = 44px
   blocks.mark-line: length = 3px
   blocks.chevron: length = 12px
   blocks.skeleton-line: length = 12px
   blocks.skeleton-blob: length = 32px
-  blocks.empty-mark: length = 16px
+  blocks.skeleton-pill: length = 18px
+  blocks.empty-disc: length = 40px
+  blocks.empty-mark: length = 20px
+  blocks.alert-mark: length = 16px
+  blocks.agent-dot: length = 6px
