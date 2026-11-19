@@ -1,13 +1,15 @@
-// A mailbox's list of messages, with the pane that reads the chosen one on a wide window, in one card. The card
-// is as tall as what it holds — one row a short card, a full list a tall one, a state with little to say its
-// own quiet room — so nothing floats over air it did not earn and no state borrows a height it cannot fill.
-// The header is one line in every state: the title, and the unread count as one badge — a pill on the theme's
-// fill in the accent's ink, sharing the unread dots' colour — but only while a message waits, for a badge is
-// news: at zero, while the messages load, when they fail to arrive or the box is empty, it says nothing at
-// all rather than dress a zero or breathe a grey shape where its words would be; the rows' own shimmer tells
-// the loading story, and the header never half-helps. An agent's note under the title when it filed or
-// flagged a message that is not in the list, the one line that may appear, because an agent's act is worth
-// a change of height.
+// A mailbox's list of messages, with the pane that reads the chosen one on a wide window, in one card. On a
+// wide window the card holds one body height in every state — the split is a scaffold, so it never rearranges
+// under a person: rows fill what they need and the order footer pins to the pane's bottom, one row claims the
+// same room as five, an empty or failed card centres its one cluster in it, and only the long list grows past
+// it. On a phone the card grows with what it holds — a stack, the platform's own idiom — one row a short card,
+// a state with little to say its own quiet room. The header is one line in every state: the title, and the
+// unread count as one badge — a pill on the theme's fill in the accent's ink, sharing the unread dots' colour —
+// but only while a message waits, for a badge is news: at zero, while the messages load, when they fail to
+// arrive or the box is empty, it says nothing at all rather than dress a zero or breathe a grey shape where
+// its words would be; the rows' own shimmer tells the loading story, and the header never half-helps. An
+// agent's note under the title when it filed or flagged a message that is not in the list, the one line that
+// may appear, because an agent's act is worth a change of height.
 //
 // The list pane holds the rows, each a band that runs edge to edge: a status rail at the start — a dot when
 // unread, a caution flag when flagged, both slots kept on every row so the words share one left edge — and
@@ -26,12 +28,13 @@
 // shimmer bar, a breathing dot in the unread's place.
 //
 // The reading pane, headed by a band the pane's own width in the header's rhythm, holds the chosen message:
-// who and when on one line, the subject as the pane's title, the snippet wrapping under; with nothing chosen
-// it rests on its quiet glyph and the app's one line of why; while the messages load, quiet bars in the
-// message's own shape claim nothing. A phone draws the list alone, the platform's own idiom (a row pushes
-// its detail): the split flips at the window's 640px floor (the responsive-columns recipe: "Else read
-// exactViewport's width"); long words cut with an ellipsis in the rows and wrap in the pane. Every word is
-// the app's.
+// who and when on one line, the subject as the pane's title, the snippet wrapping under; and it closes with
+// the way on — its own band at the pane's bottom edge, one plain button in the app's words, so the pane ends
+// where the person can go deeper, not in air; with nothing chosen it rests on its quiet glyph and the app's
+// one line of why, and says nothing it cannot act on; while the messages load, quiet bars in the message's
+// own shape claim nothing. A phone draws the list alone, the platform's own idiom (a row pushes its detail):
+// the split flips at the window's 640px floor (the responsive-columns recipe: "Else read exactViewport's
+// width"); long words cut with an ellipsis in the rows and wrap in the pane. Every word is the app's.
 use Swatch from "__SCOPE__/theme"
 use Words, ActionButton from "__SCOPE__/components"
 
@@ -124,19 +127,21 @@ component SkelRow
         box height="blocks.skel-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
 
 // The one focal point of a state with nothing to show: a glyph in a circle, the state's own line at title
-// size, one plain button as the way on or the way back. Empty and failed speak this one anatomy, so the two
-// states read as a family; failed's colour lives on its glyph alone, the words stay level (the empty line
-// reads in the muted ink, the failed line in the level ink), and no element shouts twice.
+// size, one plain button as the way on or the way back, all centred in the room the card holds (`roomMin`:
+// the wide window's one body height, the phone's quiet room). Empty and failed speak this one anatomy, so
+// the two states read as a family; failed's colour lives on its glyph alone, the words stay level (the
+// empty line reads in the muted ink, the failed line in the level ink), and no element shouts twice.
 component StateCluster
   props
     kind: enum<"empty", "failed">
     role: string
     text: string
     actionLabel: string
+    roomMin: string
     press: action
     testId: string
   view
-    column flex=1 role=role min-height="blocks.state-min" justify-content="center" align-items="center" gap="theme.space.md" padding="theme.space.xl"
+    column flex=1 role=role min-height=roomMin justify-content="center" align-items="center" gap="theme.space.md" padding="theme.space.xl"
       if kind == "empty"
         svg viewBox="0 0 24 24" width="blocks.glyph" height="blocks.glyph" aria-hidden=true
           circle cx=12 cy=12 r=12 fill="theme.color.fill"
@@ -151,12 +156,24 @@ component StateCluster
       Words(text=text, kind="title", outcome=(kind == "failed" ? "none" : "cancelled"), level=0, testId=testId)
       ActionButton(label=actionLabel, kind="plain", interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
 
+// One band of the card's chrome: a hairline rule at its top or bottom edge, one line of quiet words centred
+// in the bar's height. The list's order footer and the reading pane's label speak it, so the two panes open
+// and close in the same rhythm.
+component Bar
+  props
+    text: string
+    edge: enum<"top", "bottom">
+    testId: string
+  view
+    column min-height="blocks.bar-min" box-sizing="border-box" justify-content="center" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-top-width=(edge == "top" ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-bottom-width=(edge == "bottom" ? "theme.line.width" : "0") border-bottom-style="solid" border-bottom-color="theme.color.line"
+      text text testId=testId font="theme.type.caption" color="theme.color.ink-muted"
+
 // The list's own pane: the messages as bands (one listitem each) with air below the header's line; empty and
-// failed say their own line here — the one focal cluster, centred in the pane, with the way on — and loading
-// breathes the rows it is waiting for. A footer band with the app's words for the list's order closes the
-// pane whenever there is a list to order (a loading list keeps it, so when the rows arrive only they change;
-// an empty or failed one has no order to claim), pinned to the pane's bottom, so even one row reads as a
-// whole list.
+// failed say their own line here — the one focal cluster, centred in the room the card holds (`roomMin`),
+// with the way on — and loading breathes the rows it is waiting for. A footer band with the app's words for
+// the list's order closes the pane whenever there is a list to order (a loading list keeps it, so when the
+// rows arrive only they change; an empty or failed one has no order to claim), pinned to the pane's bottom,
+// so even one row reads as a whole list.
 component ListPane
   props
     messages: Message[]
@@ -170,6 +187,7 @@ component ListPane
     composeLabel: string
     retryLabel: string
     footerLabel: string
+    roomMin: string
     compose: action
     retry: action
     pulse: string
@@ -177,10 +195,10 @@ component ListPane
   view
     column flex=1 min-width=0
       if data == "empty"
-        StateCluster(kind="empty", role="status", text=emptyText, actionLabel=composeLabel, press=compose, testId=`${testId}-empty`)
+        StateCluster(kind="empty", role="status", text=emptyText, actionLabel=composeLabel, roomMin=roomMin, press=compose, testId=`${testId}-empty`)
       else
         if data == "failed"
-          StateCluster(kind="failed", role="alert", text=failedText, actionLabel=retryLabel, press=retry, testId=`${testId}-failed`)
+          StateCluster(kind="failed", role="alert", text=failedText, actionLabel=retryLabel, roomMin=roomMin, press=retry, testId=`${testId}-failed`)
         else
           if data == "loading"
             column margin-top="theme.space.sm"
@@ -196,30 +214,32 @@ component ListPane
                 column role="listitem"
                   MessageRow(message=m, chosen=(m.key == chosenKey), marked=(marked and m.key == agentKey), note=agentNote, testId=`${testId}-row-${m.key}`)
       if footerLabel != "" and (data == "many" or data == "one" or data == "long" or data == "loading")
-        column min-height="blocks.bar-min" box-sizing="border-box" justify-content="center" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
-          text footerLabel testId=`${testId}-footer` font="theme.type.caption" color="theme.color.ink-muted"
+        Bar(text=footerLabel, edge="top", testId=`${testId}-footer`)
 
 // The reading pane, drawn on the wide window beside the list whenever there are messages to choose from: a
 // band the pane's own width heads it, in the card header's rhythm, so its rule runs edge to edge as the
 // header's does; under the band the chosen message — who and when on one line, the subject as the pane's
-// title, the one focal point of a chosen message, and the snippet under it, wrapping. Nothing chosen, with
-// messages to choose from, says so quietly over a small glyph; while the messages load, quiet bars in the
-// message's own shape claim nothing either.
+// title, the one focal point of a chosen message, and the snippet under it, wrapping — and the pane closes
+// with the way on: its own band at the bottom edge, one plain button in the app's words, so the pane ends
+// where the person can go deeper, not in air. Nothing chosen, with messages to choose from, says so quietly
+// over a small glyph and offers no way on; while the messages load, quiet bars in the message's own shape
+// claim nothing either.
 component Reader
   props
     paneLabel: string
     paneEmptyText: string
+    openLabel: string
     messages: Message[]
     chosenKey: string
     loading: bool
+    openMessage: action
     pulse: string
     testId: string
   derive picked = first(messages.filter(m => m.key == chosenKey))
   view
     column flex=1 min-width=0 role="complementary" aria-label=paneLabel border-left-width="theme.line.width" border-left-style="solid" border-left-color="theme.color.line"
       if paneLabel != ""
-        column min-height="blocks.bar-min" box-sizing="border-box" justify-content="center" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
-          text paneLabel testId=`${testId}-pane-label` font="theme.type.caption" color="theme.color.ink-muted"
+        Bar(text=paneLabel, edge="bottom", testId=`${testId}-pane-label`)
       if loading
         column gap="theme.space.md" padding="theme.space.lg" aria-hidden=true
           row align-items="center" gap="theme.space.md"
@@ -231,12 +251,16 @@ component Reader
       else
         match picked
           case some(m)
-            column gap="theme.space.md" padding="theme.space.lg"
-              row align-items="center" gap="theme.space.md"
-                text m.from testId=`${testId}-pane-from` min-width=0 flex=1 font="theme.type.label" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-                text m.when testId=`${testId}-pane-when` margin-left="auto" min-width=0 flex-shrink=0 font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
-              Words(text=m.subject, kind="title", outcome="none", level=3, testId=`${testId}-pane-subject`)
-              text m.snippet testId=`${testId}-pane-snippet` font="theme.type.body" color="theme.color.ink-muted"
+            column flex=1 min-width=0
+              column flex=1 gap="theme.space.md" padding="theme.space.lg"
+                row align-items="center" gap="theme.space.md"
+                  text m.from testId=`${testId}-pane-from` min-width=0 flex=1 font="theme.type.label" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+                  text m.when testId=`${testId}-pane-when` margin-left="auto" min-width=0 flex-shrink=0 font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+                Words(text=m.subject, kind="title", outcome="none", level=3, testId=`${testId}-pane-subject`)
+                text m.snippet testId=`${testId}-pane-snippet` font="theme.type.body" color="theme.color.ink-muted"
+              if openLabel != ""
+                row min-height="blocks.bar-min" box-sizing="border-box" align-items="center" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+                  ActionButton(label=openLabel, kind="plain", interaction="idle", outcome="none", press=openMessage, testId=`${testId}-pane-open`)
           case none
             column flex=1 gap="theme.space.md" align-items="center" justify-content="center" padding="theme.space.xl"
               svg viewBox="0 0 24 24" width="blocks.glyph" height="blocks.glyph" aria-hidden=true
@@ -247,10 +271,11 @@ component Reader
                 Words(text=paneEmptyText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-pane-empty`)
 
 // The mailbox: one card (it centres on a wide window up to its own max), the header, then the list — with the
-// reading pane beside it whenever the window is wide and there are messages to choose from, so the scaffold
-// never rearranges itself under a person; alone on a phone, where the row's own way in (its href) opens the
-// message, as the platform composes a list with its detail. Empty and failed hold the card's full width with
-// their one cluster, the reading pane stepping aside until there is anything to read.
+// reading pane beside it whenever the window is wide and there are messages to choose from, both panes held
+// to the card's one body height so the scaffold never rearranges itself under a person; alone on a phone the
+// card grows with its rows, where the row's own way in (its href) opens the message, as the platform composes
+// a list with its detail. Empty and failed hold the card's full width with their one cluster centred in the
+// same body room, the reading pane and the order footer stepping aside until there is anything to read.
 component MessageList
   props
     title: string
@@ -262,6 +287,7 @@ component MessageList
     footerLabel: string
     paneLabel: string
     paneEmptyText: string
+    openLabel: string
     agentNote: string
     chosenKey: string
     agentKey: string
@@ -270,6 +296,7 @@ component MessageList
     messages: Message[]
     compose: action
     retry: action
+    openMessage: action
     testId: string
   resource viewport = exactViewport() as shape Viewport
   derive narrow = viewport.width < 640
@@ -288,11 +315,11 @@ component MessageList
           if unreadCount > 0
             text `${unreadCount} ${unreadLabel}` testId=`${testId}-count` flex-shrink=0 max-width="blocks.badge-max" box-sizing="border-box" font="theme.type.caption" color="theme.color.accent" background-color="theme.color.fill" border-radius="theme.radius.pill" padding-top="theme.space.xs" padding-bottom="theme.space.xs" padding-left="theme.space.sm" padding-right="theme.space.sm" font-variant-numeric="tabular-nums" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
       if narrow
-        ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, compose=compose, retry=retry, pulse=pulse, testId=testId)
+        ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, roomMin="blocks.state-min", compose=compose, retry=retry, pulse=pulse, testId=testId)
       else
         if data == "empty" or data == "failed"
-          ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, compose=compose, retry=retry, pulse=pulse, testId=testId)
+          ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, roomMin="blocks.mail-body", compose=compose, retry=retry, pulse=pulse, testId=testId)
         else
-          row flex=1 align-items="stretch"
-            ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, compose=compose, retry=retry, pulse=pulse, testId=testId)
-            Reader(paneLabel=paneLabel, paneEmptyText=paneEmptyText, messages=messages, chosenKey=chosenKey, loading=(data == "loading"), pulse=pulse, testId=testId)
+          row flex=1 align-items="stretch" min-height="blocks.mail-body"
+            ListPane(messages=messages, chosenKey=chosenKey, agentKey=agentKey, marked=(agent == "changed"), agentNote=agentNote, data=data, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, footerLabel=footerLabel, roomMin="blocks.state-min", compose=compose, retry=retry, pulse=pulse, testId=testId)
+            Reader(paneLabel=paneLabel, paneEmptyText=paneEmptyText, openLabel=openLabel, messages=messages, chosenKey=chosenKey, loading=(data == "loading"), openMessage=openMessage, pulse=pulse, testId=testId)

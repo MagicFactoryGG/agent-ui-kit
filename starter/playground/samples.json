@@ -12,7 +12,8 @@
     "paneEmptyText": "Choose a message to read it here.",
     "agentNote": "Your assistant filed the invoice from ACME.",
     "chosenKey": "message-2",
-    "agentKey": "message-4"
+    "agentKey": "message-4",
+    "openLabel": "Open message"
   },
   "Message:many": [
     {
@@ -40,7 +41,7 @@
       "from": "Maya Okafor",
       "subject": "Lunch on Thursday?",
       "snippet": "There is a new place two streets down with a good menu and a table big enough for eight.",
-      "when": "Yesterday",
+      "when": "Wed 14:05",
       "unread": true,
       "flagged": false,
       "href": "/"
@@ -50,7 +51,7 @@
       "from": "ACME Supplies",
       "subject": "Invoice 4821 for the studio order",
       "snippet": "Your order shipped on Monday; the invoice is attached and due at the end of the month.",
-      "when": "Tuesday",
+      "when": "Tue 09:12",
       "unread": false,
       "flagged": false,
       "href": "/"
@@ -60,7 +61,7 @@
       "from": "Sam Delacroix",
       "subject": "Fwd: the venue contract",
       "snippet": "Flagging this one so it does not get lost before the deposit is due.",
-      "when": "Mon",
+      "when": "Mon 16:20",
       "unread": false,
       "flagged": true,
       "href": "/"
@@ -84,7 +85,7 @@
       "from": "Constance Beauregard-Villeneuve at the regional licensing office",
       "subject": "A subject line that keeps going because the sender put the whole question in it and expected nobody to mind",
       "snippet": "The snippet is one line in the list, cut with an ellipsis, and wraps to several lines in the reading pane, which is as it should be: a preview may never push the layout around, it holds.",
-      "when": "Yesterday",
+      "when": "Wed 14:05",
       "unread": true,
       "flagged": false,
       "href": "/"
@@ -94,7 +95,7 @@
       "from": "Sam Delacroix",
       "subject": "Fwd: the venue contract, with the rider the venue's own lawyer added after the last call we all had together",
       "snippet": "Flagging this one so it does not get lost before the deposit is due at the end of the month, which is closer than the last note made it sound.",
-      "when": "Mon",
+      "when": "Mon 16:20",
       "unread": false,
       "flagged": true,
       "href": "/"

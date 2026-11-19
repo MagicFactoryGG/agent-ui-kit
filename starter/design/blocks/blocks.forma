@@ -5,10 +5,11 @@ theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
   blocks.mail-max: length = 1100px
+  blocks.mail-body: length = 520px
   blocks.state-min: length = 320px
   blocks.glyph: length = 56px
   blocks.icon: length = 16px
-  blocks.dot: length = 8px
+  blocks.dot: length = 10px
   blocks.dot-gutter: length = 16px
   blocks.row-line: length = 21px
   blocks.badge-max: length = 160px
