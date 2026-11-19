@@ -10,7 +10,7 @@
 // row (on a phone, where the list has no header, the line sits on the card). States: data
 // many|one|empty|loading|failed|long, interaction idle|busy (the card says it, and the checkboxes wait),
 // agent none|changed. Every word is a prop.
-use Words, Tag from "__SCOPE__/components"
+use Words, Tag, ActionButton from "__SCOPE__/components"
 
 // One record: its key, what it says, a status word, who owns it, when it changed, where it opens.
 shape Record
@@ -66,6 +66,7 @@ component DataTable
     failedText: string
     busyText: string
     agentNote: string
+    retryLabel: string
     sort: enum<"none", "title", "status", "owner", "updated">
     sortDir: enum<"ascending", "descending">
     data: enum<"many", "one", "empty", "loading", "failed", "long">
@@ -73,6 +74,7 @@ component DataTable
     agent: enum<"none", "changed">
     toggle: action
     toggleAll: action
+    retry: action
     testId: string
   // The checkbox events become by-key acts: the same `toggle` a person's checkbox runs, an agent's tool runs.
   action pick(key: string, on: bool)
@@ -88,8 +90,10 @@ component DataTable
     column testId=testId aria-busy=(interaction == "busy") width="100%" max-width="blocks.table-max" margin-left="auto" margin-right="auto" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
       if narrow
         if noRows
-          column padding="theme.space.lg" role=(data == "failed" ? "alert" : "status")
+          column padding="theme.space.lg" gap="theme.space.md" role=(data == "failed" ? "alert" : "status")
             Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
+            if data == "failed" and retryLabel != ""
+              ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
         else
           if sort != "none"
             row align-items="center" gap="theme.space.xs" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
@@ -139,7 +143,10 @@ component DataTable
             tbody
               tr
                 td colspan=5 text-align="start" padding="theme.space.xl" role=(data == "failed" ? "alert" : "status")
-                  Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
+                  column gap="theme.space.md"
+                    Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
+                    if data == "failed" and retryLabel != ""
+                      ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
           else
             tbody
               for r, i in records key=r.key

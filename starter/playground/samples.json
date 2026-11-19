@@ -115,6 +115,7 @@
     "loadingText": "Loading records…",
     "failedText": "Couldn't load records. Check your connection and try again.",
     "busyText": "Updating records…",
-    "agentNote": "Your assistant changed a record in this table."
+    "agentNote": "Your assistant changed a record in this table.",
+    "retryLabel": "Try again"
   }
 }
