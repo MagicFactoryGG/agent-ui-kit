@@ -90,7 +90,8 @@ component StatePanel
         if agent == "changed"
           Mark(note=agentNote, testId=`${testId}-agent`)
         if data != "loading" and (data == "failed" ? failedText : message) != ""
-          Words(text=(data == "failed" ? failedText : message), kind="body", outcome="cancelled", level=0, testId=`${testId}-message`)
+          column width="100%" align-items="center" margin-top="theme.space.sm"
+            Words(text=(data == "failed" ? failedText : message), kind="body", outcome="cancelled", level=0, testId=`${testId}-message`)
         if data == "loading"
           column testId=`${testId}-loading` width="100%" align-items="center" gap="theme.space.xs" margin-top="theme.space.sm"
             Bone(share="100%")
