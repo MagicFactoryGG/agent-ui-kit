@@ -9,4 +9,5 @@ theme
   blocks.stamp: length = 80px
   blocks.spin: length = 16px
   blocks.alert-line: length = 2px
+  blocks.term: length = 160px
   blocks.header-min: length = 240px

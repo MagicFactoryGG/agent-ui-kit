@@ -7,7 +7,7 @@
     "secondaryLabel": "Export",
     "changedNote": "Your assistant set the status to In production.",
     "waitingNote": "Your assistant suggests setting the status to Paid.",
-    "busyNote": "Saving your change…",
+    "busyNote": "Saving your change",
     "retryLabel": "Try again",
     "factsTitle": "Details",
     "factsEmptyText": "No details yet.",
