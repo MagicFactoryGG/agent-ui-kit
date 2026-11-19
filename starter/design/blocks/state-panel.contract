@@ -4,18 +4,18 @@
 // the one active colour, a critical disc for the alert form — so the three read as one family. The state line
 // follows Section's own convention — body size, muted for empty and loading, the error's ink for failed — and
 // shows in every state, so the panel always says in words what its area is (role=status speaks title and line
-// while loading, role=alert in failed). Loading then stands the content in three stepped bones below the line,
-// one per line at the body's rhythm (a bone and its gap are a 21px line), full, full and short, the wrap of a
-// centred sentence: real words above, placeholders below, and no placeholder where the action is not. The card
+// while loading, role=alert in failed). Loading stands the content in three equal bones in the action's own
+// place: the same separation above, the same height below (a bone and its gap are a 21px line, and the three
+// make 52, the action's own least height), so the card's height does not shift when the state turns. The card
 // is Section's own card — surface ground, the theme's 1px line, the card's corner — and only failed swaps the
-// line's colour for the critical hue, as Proposal's card takes the accent's, so no state change resizes the
-// card. The one action is primary in every state that shows it, the retry in failed as in empty: it is the way
-// on, and red would say a destructive act. `agent` "changed" marks a load an agent started — its tool calls the
-// same action the button does, one ledger, two doors — and `agentNote` says so as the text block's last line in
-// the accent ink, as LinkRow and ValueRow mark what an agent did: never muted, never a placeholder, a person
-// notices it. `size` "full" is the whole area's panel; "compact" claims less width and a tighter frame (padding,
-// shape, the gap before the action), for a card's body or a side panel. The three bones are one small local
-// component: markup drawn twice or more is drawn once.
+// line's colour for the critical hue, as Proposal's card takes the accent's. The one action is primary in every
+// state that shows it, the retry in failed as in empty: it is the way on, and red would say a destructive act.
+// `agent` "changed" marks a load an agent started — its tool calls the same action the button does, one ledger,
+// two doors — and `agentNote` says so as the text block's last line in the accent ink on a fill pill, the Notice's
+// own way with an area's sentence: a mark a person notices, never mistaken for the action or for a link. `size`
+// "full" is the whole area's panel; "compact" claims less width and a tighter frame (padding, shape, the gap
+// before the action), for a card's body or a side panel. The three bones are one small local component: markup
+// drawn twice or more is drawn once.
 use Words, ActionButton from "__SCOPE__/components"
 
 // One skeleton line of the loading state: a bar of the fill colour at `share` of the measure.
@@ -50,17 +50,18 @@ component StatePanel
           circle cx=12 cy=12 r=11 fill="theme.color.fill"
           rect x=7.5 y=7.5 width=9 height=9 rx=2.1 fill="none" stroke="theme.color.ink-muted" stroke-width=1.5
           path d="M7.5 12.6h2.55l1.05 1.65h1.8L13.95 12.6h2.55" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
-      column width="100%" gap="theme.space.sm"
+      column width="100%" align-items="center" gap="theme.space.sm"
         Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
         if message != ""
           Words(text=message, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-message`)
         if agent == "changed"
-          text agentNote testId=`${testId}-agent` font="theme.type.caption" color="theme.color.accent"
-        if data == "loading"
-          column testId=`${testId}-loading` width="100%" max-width="blocks.measure" align-items="center" gap="theme.space.sm"
-            Bone(share="100%")
-            Bone(share="100%")
-            Bone(share="62%")
+          row testId=`${testId}-agent` background-color="theme.color.fill" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
+            text agentNote font="theme.type.caption" color="theme.color.accent"
+      if data == "loading"
+        column testId=`${testId}-loading` width="100%" max-width="blocks.measure" align-items="center" gap="theme.space.sm" margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md")
+          Bone(share="100%")
+          Bone(share="100%")
+          Bone(share="100%")
       if data != "loading" and actionLabel != ""
         column margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md")
           ActionButton(label=actionLabel, kind="primary", interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
