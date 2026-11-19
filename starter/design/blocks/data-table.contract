@@ -135,7 +135,8 @@ component DataTable
                       :hover
                         color="theme.color.accent"
                       text r.title font="theme.type.label"
-                    Tag(text=r.status, outcome="none")
+                    row flex-shrink=0
+                      Tag(text=r.status, outcome="none")
                   text `${r.owner} · ${r.updated}` font="theme.type.caption" color="theme.color.ink-muted"
                 svg viewBox="0 0 12 12" width="blocks.glyph" height="blocks.glyph" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
                   path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
@@ -205,7 +206,7 @@ component DataTable
                           color="theme.color.accent"
                         text r.title font="theme.type.body"
                     td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                      row
+                      row flex-shrink=0
                         Tag(text=r.status, outcome="none")
                     td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
                       text r.owner font="theme.type.body" color="theme.color.ink-muted"
@@ -220,7 +221,7 @@ component DataTable
                           color="theme.color.accent"
                         text r.title font="theme.type.body"
                     td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                      row
+                      row flex-shrink=0
                         Tag(text=r.status, outcome="none")
                     td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
                       text r.owner font="theme.type.body" color="theme.color.ink-muted"
