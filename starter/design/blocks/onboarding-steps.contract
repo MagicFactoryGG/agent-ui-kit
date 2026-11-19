@@ -1,24 +1,25 @@
 // OnboardingSteps: a step-by-step frame — where the person is (a count beside numbered steps joined by one
 // connector each, the track spanning the frame, the current step accent-filled and ringed, done steps carrying a
 // drawn tick and their connectors drawn at the track's own weight while the steps to come stay hairline-thin, so
-// the track's state reads by weight too, not only by colour; a lone step keeps the count and shows its node as
-// that tick, for a lone active node read as a bar that had lost its siblings; count and steps together stay one
-// compact bar on a phone), the current step's title and lead line, the slot for the step's content, then the way
-// on: Back (hidden on the first step), an optional Skip ("" hides it) and Continue, which right-clusters at a
-// named width on a desktop (a Gutter takes the spare width, so the space between the zones reads as deliberate,
-// not a stretched slab) and fills its own row on a phone; the frame's one filled element a state is the way on,
-// and it carries the busy state in whichever branch draws it; a state with no steps and one way on fills the row.
-// The frame groups by surface and space: one raised panel whose line edge is lifted a tenth toward the muted ink,
-// so the edge holds on a near-black page (a fill alone can vanish in a theme that paints page and surface one
-// colour), one gap token between every zone, one hairline above the actions that hugs them (little room below,
-// a zone's gap above), so the rule reads as the footer's own edge, not an underline of whatever the slot last
-// held.
+// the track's state reads by weight too, not only by colour; a lone step keeps the count alone, its row the
+// counter's own height — one step has no distance to show, and a lone node with a tick would say the step was
+// already done, which it is not; count and steps together stay one compact bar on a phone), the current step's
+// title and lead line, the slot for the step's content, then the way on: Back (hidden on the first step), an
+// optional Skip ("" hides it) and Continue, which right-clusters at a named width on a desktop (a Gutter takes the
+// spare width, so the space between the zones reads as deliberate, not a stretched slab) and fills its own row on
+// a phone; the frame's one filled element a state is the way on, and it carries the busy state in whichever branch
+// draws it; a state with no steps and one way on fills the row. The frame groups by surface and space alone: one
+// raised panel whose line edge is lifted a tenth toward the muted ink, so the edge holds on a near-black page (a
+// fill alone can vanish in a theme that paints page and surface one colour), one gap token between every zone —
+// the actions belong to the last gap as the slot does to its own, with no rule between (two look runs read a
+// hairline there as the slot's own underline, and grouping by space is the kit's way).
 // States: data many|one|empty|loading|failed|long (loading says itself over a breathing skeleton of the frame
 // whose bar mirrors the resting bar's own row — the same gap, an invisible box holding the count's own width,
 // then the same dots and connectors — so the swap moves nothing, and no drawn pill sits there, for a drawn one
-// read as a stray mark; its text lines hold the title's and lead's own heights and left edges; empty answers
-// with a tinted completed banner where the bar stood — the failed alert's own anatomy in the positive colour,
-// the drawn tick its mark — then its own title and lead, and keeps the way on; failed says itself in a tinted
+// read as a stray mark; its text lines hold the title's and lead's own heights and left edges, the head bar at
+// the share a title really takes; empty answers with a quiet completed wash where the bar stood — the positive
+// tint and the drawn tick are the signal, the words take ink, with none of the failed alert's edge or accent, for
+// good news is not an alarm — then its own title and lead, and keeps the way on; failed says itself in a tinted
 // alert that carries the status colour as a drawn warning and a left accent — the tint and the marks are the
 // signal, the words take ink, for status ink is promised on the page and surface, not on a tint — and offers its
 // way back), interaction idle|busy (the way on busy), outcome none|error (an error line a footer's gap above the
@@ -42,10 +43,9 @@ keyframes breathe
 fn currentAt(steps: Step[]): number = match first(steps.map((s, i) => s.state == "current" ? i : -1).filter(x => x != -1)) { case some(i) => i, case none => 0 }
 fn currentTitle(steps: Step[]): string = match first(steps.filter(s => s.state == "current")) { case some(s) => s.title, case none => "" }
 
-// A node's fill and edge by where its step stands. A lone step reads as the whole track done (a lone active
-// node read as a bar that had lost its siblings), so it takes the done node's quiet fill and positive edge.
-fn dotFill(s: Step, lone: bool): string = lone or s.state == "done" ? "theme.color.fill" : s.state == "current" ? "theme.color.accent" : "theme.color.surface"
-fn dotEdge(s: Step, lone: bool): string = lone or s.state == "done" ? "theme.color.positive-text" : s.state == "current" ? "theme.color.accent" : "color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)"
+// A node's fill and edge by where its step stands.
+fn dotFill(s: Step): string = s.state == "done" ? "theme.color.fill" : s.state == "current" ? "theme.color.accent" : "theme.color.surface"
+fn dotEdge(s: Step): string = s.state == "done" ? "theme.color.positive-text" : s.state == "current" ? "theme.color.accent" : "color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)"
 
 // A step's dot: filled by where it stands, edged when it is a step to come (a fill alone can vanish on a dark
 // card), ringed when current; the slot holds its number or the drawn tick.
@@ -123,7 +123,7 @@ component SkTrack
             if j < 3
               StepSeg(ink="color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)", tall=false)
       column gap="theme.space.sm"
-        SkBar(share="3 1 0", rest="2 1 0", height="blocks.skel-head")
+        SkBar(share="2 1 0", rest="3 1 0", height="blocks.skel-head")
         SkBar(share="17 1 0", rest="3 1 0", height="blocks.skel-line")
 
 component OnboardingSteps
@@ -176,7 +176,7 @@ component OnboardingSteps
             path d="M8 11.4v0.01" stroke-width=1.5 stroke-linecap="round"
           text failedText testId=`${testId}-failed` role="alert" flex=1 min-width=0 font="theme.type.label" color="theme.color.ink"
       else if not hasSteps
-        row testId=`${testId}-done` align-items="center" gap="theme.space.sm" padding="theme.space.xl" border-radius="theme.radius.control" background-color="color-mix(in srgb, theme.color.positive 12%, theme.color.raised)" border-width="theme.line.width" border-style="solid" border-color="color-mix(in srgb, theme.color.positive 30%, theme.color.raised)" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="theme.color.positive"
+        row testId=`${testId}-done` align-items="center" gap="theme.space.sm" padding="theme.space.xl" border-radius="theme.radius.control" background-color="color-mix(in srgb, theme.color.positive 12%, theme.color.raised)"
           Tick(size="blocks.alert")
           if completeText != ""
             text completeText testId=`${testId}-complete` flex=1 min-width=0 font="theme.type.label" color="theme.color.ink"
@@ -189,15 +189,16 @@ component OnboardingSteps
         row testId=`${testId}-bar` role="status" aria-label=countLabel align-items="center" gap="theme.space.lg"
           box min-width="blocks.count-min" min-height="blocks.step-dot" flex-shrink=0 display="flex" align-items="center"
             text `${at + 1}/${steps.length}` testId=`${testId}-count` font="theme.type.label" color="theme.color.ink" font-variant-numeric="tabular-nums"
-          row flex=1 min-width=0 align-items="center" aria-hidden=true
-            for s, i in steps key=s.key
-              StepDot(fill=dotFill(s, lone), edge=dotEdge(s, lone), ring=(s.state == "current" and not lone), testId=`${testId}-step-${s.key}`)
-                if lone or s.state == "done"
-                  Tick(size="blocks.step-tick")
-                else
-                  text `${i + 1}` font="theme.type.caption" color=(s.state == "current" ? "theme.color.accent-ink" : "theme.color.ink-muted")
-              if i + 1 < steps.length
-                StepSeg(ink=(s.state == "done" ? "theme.color.positive" : "color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)"), tall=(s.state == "done"))
+          if not lone
+            row flex=1 min-width=0 align-items="center" aria-hidden=true
+              for s, i in steps key=s.key
+                StepDot(fill=dotFill(s), edge=dotEdge(s), ring=(s.state == "current"), testId=`${testId}-step-${s.key}`)
+                  if s.state == "done"
+                    Tick(size="blocks.step-tick")
+                  else
+                    text `${i + 1}` font="theme.type.caption" color=(s.state == "current" ? "theme.color.accent-ink" : "theme.color.ink-muted")
+                if i + 1 < steps.length
+                  StepSeg(ink=(s.state == "done" ? "theme.color.positive" : "color-mix(in srgb, theme.color.ink-muted 45%, theme.color.raised)"), tall=(s.state == "done"))
         column gap="theme.space.xs"
           if heading != ""
             Words(text=heading, kind="title", outcome="none", level=2, testId=`${testId}-title`)
@@ -214,7 +215,7 @@ component OnboardingSteps
       column
         children
       if data == "loading" and outcome != "error"
-        column border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.sm" aria-hidden=true
+        column aria-hidden=true
           row gap="theme.space.lg" align-items="center" flex-wrap="wrap"
             row gap="theme.space.sm" align-items="center"
               SkBtn(basis="none", max="none")
@@ -222,7 +223,7 @@ component OnboardingSteps
             Gutter()
             SkBtn(basis="1 1 blocks.primary-max", max="none")
       if data != "loading" or outcome == "error"
-        column gap="theme.space.md" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.sm"
+        column gap="theme.space.md"
           if outcome == "error"
             text errorText testId=`${testId}-error` role="alert" font="theme.type.caption" color="theme.color.critical-text"
           if data == "failed"
