@@ -1,0 +1,10 @@
+// The components' own sizes. Shipping a design makes this package a library: Exact refuses a literal colour,
+// spacing or corner in it (lower-library-literal), names every button, and keeps it from reading its host.
+forma components
+
+theme
+  components.row-min: length = 44px
+  components.meter-height: length = 4px
+  components.chevron: length = 12px
+  components.picture: length = 96px
+  components.mark-line: length = 3px

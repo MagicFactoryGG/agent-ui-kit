@@ -1,0 +1,6 @@
+// The blocks' own sizes; shipping a design holds this package to Exact's library rules.
+forma blocks
+
+theme
+  blocks.bar-min: length = 52px
+  blocks.sheet-max: length = 480px

@@ -1,0 +1,13 @@
+// The Theme's one component: a token shown as a chip, for the playground's Theme page. A package's tokens reach
+// the packages that `use` something from it, so every other layer uses Swatch.
+
+fn swatchFill(token: string): string = `theme.color.${token}`
+
+component Swatch
+  props
+    token: string
+    label: string
+  view
+    row gap="theme.space.sm" align-items="center" testId=`swatch-${token}`
+      box width="theme.space.xxl" height="theme.space.xl" background-color=swatchFill(token) border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+      text label font="theme.type.caption" color="theme.color.ink"

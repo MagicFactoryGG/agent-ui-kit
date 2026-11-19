@@ -1,0 +1,65 @@
+// Blocks: components arranged. Every value a Theme token or this package's size; every word a prop. States are
+// declared once as enum props (docs/recipes/state-matrix.md); for blocks the data axis is
+//   data   many, one, empty, loading, failed, long
+use Swatch from "__SCOPE__/theme"
+use Words from "__SCOPE__/components"
+
+// The bar at the top of a screen: the title, then the slot's actions. While an agent waits for the person,
+// `agentNote` says so under the title.
+component TopBar
+  props
+    title: string
+    agentNote: string
+    agent: enum<"none", "waiting">
+  slot
+  view
+    row role="banner" align-items="center" gap="theme.space.md" min-height="blocks.bar-min" padding-left="theme.space.lg" padding-right="theme.space.lg" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" background-color="theme.color.page"
+      column flex=1 min-width=0 gap="theme.space.xs"
+        Words(text=title, kind="title", outcome="none", level=1, testId="top-bar-title")
+        if agent == "waiting"
+          Words(text=agentNote, kind="caption", outcome="blocked", level=0, testId="top-bar-agent")
+      children
+
+// A titled group of rows on a card. The slot holds the rows (the caller gives none when it has none); empty,
+// loading and failed say their own line on the card.
+component Section
+  props
+    title: string
+    footer: string
+    emptyText: string
+    loadingText: string
+    failedText: string
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    testId: string
+  slot
+  view
+    column gap="theme.space.sm"
+      if title != ""
+        column padding-left="theme.space.lg" padding-right="theme.space.lg"
+          Words(text=title, kind="heading", outcome="none", level=2, testId=`${testId}-title`)
+      column testId=testId background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+        if data == "empty" or data == "loading" or data == "failed"
+          column padding="theme.space.lg" role=(data == "failed" ? "alert" : "status")
+            Words(text=(data == "empty" ? emptyText : data == "loading" ? loadingText : failedText), kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
+        children
+      if footer != ""
+        column padding-left="theme.space.lg" padding-right="theme.space.lg"
+          Words(text=footer, kind="caption", outcome="none", level=0, testId=`${testId}-footer`)
+
+// The inside of a sheet (a `dialog`'s content): its title, what it does, then the slot. An outcome says
+// `outcomeText` in its ink above the slot.
+component SheetBody
+  props
+    title: string
+    note: string
+    outcomeText: string
+    outcome: enum<"none", "success", "error", "blocked", "cancelled">
+  slot
+  view
+    column gap="theme.space.lg" padding="theme.space.xl" max-width="blocks.sheet-max" box-sizing="border-box" background-color="theme.color.raised" color="theme.color.ink" font-family="theme.family"
+      Words(text=title, kind="title", outcome="none", level=2, testId="sheet-title")
+      if note != ""
+        Words(text=note, kind="caption", outcome="none", level=0, testId="sheet-note")
+      if outcome != "none"
+        Words(text=outcomeText, kind="body", outcome=outcome, level=0, testId="sheet-outcome")
+      children

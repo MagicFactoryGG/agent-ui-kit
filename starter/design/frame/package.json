@@ -1,0 +1,8 @@
+{
+  "name": "__SCOPE__/frame",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The playground's own frame: the navigation, the pages and the light and dark cells around each piece. Not the brand: its look is neutral; the cells show the Theme's page colour.",
+  "exports": { ".": "./index.contract" },
+  "dependencies": { "__SCOPE__/theme": "workspace:*" }
+}

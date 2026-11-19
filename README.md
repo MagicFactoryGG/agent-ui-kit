@@ -18,6 +18,8 @@ authentication provider decide that ([proposed is not a security boundary](docs/
 | `apps/library-gate` | every exported component, in the form of Exact's library gate |
 | `docs/recipes` | one recipe per idea, each with an app and its tests |
 | `tools` | the checks, which any Exact app can run |
+| `tools/distiller` | the Distiller: reads a brand's products and guide into a theme and presets; [its README](tools/distiller/README.md) |
+| `starter`, `tools/create.mjs` | your own design repo (Theme, Components, Blocks, Screens) and playground, made by one create step; [the starter](starter/README.md) |
 
 ## The rules
 

@@ -1,0 +1,66 @@
+#!/usr/bin/env bun
+// Vendor the design repo's packages into an app that cannot reach the design repo when it builds (another
+// repository, a CI sandbox): a copy under <app>/vendor/<layer>/, and vendor/MANIFEST.json with each file's
+// sha256 and the design repo's commit. tools/ui-guard.mjs fails when a vendored file differs from the
+// manifest, so the copy is never edited by hand: change the design repo, then vendor again.
+//
+//   bun tools/vendor.mjs <app dir> [--layers theme,components,blocks,screens] [--also <package dir>]…
+//
+// The app's package.json then names each as "file:./vendor/<layer>".
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { basename, dirname, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const DESIGN = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+
+function walk(dir, out = []) {
+  for (const n of readdirSync(dir)) {
+    if (n === 'node_modules' || n === 'bun.lock' || n === '.DS_Store') continue;
+    const p = join(dir, n);
+    if (statSync(p).isDirectory()) walk(p, out);
+    else out.push(p);
+  }
+  return out;
+}
+
+function main(argv) {
+  const app = argv[0] && resolve(argv[0]);
+  if (!app || !existsSync(join(app, 'package.json'))) {
+    console.error('usage: bun tools/vendor.mjs <app dir> [--layers theme,components,blocks,screens] [--also <package dir>]…');
+    return 2;
+  }
+  const at = argv.indexOf('--layers');
+  const layers = (at > 0 ? argv[at + 1] : 'theme,components,blocks,screens').split(',');
+  const also = argv.flatMap((a, i) => (a === '--also' ? [resolve(argv[i + 1])] : []));
+  const dirs = [...layers.map((l) => join(DESIGN, l)), ...also];
+  const vendor = join(app, 'vendor');
+  const commit = spawnSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: DESIGN, encoding: 'utf8' }).stdout?.trim() || 'unknown';
+  const dirty = spawnSync('git', ['status', '--porcelain', '--', ...dirs], { cwd: DESIGN, encoding: 'utf8' }).stdout?.trim();
+  const files = {};
+  const pkg = JSON.parse(readFileSync(join(app, 'package.json'), 'utf8'));
+  pkg.dependencies = { ...(pkg.dependencies ?? {}) };
+  for (const dir of dirs) {
+    const name = basename(dir);
+    const to = join(vendor, name);
+    rmSync(to, { recursive: true, force: true });
+    mkdirSync(to, { recursive: true });
+    cpSync(dir, to, { recursive: true, filter: (src) => !/node_modules|bun\.lock|\.DS_Store/.test(src) });
+    // A workspace's own links become paths between the vendored copies.
+    const pj = join(to, 'package.json');
+    const p = JSON.parse(readFileSync(pj, 'utf8'));
+    for (const [dep, spec] of Object.entries(p.dependencies ?? {})) {
+      if (String(spec).startsWith('workspace:') || String(spec).startsWith('file:')) p.dependencies[dep] = `file:../${dep.split('/').pop()}`;
+    }
+    writeFileSync(pj, `${JSON.stringify(p, null, 2)}\n`);
+    pkg.dependencies[p.name] = `file:./vendor/${name}`;
+    for (const f of walk(to)) files[relative(vendor, f)] = createHash('sha256').update(readFileSync(f)).digest('hex');
+  }
+  writeFileSync(join(vendor, 'MANIFEST.json'), `${JSON.stringify({ from: 'the design repo (agent-ui-kit starter)', commit: dirty ? `${commit} with uncommitted changes` : commit, files }, null, 2)}\n`);
+  writeFileSync(join(app, 'package.json'), `${JSON.stringify(pkg, null, 2)}\n`);
+  console.log(`vendor: ${dirs.length} packages, ${Object.keys(files).length} files, from ${commit}${dirty ? ' (uncommitted changes: commit the design repo first)' : ''} into ${vendor}`);
+  return dirty ? 1 : 0;
+}
+
+process.exit(main(process.argv.slice(2)));

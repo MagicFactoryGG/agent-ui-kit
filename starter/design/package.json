@@ -1,0 +1,19 @@
+{
+  "name": "__NAME__-design",
+  "private": true,
+  "description": "__TITLE__'s design repo: the Theme (theme.json), Components, Blocks and Screens. Made by agent-ui-kit's create step.",
+  "workspaces": [
+    "theme",
+    "components",
+    "blocks",
+    "screens",
+    "frame"
+  ],
+  "scripts": {
+    "theme": "bun tools/theme.mjs build theme.json theme",
+    "check": "bun tools/theme.mjs check theme.json theme && bun tools/matrix.mjs check .",
+    "matrix": "bun tools/matrix.mjs",
+    "guard": "bun tools/ui-guard.mjs",
+    "parity": "bun tools/parity.mjs ../__NAME__-playground"
+  }
+}

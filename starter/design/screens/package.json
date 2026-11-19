@@ -1,0 +1,8 @@
+{
+  "name": "__SCOPE__/screens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Screens: whole layouts that take data and actions. An app passes data and keeps its state; it draws nothing itself.",
+  "exports": { ".": "./index.contract" },
+  "dependencies": { "__SCOPE__/theme": "workspace:*", "__SCOPE__/components": "workspace:*", "__SCOPE__/blocks": "workspace:*" }
+}

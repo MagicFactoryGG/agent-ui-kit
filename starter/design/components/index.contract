@@ -1,0 +1,159 @@
+// Components: one control or one drawn piece each. Every value is a Theme token (theme.…) or this package's own
+// size (components.…); every word is a prop. Native where the platform must own it (text input, menus, scrolling,
+// accessibility); drawn where the brand shows.
+//
+// States are declared once, here, as enum props named for their axis (agent-ui-kit docs/recipes/state-matrix.md):
+//   interaction  idle, hover, pressed, focus, disabled, busy
+//   outcome      none, success, error, blocked, cancelled
+//   agent        none, proposed, changed, waiting
+// The state matrix (tools/matrix.mjs) is generated from them; a component with none fails. A host's own hover,
+// press and focus still draw the same looks live (the :hover, :active and :focus-visible parts).
+use Swatch from "__SCOPE__/theme"
+
+fn outcomeInk(o: string): string = o == "success" ? "theme.color.positive" : o == "error" ? "theme.color.critical" : o == "blocked" ? "theme.color.caution" : o == "cancelled" ? "theme.color.ink-muted" : "theme.color.ink"
+fn wordsInk(kind: string, o: string): string = o != "none" ? outcomeInk(o) : kind == "heading" or kind == "caption" ? "theme.color.ink-muted" : "theme.color.ink"
+fn rowWash(i: string): string = i == "hover" ? "theme.color.hover" : i == "pressed" ? "theme.color.fill" : "transparent"
+fn agentLine(a: string): string = a == "proposed" ? "theme.color.accent" : a == "changed" ? "theme.color.accent" : a == "waiting" ? "theme.color.caution" : "transparent"
+
+// Words in one of the Theme's type styles. `level` is the heading level a title or heading speaks (0: none).
+component Words
+  props
+    text: string
+    kind: enum<"body", "title", "heading", "label", "caption">
+    outcome: enum<"none", "success", "error", "blocked", "cancelled">
+    level: number
+    testId: string
+  view
+    text text testId=testId role=(level > 0 ? "heading" : "none") aria-level=level font=(kind == "title" ? "theme.type.title" : kind == "heading" ? "theme.type.heading" : kind == "caption" ? "theme.type.caption" : kind == "label" ? "theme.type.label" : "theme.type.body") color=wordsInk(kind, outcome)
+
+// A row that opens something: title, detail, a drawn chevron. An agent's mark draws a line at its start and
+// says `agentNote` under the detail.
+component LinkRow
+  props
+    href: string
+    title: string
+    detail: string
+    agentNote: string
+    interaction: enum<"idle", "hover", "pressed", "focus", "disabled">
+    agent: enum<"none", "proposed", "changed", "waiting">
+    testId: string
+  view
+    link href=(interaction == "disabled" ? "" : href) testId=testId aria-disabled=(interaction == "disabled") display="flex" flex-direction="row" align-items="center" gap="theme.space.md" min-height="components.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" color="theme.color.ink" text-decoration-line="none" background-color=rowWash(interaction) opacity=(interaction == "disabled" ? 0.5 : 1) border-left-width="components.mark-line" border-left-style="solid" border-left-color=agentLine(agent) box-shadow=(interaction == "focus" ? "inset 0 0 0 2px theme.color.focus" : "none")
+      :hover
+        background-color="theme.color.hover"
+      :active
+        background-color="theme.color.fill"
+      :focus-visible
+        box-shadow="inset 0 0 0 2px theme.color.focus"
+      column flex=1 min-width=0 gap="theme.space.xs"
+        text title font="theme.type.label" color="theme.color.ink"
+        if detail != ""
+          text detail font="theme.type.caption" color="theme.color.ink-muted"
+        if agent != "none"
+          text agentNote font="theme.type.caption" color=(agent == "waiting" ? "theme.color.caution" : "theme.color.accent")
+      svg viewBox="0 0 12 12" width="components.chevron" height="components.chevron" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
+        path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+
+// A label and its value on one line; the value takes the outcome's ink.
+component ValueRow
+  props
+    label: string
+    value: string
+    agentNote: string
+    outcome: enum<"none", "success", "error", "blocked", "cancelled">
+    agent: enum<"none", "proposed", "changed", "waiting">
+    testId: string
+  view
+    column gap="theme.space.xs" min-height="components.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" box-sizing="border-box" justify-content="center" border-left-width="components.mark-line" border-left-style="solid" border-left-color=agentLine(agent)
+      row align-items="baseline" gap="theme.space.md"
+        text label flex=1 min-width=0 font="theme.type.body" color="theme.color.ink"
+        text value testId=testId font="theme.type.body" color=outcomeInk(outcome) text-align="end"
+      if agent != "none"
+        text agentNote font="theme.type.caption" color=(agent == "waiting" ? "theme.color.caution" : "theme.color.accent")
+
+// A track and its filled share. `share` is a CSS percentage such as "42%".
+component Meter
+  props
+    share: string
+    label: string
+    outcome: enum<"none", "success", "error", "blocked", "cancelled">
+  view
+    row height="components.meter-height" background-color="theme.color.fill" border-radius="theme.radius.pill" overflow="hidden" role="meter" aria-label=label
+      box width=share background-color=(outcome == "none" ? "theme.color.ink-muted" : outcomeInk(outcome)) border-radius="theme.radius.pill"
+
+// A short status word in a pill, in the outcome's ink.
+component Tag
+  props
+    text: string
+    outcome: enum<"none", "success", "error", "blocked", "cancelled">
+  view
+    text text font="theme.type.caption" color=outcomeInk(outcome) padding-left="theme.space.sm" padding-right="theme.space.sm" border-radius="theme.radius.pill" border-width="theme.line.width" border-style="solid" border-color=(outcome == "none" ? "theme.color.line" : outcomeInk(outcome))
+
+// A drawn button: "primary" fills with the accent, "plain" is the surface with a line. Busy keeps its words and
+// cannot be pressed; an outcome colours its ring once an act ends.
+component ActionButton
+  props
+    label: string
+    kind: enum<"primary", "plain">
+    interaction: enum<"idle", "hover", "pressed", "focus", "disabled", "busy">
+    outcome: enum<"none", "success", "error", "blocked", "cancelled">
+    press: action
+    testId: string
+  view
+    button press=press testId=testId disabled=(interaction == "disabled" or interaction == "busy") aria-busy=(interaction == "busy") min-height="components.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color=(outcome != "none" ? outcomeInk(outcome) : kind == "primary" ? "theme.color.accent" : "theme.color.line") background-color=(kind == "primary" ? "theme.color.accent" : interaction == "hover" ? "theme.color.hover" : interaction == "pressed" ? "theme.color.fill" : "theme.color.surface") color=(kind == "primary" ? "theme.color.accent-ink" : "theme.color.ink") opacity=(interaction == "disabled" ? 0.5 : interaction == "busy" ? 0.7 : kind == "primary" and interaction == "hover" ? 0.9 : kind == "primary" and interaction == "pressed" ? 0.8 : 1) box-shadow=(interaction == "focus" ? "0 0 0 2px theme.color.focus" : "none")
+      :hover
+        opacity=0.9
+      :active
+        opacity=0.8
+      :focus-visible
+        box-shadow="0 0 0 2px theme.color.focus"
+      text label font="theme.type.label"
+
+// One of a few, drawn: each option a button that says it is pressed. Words are props.
+component Segment
+  props
+    label: string
+    on: bool
+    interaction: enum<"idle", "hover", "pressed", "focus", "disabled">
+    press: action
+    testId: string
+  view
+    button press=press testId=testId aria-pressed=on disabled=(interaction == "disabled") flex=1 min-height="components.row-min" padding-left="theme.space.md" padding-right="theme.space.md" border-radius="theme.radius.control" border-width=0 background-color=(on ? "theme.color.surface" : interaction == "hover" ? "theme.color.hover" : "transparent") color=(on ? "theme.color.ink" : "theme.color.ink-muted") opacity=(interaction == "disabled" ? 0.5 : 1) box-shadow=(interaction == "focus" ? "0 0 0 2px theme.color.focus" : "none")
+      :hover
+        color="theme.color.ink"
+      :focus-visible
+        box-shadow="0 0 0 2px theme.color.focus"
+      text label font="theme.type.label"
+
+// Light, dark or the system's: the person's choice (and an agent's, by the same action), which the app applies
+// with Exact's setScheme. Words and actions are the app's.
+component SchemeChoice
+  props
+    scheme: enum<"system", "light", "dark">
+    interaction: enum<"idle", "disabled">
+    lightLabel: string
+    darkLabel: string
+    systemLabel: string
+    groupLabel: string
+    light: action
+    dark: action
+    system: action
+  view
+    row role="group" aria-label=groupLabel gap="theme.space.xs" padding="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.control"
+      Segment(label=lightLabel, on=(scheme == "light"), interaction=interaction, press=light, testId="scheme-light")
+      Segment(label=darkLabel, on=(scheme == "dark"), interaction=interaction, press=dark, testId="scheme-dark")
+      Segment(label=systemLabel, on=(scheme == "system"), interaction=interaction, press=system, testId="scheme-system")
+
+// A picture at the Theme's corner, with what the slot lays over it (a face box, a mesh). While it loads or when
+// it failed, the fill shows and `label` is said.
+component Picture
+  props
+    src: string
+    label: string
+    data: enum<"one", "loading", "failed">
+  slot
+  view
+    box position="relative" width="components.picture" height="components.picture" flex-shrink=0 border-radius="theme.radius.control" overflow="hidden" background-color="theme.color.fill" aria-label=label role="img"
+      if data == "one"
+        image src width="100%" height="100%" aria-hidden=true
+      children

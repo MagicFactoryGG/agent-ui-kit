@@ -1,0 +1,7 @@
+{
+  "name": "__SCOPE__/theme",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Theme: tokens only (colour, type, spacing, corners, motion), from ../theme.json. theme.forma, theme.css and tailwind.css are generated.",
+  "exports": { ".": "./index.contract", "./theme.css": "./theme.css", "./tailwind.css": "./tailwind.css" }
+}

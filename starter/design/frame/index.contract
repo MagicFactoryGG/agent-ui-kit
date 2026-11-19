@@ -1,0 +1,87 @@
+// The playground's frame. A generated app (tools/matrix.mjs) places every piece inside these; nobody writes the
+// playground's app by hand. Its look is neutral on purpose: only the cells show the Theme.
+use Swatch from "__SCOPE__/theme"
+
+// The window: the navigation beside the page, both in the slot.
+component Shell
+  props
+    title: string
+  slot
+  view
+    row testId="playground" position="absolute" inset=0 background-color="frame.ground" color="frame.ink" aria-label=title
+      children
+
+// The list of pages on the left.
+component NavList
+  props
+    title: string
+  slot
+  view
+    scroll width="frame.nav-width" flex-shrink=0 background-color="frame.panel" border-right-width=1 border-right-style="solid" border-right-color="frame.line"
+      column padding="frame.pad" gap="frame.small"
+        text title role="heading" aria-level=1 font="frame.type-head" color="frame.ink" padding-bottom="frame.gap"
+        children
+
+// One page in the list: a group's heading when `press` is never needed is a NavHeading.
+component NavItem
+  props
+    label: string
+    on: bool
+    press: action
+    testId: string
+  view
+    button press=press testId=testId aria-current=(on ? "page" : "false") text-align="start" padding-left="frame.gap" padding-right="frame.gap" padding-top="frame.small" padding-bottom="frame.small" border-radius="frame.corner" border-width=0 background-color=(on ? "frame.on" : "transparent") color="frame.ink"
+      :hover
+        background-color="frame.on"
+      text label font="frame.type-item"
+
+component NavHeading
+  props
+    label: string
+  view
+    text label role="heading" aria-level=2 font="frame.type-small" color="frame.ink-muted" padding-top="frame.gap" padding-left="frame.gap"
+
+// The page beside the list: its title, a line, then the rows of cells.
+component Page
+  props
+    title: string
+    note: string
+  slot
+  view
+    scroll flex=1 min-width=0
+      column padding="frame.pad" gap="frame.gap"
+        text title role="heading" aria-level=2 font="frame.type-title" color="frame.ink"
+        text note font="frame.type-small" color="frame.ink-muted"
+        children
+
+// One state: its name, then its cells (light, then dark), side by side.
+component MatrixRow
+  props
+    label: string
+    testId: string
+  slot
+  view
+    column gap="frame.small" testId=testId
+      text label font="frame.type-small" color="frame.ink-muted" font-variant-numeric="tabular-nums"
+      row gap="frame.gap" align-items="stretch" flex-wrap="wrap"
+        children
+
+// One cell: the piece in one mode, on the Theme's page colour. The pin holds the scheme whatever the window's.
+component MatrixCell
+  props
+    scheme: enum<"light", "dark">
+    testId: string
+  slot
+  view
+    column testId=testId color-scheme=(scheme == "dark" ? "dark" : "light") flex=1 min-width="frame.cell-min" padding="frame.pad" background-color="theme.color.page" color="theme.color.ink" font-family="theme.family" border-radius="frame.corner" border-width=1 border-style="solid" border-color="frame.line"
+      children
+
+// A screen's cell: a window-sized box the screen fills (a screen lays itself out at inset 0).
+component ScreenCell
+  props
+    scheme: enum<"light", "dark">
+    testId: string
+  slot
+  view
+    column testId=testId color-scheme=(scheme == "dark" ? "dark" : "light") position="relative" width=480 height=640 flex-shrink=0 overflow="hidden" background-color="theme.color.page" color="theme.color.ink" font-family="theme.family" border-radius="frame.corner" border-width=1 border-style="solid" border-color="frame.line"
+      children

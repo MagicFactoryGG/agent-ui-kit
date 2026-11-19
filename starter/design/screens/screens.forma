@@ -1,0 +1,5 @@
+// The screens' own sizes; shipping a design holds this package to Exact's library rules.
+forma screens
+
+theme
+  screens.column-max: length = 720px

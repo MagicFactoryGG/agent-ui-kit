@@ -1,0 +1,32 @@
+// An example Screen, to copy: a list of items, each opening its own page. Data and states in; the app draws
+// nothing itself. The bar, scroller and page are drawn here, with Theme tokens only.
+use Swatch from "__SCOPE__/theme"
+use LinkRow from "__SCOPE__/components"
+use TopBar, Section from "__SCOPE__/blocks"
+
+// One item in the list: its key, what it says, and where it opens (the app builds `href` from its routes).
+shape Item
+  key: string
+  title: string
+  detail: string
+  href: string
+
+component ItemList
+  props
+    title: string
+    sectionTitle: string
+    footer: string
+    emptyText: string
+    loadingText: string
+    failedText: string
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    items: Item[]
+  view
+    column testId="item-list" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink" font-family="theme.family"
+      TopBar(title=title, agentNote="", agent="none")
+      scroll id="item-list-scroll" flex=1 min-height=0
+        column width="100%" max-width="screens.column-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding="theme.space.lg" gap="theme.space.xl"
+          Section(title=sectionTitle, footer=footer, emptyText=emptyText, loadingText=loadingText, failedText=failedText, data=data, testId="items")
+            for item, i in items key=item.key
+              column border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                LinkRow(href=item.href, title=item.title, detail=item.detail, agentNote="", interaction="idle", agent="none", testId=`item-${item.key}`)

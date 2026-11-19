@@ -1,0 +1,5 @@
+// Work in progress. A new piece starts here: write it in its own file, declare its states as enum props named for
+// their axis (interaction, outcome, data, agent), name it below, and the playground draws its matrix on every
+// host, light and dark. When it is final, move the file to the design repo's components or blocks.
+// use NewPiece from "./new-piece.contract"
+use Swatch from "__SCOPE__/theme"
