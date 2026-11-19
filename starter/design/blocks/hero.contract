@@ -1,6 +1,7 @@
 // Hero: a landing page's opening. The copy column holds a short kicker, the headline at a display size drawn from
 // the theme's title style (its weight, line and family; only the size is the block's own, blocks.hero-display), a
-// lead paragraph on a reading measure, and the way on: the primary action (the one filled control in every state)
+// lead paragraph on a reading measure (the headline's lines balanced, so no word stands alone on its last line;
+// every text breaks a word wider than its box rather than spill), and the way on: the primary action (the one filled control in every state)
 // beside a quiet secondary. Beside it on a desktop (under it on a phone: a wrapping row of two columns, each with a
 // named least width) stands the drawn panel: a picture band of the theme's own accent rings, then the panel's rows,
 // the points the page makes ("In every plan"), each a row with a drawn tick, never a card.
@@ -46,9 +47,9 @@ component HeroRow
     row testId=testId role="listitem" align-items="flex-start" gap="theme.space.md"
       HeroTick()
       column flex=1 min-width=0 gap="theme.space.xs"
-        text title font="theme.type.label" color="theme.color.ink"
+        text title overflow-wrap="break-word" font="theme.type.label" color="theme.color.ink"
         if detail != ""
-          text detail font="theme.type.caption" color="theme.color.ink-muted"
+          text detail overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
 
 // A row still loading: the disc and two bars, breathing, never a control.
 component HeroBone
@@ -82,7 +83,7 @@ component HeroNote
           svg viewBox="0 0 24 24" width="blocks.hero-tick" height="blocks.hero-tick" fill="none" stroke="theme.color.ink-muted" flex-shrink=0
             circle cx=12 cy=12 r=10.5 stroke-width=1.5 stroke-dasharray="3 3"
       column flex=1 min-width=0 gap="theme.space.lg" align-items="flex-start"
-        text text testId=testId role=(kind == "failed" ? "alert" : "status") font="theme.type.body" color=(kind == "failed" ? "theme.color.ink" : "theme.color.ink-muted")
+        text text testId=testId role=(kind == "failed" ? "alert" : "status") overflow-wrap="break-word" font="theme.type.body" color=(kind == "failed" ? "theme.color.ink" : "theme.color.ink-muted")
         children
 
 component Hero
@@ -127,26 +128,26 @@ component Hero
               row align-items="baseline" gap="theme.space.sm"
                 svg viewBox="0 0 8 8" width="blocks.note-dot" height="blocks.note-dot" aria-hidden=true flex-shrink=0
                   circle cx=4 cy=4 r=4 fill="theme.color.accent"
-                text kicker testId=`${testId}-kicker` flex=1 min-width=0 font="theme.type.label" color="theme.color.accent"
-            text headline testId=`${testId}-headline` role="heading" aria-level=1 padding-top="theme.space.xs" padding-bottom="theme.space.xs" font="theme.type.title" font-size="blocks.hero-display" color="theme.color.ink"
+                text kicker testId=`${testId}-kicker` flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.label" color="theme.color.accent"
+            text headline testId=`${testId}-headline` role="heading" aria-level=1 padding-top="theme.space.xs" padding-bottom="theme.space.xs" text-wrap="balance" overflow-wrap="break-word" font="theme.type.title" font-size="blocks.hero-display" color="theme.color.ink"
             if lead != ""
-              text lead testId=`${testId}-lead` max-width="blocks.measure" font="theme.type.body" font-size="blocks.hero-lead" color="theme.color.ink-muted"
+              text lead testId=`${testId}-lead` max-width="blocks.measure" overflow-wrap="break-word" font="theme.type.body" font-size="blocks.hero-lead" color="theme.color.ink-muted"
           column gap="theme.space.md"
             row flex-wrap="wrap" gap="theme.space.md" align-items="center"
               ActionButton(label=primaryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=primary, testId=`${testId}-primary`)
               if secondaryLabel != ""
                 ActionButton(label=secondaryLabel, kind="plain", interaction="idle", outcome="none", press=secondary, testId=`${testId}-secondary`)
             if outcome == "error"
-              text errorText testId=`${testId}-error` role="alert" font="theme.type.caption" color="theme.color.critical-text"
+              text errorText testId=`${testId}-error` role="alert" overflow-wrap="break-word" font="theme.type.caption" color="theme.color.critical-text"
           if agent == "proposed"
             column testId=`${testId}-proposal` role="status" gap="theme.space.md" padding="theme.space.lg" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" background-color="theme.color.surface"
-              text proposedNote testId=`${testId}-agent` font="theme.type.body" color="theme.color.ink"
+              text proposedNote testId=`${testId}-agent` overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
               row flex-wrap="wrap" gap="theme.space.sm"
                 ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
                 ActionButton(label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
           if agent == "changed"
             row testId=`${testId}-changed` role="status" flex-wrap="wrap" align-items="center" gap="theme.space.md" padding-left="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="theme.color.accent"
-              text changedNote testId=`${testId}-agent` flex-shrink=1 min-width=0 font="theme.type.body" color="theme.color.accent"
+              text changedNote testId=`${testId}-agent` flex-shrink=1 min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.accent"
               ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
         // The panel: a drawn picture, then the rows (or the state that stands in their place).
         column testId=`${testId}-panel` flex=1 min-width="blocks.hero-panel-min" box-sizing="border-box" overflow="hidden" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(data == "failed" ? "theme.color.critical" : "theme.color.line")
@@ -168,7 +169,7 @@ component Hero
                   HeroRow(title=h.title, detail=h.detail, testId=`${testId}-row-${h.key}`)
             else if data == "loading"
               column gap="theme.space.lg"
-                text loadingText testId=`${testId}-loading` role="status" font="theme.type.body" color="theme.color.ink-muted"
+                text loadingText testId=`${testId}-loading` role="status" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
                 column gap="theme.space.lg" animation="heroBreathe 1.8s ease-in-out infinite"
                   HeroBone(share="60%")
                   HeroBone(share="45%")
