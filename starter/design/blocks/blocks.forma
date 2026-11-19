@@ -6,6 +6,7 @@ theme
   blocks.sheet-max: length = 480px
   blocks.panel-max: length = 480px
   blocks.panel-compact: length = 320px
+  blocks.error-line: length = 2px
   blocks.shape-full: length = 56px
   blocks.shape-compact: length = 40px
   blocks.bone: length = 12px

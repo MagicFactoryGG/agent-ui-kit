@@ -22,7 +22,7 @@ component StatePanel
     press: action
     testId: string
   view
-    column testId=testId role=(data == "failed" ? "alert" : data == "loading" ? "status" : "none") width="100%" max-width=(size == "full" ? "blocks.panel-max" : "blocks.panel-compact") margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(size == "full" ? "theme.space.xxl" : "theme.space.xl") align-items="center" text-align="center" background-color="theme.color.raised" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(data == "failed" ? "theme.color.critical" : "theme.color.line")
+    column testId=testId role=(data == "failed" ? "alert" : data == "loading" ? "status" : "none") width="100%" max-width=(size == "full" ? "blocks.panel-max" : "blocks.panel-compact") margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(size == "full" ? "theme.space.xxl" : "theme.space.xl") align-items="center" text-align="center" background-color="theme.color.raised" border-radius="theme.radius.card" border-width=(data == "failed" ? "blocks.error-line" : "theme.line.width") border-style="solid" border-color=(data == "failed" ? "theme.color.critical" : "theme.color.line")
       svg viewBox="0 0 24 24" width=(size == "full" ? "blocks.shape-full" : "blocks.shape-compact") height=(size == "full" ? "blocks.shape-full" : "blocks.shape-compact") aria-hidden=true flex-shrink=0 margin-bottom=(size == "full" ? "theme.space.lg" : "theme.space.md")
         if data == "failed"
           circle cx=12 cy=12 r=11 fill="theme.color.critical"
