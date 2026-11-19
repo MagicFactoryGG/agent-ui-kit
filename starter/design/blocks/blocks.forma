@@ -9,9 +9,9 @@ theme
   blocks.mark-line: length = 3px
   blocks.glyph: length = 12px
   blocks.select-col: length = 48px
-  blocks.col-status: length = 110px
-  blocks.col-owner: length = 150px
-  blocks.col-updated: length = 130px
+  blocks.col-status: length = 140px
+  blocks.col-owner: length = 180px
+  blocks.col-updated: length = 140px
   blocks.skel-bar: length = 8px
   blocks.skel-check: length = 16px
   blocks.state-min: length = 176px

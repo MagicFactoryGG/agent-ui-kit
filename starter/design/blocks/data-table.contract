@@ -171,7 +171,7 @@ component DataTable
                   td text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
                   td colspan=4 text-align="start" padding-left="theme.space.md" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" role=(data == "failed" ? "alert" : "status")
                     column gap="theme.space.md"
-                      Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
+                      Words(text=note, kind="caption", outcome="cancelled", level=0, testId=`${testId}-${data}`)
                 else
                   td colspan=5 text-align="center" height="blocks.state-min" padding-left="theme.space.lg" padding-right="theme.space.lg" role=(data == "failed" ? "alert" : "status")
                     column gap="theme.space.md" align-items="center"
