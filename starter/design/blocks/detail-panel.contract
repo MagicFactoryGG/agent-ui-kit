@@ -1,21 +1,23 @@
 // The detail of one record, alone or inside a screen's column: a header (the title with its status tag beside it,
-// up to two actions), the record's facts as label-value rows, a notes paragraph, and its activity at the end. The
+// up to two actions), the record's facts as definition rows, a notes paragraph, and its activity at the end. The
 // panel keeps one measure (`blocks.detail-max`) and groups by space, not by frames: facts and activity are rows on
 // the page, divided by the one meaningful line, their labels one quiet step above; the notes sit on the fill ground
 // as prose; the record's own work (loading, a save in flight) says itself as a chip on the same fill ground beside
-// the tag. The one filled focal element is the primary action; the rest is quiet. Two rails hold it together: every
-// label and row starts at the panel's left edge, every value, stamp and action ends at its right.
+// the tag. The one filled focal element is the primary action; the rest is quiet. One rail holds it together: every
+// label, term and row starts at the panel's left edge, and only time stamps and the header's actions end at its
+// right.
 //
 // States: `data` one record, loading, failed and long content; `agent` none, changed (a changed value carries the
 // kit's mark with `changedNote`, the ledger's "did" sentence) and waiting (`waitingNote`, its "asks" sentence, is
 // the calm line the person must answer). The buttons' `interaction` is the app's: busy while a write is in flight
 // (the chip turning with `busyNote`, the platform's own progress), disabled when it means to refuse them. Loading
-// claims nothing: quiet bars stand where the short facts' labels and values and the activity's lines sit, and the
-// notes' ground holds the paragraph's place, so completing a load moves nothing. The record that failed says so with
-// the kit's severity language - a critical mark, the message in the error's ink, a warning triangle at its side -
-// and offers the way on: `retryLabel` naming it, `retryPress` being the app's own action; what did not arrive says
-// nothing. A fact's short value sits at the end of its line; a long one reads as prose under its label. Every word
-// is a prop; rows arrive by shape (Fact, Event), and the rows themselves are the small local components below
+// claims nothing: quiet bars stand where the facts' terms and values and the activity's lines sit, and the notes'
+// ground holds the paragraph's place, so completing a load moves nothing. The record that failed says so with the
+// kit's severity language - one semantic border in the critical ink, the message in the error's own ink, a warning
+// triangle at its side - and offers the way on: `retryLabel` naming it, `retryPress` being the app's own action;
+// what did not arrive says nothing. A fact reads as a definition - its term in a fixed column, its value one type
+// step stronger flowing after it; a value long enough to be a paragraph reads as prose under its term. Every word is
+// a prop; rows arrive by shape (Fact, Event), and the rows themselves are the small local components below
 // (FactRow, EventRow, their quiet stand-ins, the chip), each drawn once.
 use Swatch from "__SCOPE__/theme"
 use Words, ActionButton, Tag from "__SCOPE__/components"
@@ -53,7 +55,7 @@ component StatusChip
     testId: string
     speak: bool
   view
-    row role=(speak ? "status" : "none") gap="theme.space.xs" align-items="center" background-color="theme.color.surface" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" testId=testId
+    row role=(speak ? "status" : "none") gap="theme.space.xs" align-items="center" background-color="theme.color.fill" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" testId=testId
       progress aria-label=text width="blocks.spin" height="blocks.spin"
       text text testId=`${testId}-text` font="theme.type.caption" color="theme.color.ink"
 
@@ -103,9 +105,7 @@ component GhostEvent
     row aria-hidden=true min-height="components.row-min" box-sizing="border-box" padding-top="theme.space.md" padding-bottom="theme.space.md"
       column flex=1 gap="theme.space.sm"
         box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
-        row align-items="center" gap="theme.space.md"
-          box height="theme.space.md" flex=1 background-color="theme.color.fill" border-radius="theme.radius.pill"
-          box width="blocks.stamp" height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill" flex-shrink=0
+        box height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 component DetailPanel
   props
@@ -158,10 +158,10 @@ component DetailPanel
             if primaryLabel != ""
               ActionButton(label=primaryLabel, kind="primary", interaction=interaction, outcome="none", press=primaryPress, testId=`${testId}-primary`)
       if data == "failed"
-        // The failure is the record's: one block lifted on the surface ground, its severity said the kit's way -
-        // a critical mark, the message in the error's ink, a warning triangle at its side - and the way on as a
-        // quiet button of the app's own words. What did not arrive says nothing.
-        column testId=`${testId}-failed` role="alert" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-left-width="blocks.alert-line" border-left-style="solid" border-left-color="theme.color.critical"
+        // The failure is the record's: one block lifted on the surface ground with the one semantic border in
+        // the critical ink, a warning triangle at the message's side, the words in the error's ink - and the way
+        // on as a quiet button of the app's own words. What did not arrive says nothing.
+        column testId=`${testId}-failed` role="alert" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.critical"
           row gap="theme.space.sm" align-items="flex-start"
             svg viewBox="0 0 16 16" width="blocks.spin" height="blocks.spin" fill="none" stroke="theme.color.critical" aria-hidden=true margin-top="theme.space.xs" flex-shrink=0
               path d="M8 2.5L14.5 13.5H1.5Z" stroke-width=1.3 stroke-linejoin="round"

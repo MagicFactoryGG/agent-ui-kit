@@ -6,8 +6,6 @@ theme
   blocks.sheet-max: length = 480px
   blocks.detail-max: length = 880px
   blocks.notes-hold: length = 96px
-  blocks.stamp: length = 80px
   blocks.spin: length = 16px
-  blocks.alert-line: length = 2px
   blocks.term: length = 160px
   blocks.header-min: length = 240px
