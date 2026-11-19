@@ -4,7 +4,7 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
-  blocks.table-max: length = 920px
+  blocks.table-max: length = 1120px
   blocks.row-min: length = 44px
   blocks.mark-line: length = 3px
   blocks.glyph: length = 12px

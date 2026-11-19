@@ -107,7 +107,7 @@ component DataTable
             Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
             if data == "failed" and retryLabel != ""
               row
-                ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+                ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="error", press=retry, testId=`${testId}-retry`)
             if data == "empty" and createLabel != ""
               row
                 ActionButton(label=createLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=create, testId=`${testId}-create`)
@@ -172,7 +172,7 @@ component DataTable
                     Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
                     if data == "failed" and retryLabel != ""
                       row
-                        ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+                        ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="error", press=retry, testId=`${testId}-retry`)
                     if data == "empty" and createLabel != ""
                       row
                         ActionButton(label=createLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=create, testId=`${testId}-create`)
@@ -184,7 +184,7 @@ component DataTable
                     td height="blocks.row-min" padding-left="theme.space.md" padding-right="theme.space.md"
                       box width="55%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
                     td height="blocks.row-min" padding-left="theme.space.md" padding-right="theme.space.md"
-                      box width="70%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
+                      box width="70%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
                     td height="blocks.row-min" padding-left="theme.space.md" padding-right="theme.space.md"
                       box width="50%" height="blocks.skel-bar" background-color="theme.color.fill" border-radius="theme.radius.control" animation=pulse
                     td height="blocks.row-min" text-align="end" padding-left="theme.space.md" padding-right="theme.space.lg"

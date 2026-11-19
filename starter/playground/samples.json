@@ -3,7 +3,7 @@
   "Record:many": [
     {
       "key": "record-1",
-      "title": "Q3 expense review",
+      "title": "Q3 expense review — EMEA marketing, all cards",
       "status": "Draft",
       "owner": "Maya Okafor",
       "updated": "Nov 12, 09:41",
@@ -11,7 +11,7 @@
     },
     {
       "key": "record-2",
-      "title": "Renew design licences",
+      "title": "Renew the design tool licences before December",
       "status": "In review",
       "owner": "Jonas Weber",
       "updated": "Nov 11, 17:03",
@@ -19,7 +19,7 @@
     },
     {
       "key": "record-3",
-      "title": "Move audit log to cold storage",
+      "title": "Move the 2024 audit log to cold storage and free the disk",
       "status": "Scheduled",
       "owner": "Priya Nair",
       "updated": "Nov 10, 14:20",
@@ -27,7 +27,7 @@
     },
     {
       "key": "record-4",
-      "title": "Rotate service credentials",
+      "title": "Rotate the deploy service credentials, note the change",
       "status": "Filed",
       "owner": "Sam Delacroix",
       "updated": "Nov 8, 08:15",
@@ -37,7 +37,7 @@
   "Record:one": [
     {
       "key": "record-1",
-      "title": "Q3 expense review",
+      "title": "Q3 expense review — EMEA marketing, all cards",
       "status": "Draft",
       "owner": "Maya Okafor",
       "updated": "Nov 12, 09:41",
