@@ -2,7 +2,7 @@
   "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types.",
   "props:StatePanel": {
     "title": "Your files",
-    "message": "Everything you add to this project will appear here, ready to share with your team.",
+    "message": "Everything you add to this project will appear here, ready to share.",
     "failedText": "We couldn't load your files. Check your connection, then try again.",
     "agentNote": "Your assistant is taking care of this.",
     "actionLabel": "Add files",

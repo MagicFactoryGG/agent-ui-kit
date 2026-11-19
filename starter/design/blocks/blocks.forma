@@ -9,6 +9,7 @@ theme
   blocks.shape-full: length = 56px
   blocks.shape-compact: length = 40px
   blocks.bone: length = 12px
+  blocks.bone-action: length = 160px
   blocks.note-dot: length = 6px
   blocks.measure: length = 560px
   blocks.action-min: length = 44px  // ActionButton's own least height (components.row-min); a block may not reach into another package's sizes
