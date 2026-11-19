@@ -1,7 +1,8 @@
 // The permit view of the app's one tool list: each tool, its sentence, and
 // the mode in force, which the person can raise and never lower below the
-// tool's floor. `modeLabels` are the app's words for the five modes, in the
-// ledger's order (direct, recorded, delayed, proposed, off).
+// tool's floor (a secret's tool: direct, proposed or off). `modeLabels` are
+// the app's words for the five modes, in the ledger's order (direct,
+// recorded, delayed, proposed, off).
 use AgentTool, Raise, modes, rank from "./ledger.contract"
 
 fn shownMode(t: AgentTool, raised: Raise[]): string = raised.filter(r => r.tool == t.name and rank(r.mode) > rank(t.floor)).length > 0 ? raised.filter(r => r.tool == t.name).map(r => r.mode).join("") : t.floor
@@ -27,5 +28,5 @@ component PermitList
             text t.title
             text t.sentence part="detail" color="param.detailInk" font="-exact-footnote"
           select value=shownMode(t, raised) change=set(t.name) aria-label=t.title testId=`${id}-${t.name}`
-            for m in modes().filter(x => rank(x) >= rank(t.floor)) key=m
+            for m in modes().filter(x => rank(x) >= rank(t.floor) and (not t.secret or (x != "recorded" and x != "delayed"))) key=m
               option modeLabel(m, modeLabels) value=m

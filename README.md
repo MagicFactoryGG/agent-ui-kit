@@ -1,4 +1,4 @@
-# agent-ui-kit (working name)
+# agent-ui-kit
 
 The layer between an agent and a person, for [Exact](https://github.com/expo/exact) apps. A person
 and an agent change the same values; this library records what an agent did, holds what waits for a
@@ -38,8 +38,8 @@ authentication provider decide that ([proposed is not a security boundary](docs/
 
 You need a checkout of Exact at commit `51002ee77` (the version this repository is tested against),
 Bun 1.4.2 and the Rust toolchain on `PATH`, and Xcode for macOS and the iOS Simulator. Point the apps at
-your Exact checkout with `EXACT` (each app's `exact.mjs` was written by Exact's `exact new`, and its
-default path is only the authors' folder layout):
+your Exact checkout with `EXACT`. Each app's `exact.mjs`, `AGENTS.md` and `CLAUDE.md` were written by
+Exact's `exact new`, and the Exact path they name is a default that `EXACT` replaces:
 
     export EXACT=/path/to/exact
     cd apps/agent-gallery && bun install && bun exact.mjs test web     # or macos, ios
@@ -60,12 +60,16 @@ Start with [one ledger, two doors](docs/recipes/one-ledger-two-doors.md); run th
 [run the checks](docs/recipes/run-the-checks.md).
 
 Every check and its settings: [run the checks](docs/recipes/run-the-checks.md). What Exact blocks today,
-and the workaround for each: [Exact asks](docs/recipes/exact-asks.md).
+and the workaround for each: [workarounds at Exact 51002ee77](docs/recipes/exact-workarounds.md).
 
 ## Status
 
-Version 1. Exact changes quickly; this repository follows one pinned Exact commit and moves it on purpose.
-Issues are welcome. A gap in Exact itself goes to Exact's own issues, with the smallest app that shows it.
+0.1.0, the first public version. Exact changes quickly; this repository follows one pinned Exact commit
+and moves it on purpose.
+
+Not built yet: a level a tool needs and the level an authentication provider met, with the library's
+comparison in the record; who must answer a waiting act, and by when; and the time of each act in its
+receipt (an app can pass the time in; a function cannot read the clock).
 
 ## The name
 

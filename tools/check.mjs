@@ -2,9 +2,8 @@
 // a total. Exits 1 when any fails.
 //
 // On ios it runs only the steps that launch each app once (the words, the
-// gate's IR, and each app's own tests), with no Simulator window: the checks
-// that drive the app launch it once per case, which is for web and macOS. Run
-// ios last, once per piece of work.
+// gate's IR, and each app's own tests): the checks that drive the app launch
+// it once for each case, which is slow on a simulator.
 //
 //   bun tools/check.mjs [web|macos|ios]
 import { spawnSync } from "node:child_process";

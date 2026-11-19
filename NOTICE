@@ -13,6 +13,5 @@ Industries, Inc. (Expo):
 - The apps' exact.mjs, AGENTS.md and CLAUDE.md blocks are written by Exact's
   `exact new`.
 
-UI SDK: the idea of components that are ready for an agent, and the names of
-the component kinds in the catalogue, came from reading it. No code of it is
-in this repository.
+Prior work on components that are ready for an agent shaped the idea of this
+library. No code of it is in this repository.

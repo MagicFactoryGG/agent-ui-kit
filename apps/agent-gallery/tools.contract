@@ -5,8 +5,8 @@
 // the act.
 //
 // The door is passed as "agent": an action cannot read which door called it
-// (docs/recipes/exact-asks.md). A tool's action calls functions only, never
-// another action with arguments (Exact's tool-action bug, same recipe).
+// (docs/recipes/exact-workarounds.md). A tool's action calls functions only,
+// never another action with arguments (same recipe, 3).
 use Ledger, act, answer, undo, raise from "@agent-ui-kit/agent"
 use titleOf, switchAct, setAct, secretAct, roleAct, addAct, removeAct, memberName, cities, teamNameProblem, isDay from "./model.contract"
 use folderIds from "./examples.contract"

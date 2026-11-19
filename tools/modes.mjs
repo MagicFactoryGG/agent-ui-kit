@@ -14,7 +14,7 @@
 //      waits), recorded (a change with that mode, nothing waits), delayed or
 //      proposed (it waits, its key is not yet written);
 //    - each act is said in one sentence with at most two answer words, and
-//      the sentence names no place on a screen (beyond 2);
+//      the sentence names no place on a screen;
 //    - with `raise` set (ops; %tool and %mode are filled in), raised to
 //      proposed the same call waits; with `lower` set, an attempt to set the
 //      mode one step below the floor is refused and changes nothing.

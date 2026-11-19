@@ -11,7 +11,7 @@ sentence on the notice, and can undo it.
 - **Two actions, one function.** An action cannot read which door called it,
   so each door has its own one-line action and passes its door (`"person"` or
   `"agent"`). A tool's action calls functions only, never another action with
-  arguments ([Exact asks](exact-asks.md)).
+  arguments ([workarounds](exact-workarounds.md)).
 - **The mode comes from the tool list**, not from an `if` in the tool
   ([modes](modes.md)).
 - `tools/both-doors.mjs` proves that the switch and the tool reach the same

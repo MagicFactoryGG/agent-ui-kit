@@ -47,7 +47,8 @@ component App
 
   // The agent's door. Answer words are closed: saved, delayed, proposed, off,
   // invalid, unknown-option, unknown-id, too-short, too-long, undone,
-  // accepted, rejected, answer-elsewhere, below-floor, person-only.
+  // accepted, rejected, answer-elsewhere, below-floor, person-only, not-latest,
+  // secret, secret-mode.
   tool readSettings reads "Each setting, one per line: id, on or off, and waiting when an act waits on it, tab-separated." = readSettings
     returns settingsText
   tool setSetting writes idempotent closed "Turn an email setting on or off. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readSettings." = setSetting
@@ -114,13 +115,13 @@ component App
     returns waitingText
   tool readPermits reads "Each tool an assistant may call: name, its floor, and the mode in force, tab-separated." = readPermits
     returns permitText
-  tool undoChange writes closed "Undo one change, by its change id from listActivity. Answers undone or unknown-id." = undoChange
+  tool undoChange writes closed "Undo one change, by its change id from listActivity: only the newest change on a value, and never a secret's. Answers undone, unknown-id, not-latest or secret." = undoChange
     returns book.answer
-    fails when book.answer == "unknown-id"
+    fails when book.answer != "undone"
   tool answerWaiting writes closed "Answer an act that waits, by its id from listWaiting. Answers accepted, rejected, unknown-id, or answer-elsewhere: an act the assistant asked for is answered by the person." = answerWaiting
     returns book.answer
     fails when book.answer != "accepted" and book.answer != "rejected"
-  tool raiseMode writes idempotent closed "Make a tool's mode stricter (recorded, delayed, proposed or off). Answers saved, below-floor, or person-only: only the person makes a mode less strict." = raiseMode
+  tool raiseMode writes idempotent closed "Make a tool's mode stricter (recorded, delayed, proposed or off). Answers saved, below-floor, secret-mode (a secret takes only proposed or off), or person-only: only the person makes a mode less strict." = raiseMode
     returns book.answer
     fails when book.answer != "saved"
 

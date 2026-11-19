@@ -33,7 +33,9 @@ values in a ledger. Each takes the app's directory and a host:
 
 A `both-doors.json` case: `name`, `person` (ops), `agent` (ops), `same` (state
 paths that must be equal), `expect` and `expectPerson` (path: value), `calls`
-(`[outcome, value]` for each call), `noLeak` (text no call record may hold).
+(`[outcome, value]` for each call), `noLeak` (text no call record may hold),
+`noLeakIn` (state paths that may not hold it either), `tree` (a testId and the
+value its node must show after the agent's steps).
 An op is an `exact.mjs agent` op: `tap <id>`, `type <id> <text>`, `call
 <tool> <json>`, `clock +<ms>`.
 

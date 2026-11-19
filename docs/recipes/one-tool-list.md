@@ -16,6 +16,11 @@ ledger. Three views read that one list:
   ("what an assistant can do here, and what needs a person"), so another
   party's agent can read it before it acts.
 - `tools/modes.mjs` holds each row's floor to its tool line.
+- **The cost today:** this list sits beside Exact's own `tool` lines, so a tool is written in up to five
+  places: its `tool` line, its `AgentTool` row, its face in `app.json`, and, for the checks, a sample in
+  `agent-checks.json` and a case in `both-doors.json`. Contract cannot read its own tool lines (name and
+  consequence); if it could, each floor could be computed from the line, and the list would hold only
+  what the line cannot say (reach, secret, a stricter floor).
 
 ```contract
 use Value, AgentTool, AnswerWords, Act, Ledger, ledger, act, personSet, raise, undo, isOn, modeOf from "@agent-ui-kit/agent"

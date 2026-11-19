@@ -6,6 +6,12 @@ gives it back.
 - The tool's floor is `direct` (`AgentTool.secret` is true): the value is
   written at once and never goes into the record, so no undo and no activity
   line holds it.
+- A secret's tool takes only `direct`, `proposed` or `off`: `raise` answers
+  `secret-mode` for `recorded` or `delayed`. While a proposed secret waits,
+  its value is in `Waiting.value` (the ledger needs it to apply the answer):
+  an app never shows that field for a secret's tool. Once it takes effect, its
+  receipt keeps no value (`was` and `now` are `""`), and `undo` answers
+  `secret`.
 - No `reads` tool returns the value: a read says `set` or `empty`.
 - The field is the platform's own (`input type="password"`, or
   `autocomplete="one-time-code"` for a code), so AutoFill and the platform's

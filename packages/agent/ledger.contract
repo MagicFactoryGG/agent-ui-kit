@@ -6,7 +6,7 @@
 //
 // Why one record and pure functions: an action cannot read which door called
 // it, and a tool's action that calls another action with arguments loses its
-// parameters (see the recipes' "Exact asks"). A function has neither problem,
+// parameters (docs/recipes/exact-workarounds.md). A function has neither problem,
 // so the record, undo, the waiting list and the modes live here once, not in
 // each tool.
 //
@@ -138,9 +138,12 @@ fn raisedOf(l: Ledger, tool: string): string = l.raised.filter(r => r.tool == to
 // The mode in force: the floor, or the person's raise above it. A tool the
 // app did not list is proposed.
 fn modeOf(l: Ledger, tool: string): string = raisedOf(l, tool) != "" and rank(raisedOf(l, tool)) > rank(floorOf(l, tool)) ? raisedOf(l, tool) : floorOf(l, tool)
+fn isSecret(l: Ledger, tool: string): bool = l.tools.filter(t => t.name == tool and t.secret).length > 0
 // A person (or an agent) sets a tool's mode. Below the floor: `below-floor`.
-// An agent may only make a mode stricter: `person-only` otherwise.
-fn raise(l: Ledger, tool: string, mode: string, door: string): Ledger = rank(mode) < rank(floorOf(l, tool)) ? Ledger(l, answer="below-floor") : door != "person" and rank(mode) < rank(modeOf(l, tool)) ? Ledger(l, answer="person-only") : Ledger(l, raised=l.raised.filter(r => r.tool != tool).concat([Raise(tool=tool, mode=mode)]), answer="saved")
+// An agent may only make a mode stricter: `person-only` otherwise. A secret's
+// tool takes only direct, proposed or off (`secret-mode`): a recorded or
+// delayed secret would sit in the record or wait where an app may show it.
+fn raise(l: Ledger, tool: string, mode: string, door: string): Ledger = rank(mode) < rank(floorOf(l, tool)) ? Ledger(l, answer="below-floor") : isSecret(l, tool) and (mode == "recorded" or mode == "delayed") ? Ledger(l, answer="secret-mode") : door != "person" and rank(mode) < rank(modeOf(l, tool)) ? Ledger(l, answer="person-only") : Ledger(l, raised=l.raised.filter(r => r.tool != tool).concat([Raise(tool=tool, mode=mode)]), answer="saved")
 
 // --- Acts -----------------------------------------------------------------
 
@@ -154,7 +157,7 @@ fn noFor(l: Ledger, mode: string): string = mode == "proposed" ? l.words.reject 
 // An agent's (or a tool's) act, taken in the mode in force for its tool. The
 // answer word is `saved` (direct, recorded), `delayed`, `proposed` or `off`.
 fn act(l: Ledger, a: Act): Ledger = modeOf(l, a.tool) == "off" ? Ledger(l, answer="off") : modeOf(l, a.tool) == "direct" ? applied(l, a, "direct") : modeOf(l, a.tool) == "recorded" ? applied(l, a, "recorded") : held(l, a, modeOf(l, a.tool))
-fn applied(l: Ledger, a: Act, mode: string): Ledger = Ledger(l, values=put(l.values, a.key, a.value), changes=(mode == "recorded" ? [Change(id=`a${l.seq + 1}`, tool=a.tool, door=a.door, mode=mode, key=a.key, title=a.title, sentence=a.did, was=valueOf(l, a.key), now=a.value, answeredBy="")].concat(l.changes) : l.changes), waiting=l.waiting.filter(w => w.key != a.key), marked=withKey(l.marked, a.key), note=Note(ref=`a${l.seq + 1}`, mode=mode, sentence=a.did, yes=yesFor(l, mode), no=noFor(l, mode)), seq=l.seq + 1, answer="saved")
+fn applied(l: Ledger, a: Act, mode: string): Ledger = Ledger(l, values=put(l.values, a.key, a.value), changes=(mode == "recorded" ? [Change(id=`a${l.seq + 1}`, tool=a.tool, door=a.door, mode=mode, key=a.key, title=a.title, sentence=a.did, was=(isSecret(l, a.tool) ? "" : valueOf(l, a.key)), now=(isSecret(l, a.tool) ? "" : a.value), answeredBy="")].concat(l.changes) : l.changes), waiting=l.waiting.filter(w => w.key != a.key), marked=withKey(l.marked, a.key), note=Note(ref=`a${l.seq + 1}`, mode=mode, sentence=a.did, yes=yesFor(l, mode), no=noFor(l, mode)), seq=l.seq + 1, answer="saved")
 fn held(l: Ledger, a: Act, mode: string): Ledger = Ledger(l, waiting=l.waiting.filter(w => w.key != a.key).concat([Waiting(id=`a${l.seq + 1}`, tool=a.tool, door=a.door, mode=mode, key=a.key, title=a.title, sentence=(mode == "delayed" ? a.will : a.asks), did=a.did, value=a.value, yes=yesFor(l, mode), no=noFor(l, mode))]), note=Note(ref=`a${l.seq + 1}`, mode=mode, sentence=(mode == "delayed" ? a.will : a.asks), yes=yesFor(l, mode), no=noFor(l, mode)), seq=l.seq + 1, answer=mode)
 
 // A person's own edit: it wins. It writes the value, clears the agent's mark
@@ -163,7 +166,8 @@ fn personSet(l: Ledger, key: string, value: string): Ledger = Ledger(l, values=p
 
 // --- Answers --------------------------------------------------------------
 
-fn receipt(l: Ledger, w: Waiting, door: string): Change = Change(id=w.id, tool=w.tool, door=w.door, mode=w.mode, key=w.key, title=w.title, sentence=w.did, was=valueOf(l, w.key), now=w.value, answeredBy=door)
+// A secret's receipt keeps no value: `was` and `now` are "".
+fn receipt(l: Ledger, w: Waiting, door: string): Change = Change(id=w.id, tool=w.tool, door=w.door, mode=w.mode, key=w.key, title=w.title, sentence=w.did, was=(isSecret(l, w.tool) ? "" : valueOf(l, w.key)), now=(isSecret(l, w.tool) ? "" : w.value), answeredBy=door)
 fn quietIf(l: Ledger, ref: string): Note = l.note.ref == ref ? quietNote() : l.note
 // May `door` answer `w`? Not when the app turned on "the door that asks never
 // answers" and the answer comes through the door that asked.
@@ -189,9 +193,13 @@ fn hasDelayed(l: Ledger): bool = l.waiting.filter(w => w.mode == "delayed").leng
 
 // --- Undo -----------------------------------------------------------------
 
-// Undo one change by its id: its key goes back to the old value. Words:
-// undone, unknown-id.
-fn undo(l: Ledger, id: string): Ledger = match first(l.changes.filter(c => c.id == id)) { case some(c) => Ledger(l, values=put(l.values, c.key, c.was), changes=l.changes.filter(x => x.id != id), marked=(l.changes.filter(x => x.id != id and x.key == c.key).length > 0 ? l.marked : l.marked.filter(m => m != c.key)), note=quietIf(l, id), answer="undone"), case none => Ledger(l, answer="unknown-id") }
+// Undo one change by its id: its key goes back to the old value. Only the
+// newest change on a key can be undone (`not-latest` for an older one, so the
+// record never says a later change took effect when it did not), and a
+// secret's change cannot (`secret`: its old value is not kept). Words: undone,
+// unknown-id, not-latest, secret.
+fn newerOnKey(l: Ledger, c: Change): bool = l.changes.slice(0, max(l.changes.map(x => x.id).indexOf(c.id), 0)).filter(x => x.key == c.key).length > 0
+fn undo(l: Ledger, id: string): Ledger = match first(l.changes.filter(c => c.id == id)) { case some(c) => isSecret(l, c.tool) ? Ledger(l, answer="secret") : newerOnKey(l, c) ? Ledger(l, answer="not-latest") : Ledger(l, values=put(l.values, c.key, c.was), changes=l.changes.filter(x => x.id != id), marked=(l.changes.filter(x => x.id != id and x.key == c.key).length > 0 ? l.marked : l.marked.filter(m => m != c.key)), note=quietIf(l, id), answer="undone"), case none => Ledger(l, answer="unknown-id") }
 fn undoLatest(l: Ledger): Ledger = match first(l.changes) { case some(c) => undo(l, c.id), case none => Ledger(l, answer="unknown-id") }
 
 // --- The notice's two answers ---------------------------------------------

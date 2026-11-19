@@ -3,7 +3,7 @@
 // (open, query, highlight): the app's tool sets the value by key. A row's
 // change mark and proposal bar are the same as @agent-ui-kit/agent's
 // ChangeMark and ProposalBar, drawn here because a package cannot use another
-// package by a local path (see docs/recipes/exact-asks.md).
+// package by a local path (see docs/recipes/exact-workarounds.md).
 
 use Field from "./field.contract"
 use Combobox from "./combobox.contract"

@@ -313,13 +313,14 @@
     }
   },
   {
-    "name": "a city: the combobox and setCity reach the same value; an unknown one is refused",
+    "name": "a city: the combobox and setCity reach the same value, and the field shows the agent's city; an unknown one is refused",
     "person": [
       "tap tab-more",
       "type city-input Per",
       "type city-input key Enter"
     ],
     "agent": [
+      "tap tab-more",
       "call findCity {\"text\":\"per\"}",
       "call setCity {\"name\":\"Perth\"}",
       "call setCity {\"name\":\"Atlantis\"}"
@@ -340,7 +341,10 @@
         "failed",
         "unknown-option"
       ]
-    ]
+    ],
+    "tree": {
+      "city-input": "Perth"
+    }
   },
   {
     "name": "the team name: the refusal word comes from the same check as the person's error",
@@ -432,6 +436,79 @@
     "expect": {
       "book.values.0.value": "on",
       "book.waiting.0.key": "digest"
+    }
+  },
+  {
+    "name": "a raised secret: only proposed or off, and the record keeps no value",
+    "agent": [
+      "call raiseMode {\"tool\":\"setSecret\",\"mode\":\"recorded\"}",
+      "call raiseMode {\"tool\":\"setSecret\",\"mode\":\"proposed\"}",
+      "call setSecret {\"field\":\"apiKey\",\"value\":\"s3cret-xyz\"}",
+      "tap review-settings",
+      "tap approvals-a1-accept",
+      "call undoChange {\"change\":\"a1\"}"
+    ],
+    "calls": [
+      [
+        "failed",
+        "secret-mode"
+      ],
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "proposed"
+      ],
+      [
+        "failed",
+        "secret"
+      ]
+    ],
+    "expect": {
+      "book.values.11.value": "s3cret-xyz",
+      "book.changes.0.was": "",
+      "book.changes.0.now": ""
+    },
+    "noLeak": "s3cret-xyz",
+    "noLeakIn": [
+      "book.changes",
+      "book.note"
+    ]
+  },
+  {
+    "name": "undo out of order: only the newest change on a value can be undone",
+    "agent": [
+      "call setNumber {\"field\":\"goal\",\"value\":9000}",
+      "call setNumber {\"field\":\"goal\",\"value\":9500}",
+      "call undoChange {\"change\":\"a1\"}",
+      "call undoChange {\"change\":\"a2\"}"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "failed",
+        "not-latest"
+      ],
+      [
+        "ok",
+        "undone"
+      ]
+    ],
+    "expect": {
+      "book.values.6.value": "9000",
+      "book.changes.length": 1,
+      "book.marked": [
+        "goal"
+      ]
     }
   }
 ]

@@ -20,7 +20,11 @@ tool:
   "person")`, and set it back down to the floor, never below it
   (`below-floor`). An agent may only make a mode stricter (`person-only`).
 - **Delayed** acts apply when the app calls `settle`, from a task after its
-  delay. Stop is the act's second answer word.
+  delay. Stop is the act's second answer word. The task below is keyed on
+  the ledger's count, so every new act starts the delay again, and `settle`
+  applies every delayed act at once: an agent that acts more often than the
+  delay holds all of them open. An app that must apply each one on time
+  gives each its own task, keyed on the act's id.
 - `tools/modes.mjs` holds each floor to its tool line, and checks that every
   act lands in its mode ([run the checks](run-the-checks.md)).
 

@@ -14,20 +14,28 @@ component Combobox
     choose: action
   parts
     field: control
-  state query = value
+  // While the person types, the field shows the query; else the app's value,
+  // so a value set by the agent's tool shows at once.
+  state query = ""
+  state editing = false
   state open = false
   state chosen = 0
   derive hits = options.filter(name => name.toLowerCase().includes(query.toLowerCase()))
   action edit(text: string)
     query = text
+    editing = true
     chosen = 0
     open = true
   action began
+    query = value
+    editing = true
     open = true
   action ended
+    editing = false
     open = false
   action pick(name: string)
     query = name
+    editing = false
     open = false
     chosen = 0
     choose(name)
@@ -38,6 +46,7 @@ component Combobox
         let next = k == "Home" ? 0 : k == "End" ? hits.length - 1 : k == "ArrowDown" ? min(chosen + 1, hits.length - 1) : max(chosen - 1, 0)
         chosen = next
         open = true
+        scrollIntoView(`${id}-option-${next}`, block="nearest")
       else if k == "Enter" and open
         match hits.at(chosen)
           case some(name)
@@ -47,15 +56,17 @@ component Combobox
             chosen = 0
       else if k == "Escape"
         preventDefault()
+        editing = false
         open = false
         chosen = 0
   view
     column
-      input part="field" id=id testId=id role="combobox" aria-label=label placeholder=placeholder value=query input=edit key=searchKey focus=began blur=ended
+      input part="field" id=id testId=id role="combobox" aria-label=label placeholder=placeholder value=(editing ? query : value) input=edit key=searchKey focus=began blur=ended
         aria-expanded=(open and hits.length > 0) aria-controls=`${id}-options`
-        aria-activedescendant=(open ? `${id}-option-${chosen}` : "")
+        aria-activedescendant=(open and hits.length > 0 ? `${id}-option-${chosen}` : "")
       if open and hits.length > 0
-        column id=`${id}-options` role="listbox" aria-label=label testId=`${id}-options`
-          for name, i in hits key=name
-            button id=`${id}-option-${i}` testId=`${id}-option-${i}` role="option" aria-selected=(i == chosen) tabindex=-1 retainFocus=true press=pick(name)
-              text name
+        scroll max-height="50vh"
+          column id=`${id}-options` role="listbox" aria-label=label testId=`${id}-options`
+            for name, i in hits key=name
+              button id=`${id}-option-${i}` testId=`${id}-option-${i}` role="option" aria-selected=(i == chosen) tabindex=-1 retainFocus=true press=pick(name)
+                text name

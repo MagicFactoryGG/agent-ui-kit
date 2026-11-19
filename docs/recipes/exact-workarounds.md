@@ -1,17 +1,17 @@
-# Recipe: what Exact blocks today, and the workaround
+# Recipe: workarounds at Exact 51002ee77
 
-Each gap below has the smallest workaround this repo uses, so the packages run
-on Exact as it is (pinned in the README). Each is a candidate issue for Exact,
-with the smallest app that shows it. Nothing here is sent anywhere.
+The packages run on Exact as it is at the pinned commit. Where this library
+needed something Exact does not do there, it uses the smallest workaround,
+listed here, so a reader knows why the code has that shape.
 
 1. **A tool call is not a test step.** `call` runs only in the driver, so
    "both doors reach the same state" needs `tools/both-doors.mjs` beside the
-   app's tests. Ask: `call <tool> <json>` as a step in `*.test.contract`.
+   app's tests.
 2. **An action cannot read which door called it.** The guide's tools section
    says each call's record keeps its `door`, and a package's native view is
    told its origin, but Contract cannot read it. Workaround: two one-line
    actions per value, one per door, that pass `"person"` or `"agent"` to the
-   same ledger function. Ask: a door an action can read.
+   same ledger function.
 3. **A tool's action that calls another action with arguments** fails the face
    check (`intents-face-type`: the face "names parameter …, which its action
    does not take"). Workaround: the ledger is pure functions, which a tool's
@@ -33,8 +33,7 @@ with the smallest app that shows it. Nothing here is sent anywhere.
    after each call that another kind of op follows.
 8. **Each driver run launches the app**, so a check with many cases launches
    it many times. On the iOS Simulator that is too slow and too heavy, so
-   `tools/check.mjs ios` runs only each app's own tests. Ask: a reset of the
-   app's state inside one launch, for every host.
+   `tools/check.mjs ios` runs only each app's own tests.
 
 The block below is the workaround for 2 and 3 in one app: two doors, one
 function, and no action called with arguments from a tool.
