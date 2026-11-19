@@ -48,7 +48,7 @@
 //   panel alone in a window cannot pin its account to that window — the rail's right hairline and the account's
 //   own hairline close the panel instead, and a real shell's pane does the rest).
 // - Loading says its line once — a small drawn cue beside muted words (role=status) — above the shape coming:
-//   two sections as the resting list has, each a thin word-wide bar for the group's own label on a
+//   two sections as the resting list has, each a thin, short bar for the group's own label on a
 //   section-label row above word-wide label bars for its rows, a badge pill of the badge's own size where the
 //   row carries a count. Bars are the width of a word, not lines the width of the panel: what arrives does not
 //   jump, and the ghosts read as labels coming, not as rules across the rail.
@@ -117,13 +117,13 @@ component NavItem
       if badge > 0
         text `${badge}` testId=`${testId}-badge` flex-shrink=0 min-width="blocks.nav-badge-min" box-sizing="border-box" text-align="center" font="theme.type.caption" color="theme.color.ink" font-variant-numeric="tabular-nums" padding-left="theme.space.sm" padding-right="theme.space.sm" background-color=(current ? "theme.color.surface" : "theme.color.fill") border-radius="theme.radius.pill" white-space="nowrap"
 
-// A group's own label, still coming: a thin bar the width of a word at the heading's inset, on a row the height
-// of a section label — so the section that arrives takes the place its ghost held, close to its rows the way a
-// real heading sits.
+// A group's own label, still coming: a thin bar the width of a short word (shorter than a place's bar, as a
+// heading is) at the heading's inset, on a row the height of a section label — so the section that arrives takes
+// the place its ghost held, close to its rows the way a real heading sits.
 component NavHeadGhost
   view
     row min-height="theme.space.xl" align-items="center" padding-left="theme.space.md" padding-right="theme.space.md" aria-hidden=true
-      box width="blocks.nav-ghost-word" height="theme.space.sm" background-color="theme.color.fill" border-radius="theme.radius.pill"
+      box width="blocks.nav-ghost-head" height="theme.space.sm" background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 // A place still coming: the row's own height and insets, a bar the width of a word where the label will be and,
 // where the row carries a count, a pill of the badge's own size — so what arrives does not jump.
