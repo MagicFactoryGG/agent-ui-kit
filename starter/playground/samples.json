@@ -233,6 +233,7 @@
     "rejectLabel": "Clear it"
   },
   "props:FeatureGrid": {
+    "eyebrow": "Features",
     "title": "Everything your team needs",
     "lead": "One place to plan, write and ship together, on every device you use.",
     "actionLabel": "See all features",
