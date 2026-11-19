@@ -1,6 +1,6 @@
 // One block for a whole area's empty, loading and failed states: a calm centred panel, its card, shape and type
-// all Theme tokens (no image file). The drawn shape says the state: a blank card holding one unwritten line
-// (empty), a broken arc in the accent, the one active colour (loading), a filled alert form (failed). Loading
+// all Theme tokens (no image file). The drawn shape says the state: an empty tray (empty), a broken arc in the
+// accent, the one active colour (loading), a filled alert form (failed). Loading
 // keeps the title (so a reader hears what loads, role=status) and stands in three stepped skeleton lines for the
 // rest; the one action is primary whenever it shows, the retry in failed as in empty. `size` "full" is the whole
 // area's panel; "compact" keeps the type and claims less width, for a card's body or a side panel. No agent axis,
@@ -27,7 +27,7 @@ component StatePanel
           circle cx=12 cy=12 r=10 fill="none" stroke="theme.color.accent" stroke-width=2.5 stroke-linecap="round" stroke-dasharray="47 16" transform="rotate(-90 12 12)"
         else
           rect x=4.5 y=4.5 width=15 height=15 rx=3.5 fill="none" stroke="theme.color.ink-muted" stroke-width=2
-          line x1=8.5 y1=12 x2=15.5 y2=12 stroke="theme.color.ink-muted" stroke-width=2 stroke-linecap="round"
+          path d="M4.5 13h4.25l1.75 2.75h3L15.25 13h4.25" fill="none" stroke="theme.color.ink-muted" stroke-width=2 stroke-linecap="round" stroke-linejoin="round"
       column margin-bottom="theme.space.sm"
         Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
       if data == "loading"
