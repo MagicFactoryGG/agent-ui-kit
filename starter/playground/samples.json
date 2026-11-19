@@ -264,5 +264,107 @@
     "accountDetail": "Workspace admin",
     "agentKey": "naventry-2",
     "agentNote": "Added by your assistant"
-  }
+  },
+  "props:MessageList": {
+    "title": "Inbox",
+    "unreadLabel": "unread",
+    "emptyText": "No messages yet.",
+    "failedText": "Your messages did not load.",
+    "composeLabel": "Write a message",
+    "retryLabel": "Try again",
+    "orderLabel": "Newest first",
+    "paneLabel": "Message preview",
+    "paneEmptyText": "Choose a message to read it here.",
+    "paneQuietText": "When a message arrives, it opens here.",
+    "openLabel": "Open message",
+    "agentNote": "Your assistant filed the invoice from ACME.",
+    "chosenKey": "message-2",
+    "agentKey": "message-4"
+  },
+  "Message:many": [
+    {
+      "key": "message-1",
+      "from": "Priya Nair",
+      "subject": "Design review notes",
+      "snippet": "Three small changes before we cut the release, all in the section you wrote last week.",
+      "when": "09:41",
+      "unread": true,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-2",
+      "from": "Jonas Weber",
+      "subject": "Q3 report is ready to file",
+      "snippet": "The numbers are reconciled and the summary page waits on your sign-off before Friday.",
+      "when": "08:15",
+      "unread": false,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-3",
+      "from": "Maya Okafor",
+      "subject": "Lunch on Thursday?",
+      "snippet": "There is a new place two streets down with a good menu and a table big enough for eight.",
+      "when": "Wed 14:05",
+      "unread": true,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-4",
+      "from": "ACME Supplies",
+      "subject": "Invoice 4821 for the studio order",
+      "snippet": "Your order shipped on Monday; the invoice is attached and due at the end of the month.",
+      "when": "Tue 09:12",
+      "unread": false,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-5",
+      "from": "Sam Delacroix",
+      "subject": "Fwd: the venue contract",
+      "snippet": "Flagging this one so it does not get lost before the deposit is due.",
+      "when": "Mon 16:20",
+      "unread": false,
+      "flagged": true,
+      "href": "/"
+    }
+  ],
+  "Message:one": [
+    {
+      "key": "message-2",
+      "from": "Jonas Weber",
+      "subject": "Q3 report is ready to file",
+      "snippet": "The numbers are reconciled and the summary page waits on your sign-off before Friday.",
+      "when": "08:15",
+      "unread": false,
+      "flagged": false,
+      "href": "/"
+    }
+  ],
+  "Message:long": [
+    {
+      "key": "message-1",
+      "from": "Constance Beauregard-Villeneuve at the regional licensing office",
+      "subject": "A subject line that keeps going because the sender put the whole question in it and expected nobody to mind",
+      "snippet": "The snippet is one line in the list, cut with an ellipsis, and wraps to several lines in the reading pane, which is as it should be: a preview may never push the layout around, it holds.",
+      "when": "Wed 14:05",
+      "unread": true,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-2",
+      "from": "Sam Delacroix",
+      "subject": "Fwd: the venue contract, with the rider the venue's own lawyer added after the last call we all had together",
+      "snippet": "Flagging this one so it does not get lost before the deposit is due at the end of the month, which is closer than the last note made it sound.",
+      "when": "Mon 16:20",
+      "unread": false,
+      "flagged": true,
+      "href": "/"
+    }
+  ]
 }
