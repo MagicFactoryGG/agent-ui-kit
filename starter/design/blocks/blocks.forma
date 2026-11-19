@@ -9,3 +9,9 @@ theme
   blocks.step-tick: length = 12px
   blocks.step-line: length = 2px
   blocks.mark-line: length = 3px
+  blocks.actions-min: length = 240px
+  blocks.alert: length = 16px
+  blocks.skel-head: length = 20px
+  blocks.skel-line: length = 12px
+  blocks.skel-btn: length = 96px
+  blocks.skel-btn-tall: length = 44px
