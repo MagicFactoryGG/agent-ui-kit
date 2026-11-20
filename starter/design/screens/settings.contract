@@ -198,8 +198,11 @@ component SettingsScreen
                     // desktop and wraps away, zero tall, on a phone. Named by the change's sentence.
                     row flex-wrap="wrap" column-gap="theme.space.xl"
                       box flex=1 min-width="screens.settings-aside" aria-hidden=true
-                      row role="group" aria-label=changedText flex=2 min-width="screens.settings-card-min" box-sizing="border-box" padding-left="theme.space.lg"
-                        ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="settings-screen-undo")
+                      column flex=2 min-width="screens.settings-card-min" box-sizing="border-box"
+                        // The inset is the wrapper's, not the flex item's: a basis-0 item's own padding takes part in
+                        // sharing the width out, and the button had stood 11px off the card's edge.
+                        row role="group" aria-label=changedText padding-left="theme.space.lg"
+                          ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="settings-screen-undo")
             else if data == "loading"
               SettingsGhost(loadingText=loadingText, testId="settings-screen-loading-1")
               SettingsGhost(loadingText=loadingText, testId="settings-screen-loading-2")
