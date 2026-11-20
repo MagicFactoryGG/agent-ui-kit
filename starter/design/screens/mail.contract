@@ -4,7 +4,7 @@
 //   start is the kit's SideNav: the product's mark and name, Compose under them (Compose is where a person starts,
 //   so it sits at the top of the folders, as the rail's own control), the folders with their counts, the account.
 //   Beside it, on the page, the kit's MessageList: the folder's name and unread count, the messages, and its own
-//   reading pane, which holds the open message (who and when, the subject, the body). Over the list, a toolbar
+//   reading pane, which holds the open message (who and when, the subject, the body). Over that pane, a toolbar
 //   with the open message's actions (Reply, Reply all, Forward, and Flag, which an agent may set too). MessageList
 //   draws its reading pane itself on any window wider than a phone, so the screen uses that pane as its third and
 //   does not draw a second copy of the message beside it: the open message's body is passed in as its row's
@@ -298,14 +298,17 @@ component MailScreen
           column min-height="100%"
             SideNav(productName=title, productMark=mark, navLabel=navLabel, entries=entries, data="many", emptyText="", emptyLabel="", empty=compose, loadingText="", failedText="", retryLabel="", retry=retry, accountName=accountName, accountDetail=accountDetail, agent="none", agentKey="", agentNote="", testId="mail-folders")
               ActionButton(label=composeLabel, kind=(composeFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=compose, testId="mail-compose")
-            box flex=1 border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line" aria-hidden=true
+            box flex=1 border-left-width="theme.line.width" border-left-style="solid" border-left-color="theme.color.line" border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line" aria-hidden=true
         scroll id="mail-main" flex=1 min-width=0 min-height=0
           column role="main" padding="theme.space.xl" gap="theme.space.lg"
             if shown
               MailAgent(agent=agent, proposedNote=proposedNote, changedNote=changedNote, waitingNote=waitingNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, waitingLabel=waitingLabel, accept=accept, reject=reject, undo=undo, review=review)
             if open
-              row role="group" aria-label=toolbarLabel testId="mail-toolbar" justify-content="flex-end"
-                MailReplies(replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, flagLabel=flagLabel, flagged=openFlagged, showFlag=true, focal=false, reply=reply, replyAll=replyAll, forward=forward, flag=flag)
+              row
+                column flex=1 min-width=0 aria-hidden=true
+                row role="group" aria-label=toolbarLabel testId="mail-toolbar" flex=1 min-width=0
+                  column min-width=0 padding-left="theme.space.lg"
+                    MailReplies(replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, flagLabel=flagLabel, flagged=openFlagged, showFlag=true, focal=false, reply=reply, replyAll=replyAll, forward=forward, flag=flag)
             MessageList(title=folderTitle, unreadLabel=unreadLabel, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, orderLabel=orderLabel, paneLabel=paneLabel, paneEmptyText=paneEmptyText, paneQuietText=paneQuietText, openLabel="", agentNote=agentNote, chosenKey=(open ? letter.key : ""), agentKey=agentKey, data=data, agent=(agent == "changed" ? "changed" : "none"), messages=listed, compose=compose, retry=retry, openMessage=reply, testId="mail-list")
     else
       column testId="mail" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
