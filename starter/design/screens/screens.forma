@@ -90,3 +90,5 @@ theme
   screens.entry-glyph: length = 16px  // the clock of the agent's note, the tick beside the accepted note
   screens.entry-glyph-top: length = 2px  // a 16px glyph centred on the body type's first line (21px)
   screens.entry-mark-line: length = 3px  // the agent note's start edge: the kit's agent mark (components.mark-line)
+  screens.entry-dot: length = 8px  // the busy cue's pulsing dot, on a caption line
+  screens.entry-note-min: length = 200px  // the accepted note keeps this; narrower, the way back wraps under it
