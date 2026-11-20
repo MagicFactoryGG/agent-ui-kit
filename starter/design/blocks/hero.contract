@@ -1,5 +1,5 @@
-// Hero: a landing page's opening. The copy column holds a short kicker, the headline at a display size drawn from
-// the theme's title style (its weight, line and family; only the size is the block's own, blocks.hero-display), a
+// Hero: a landing page's opening. The copy column holds a short kicker, the headline in the theme's display step
+// (theme.type.display with its tracking; display-compact when the app sets `size` compact on a narrow window), a
 // lead paragraph on a reading measure (the headline's lines balanced, so no word stands alone on its last line;
 // every text breaks a word wider than its box rather than spill), and the way on: the primary action (the one filled control in every state)
 // beside a quiet secondary. Beside it on a desktop (under it on a phone: a wrapping row of two columns, each with a
@@ -108,6 +108,8 @@ component Hero
     undoLabel: string
     data: enum<"many", "one", "empty", "loading", "failed", "long">
     interaction: enum<"idle", "busy">
+    // The app sets it from exactViewport()'s width (compact under about 600 px): a piece cannot measure the window.
+    size: enum<"wide", "compact">
     outcome: enum<"none", "error">
     agent: enum<"none", "proposed", "changed">
     primary: action
@@ -129,7 +131,7 @@ component Hero
                 svg viewBox="0 0 8 8" width="blocks.note-dot" height="blocks.note-dot" aria-hidden=true flex-shrink=0
                   circle cx=4 cy=4 r=4 fill="theme.color.accent"
                 text kicker testId=`${testId}-kicker` flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.label" color="theme.color.accent"
-            text headline testId=`${testId}-headline` role="heading" aria-level=1 padding-top="theme.space.xs" padding-bottom="theme.space.xs" text-wrap="balance" overflow-wrap="break-word" font="theme.type.title" font-size="blocks.hero-display" color="theme.color.ink"
+            text headline testId=`${testId}-headline` role="heading" aria-level=1 padding-top="theme.space.xs" padding-bottom="theme.space.xs" text-wrap="balance" overflow-wrap="break-word" font=(size == "compact" ? "theme.type.display-compact" : "theme.type.display") letter-spacing=(size == "compact" ? "theme.type.display-compact-tracking" : "theme.type.display-tracking") color="theme.color.ink"
             if lead != ""
               text lead testId=`${testId}-lead` max-width="blocks.measure" overflow-wrap="break-word" font="theme.type.body" font-size="blocks.hero-lead" color="theme.color.ink-muted"
           column gap="theme.space.md"
