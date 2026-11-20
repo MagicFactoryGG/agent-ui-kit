@@ -21,6 +21,7 @@ theme
   screens.settings-main-min: length = 320px  // the section's least width: a phone's column (358 at 390) holds it
   screens.settings-main-max: length = 864px  // a group's title column and its card, each at a width that reads in one glance
   screens.settings-panel-max: length = 640px  // StatePanel's own full width, so its card is not centred away from the heading's edge
+  screens.settings-measure: length = 560px  // the lead under the heading: near 70 characters of body type a line
   screens.settings-place-min: length = 40px
   screens.settings-dot: length = 6px
   screens.settings-aside: length = 200px  // SettingsGroup's own title column's least width, so a ghost wraps where a group does
