@@ -27,7 +27,8 @@
 //          empty says `emptyText` in the Section and offers the page's own action as its way on (the state's one
 //          fill: the bar's action steps back to plain); loading says `loadingText` (role status) over ghost
 //          rows the shape of the rows to come; failed says `failedText` in the error's ink on the surface
-//          (role alert) with `retryLabel`, the state's one fill; long is many with words that run long and wrap.
+//          (role alert) beside the warning mark in the same ink, as the kit's SideNav and MediaViewer say a failure,
+//          drawn in the Section's card (its own failed line has no room for a mark), with `retryLabel`, the one fill; long is many with words that run long and wrap.
 //   agent  none|proposed|changed — an assistant's act on the page, through the other door: proposed waits in
 //          an accent-edged band over the list (one sentence, two answer words; Accept is the one fill);
 //          changed marks the row `agentKey` names (LinkRow's accent edge and `markNote`) and says
@@ -190,7 +191,7 @@ component AppShell
                   ShellBand(sentence=changedNote, tone="changed", testId="app-shell-changed")
                     ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="app-shell-undo")
                 column gap="theme.space.sm"
-                  Section(title=sectionTitle, footer=(shown ? footer : ""), emptyText=emptyText, loadingText=loadingText, failedText=failedText, data=(data == "long" ? "many" : data), testId="app-shell-section")
+                  Section(title=sectionTitle, footer=(shown ? footer : ""), emptyText=emptyText, loadingText=loadingText, failedText=failedText, data=(data == "long" or data == "failed" ? "many" : data), testId="app-shell-section")
                     if shown
                       column role="list" aria-label=sectionTitle
                         for r, i in rows key=r.key
@@ -205,8 +206,16 @@ component AppShell
                       row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.lg"
                         ActionButton(label=actionLabel, kind="primary", interaction="idle", outcome="none", press=act, testId="app-shell-empty-action")
                     else
-                      row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.lg"
-                        ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId="app-shell-retry")
+                      column role="alert" gap="theme.space.md" padding="theme.space.lg"
+                        row align-items="flex-start" gap="theme.space.sm"
+                          svg viewBox="0 0 24 24" width="screens.shell-glyph" height="screens.shell-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0
+                            path d="M12 3.5L21.5 20H2.5Z" stroke-width=1.6 stroke-linejoin="round"
+                            path d="M12 9.5v4.5" stroke-width=1.6 stroke-linecap="round"
+                            path d="M12 16.8v0.01" stroke-width=1.8 stroke-linecap="round"
+                          column flex=1 min-width=0
+                            Words(text=failedText, kind="body", outcome="error", level=0, testId="app-shell-section-failed")
+                        row
+                          ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId="app-shell-retry")
           if sheet
             row position="absolute" inset=0 align-items="stretch"
               scroll id="app-shell-sheet" width="screens.shell-sheet" flex-shrink=1 min-width=0 background-color="theme.color.surface"
