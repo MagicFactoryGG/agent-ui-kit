@@ -22,6 +22,11 @@
   --theme-color-critical-text: light-dark(#c62828, #f87171);
   --theme-color-control-tint: light-dark(#2f5bd3, #3b63d8);
   --theme-family: system-ui, sans-serif;
+  --theme-type-display-size: 40px;
+  --theme-type-display-weight: 600;
+  --theme-type-display-line: 1.1;
+  --theme-type-display-tracking: -0.02em;
+  --theme-type-display-compact-size: 30px;
   --theme-type-title-size: 20px;
   --theme-type-title-weight: 600;
   --theme-type-title-line: 1.25;

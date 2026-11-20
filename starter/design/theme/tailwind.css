@@ -21,6 +21,9 @@
   --color-critical-text: var(--theme-color-critical-text);
   --color-control-tint: var(--theme-color-control-tint);
   --font-sans: var(--theme-family);
+  --text-display: var(--theme-type-display-size);
+  --text-display--line-height: var(--theme-type-display-line);
+  --text-display--font-weight: var(--theme-type-display-weight);
   --text-title: var(--theme-type-title-size);
   --text-title--line-height: var(--theme-type-title-line);
   --text-title--font-weight: var(--theme-type-title-weight);
