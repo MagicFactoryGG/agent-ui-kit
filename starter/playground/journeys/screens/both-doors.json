@@ -1,0 +1,20 @@
+[
+  {
+    "name": "MediaViewer: Next and showPicture reach the same picture; the agent's is recorded and marked",
+    "person": ["tap media-viewer-next"],
+    "agent": ["call showPicture {\"picture\":\"tram\"}"],
+    "same": ["pictureIndex", "book.values"],
+    "calls": [["ok", "saved"]],
+    "expect": {
+      "pictureIndex": 1,
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": ["picture"]
+    },
+    "expectPerson": {
+      "pictureIndex": 1,
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  }
+]

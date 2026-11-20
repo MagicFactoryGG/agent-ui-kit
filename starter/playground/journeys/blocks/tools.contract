@@ -1,0 +1,11 @@
+// The agent's door: the actions the root's `tool` lines name. Each is one line over the ledger's functions; the
+// mode comes from the tool list, never from an `if` here. The door is passed as "agent": an action cannot read
+// which door called it. A tool's action calls functions only, never another action with arguments (the kit's
+// docs/recipes/exact-workarounds.md, 3).
+use act from "@agent-ui-kit/agent"
+use switchAct from "./model.contract"
+
+members App
+  action readSettings
+  action setSetting(setting: enum<"digest", "failures", "marketing">, on: bool)
+    book = act(book, switchAct("setSetting", setting, on))
