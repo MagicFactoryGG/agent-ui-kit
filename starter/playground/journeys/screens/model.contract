@@ -121,6 +121,8 @@ fn settingKeys(): string[] = settingsSwitchKeys().map(k => settingKey(k))
 fn settingLabel(key: string): string = settingsSwitches().filter(r => r.key == key).map(r => r.label).join("")
 fn settingSectionOf(key: string): string = settingsSectionKeys().filter(s => settingsGroupsOf(s).filter(g => g.rows.filter(r => r.key == key).length > 0).length > 0).join("")
 fn settingAct(key: string, on: bool): Act = Act(tool="setSetting", door="agent", key=settingKey(key), title=settingLabel(key), value=(on ? "on" : "off"), did=`Your assistant turned ${settingLabel(key)} ${on ? "on" : "off"}.`, asks=`Your assistant suggests turning ${settingLabel(key)} ${on ? "on" : "off"}.`, will=`Your assistant will turn ${settingLabel(key)} ${on ? "on" : "off"} in 5 seconds.`)
+// The same act through suggestSetting, whose floor is proposed: it waits in the ledger until the person answers.
+fn settingAsk(key: string, on: bool): Act = Act(settingAct(key, on), tool="suggestSetting")
 
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
@@ -128,7 +130,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="openProject", title="Project", sentence="Opens a project beside the list.", floor="recorded", reach="self", secret=false),
   AgentTool(name="flagMessage", title="Flags", sentence="Flags or unflags a message.", floor="recorded", reach="self", secret=false),
   AgentTool(name="fillAnswer", title="Setup", sentence="Fills in an answer of the workspace setup.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="setSetting", title="Settings", sentence="Turns a setting on or off.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="setSetting", title="Settings", sentence="Turns a setting on or off.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="suggestSetting", title="Suggested settings", sentence="Suggests turning a setting on or off; the person answers.", floor="proposed", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [

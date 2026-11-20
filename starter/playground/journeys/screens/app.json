@@ -12,7 +12,8 @@
       "fillAnswer": { "title": "Fill Answer", "parameters": { "answer": { "title": "Answer" }, "value": { "title": "Value" } } },
       "readSettings": { "title": "Read Settings" },
       "showSettingsSection": { "title": "Show Settings Section", "parameters": { "section": { "title": "Section" } } },
-      "setSetting": { "title": "Set Setting", "parameters": { "setting": { "title": "Setting" }, "on": { "title": "On" } } }
+      "setSetting": { "title": "Set Setting", "parameters": { "setting": { "title": "Setting" }, "on": { "title": "On" } } },
+      "suggestSetting": { "title": "Suggest Setting", "parameters": { "setting": { "title": "Setting" }, "on": { "title": "On" } } }
     }
   }
 }

@@ -148,5 +148,45 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "SettingsScreen: suggestSetting changes nothing until the person answers; the suggestion is shown on the setting's group",
+    "person": ["call openScreen {\"screen\":\"SettingsScreen\"}"],
+    "agent": ["call openScreen {\"screen\":\"SettingsScreen\"}", "call suggestSetting {\"setting\":\"digest\",\"on\":false}"],
+    "same": ["settingsGroups", "book.values", "book.changes"],
+    "calls": [["ok", "SettingsScreen"], ["ok", "proposed"]],
+    "expect": {
+      "settingsAgent": "proposed",
+      "settingsAgentKey": "digest",
+      "settingsGroups.0.rows.0.on": true,
+      "book.waiting.length": 1,
+      "book.changes.length": 0
+    }
+  },
+  {
+    "name": "SettingsScreen: Accept on the screen lets suggestSetting through, to the value the person's switch reaches",
+    "person": ["call openScreen {\"screen\":\"SettingsScreen\"}", "type settings-email-switch-digest false"],
+    "agent": ["call openScreen {\"screen\":\"SettingsScreen\"}", "call suggestSetting {\"setting\":\"digest\",\"on\":false}", "tap settings-email-accept"],
+    "same": ["settingsGroups", "book.values", "book.waiting"],
+    "calls": [["ok", "SettingsScreen"], ["ok", "proposed"]],
+    "expect": {
+      "settingsGroups.0.rows.0.on": false,
+      "settingsAgent": "changed",
+      "book.waiting.length": 0,
+      "book.changes.length": 1,
+      "book.changes.0.mode": "proposed"
+    }
+  },
+  {
+    "name": "SettingsScreen: Not now on the screen drops suggestSetting, and nothing changes",
+    "person": ["call openScreen {\"screen\":\"SettingsScreen\"}"],
+    "agent": ["call openScreen {\"screen\":\"SettingsScreen\"}", "call suggestSetting {\"setting\":\"mentions\",\"on\":false}", "tap settings-email-decline"],
+    "same": ["settingsGroups", "settingsAgent", "book.values", "book.waiting", "book.changes", "book.marked"],
+    "calls": [["ok", "SettingsScreen"], ["ok", "proposed"]],
+    "expect": {
+      "settingsAgent": "none",
+      "settingsGroups.0.rows.1.on": true,
+      "book.waiting.length": 0
+    }
   }
 ]

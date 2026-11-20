@@ -11,7 +11,7 @@
 // Keys in the ledger are unique in this app; a screen's own view state stays out of it.
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
-use Ledger, ledger, personSet, valueOf, isOn, isMarked, undoLatest from "@agent-ui-kit/agent"
+use Ledger, ledger, personSet, valueOf, isOn, isMarked, undoLatest, answerKey, waitingId, waitingSentence from "@agent-ui-kit/agent"
 use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer, SettingsScreen, SettingsScreenGroup from "__SCOPE__/screens"
 use Message, Setting from "__SCOPE__/blocks"
 use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys, settingsSections, settingsGroupsOf, settingsSwitches, settingsSwitchKeys, settingKey, settingKeys, settingSectionOf from "./model.contract"
@@ -79,12 +79,23 @@ component App
   state settingsAt = "notifications"
   derive settingsGroups = settingsGroupsOf(settingsAt).map(g => SettingsScreenGroup(g, rows=g.rows.map(r => r.kind == "switch" ? Setting(r, on=isOn(book, settingKey(r.key))) : r)))
   derive settingsMarkedKey = settingsSwitchKeys().filter(k => isMarked(book, settingKey(k))).slice(0, 1).join("")
+  // A suggestion (suggestSetting) waits in the ledger until the person answers it on the screen; while it waits it
+  // is the screen's agent state, before a change already made.
+  derive settingsAskKey = settingsSwitchKeys().filter(k => waitingId(book, settingKey(k)) != "").slice(0, 1).join("")
+  // The same state as the view gives SettingsScreen, for the cases to read.
+  derive settingsAgent = settingsAskKey != "" ? "proposed" : settingsMarkedKey != "" ? "changed" : "none"
+  derive settingsAgentKey = settingsAskKey != "" ? settingsAskKey : settingsMarkedKey
   derive settingsText = [`section\t${settingsAt}`].concat(settingsSwitches().map(r => `${r.key}\t${settingSectionOf(r.key)}\t${r.label}\t${isOn(book, settingKey(r.key)) ? "on" : "off"}`)).join("\n")
   // The person's door: a place in the list shows its section; a switch turns its setting on or off.
   action pickSectionByPerson(key: string)
     settingsAt = key
   action toggleSettingByPerson(key: string)
     book = personSet(book, settingKey(key), isOn(book, settingKey(key)) ? "off" : "on")
+  // The person's answer to a suggestion: Accept lets it through (recorded, so Undo can take it back), Not now drops it.
+  action acceptSettingByPerson
+    book = answerKey(book, settingKey(settingsAskKey), true, "person")
+  action declineSettingByPerson
+    book = answerKey(book, settingKey(settingsAskKey), false, "person")
 
   // A retry and a proposal's answers: this use has none.
   action ignore
@@ -122,6 +133,9 @@ component App
   tool setSetting writes idempotent closed "Turn a setting on or off, by id from readSettings. Answers saved or unknown-id." = setSetting
     returns book.answer
     fails when book.answer == "unknown-id" or book.answer == "off"
+  tool suggestSetting writes idempotent closed "Suggest turning a setting on or off, by id from readSettings; it waits until the person accepts or declines it on the screen. Answers proposed or unknown-id." = suggestSetting
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off"
 
   view
     main testId="app" width="100%" height="100%"
@@ -134,4 +148,4 @@ component App
       else if shown == "OnboardingScreen"
         OnboardingScreen(productName="Northwind", exitLabel="Save and exit", steps=setupStepsAt(setupStep), answers=setupFields, lead="A few details to set your workspace up. You can change any of them later.", countLabel="Setup progress", backLabel="Back", continueLabel="Continue", skipLabel="Skip for now", retryLabel="", errorText="", loadingText="", failedText="", listTitle="Your setup", listNote="Your answers are saved as you go. Leave at any time and pick up where you stopped.", doneWord="done", currentWord="in progress", nextWord="to come", markNote="Filled in by your assistant", proposedNote="", acceptLabel="", rejectLabel="", waitingNote="", data="many", interaction="idle", outcome="none", agent=(setupMarked ? "changed" : "none"), exit=ignore, back=setupBackByPerson, advance=continueByPerson, skip=continueByPerson, retry=ignore, accept=ignore, reject=ignore, edit=answerByPerson)
       else if shown == "SettingsScreen"
-        SettingsScreen(title="Settings", navLabel="Settings sections", currentKey=settingsAt, sections=settingsSections(), groups=settingsGroups, groupEmptyText="Nothing to set here yet.", loadingText="", emptyTitle="", emptyText="", addLabel="", failedTitle="", failedText="", retryLabel="", agentSection=settingSectionOf(settingsMarkedKey), agentKey=settingsMarkedKey, proposalText="", acceptLabel="", declineLabel="", changedText=latestAbout(book, settingKeys()), waitingText="", waitingNote="", undoLabel="Undo", data="many", agent=(settingsMarkedKey != "" ? "changed" : "none"), pick=pickSectionByPerson, toggle=toggleSettingByPerson, choose=ignoreKey, open=ignoreKey, remove=ignoreKey, accept=ignore, decline=ignore, retry=ignore, add=ignore, undo=undoByPerson)
+        SettingsScreen(title="Settings", navLabel="Settings sections", currentKey=settingsAt, sections=settingsSections(), groups=settingsGroups, groupEmptyText="Nothing to set here yet.", loadingText="", emptyTitle="", emptyText="", addLabel="", failedTitle="", failedText="", retryLabel="", agentSection=settingSectionOf(settingsAgentKey), agentKey=settingsAgentKey, proposalText=waitingSentence(book, settingKey(settingsAskKey)), acceptLabel="Accept", declineLabel="Not now", changedText=latestAbout(book, settingKeys()), waitingText="", waitingNote="", undoLabel="Undo", data="many", agent=(settingsAskKey != "" ? "proposed" : settingsMarkedKey != "" ? "changed" : "none"), pick=pickSectionByPerson, toggle=toggleSettingByPerson, choose=ignoreKey, open=ignoreKey, remove=ignoreKey, accept=acceptSettingByPerson, decline=declineSettingByPerson, retry=ignore, add=ignore, undo=undoByPerson)

@@ -3,7 +3,7 @@
 // which door called it. A tool's action calls functions only, never another action with arguments (the kit's
 // docs/recipes/exact-workarounds.md, 3).
 use Ledger, act from "@agent-ui-kit/agent"
-use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys, answerAct, setupAnswerKeys, settingAct, settingsSwitchKeys from "./model.contract"
+use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys, answerAct, setupAnswerKeys, settingAct, settingAsk, settingsSwitchKeys from "./model.contract"
 
 members App
   action openScreen(screen: enum<"MediaViewer", "ListDetail", "MailScreen", "OnboardingScreen", "SettingsScreen">)
@@ -27,3 +27,5 @@ members App
     settingsAt = section
   action setSetting(setting: string, on: bool)
     book = settingsSwitchKeys().includes(setting) ? act(book, settingAct(setting, on)) : Ledger(book, answer="unknown-id")
+  action suggestSetting(setting: string, on: bool)
+    book = settingsSwitchKeys().includes(setting) ? act(book, settingAsk(setting, on)) : Ledger(book, answer="unknown-id")
