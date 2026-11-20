@@ -4,6 +4,7 @@ use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf, isMarked from "@ag
 use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint, LinkGroup, FooterLink from "__SCOPE__/blocks"
 use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint from "__SCOPE__/blocks"
 use Question from "__SCOPE__/blocks"
+use Stat from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -130,6 +131,18 @@ fn faqText(l: Ledger): string = faqKeys().map(k => `${k}\t${faqQuestion(k)}\t${v
 fn faqMarkedKey(l: Ledger): string = faqKeys().filter(k => isMarked(l, faqKey(k))).slice(0, 1).join("")
 fn faqAct(key: string, open: bool): Act = Act(tool="openQuestion", door="agent", key=faqKey(key), title=faqQuestion(key), value=openWord(open), did=`Your assistant ${open ? "opened" : "closed"} this question for you.`, asks=`Your assistant suggests ${open ? "opening" : "closing"} “${faqQuestion(key)}”.`, will=`Your assistant will ${open ? "open" : "close"} “${faqQuestion(key)}” in 5 seconds.`)
 
+// StatTiles: a shop's numbers for this week, whose last read failed. The row's data state is the value both doors
+// set ("failed", then "many" once read again): the failed banner's Try again for a person, loadStats for the agent,
+// whose read is recorded and said under the row with Keep and Undo.
+fn weekStats(): Stat[] = [
+  Stat(key="revenue", label="Revenue", value="$48,210", change="+12.4% on last week", trend="up"),
+  Stat(key="orders", label="Orders", value="1,864", change="+8.2% on last week", trend="up"),
+  Stat(key="aov", label="Average order", value="$25.86", change="-2.1% on last week", trend="down"),
+  Stat(key="returns", label="Returns", value="3.1%", change="No change", trend="flat")
+]
+fn statsText(state: string): string = state == "many" ? weekStats().map(s => `${s.key}\t${s.label}\t${s.value}\t${s.change}`).join("\n") : state
+fn loadStatsAct(): Act = Act(tool="loadStats", door="agent", key="stats", title="This week's numbers", value="many", did="Your assistant read this week's numbers again.", asks="Your assistant suggests reading this week's numbers again.", will="Your assistant will read this week's numbers again in 5 seconds.")
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
@@ -143,7 +156,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="choosePlan", title="Plan", sentence="Chooses the workspace's plan: starter, team or business.", floor="recorded", reach="self", secret=false),
   AgentTool(name="startTrial", title="Free trial", sentence="Starts the free trial, as the page's Start free trial does.", floor="recorded", reach="self", secret=false),
   AgentTool(name="addFooterLinks", title="Footer links", sentence="Adds the first column, Help with Contact us, to the footer that has no links.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="openQuestion", title="Help questions", sentence="Opens a question on the help page to show its answer, or closes it.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="openQuestion", title="Help questions", sentence="Opens a question on the help page to show its answer, or closes it.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="loadStats", title="This week's numbers", sentence="Reads this week's numbers again after a failed read, as their Try again does.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -158,5 +172,6 @@ fn startValues(): Value[] = [
   Value(key="plan", value="none"),
   Value(key="trial", value="off"),
   Value(key="footer", value="empty"),
-  Value(key="faq-returns", value="open"), Value(key="faq-delivery", value="closed"), Value(key="faq-change", value="closed"), Value(key="faq-payment", value="closed")
+  Value(key="faq-returns", value="open"), Value(key="faq-delivery", value="closed"), Value(key="faq-change", value="closed"), Value(key="faq-payment", value="closed"),
+  Value(key="stats", value="failed")
 ]

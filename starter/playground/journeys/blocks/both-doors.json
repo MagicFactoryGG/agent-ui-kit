@@ -572,5 +572,38 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "StatTiles: this week's numbers failed to read: Try again and loadStats reach the same numbers; the agent's is recorded and said under the row",
+    "person": [
+      "tap stats-retry"
+    ],
+    "agent": [
+      "call loadStats {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.21.key": "stats",
+      "book.values.21.value": "many",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.was": "failed",
+      "book.marked": [
+        "stats"
+      ]
+    },
+    "expectPerson": {
+      "book.values.21.value": "many",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]

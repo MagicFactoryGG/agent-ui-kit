@@ -119,6 +119,12 @@
             "title": "Open"
           }
         }
+      },
+      "readStats": {
+        "title": "Read Stats"
+      },
+      "loadStats": {
+        "title": "Load Stats"
       }
     }
   }

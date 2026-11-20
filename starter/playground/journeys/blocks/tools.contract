@@ -6,6 +6,7 @@ use act from "@agent-ui-kit/agent"
 use switchAct, statusAct, loadAct, continueFrom, readAct, addHomeAct, pickAct, addFeatureAct, planAct, trialAct, addFooterLinksAct from "./model.contract"
 use switchAct, statusAct, loadAct, continueFrom, readAct, addHomeAct, pickAct, addFeatureAct, planAct, trialAct from "./model.contract"
 use faqAct from "./model.contract"
+use loadStatsAct from "./model.contract"
 
 members App
   action readSettings
@@ -44,3 +45,6 @@ members App
   action readFaq
   action openQuestion(question: enum<"returns", "delivery", "change", "payment">, open: bool)
     book = act(book, faqAct(question, open))
+  action readStats
+  action loadStats
+    book = act(book, loadStatsAct())
