@@ -1,0 +1,8 @@
+{
+  "button": "ActionButton",
+  "field": "Field",
+  "check": "SettingsGroup's switch row",
+  "radio": "Segment",
+  "menu": "a menu primitive (none yet: declare one in components)",
+  "tab": "Segment"
+}
