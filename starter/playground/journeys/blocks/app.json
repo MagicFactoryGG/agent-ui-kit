@@ -119,6 +119,23 @@
             "title": "Open"
           }
         }
+      },
+      "readChart": {
+        "title": "Read Chart"
+      },
+      "setChartRange": {
+        "title": "Set Chart Range",
+        "parameters": {
+          "range": {
+            "title": "Range"
+          }
+        }
+      },
+      "readNotes": {
+        "title": "Read Notes"
+      },
+      "markNotesRead": {
+        "title": "Mark Notes Read"
       }
     }
   }

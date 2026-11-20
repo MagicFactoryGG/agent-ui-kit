@@ -1,6 +1,6 @@
 {
-  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only; a prop for one data state as \"<prop>@<data>\" (\"interaction@failed\": \"disabled\"). \"sections\": a second playground app per group (<playground>/<name>; bun play.mjs web <name>): every block, every screen. The main app draws the components, each layer's index.contract pieces and wip/. One app drawing every state of every piece outgrew the web bundle.",
-  "sections": { "blocks": { "layers": ["blocks"], "except": ["index.contract"] }, "screens": { "layers": ["screens"], "except": ["index.contract"] } },
+  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only; a prop for one data state as \"<prop>@<data>\" (\"interaction@failed\": \"disabled\"). \"sections\": a second playground app per group (<playground>/<name>; bun play.mjs web <name>): the blocks in three apps by file name (a-f, g-r, s-z), every screen in one. The main app draws the components, each layer's index.contract pieces and wip/. One app drawing every state of every piece outgrew the web bundle.",
+  "sections": { "blocks-a-f": { "layers": ["blocks"], "except": ["index.contract"], "match": "^[a-f]" }, "blocks-g-r": { "layers": ["blocks"], "except": ["index.contract"], "match": "^[g-r]" }, "blocks-s-z": { "layers": ["blocks"], "except": ["index.contract"], "match": "^[s-z]" }, "screens": { "layers": ["screens"], "except": ["index.contract"] } },
   "props:DetailPanel": {
     "title": "Aurora Desk Lamp",
     "statusLabel": "In production",
@@ -1113,6 +1113,83 @@
       "open": false
     }
   ],
+  "props:SettingsScreen": {
+    "title": "Settings",
+    "navLabel": "Settings sections",
+    "currentKey": "notifications",
+    "groupEmptyText": "Nothing to set in this group yet.",
+    "loadingText": "Loading your notification settings",
+    "emptyTitle": "No alerts to set yet",
+    "emptyText": "Alerts appear here once you follow a project or a person.",
+    "addLabel": "Follow a project",
+    "failedTitle": "These settings did not load",
+    "failedText": "Check your connection, then try again. Nothing was changed.",
+    "retryLabel": "Try again",
+    "agentSection": "notifications",
+    "agentKey": "digest",
+    "proposalText": "Your assistant suggests turning the weekly digest off.",
+    "acceptLabel": "Accept",
+    "declineLabel": "Not now",
+    "changedText": "Your assistant turned the weekly digest on.",
+    "waitingText": "This change waits for your answer.",
+    "waitingNote": "Your assistant is waiting for your answer on one change.",
+    "undoLabel": "Undo",
+    "currentKey@long": "notifications",
+    "agentSection@long": "notifications",
+    "agentKey@long": "digest"
+  },
+  "SettingsSection:many": [
+    { "key": "account", "label": "Account", "detail": "Your name, email and password." },
+    { "key": "notifications", "label": "Notifications", "detail": "What reaches you, where, and when it stays quiet." },
+    { "key": "privacy", "label": "Privacy", "detail": "Who sees what you share." },
+    { "key": "appearance", "label": "Appearance", "detail": "Light, dark and the size of text." },
+    { "key": "assistant", "label": "Assistant", "detail": "What your assistant may do for you." }
+  ],
+  "SettingsSection:empty": [
+    { "key": "account", "label": "Account", "detail": "Your name, email and password." },
+    { "key": "notifications", "label": "Notifications", "detail": "What reaches you, where, and when it stays quiet." },
+    { "key": "privacy", "label": "Privacy", "detail": "Who sees what you share." },
+    { "key": "appearance", "label": "Appearance", "detail": "Light, dark and the size of text." },
+    { "key": "assistant", "label": "Assistant", "detail": "What your assistant may do for you." }
+  ],
+  "SettingsSection:loading": [
+    { "key": "account", "label": "Account", "detail": "Your name, email and password." },
+    { "key": "notifications", "label": "Notifications", "detail": "What reaches you, where, and when it stays quiet." },
+    { "key": "privacy", "label": "Privacy", "detail": "Who sees what you share." },
+    { "key": "appearance", "label": "Appearance", "detail": "Light, dark and the size of text." },
+    { "key": "assistant", "label": "Assistant", "detail": "What your assistant may do for you." }
+  ],
+  "SettingsSection:failed": [
+    { "key": "account", "label": "Account", "detail": "Your name, email and password." },
+    { "key": "notifications", "label": "Notifications", "detail": "What reaches you, where, and when it stays quiet." },
+    { "key": "privacy", "label": "Privacy", "detail": "Who sees what you share." },
+    { "key": "appearance", "label": "Appearance", "detail": "Light, dark and the size of text." },
+    { "key": "assistant", "label": "Assistant", "detail": "What your assistant may do for you." }
+  ],
+  "SettingsSection:long": [
+    { "key": "account", "label": "Account and sign-in", "detail": "" },
+    { "key": "notifications", "label": "Notifications, reminders and the quiet hours that hold them back", "detail": "Everything that may reach you, on which of your devices, at which hours of the day, and what waits until morning instead of waking you up" },
+    { "key": "privacy", "label": "Privacy and data sharing with other people", "detail": "" },
+    { "key": "assistant", "label": "Assistant", "detail": "" }
+  ],
+  "SettingsScreenGroup:many": [
+    { "key": "email", "title": "Email", "footer": "Sent to the address on your account.", "rows": [
+      { "key": "digest", "kind": "switch", "label": "Weekly digest", "detail": "A summary of your week, each Monday.", "value": "", "on": true },
+      { "key": "mentions", "kind": "switch", "label": "Mentions", "detail": "When someone names you in a comment.", "value": "", "on": true },
+      { "key": "news", "kind": "switch", "label": "Product news", "detail": "", "value": "", "on": false }
+    ] },
+    { "key": "device", "title": "On this device", "footer": "Only this phone or computer.", "rows": [
+      { "key": "sound", "kind": "value", "label": "Sound", "detail": "", "value": "Chime", "on": false },
+      { "key": "quiet", "kind": "link", "label": "Quiet hours", "detail": "Nothing makes a sound from 22:00 to 07:00.", "value": "", "on": false },
+      { "key": "reset", "kind": "danger", "label": "Turn every alert off", "detail": "", "value": "", "on": false }
+    ] }
+  ],
+  "SettingsScreenGroup:long": [
+    { "key": "email", "title": "Email to the address on your account, and to the second address you added for work", "footer": "Sent to the address on your account, and copied to your work address when you turn that on in your account settings.", "rows": [
+      { "key": "digest", "kind": "switch", "label": "A very long label for a switch row, written the way a person might really write it, going past the width of a narrow phone", "detail": "A very long detail line under the switch, as a person might really write it, that wraps to keep the switch in reach", "value": "", "on": true },
+      { "key": "sound", "kind": "value", "label": "A very long label for one setting, the way a person might really name it", "detail": "A very long detail line, as a person might really write it, that has to wrap instead of pushing the row apart", "value": "A very long chosen value", "on": false }
+    ] }
+  ],
   "props:MailScreen": {
     "title": "Mail",
     "mark": "M",
@@ -1406,6 +1483,473 @@
       "when": "Wed 14:05",
       "subject": "A subject line that keeps going because the sender put the whole question in it and expected nobody to mind",
       "body": "The body of a long message wraps in the pane and keeps its own paragraphs, however long a line runs, and a word without a break such as https://licensing-office.regional-authority.example/applications/2026/studio-renovation/attachments breaks where it must rather than push the page sideways.\nA second paragraph follows, so the reader sees that the letter keeps the sender's own line breaks."
+    }
+  ],
+  "NavEntry:empty": [
+    {
+      "key": "naventry-1",
+      "label": "Overview",
+      "href": "/",
+      "group": "Workspace",
+      "badge": 0,
+      "current": true
+    },
+    {
+      "key": "naventry-2",
+      "label": "Reports",
+      "href": "/reports",
+      "group": "Workspace",
+      "badge": 12,
+      "current": false
+    },
+    {
+      "key": "naventry-3",
+      "label": "Invoices",
+      "href": "/invoices",
+      "group": "Workspace",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-4",
+      "label": "Expenses",
+      "href": "/expenses",
+      "group": "Workspace",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-5",
+      "label": "Team",
+      "href": "/team",
+      "group": "People",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-6",
+      "label": "Guests",
+      "href": "/guests",
+      "group": "People",
+      "badge": 3,
+      "current": false
+    },
+    {
+      "key": "naventry-7",
+      "label": "Permissions",
+      "href": "/permissions",
+      "group": "People",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-8",
+      "label": "Billing",
+      "href": "/billing",
+      "group": "Admin",
+      "badge": 5,
+      "current": false
+    },
+    {
+      "key": "naventry-9",
+      "label": "Integrations",
+      "href": "/integrations",
+      "group": "Admin",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-10",
+      "label": "Settings",
+      "href": "/settings",
+      "group": "Admin",
+      "badge": 0,
+      "current": false
+    }
+  ],
+  "NavEntry:loading": [
+    {
+      "key": "naventry-1",
+      "label": "Overview",
+      "href": "/",
+      "group": "Workspace",
+      "badge": 0,
+      "current": true
+    },
+    {
+      "key": "naventry-2",
+      "label": "Reports",
+      "href": "/reports",
+      "group": "Workspace",
+      "badge": 12,
+      "current": false
+    },
+    {
+      "key": "naventry-3",
+      "label": "Invoices",
+      "href": "/invoices",
+      "group": "Workspace",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-4",
+      "label": "Expenses",
+      "href": "/expenses",
+      "group": "Workspace",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-5",
+      "label": "Team",
+      "href": "/team",
+      "group": "People",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-6",
+      "label": "Guests",
+      "href": "/guests",
+      "group": "People",
+      "badge": 3,
+      "current": false
+    },
+    {
+      "key": "naventry-7",
+      "label": "Permissions",
+      "href": "/permissions",
+      "group": "People",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-8",
+      "label": "Billing",
+      "href": "/billing",
+      "group": "Admin",
+      "badge": 5,
+      "current": false
+    },
+    {
+      "key": "naventry-9",
+      "label": "Integrations",
+      "href": "/integrations",
+      "group": "Admin",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-10",
+      "label": "Settings",
+      "href": "/settings",
+      "group": "Admin",
+      "badge": 0,
+      "current": false
+    }
+  ],
+  "NavEntry:failed": [
+    {
+      "key": "naventry-1",
+      "label": "Overview",
+      "href": "/",
+      "group": "Workspace",
+      "badge": 0,
+      "current": true
+    },
+    {
+      "key": "naventry-2",
+      "label": "Reports",
+      "href": "/reports",
+      "group": "Workspace",
+      "badge": 12,
+      "current": false
+    },
+    {
+      "key": "naventry-3",
+      "label": "Invoices",
+      "href": "/invoices",
+      "group": "Workspace",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-4",
+      "label": "Expenses",
+      "href": "/expenses",
+      "group": "Workspace",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-5",
+      "label": "Team",
+      "href": "/team",
+      "group": "People",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-6",
+      "label": "Guests",
+      "href": "/guests",
+      "group": "People",
+      "badge": 3,
+      "current": false
+    },
+    {
+      "key": "naventry-7",
+      "label": "Permissions",
+      "href": "/permissions",
+      "group": "People",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-8",
+      "label": "Billing",
+      "href": "/billing",
+      "group": "Admin",
+      "badge": 5,
+      "current": false
+    },
+    {
+      "key": "naventry-9",
+      "label": "Integrations",
+      "href": "/integrations",
+      "group": "Admin",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-10",
+      "label": "Settings",
+      "href": "/settings",
+      "group": "Admin",
+      "badge": 0,
+      "current": false
+    }
+  ],
+  "props:AppShell": {
+    "title": "Projects",
+    "searchLabel": "Search projects",
+    "searchText": "",
+    "actionLabel": "New project",
+    "menuLabel": "Open the menu",
+    "closeLabel": "Close the menu",
+    "productName": "Acme Console",
+    "productMark": "AC",
+    "navLabel": "Main menu",
+    "accountName": "Ada Lovelace",
+    "accountDetail": "Workspace admin",
+    "sectionTitle": "Active projects",
+    "footer": "Projects you have not opened for 90 days move to the archive.",
+    "emptyText": "No projects yet. A new project keeps its files, people and deadlines in one place.",
+    "loadingText": "Loading your projects…",
+    "failedText": "Your projects could not be loaded. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "proposedNote": "Your assistant suggests archiving Harbour signage, untouched since March.",
+    "acceptLabel": "Archive",
+    "rejectLabel": "Not now",
+    "changedNote": "Your assistant renamed Spring launch to Spring launch: retail.",
+    "markNote": "Renamed by your assistant",
+    "undoLabel": "Undo",
+    "agentKey": "spring"
+  },
+  "ShellRow:many": [
+    {
+      "key": "aurora",
+      "title": "Aurora desk lamp",
+      "detail": "Production · due Dec 4 · Maya Okafor",
+      "href": "/"
+    },
+    {
+      "key": "spring",
+      "title": "Spring launch: retail",
+      "detail": "Planning · 12 tasks open · Jonas Weber",
+      "href": "/"
+    },
+    {
+      "key": "audit",
+      "title": "2024 audit archive",
+      "detail": "Review · waiting on finance · Priya Nair",
+      "href": "/"
+    },
+    {
+      "key": "harbour",
+      "title": "Harbour signage",
+      "detail": "Paused since March · Sam Rivera",
+      "href": "/"
+    },
+    {
+      "key": "onboarding",
+      "title": "New hire onboarding",
+      "detail": "Ongoing · 3 people this month · Ada Lovelace",
+      "href": "/"
+    }
+  ],
+  "ShellRow:long": [
+    {
+      "key": "aurora",
+      "title": "Aurora desk lamp, the brass-and-linen edition for the Rotterdam showroom and its winter catalogue",
+      "detail": "Production · due Dec 4 · Maya Okafor, with the supplier's long note on the cloth-wrapped cord and the dimmer's range",
+      "href": "/"
+    },
+    {
+      "key": "spring",
+      "title": "Spring launch: retail, wholesale and the three pop-up stores along the harbour front",
+      "detail": "Planning · 12 tasks open · Jonas Weber",
+      "href": "/"
+    }
+  ],
+  "props:BarChart": {
+    "title": "Orders",
+    "note": "Orders placed each month, January to June",
+    "chartLabel": "Orders per month",
+    "range": "month",
+    "rangeLabel": "Range",
+    "emptyText": "No orders in this range yet. They appear here as soon as the first one is placed.",
+    "emptyLabel": "Share your shop",
+    "loadingText": "Loading orders…",
+    "failedText": "The orders did not load. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "agentKey": "mar",
+    "agentNote": "Your assistant switched the chart to months.",
+    "undoLabel": "Undo",
+    "proposalText": "Your assistant suggests showing quarters, to compare with last year.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "agentKey@long": "north",
+    "range@long": "month"
+  },
+  "BarPoint:many": [
+    { "key": "jan", "label": "Jan", "value": "1,180", "share": 0.52 },
+    { "key": "feb", "label": "Feb", "value": "1,420", "share": 0.63 },
+    { "key": "mar", "label": "Mar", "value": "2,260", "share": 1 },
+    { "key": "apr", "label": "Apr", "value": "1,940", "share": 0.86 },
+    { "key": "may", "label": "May", "value": "1,610", "share": 0.71 },
+    { "key": "jun", "label": "Jun", "value": "1,350", "share": 0.6 }
+  ],
+  "BarPoint:one": [
+    { "key": "mar", "label": "March", "value": "2,260", "share": 1 }
+  ],
+  "BarPoint:long": [
+    { "key": "north", "label": "North and Central Europe, including the Nordic countries", "value": "12,480 orders", "share": 1 },
+    { "key": "south", "label": "South", "value": "8,920 orders", "share": 0.71 },
+    { "key": "west", "label": "Western Europe and the United Kingdom", "value": "4,105 orders", "share": 0.33 }
+  ],
+  "BarRange:many": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
+  "BarRange:one": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
+  "BarRange:empty": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
+  "BarRange:loading": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
+  "BarRange:failed": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
+  "BarRange:long": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
+  "props:NotificationList": {
+    "title": "Notifications",
+    "summary": "2 new",
+    "markAllLabel": "Mark all read",
+    "newTitle": "New",
+    "earlierTitle": "Earlier",
+    "loadingText": "Checking for new notifications…",
+    "emptyTitle": "You're all caught up",
+    "emptyText": "New notifications will appear here as they arrive.",
+    "emptyActionLabel": "Notification settings",
+    "failedTitle": "Couldn't load just now",
+    "failedText": "Check your connection, then try again. Nothing you received is lost.",
+    "retryLabel": "Try again",
+    "proposedNote": "Your assistant suggests marking 2 notifications read.",
+    "acceptLabel": "Mark read",
+    "rejectLabel": "Not now",
+    "changedNote": "Your assistant marked 3 notifications read.",
+    "undoLabel": "Undo",
+    "summary@one": "1 new",
+    "summary@long": "1 new"
+  },
+  "NotificationNote:many": [
+    {
+      "key": "move-review",
+      "title": "Your assistant suggests moving Thursday's review to 15:00.",
+      "detail": "It overlaps the supplier call Priya booked.",
+      "when": "2 min ago",
+      "unread": true,
+      "kind": "agent",
+      "yesLabel": "Accept",
+      "noLabel": "Reject"
+    },
+    {
+      "key": "storage",
+      "title": "Storage is 90% full",
+      "detail": "New exports pause once it is full.",
+      "when": "1 h ago",
+      "unread": true,
+      "kind": "warning",
+      "yesLabel": "Manage storage",
+      "noLabel": ""
+    },
+    {
+      "key": "paid",
+      "title": "Invoice INV-2041 was paid",
+      "detail": "Northwind Traders paid €1,240.00.",
+      "when": "Yesterday",
+      "unread": false,
+      "kind": "success",
+      "yesLabel": "",
+      "noLabel": ""
+    },
+    {
+      "key": "shared",
+      "title": "Sam Rivera shared “Q3 plan” with you",
+      "detail": "You can view and comment.",
+      "when": "Mon",
+      "unread": false,
+      "kind": "info",
+      "yesLabel": "",
+      "noLabel": ""
+    },
+    {
+      "key": "archived",
+      "title": "Your assistant archived 12 old threads.",
+      "detail": "They stay in Archive for 30 days.",
+      "when": "Mon",
+      "unread": false,
+      "kind": "agent",
+      "yesLabel": "",
+      "noLabel": ""
+    }
+  ],
+  "NotificationNote:one": [
+    {
+      "key": "move-review",
+      "title": "Your assistant suggests moving Thursday's review to 15:00.",
+      "detail": "It overlaps the supplier call Priya booked.",
+      "when": "2 min ago",
+      "unread": true,
+      "kind": "agent",
+      "yesLabel": "Accept",
+      "noLabel": "Reject"
+    }
+  ],
+  "NotificationNote:long": [
+    {
+      "key": "move-review",
+      "title": "Your assistant suggests moving Thursday's quarterly planning review with the whole regional team to Friday afternoon at 15:00.",
+      "detail": "It overlaps the supplier call Priya booked last week, and three of the seven people invited have already said that Friday afternoon suits them better.",
+      "when": "2 min ago",
+      "unread": true,
+      "kind": "agent",
+      "yesLabel": "Accept",
+      "noLabel": "Reject"
+    },
+    {
+      "key": "export",
+      "title": "The export of every invoice, credit note and receipt from the last financial year finished",
+      "detail": "Northwind_Traders_2025_full_ledger_export_with_attachments_and_audit_trail.zip is ready to download for the next seven days.",
+      "when": "Yesterday, 16:47",
+      "unread": false,
+      "kind": "success",
+      "yesLabel": "Download",
+      "noLabel": ""
     }
   ],
   "props:DashboardScreen": {

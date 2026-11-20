@@ -1,17 +1,97 @@
 {
   "intents": {
     "tools": {
-      "openScreen": { "title": "Open Screen", "parameters": { "screen": { "title": "Screen" } } },
-      "readAlbum": { "title": "Read Album" },
-      "showPicture": { "title": "Show Picture", "parameters": { "picture": { "title": "Picture" } } },
-      "readMail": { "title": "Read Mail" },
-      "flagMessage": { "title": "Flag Message", "parameters": { "message": { "title": "Message" }, "flagged": { "title": "Flagged" } } },
-      "readProjects": { "title": "Read Projects" },
-      "openProject": { "title": "Open Project", "parameters": { "project": { "title": "Project" } } },
-      "readSetup": { "title": "Read Setup" },
-      "fillAnswer": { "title": "Fill Answer", "parameters": { "answer": { "title": "Answer" }, "value": { "title": "Value" } } },
-      "readPeriods": { "title": "Read Periods" },
-      "setPeriod": { "title": "Set Period", "parameters": { "period": { "title": "Period" } } }
+      "openScreen": {
+        "title": "Open Screen",
+        "parameters": {
+          "screen": {
+            "title": "Screen"
+          }
+        }
+      },
+      "readAlbum": {
+        "title": "Read Album"
+      },
+      "showPicture": {
+        "title": "Show Picture",
+        "parameters": {
+          "picture": {
+            "title": "Picture"
+          }
+        }
+      },
+      "readMail": {
+        "title": "Read Mail"
+      },
+      "flagMessage": {
+        "title": "Flag Message",
+        "parameters": {
+          "message": {
+            "title": "Message"
+          },
+          "flagged": {
+            "title": "Flagged"
+          }
+        }
+      },
+      "readProjects": {
+        "title": "Read Projects"
+      },
+      "openProject": {
+        "title": "Open Project",
+        "parameters": {
+          "project": {
+            "title": "Project"
+          }
+        }
+      },
+      "readSetup": {
+        "title": "Read Setup"
+      },
+      "fillAnswer": {
+        "title": "Fill Answer",
+        "parameters": {
+          "answer": {
+            "title": "Answer"
+          },
+          "value": {
+            "title": "Value"
+          }
+        }
+      },
+      "readProjectList": {
+        "title": "Read Project List"
+      },
+      "searchProjects": {
+        "title": "Search Projects",
+        "parameters": {
+          "text": {
+            "title": "Text"
+          }
+        }
+      },
+      "readSettings": {
+        "title": "Read Settings"
+      },
+      "showSettingsSection": {
+        "title": "Show Settings Section",
+        "parameters": {
+          "section": {
+            "title": "Section"
+          }
+        }
+      },
+      "setSetting": {
+        "title": "Set Setting",
+        "parameters": {
+          "setting": {
+            "title": "Setting"
+          },
+          "on": {
+            "title": "On"
+          }
+        }
+      }
     }
   }
 }

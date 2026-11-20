@@ -1,15 +1,29 @@
 [
   {
     "name": "MediaViewer: Next and showPicture reach the same picture; the agent's is recorded and marked",
-    "person": ["tap media-viewer-next"],
-    "agent": ["call showPicture {\"picture\":\"tram\"}"],
-    "same": ["pictureIndex", "book.values"],
-    "calls": [["ok", "saved"]],
+    "person": [
+      "tap media-viewer-next"
+    ],
+    "agent": [
+      "call showPicture {\"picture\":\"tram\"}"
+    ],
+    "same": [
+      "pictureIndex",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
     "expect": {
       "pictureIndex": 1,
       "book.changes.length": 1,
       "book.changes.0.mode": "recorded",
-      "book.marked": ["picture"]
+      "book.marked": [
+        "picture"
+      ]
     },
     "expectPerson": {
       "pictureIndex": 1,
@@ -19,15 +33,35 @@
   },
   {
     "name": "MailScreen: Flag and flagMessage flag the same message; the agent's is recorded and marked",
-    "person": ["call openScreen {\"screen\":\"MailScreen\"}", "tap mail-flag"],
-    "agent": ["call openScreen {\"screen\":\"MailScreen\"}", "call flagMessage {\"message\":\"m2\",\"flagged\":true}"],
-    "same": ["mailMessages", "book.values"],
-    "calls": [["ok", "MailScreen"], ["ok", "saved"]],
+    "person": [
+      "call openScreen {\"screen\":\"MailScreen\"}",
+      "tap mail-flag"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"MailScreen\"}",
+      "call flagMessage {\"message\":\"m2\",\"flagged\":true}"
+    ],
+    "same": [
+      "mailMessages",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "MailScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
     "expect": {
       "mailMarkedKey": "m2",
       "book.changes.length": 1,
       "book.changes.0.mode": "recorded",
-      "book.marked": ["flag-m2"]
+      "book.marked": [
+        "flag-m2"
+      ]
     },
     "expectPerson": {
       "mailMarkedKey": "",
@@ -37,15 +71,36 @@
   },
   {
     "name": "ListDetail: a tap on a row and openProject open the same project; the agent's is recorded and marked",
-    "person": ["call openScreen {\"screen\":\"ListDetail\"}", "tap list-detail-row-north"],
-    "agent": ["call openScreen {\"screen\":\"ListDetail\"}", "call openProject {\"project\":\"north\"}"],
-    "same": ["projectKey", "opened", "book.values"],
-    "calls": [["ok", "ListDetail"], ["ok", "saved"]],
+    "person": [
+      "call openScreen {\"screen\":\"ListDetail\"}",
+      "tap list-detail-row-north"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"ListDetail\"}",
+      "call openProject {\"project\":\"north\"}"
+    ],
+    "same": [
+      "projectKey",
+      "opened",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "ListDetail"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
     "expect": {
       "projectKey": "north",
       "book.changes.length": 1,
       "book.changes.0.mode": "recorded",
-      "book.marked": ["project"]
+      "book.marked": [
+        "project"
+      ]
     },
     "expectPerson": {
       "projectKey": "north",
@@ -55,10 +110,29 @@
   },
   {
     "name": "ListDetail: Undo on the screen takes back the agent's openProject",
-    "person": ["call openScreen {\"screen\":\"ListDetail\"}"],
-    "agent": ["call openScreen {\"screen\":\"ListDetail\"}", "call openProject {\"project\":\"atlas\"}", "tap list-detail-undo"],
-    "same": ["projectKey", "book.values", "book.marked"],
-    "calls": [["ok", "ListDetail"], ["ok", "saved"]],
+    "person": [
+      "call openScreen {\"screen\":\"ListDetail\"}"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"ListDetail\"}",
+      "call openProject {\"project\":\"atlas\"}",
+      "tap list-detail-undo"
+    ],
+    "same": [
+      "projectKey",
+      "book.values",
+      "book.marked"
+    ],
+    "calls": [
+      [
+        "ok",
+        "ListDetail"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
     "expect": {
       "projectKey": "harbour",
       "book.changes.length": 0,
@@ -67,18 +141,40 @@
   },
   {
     "name": "OnboardingScreen: typing the workspace name and fillAnswer write the same answer; the agent's is recorded and marked",
-    "person": ["call openScreen {\"screen\":\"OnboardingScreen\"}", "type onboarding-workspace-input Harbour Studio"],
-    "agent": ["call openScreen {\"screen\":\"OnboardingScreen\"}", "call fillAnswer {\"answer\":\"workspace\",\"value\":\"Harbour Studio\"}"],
-    "same": ["setupStep", "book.values"],
-    "calls": [["ok", "OnboardingScreen"], ["ok", "saved"]],
+    "person": [
+      "call openScreen {\"screen\":\"OnboardingScreen\"}",
+      "type onboarding-workspace-input Harbour Studio"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"OnboardingScreen\"}",
+      "call fillAnswer {\"answer\":\"workspace\",\"value\":\"Harbour Studio\"}"
+    ],
+    "same": [
+      "setupStep",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "OnboardingScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
     "expect": {
       "setupFields.0.value": "Harbour Studio",
       "setupFields.0.byAgent": true,
       "book.changes.length": 1,
       "book.changes.0.mode": "recorded",
-      "book.marked": ["setup-workspace"]
+      "book.marked": [
+        "setup-workspace"
+      ]
     },
-    "tree": { "onboarding-workspace-input": "Harbour Studio" },
+    "tree": {
+      "onboarding-workspace-input": "Harbour Studio"
+    },
     "expectPerson": {
       "setupFields.0.value": "Harbour Studio",
       "setupFields.0.byAgent": false,
@@ -88,10 +184,33 @@
   },
   {
     "name": "OnboardingScreen: Continue moves the step on, and the person's typing takes an answer the agent filled back",
-    "person": ["call openScreen {\"screen\":\"OnboardingScreen\"}", "tap onboarding-steps-continue", "type onboarding-size-input 12"],
-    "agent": ["call openScreen {\"screen\":\"OnboardingScreen\"}", "call fillAnswer {\"answer\":\"size\",\"value\":\"8\"}", "tap onboarding-steps-continue", "type onboarding-size-input 12"],
-    "same": ["setupStep", "setupFields", "book.values", "book.marked"],
-    "calls": [["ok", "OnboardingScreen"], ["ok", "saved"]],
+    "person": [
+      "call openScreen {\"screen\":\"OnboardingScreen\"}",
+      "tap onboarding-steps-continue",
+      "type onboarding-size-input 12"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"OnboardingScreen\"}",
+      "call fillAnswer {\"answer\":\"size\",\"value\":\"8\"}",
+      "tap onboarding-steps-continue",
+      "type onboarding-size-input 12"
+    ],
+    "same": [
+      "setupStep",
+      "setupFields",
+      "book.values",
+      "book.marked"
+    ],
+    "calls": [
+      [
+        "ok",
+        "OnboardingScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
     "expect": {
       "setupStep": "team",
       "setupFields.0.value": "12",
@@ -100,23 +219,24 @@
     }
   },
   {
-    "name": "DashboardScreen: a tap on Month and setPeriod show the same period; the agent's is recorded and marked",
+    "name": "AppShell: typing in the search and searchProjects keep the same projects; the agent's is recorded and marked",
     "person": [
-      "call openScreen {\"screen\":\"DashboardScreen\"}",
-      "tap dashboard-period-month"
+      "call openScreen {\"screen\":\"AppShell\"}",
+      "type app-shell-search harbour"
     ],
     "agent": [
-      "call openScreen {\"screen\":\"DashboardScreen\"}",
-      "call setPeriod {\"period\":\"month\"}"
+      "call openScreen {\"screen\":\"AppShell\"}",
+      "call searchProjects {\"text\":\"harbour\"}"
     ],
     "same": [
-      "dashPeriod",
+      "shellQuery",
+      "shellText",
       "book.values"
     ],
     "calls": [
       [
         "ok",
-        "DashboardScreen"
+        "AppShell"
       ],
       [
         "ok",
@@ -124,38 +244,41 @@
       ]
     ],
     "expect": {
-      "dashPeriod": "month",
+      "shellQuery": "harbour",
+      "shellRows.length": 1,
       "book.changes.length": 1,
       "book.changes.0.mode": "recorded",
       "book.marked": [
-        "dash-period"
+        "shell-search"
       ]
     },
     "expectPerson": {
-      "dashPeriod": "month",
+      "shellQuery": "harbour",
+      "shellRows.length": 1,
       "book.changes.length": 0,
       "book.marked": []
     }
   },
   {
-    "name": "DashboardScreen: Undo on the screen takes back the agent's setPeriod",
+    "name": "AppShell: Undo on the shell takes back the agent's search, even one that keeps no project",
     "person": [
-      "call openScreen {\"screen\":\"DashboardScreen\"}"
+      "call openScreen {\"screen\":\"AppShell\"}"
     ],
     "agent": [
-      "call openScreen {\"screen\":\"DashboardScreen\"}",
-      "call setPeriod {\"period\":\"quarter\"}",
-      "tap dashboard-undo"
+      "call openScreen {\"screen\":\"AppShell\"}",
+      "call searchProjects {\"text\":\"lighthouse\"}",
+      "tap app-shell-undo"
     ],
     "same": [
-      "dashPeriod",
+      "shellQuery",
+      "shellText",
       "book.values",
       "book.marked"
     ],
     "calls": [
       [
         "ok",
-        "DashboardScreen"
+        "AppShell"
       ],
       [
         "ok",
@@ -163,7 +286,125 @@
       ]
     ],
     "expect": {
-      "dashPeriod": "week",
+      "shellQuery": "",
+      "shellRows.length": 4,
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "SettingsScreen: the weekly digest's switch and setSetting turn it off alike; the agent's is recorded and marked",
+    "person": [
+      "call openScreen {\"screen\":\"SettingsScreen\"}",
+      "type settings-email-switch-digest false"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"SettingsScreen\"}",
+      "call setSetting {\"setting\":\"digest\",\"on\":false}"
+    ],
+    "same": [
+      "settingsAt",
+      "settingsGroups",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "SettingsScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "settingsGroups.0.rows.0.on": false,
+      "settingsMarkedKey": "digest",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": [
+        "settings-digest"
+      ]
+    },
+    "expectPerson": {
+      "settingsGroups.0.rows.0.on": false,
+      "settingsMarkedKey": "",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "SettingsScreen: a place in the list and showSettingsSection show the same section, and its switch and setSetting turn read receipts on alike",
+    "person": [
+      "call openScreen {\"screen\":\"SettingsScreen\"}",
+      "tap settings-screen-place-privacy",
+      "type settings-sharing-switch-receipts true"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"SettingsScreen\"}",
+      "call setSetting {\"setting\":\"receipts\",\"on\":true}",
+      "call showSettingsSection {\"section\":\"privacy\"}"
+    ],
+    "same": [
+      "settingsAt",
+      "settingsGroups",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "SettingsScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "privacy"
+      ]
+    ],
+    "expect": {
+      "settingsAt": "privacy",
+      "settingsGroups.0.rows.1.on": true,
+      "settingsMarkedKey": "receipts",
+      "book.marked": [
+        "settings-receipts"
+      ]
+    },
+    "expectPerson": {
+      "settingsAt": "privacy",
+      "book.marked": []
+    }
+  },
+  {
+    "name": "SettingsScreen: Undo on the screen takes back the agent's setSetting",
+    "person": [
+      "call openScreen {\"screen\":\"SettingsScreen\"}"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"SettingsScreen\"}",
+      "call setSetting {\"setting\":\"mentions\",\"on\":false}",
+      "tap settings-screen-undo"
+    ],
+    "same": [
+      "settingsGroups",
+      "book.values",
+      "book.marked"
+    ],
+    "calls": [
+      [
+        "ok",
+        "SettingsScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "settingsGroups.0.rows.1.on": true,
+      "settingsMarkedKey": "",
       "book.changes.length": 0,
       "book.marked": []
     }
