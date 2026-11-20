@@ -34,8 +34,8 @@
 //          `waitingNote` under its title.
 //
 // Both doors: a person's press and an agent's tool reach the same actions, each by key: `pick` a section,
-// `toggle`, `choose`, `open` and `remove` a setting (SettingsGroup's own), `accept` and `decline` a proposal or a waiting act,
-// `undo` the agent's change, `retry`, `add`.
+// `toggle`, `choose`, `open` and `remove` a setting (SettingsGroup's own), `accept` and `decline` a proposal or
+// a waiting act, `undo` the agent's change, `retry`, `add`.
 use Swatch from "__SCOPE__/theme"
 use Words, ActionButton from "__SCOPE__/components"
 use TopBar, StatePanel, SettingsGroup, Setting from "__SCOPE__/blocks"
