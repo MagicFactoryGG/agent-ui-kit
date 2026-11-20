@@ -10,7 +10,9 @@
 // line, and each answer the app refused says why under its field); agent none|proposed|changed|waiting
 // (proposed: the frame's note with its two answer words, and every answer the agent filled carries the mark and
 // `markNote`; changed: the same marks, the change already made, so the person sees what the agent wrote; waiting:
-// the bar says what the agent waits for). Every word is the app's; every value a Theme token or a screens.* size.
+// what the agent waits for is said once, in the frame above the fields, where the person's eyes and hands already
+// are — a caption in the top bar sat a window's width from the form on a desktop). Every word is the app's; every
+// value a Theme token or a screens.* size.
 use Words, ActionButton, Field from "__SCOPE__/components"
 use TopBar, OnboardingSteps, Step from "__SCOPE__/blocks"
 
@@ -57,6 +59,28 @@ component OnboardingGhostField
         box flex=share height="screens.onboarding-ghost-line" background-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)" border-radius="theme.radius.pill"
         box flex="3 1 0"
       box height="screens.onboarding-ghost-field" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)"
+
+// A line the frame says about the step itself, marked at its start in its status colour with a drawn glyph: a
+// warning when the content failed (said as an alert), a clock while an agent waits for the person (said as a
+// status). The words take ink, never the status colour: the frame is the theme's raised surface, and another
+// party's theme need not hold status ink there.
+component OnboardingNote
+  props
+    tone: enum<"failed", "waiting">
+    text: string
+    testId: string
+  view
+    row testId=testId role=(tone == "failed" ? "alert" : "status") gap="theme.space.sm" align-items="flex-start" padding-left="theme.space.md" border-left-width="screens.onboarding-mark-line" border-left-style="solid" border-left-color=(tone == "failed" ? "theme.color.critical" : "theme.color.caution")
+      if tone == "failed"
+        svg viewBox="0 0 16 16" width="screens.onboarding-alert" height="screens.onboarding-alert" margin-top="screens.onboarding-title-top" fill="none" stroke="theme.color.critical" aria-hidden=true flex-shrink=0
+          path d="M8 2.5L14.5 13.5H1.5Z" stroke-width=1.5 stroke-linejoin="round"
+          path d="M8 6.5v3.2" stroke-width=1.5 stroke-linecap="round"
+          path d="M8 11.4v0.01" stroke-width=1.5 stroke-linecap="round"
+      else
+        svg viewBox="0 0 16 16" width="screens.onboarding-alert" height="screens.onboarding-alert" margin-top="screens.onboarding-title-top" fill="none" stroke="theme.color.caution" aria-hidden=true flex-shrink=0
+          circle cx=8 cy=8 r=6 stroke-width=1.5
+          path d="M8 4.8V8l2.2 1.4" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+      text text testId=`${testId}-text` flex=1 min-width=0 font="theme.type.label" color="theme.color.ink"
 
 // One step in the list beside the frame: a drawn tick when done, the accent ring when current, a quiet ring to
 // come; the current step's name in the label weight. A track joins each glyph to the next, as the frame's own bar
@@ -131,31 +155,29 @@ component OnboardingScreen
     edit(key, value)
   view
     column testId="onboarding" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
-      TopBar(title=productName, agentNote=waitingNote, agent=(agent == "waiting" ? "waiting" : "none"))
+      TopBar(title=productName, agentNote="", agent="none")
         ActionButton(label=exitLabel, kind="plain", interaction="idle", outcome="none", press=exit, testId="onboarding-exit")
       scroll id="onboarding-scroll" flex=1 min-height=0
         column role="main" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.xl" padding-bottom="theme.space.xxl"
           row width="100%" max-width="screens.onboarding-max" margin-left="auto" margin-right="auto" flex-wrap="wrap" column-gap="theme.space.xxl" row-gap="theme.space.xl" justify-content="center" align-items="flex-start"
             column flex="1 1 screens.onboarding-main" min-width=0 max-width="screens.onboarding-main"
               OnboardingSteps(steps=steps, lead=lead, countLabel=countLabel, backLabel=backLabel, continueLabel=(data == "failed" ? retryLabel : continueLabel), skipLabel=skipLabel, errorText=errorText, emptyText="", completeText="", loadingText="", failedText="", retryLabel="", agentNote=proposedNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, data="many", interaction=(busy or data == "loading" ? "busy" : "idle"), outcome=(outcome == "error" and loaded ? "error" : "none"), agent=(agent == "proposed" and loaded ? "proposed" : "none"), testId="onboarding-steps", back=back, advance=wayOn, skip=skip, retry=retry, accept=accept, reject=reject)
-                if data == "loading"
-                  column gap="theme.space.lg"
-                    text loadingText testId="onboarding-loading" role="status" font="theme.type.body" color="theme.color.ink-muted"
-                    column gap="theme.space.lg" aria-hidden=true animation="onboardingBreathe 1.8s ease-in-out infinite"
-                      OnboardingGhostField(share="1 1 0")
-                      OnboardingGhostField(share="2 1 0")
-                      OnboardingGhostField(share="1 1 0")
-                else if data == "failed"
-                  row testId="onboarding-failed" gap="theme.space.sm" align-items="flex-start" padding-left="theme.space.md" border-left-width="screens.onboarding-mark-line" border-left-style="solid" border-left-color="theme.color.critical"
-                    svg viewBox="0 0 16 16" width="screens.onboarding-alert" height="screens.onboarding-alert" fill="none" stroke="theme.color.critical" aria-hidden=true flex-shrink=0
-                      path d="M8 2.5L14.5 13.5H1.5Z" stroke-width=1.5 stroke-linejoin="round"
-                      path d="M8 6.5v3.2" stroke-width=1.5 stroke-linecap="round"
-                      path d="M8 11.4v0.01" stroke-width=1.5 stroke-linecap="round"
-                    text failedText testId="onboarding-failed-text" role="alert" flex=1 min-width=0 font="theme.type.label" color="theme.color.ink"
-                else
-                  column testId="onboarding-form" gap="theme.space.lg"
-                    for a in answers key=a.key
-                      OnboardingAnswerRow(answer=a, marked=(agent == "proposed" or agent == "changed"), markNote=markNote, refused=(outcome == "error"), busy=busy, edit=typed)
+                column gap="theme.space.lg"
+                  if agent == "waiting"
+                    OnboardingNote(tone="waiting", text=waitingNote, testId="onboarding-waiting")
+                  if data == "loading"
+                    column gap="theme.space.lg"
+                      text loadingText testId="onboarding-loading" role="status" font="theme.type.body" color="theme.color.ink-muted"
+                      column gap="theme.space.lg" aria-hidden=true animation="onboardingBreathe 1.8s ease-in-out infinite"
+                        OnboardingGhostField(share="1 1 0")
+                        OnboardingGhostField(share="2 1 0")
+                        OnboardingGhostField(share="1 1 0")
+                  else if data == "failed"
+                    OnboardingNote(tone="failed", text=failedText, testId="onboarding-failed")
+                  else
+                    column testId="onboarding-form" gap="theme.space.lg"
+                      for a in answers key=a.key
+                        OnboardingAnswerRow(answer=a, marked=(agent == "proposed" or agent == "changed"), markNote=markNote, refused=(outcome == "error"), busy=busy, edit=typed)
             column role="complementary" aria-label=listTitle testId="onboarding-list" flex="1 1 screens.onboarding-aside" min-width=0 max-width="screens.onboarding-main" padding-top="theme.space.xl" gap="theme.space.md"
               Words(text=listTitle, kind="heading", outcome="none", level=2, testId="onboarding-list-title")
               column role="list"
