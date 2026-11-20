@@ -155,7 +155,7 @@ component AppShell
             ShellNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, accountName=accountName, accountDetail=accountDetail, retry=retry)
             box flex=1 border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line" aria-hidden=true
       column flex=1 min-width=0 position="relative" display="flex" flex-direction="column"
-        row role="banner" align-items="center" gap="theme.space.md" min-height="screens.shell-bar-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" background-color="theme.color.page"
+        row role="banner" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.sm" min-height="screens.shell-bar-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" background-color="theme.color.page"
           if not wide
             if sheet
               button press=closeMenu testId="app-shell-menu" aria-label=closeLabel aria-expanded=true flex-shrink=0 width="screens.shell-tap" height="screens.shell-tap" display="flex" align-items="center" justify-content="center" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" background-color="theme.color.fill"
@@ -167,11 +167,13 @@ component AppShell
                 :focus-visible
                   box-shadow="0 0 0 2px theme.color.focus"
                 ShellMenuGlyph(open=false)
-          column flex=1 min-width=0
-            Words(text=title, kind="title", outcome="none", level=1, testId="app-shell-title")
+          column flex=1 min-width="screens.shell-title-min"
+            text title testId="app-shell-title" title=title role="heading" aria-level=1 font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
           if wide
             input type="search" value=searchText input=search placeholder=searchLabel aria-label=searchLabel testId="app-shell-search" width="screens.shell-search" min-width=0 flex-shrink=1
-          ActionButton(label=actionLabel, kind=(barFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=act, testId="app-shell-action")
+          if data != "empty"
+            column max-width="screens.shell-action-max" min-width=0
+              ActionButton(label=actionLabel, kind=(barFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=act, testId="app-shell-action")
         column flex=1 min-height=0 position="relative" display="flex" flex-direction="column"
           column flex=1 min-height=0 display="flex" flex-direction="column" inert=sheet
             if not wide
