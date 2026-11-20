@@ -79,21 +79,26 @@ component FooterColumn
         for l in group.links key=l.key
           FooterLinkRow(label=l.label, href=l.href, marked=(agent == "changed" and l.key == agentKey), note=agentNote, testId=`${testId}-${l.key}`)
 
-// A column still loading: a heading bar and link bars at the rows' own pitch, never a control.
+// A column still loading: a heading bar and link bars at the rows' own pitch, never a control. The heading's bar
+// is a step darker (the muted ink washed into the surface), as the heading is the column's bolder words; each
+// column gives its own widths, so the ghosts read as words coming rather than as one stamped pattern.
 component FooterBone
   props
     head: string
+    first: string
+    second: string
+    third: string
   view
     column flex=1 min-width="blocks.footer-col-min" box-sizing="border-box" gap="theme.space.sm" aria-hidden=true
       row min-height="blocks.footer-head-min" align-items="center" padding-bottom="theme.space.xs"
-        box width=head height="blocks.footer-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+        box width=head height="blocks.footer-bone" background-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.surface)" border-radius="theme.radius.pill"
       column
         row min-height="blocks.footer-link-min" align-items="center"
-          box width="70%" height="blocks.footer-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+          box width=first height="blocks.footer-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
         row min-height="blocks.footer-link-min" align-items="center"
-          box width="55%" height="blocks.footer-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+          box width=second height="blocks.footer-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
         row min-height="blocks.footer-link-min" align-items="center"
-          box width="62%" height="blocks.footer-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+          box width=third height="blocks.footer-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 // The columns' word in their place: a drawn mark, one line, then the slot's way on. Failed draws a warning in the
 // critical hue and speaks as an alert, in ink; empty draws an open ring and speaks as a status.
@@ -179,10 +184,10 @@ component SiteFooter
               column gap="theme.space.lg"
                 text loadingText testId=`${testId}-loading` role="status" overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
                 row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.xl" animation="footerBreathe 1.8s ease-in-out infinite"
-                  FooterBone(head="45%")
-                  FooterBone(head="35%")
-                  FooterBone(head="50%")
-                  FooterBone(head="40%")
+                  FooterBone(head="45%", first="70%", second="55%", third="62%")
+                  FooterBone(head="35%", first="52%", second="74%", third="46%")
+                  FooterBone(head="50%", first="64%", second="48%", third="58%")
+                  FooterBone(head="40%", first="44%", second="66%", third="72%")
             else if data == "failed"
               FooterNote(text=failedText, kind="failed", testId=`${testId}-failed`)
                 if retryLabel != ""
