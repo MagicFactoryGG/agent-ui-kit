@@ -1,0 +1,282 @@
+// MailScreen: a mail app's layout. What it is, by width:
+//
+// - A desktop (a window at least fn mailWideFrom() wide) shows three panes at once. The rail down the window's
+//   start is the kit's SideNav: the product's mark and name, Compose under them (Compose is where a person starts,
+//   so it sits at the top of the folders, as the rail's own control), the folders with their counts, the account.
+//   Beside it, on the page, the kit's MessageList: the folder's name and unread count, the messages, and its own
+//   reading pane, which holds the open message (who and when, the subject, the body). Over the list, a toolbar
+//   with the reply actions for the open message. MessageList draws its reading pane itself on any window wider
+//   than a phone, so the screen uses that pane as its third and does not draw a second copy of the message beside
+//   it: the open message's body is passed in as its row's preview (`snippet`), so the pane reads it whole while
+//   the row still shows its first line, as a mail list does.
+// - A phone shows one pane at a time, the one `which` names: the folders (SideNav, full width), the list
+//   (MessageList, which draws the list alone on a phone) or the open message (drawn here: the subject, the sender
+//   with their address, the recipients, the body and the reply actions), each under the kit's TopBar (the
+//   product's name and Compose), and the list and the message with Back at their start. Back is drawn here, not in
+//   TopBar: TopBar's slot follows its title, and Back leads.
+//
+// States:
+//   data   many|empty|loading|failed|long, for the list (the folders keep their places while the list loads):
+//          MessageList says each in its own room with its way on (empty: write a message; failed: Try again, the
+//          state's one fill, so Compose steps back to plain); loading breathes rows in the real rows' shape and
+//          offers no reply action, for there is nothing open to answer. A phone asked for the message while
+//          there is none to open shows the list's state instead, so a person is never on an empty page. long:
+//          every word at length (folders cut with an ellipsis; subject, sender, recipients and body wrap).
+//   agent  none|proposed|changed|waiting, an assistant's act on the mail, through the other door, said in one
+//          band over the panes (the same band on a phone and a desktop, so what waits is held in one place):
+//          proposed: its sentence and two answer words (Accept is the state's one fill); changed: its sentence
+//          and Undo, and the message it changed carries MessageList's accent mark and `agentNote` on its row;
+//          waiting: what the assistant waits for, marked in the caution colour with a clock.
+//   which  list|message|folders: the pane a phone shows (a desktop shows all three).
+// Every word is the app's; every value a Theme token or a screens.mail-* size. The words of a band take ink on
+// the surface (another party's theme need not hold a status colour as text on a tint); the band's start edge and
+// glyph carry its tone.
+use Words, ActionButton from "__SCOPE__/components"
+use TopBar, SideNav, NavEntry, MessageList, Message from "__SCOPE__/blocks"
+
+// One folder: its key, its name, where it opens, the group it sits in ("" for none), and how many unread
+// messages it holds (0 shows no count).
+shape MailFolder
+  key: string
+  label: string
+  href: string
+  group: string
+  count: number
+
+// The open message: its key (the list's row with the same key is the chosen one), who sent it and from which
+// address, who it went to, when, its subject and its whole body.
+shape MailLetter
+  key: string
+  from: string
+  address: string
+  to: string
+  when: string
+  subject: string
+  body: string
+
+// The one viewport fact the screen reads.
+shape MailViewport
+  width: number
+
+// The least window width that holds the rail (screens.mail-rail) beside a list and its reading pane.
+fn mailWideFrom(): number = 900
+
+// Back, at the start of a phone's pane: the accent chevron and the name of the pane it goes back to. Its name says
+// `label` then the pane's name ("Back to" "Inbox"), so a screen reader hears what it does.
+component MailBack
+  props
+    label: string
+    target: string
+    press: action
+    testId: string
+  view
+    row
+      button press=press testId=testId aria-label=`${label} ${target}` display="flex" flex-direction="row" align-items="center" gap="theme.space.xs" min-width=0 min-height="screens.mail-tap" padding-left="0" padding-right="theme.space.sm" border-width=0 border-radius="theme.radius.control" background-color="transparent" color="theme.color.accent"
+        :hover
+          opacity=0.8
+        :focus-visible
+          box-shadow="0 0 0 2px theme.color.focus"
+        svg viewBox="0 0 16 16" width="screens.mail-glyph" height="screens.mail-glyph" fill="none" stroke="theme.color.accent" aria-hidden=true flex-shrink=0
+          path d="M10 3L5 8l5 5" stroke-width=1.75 stroke-linecap="round" stroke-linejoin="round"
+        text target min-width=0 font="theme.type.label" color="theme.color.accent" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+
+// What an assistant did or asks, in one band: its glyph and sentence, then its answers (the slot), which wrap under
+// the sentence when the sentence would fall under its least width. Proposed and changed take the accent's edge
+// (the kit's agent mark, as LinkRow draws it), waiting the caution's edge and a clock. The words are ink on the
+// surface; the frame is the line token, so the band shows on a theme whose page and surface are one colour.
+component MailBand
+  props
+    tone: enum<"proposed", "changed", "waiting">
+    sentence: string
+    testId: string
+  slot
+  view
+    row testId=testId role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.md" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-left-width="screens.mail-mark-line" border-left-color=(tone == "waiting" ? "theme.color.caution" : "theme.color.accent")
+      row flex=1 min-width="screens.mail-band-min" align-items="flex-start" gap="theme.space.sm"
+        svg viewBox="0 0 16 16" width="screens.mail-glyph" height="screens.mail-glyph" margin-top="screens.mail-glyph-top" fill="none" aria-hidden=true flex-shrink=0
+          if tone == "waiting"
+            circle cx=8 cy=8 r=6 stroke="theme.color.caution" stroke-width=1.5
+            path d="M8 4.8V8l2.2 1.4" stroke="theme.color.caution" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+          else if tone == "changed"
+            circle cx=8 cy=8 r=6.5 fill="theme.color.accent"
+            path d="M5 8.2l2 2 4-4.4" stroke="theme.color.accent-ink" stroke-width=1.6 stroke-linecap="round" stroke-linejoin="round"
+          else
+            path d="M8 1.5l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z" fill="theme.color.accent"
+        text sentence testId=`${testId}-sentence` flex=1 min-width=0 font="theme.type.body" color="theme.color.ink" overflow-wrap="anywhere"
+      if tone != "waiting"
+        row flex-wrap="wrap" gap="theme.space.sm" flex-shrink=0
+          children
+
+// The assistant's band for this state, the same on a phone and a desktop.
+component MailAgent
+  props
+    agent: enum<"none", "proposed", "changed", "waiting">
+    proposedNote: string
+    changedNote: string
+    waitingNote: string
+    acceptLabel: string
+    rejectLabel: string
+    undoLabel: string
+    accept: action
+    reject: action
+    undo: action
+  view
+    if agent == "proposed"
+      MailBand(tone="proposed", sentence=proposedNote, testId="mail-proposal")
+        ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="mail-reject")
+        ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="mail-accept")
+    else if agent == "changed"
+      MailBand(tone="changed", sentence=changedNote, testId="mail-changed")
+        ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="mail-undo")
+    else if agent == "waiting"
+      MailBand(tone="waiting", sentence=waitingNote, testId="mail-waiting")
+
+// The reply actions for the open message: Reply, Reply all, Forward. `focal` fills Reply when it is the pane's one
+// thing to do (a phone's open message); on a desktop's toolbar all three stay plain beside Compose.
+component MailReplies
+  props
+    replyLabel: string
+    replyAllLabel: string
+    forwardLabel: string
+    focal: bool
+    reply: action
+    replyAll: action
+    forward: action
+  view
+    row flex-wrap="wrap" gap="theme.space.sm"
+      ActionButton(label=replyLabel, kind=(focal ? "primary" : "plain"), interaction="idle", outcome="none", press=reply, testId="mail-reply")
+      ActionButton(label=replyAllLabel, kind="plain", interaction="idle", outcome="none", press=replyAll, testId="mail-reply-all")
+      ActionButton(label=forwardLabel, kind="plain", interaction="idle", outcome="none", press=forward, testId="mail-forward")
+
+// The open message on a phone: one card, as MessageList's own, in three bands. The subject first, at title size
+// (the pane's focal words), with the sender under it (a round initial, the name and when on one line, the
+// address, then the recipients after `toLabel`); the body next, wrapping and keeping the app's own line breaks;
+// last the reply actions, on their own band, attached to the words they answer.
+component MailLetterCard
+  props
+    letter: MailLetter
+    toLabel: string
+    replyLabel: string
+    replyAllLabel: string
+    forwardLabel: string
+    reply: action
+    replyAll: action
+    forward: action
+  view
+    column testId="mail-letter" role="article" aria-label=letter.subject min-width=0 background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+      column gap="theme.space.lg" padding="theme.space.lg" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+        column overflow-wrap="anywhere"
+          Words(text=letter.subject, kind="title", outcome="none", level=2, testId="mail-letter-subject")
+        row gap="theme.space.md" align-items="flex-start"
+          column width="screens.mail-avatar" height="screens.mail-avatar" flex-shrink=0 align-items="center" justify-content="center" border-radius="theme.radius.pill" background-color="theme.color.fill" aria-hidden=true
+            text letter.from.trim().slice(0, 1) font="theme.type.label" color="theme.color.ink"
+          column flex=1 min-width=0 gap="theme.space.xs"
+            row align-items="baseline" gap="theme.space.md"
+              text letter.from testId="mail-letter-from" flex=1 min-width=0 font="theme.type.label" color="theme.color.ink" overflow-wrap="anywhere"
+              text letter.when testId="mail-letter-when" flex-shrink=0 font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap"
+            if letter.address != ""
+              text letter.address testId="mail-letter-address" font="theme.type.caption" color="theme.color.ink-muted" overflow-wrap="anywhere"
+            if letter.to != ""
+              row gap="theme.space.xs" align-items="baseline"
+                text toLabel flex-shrink=0 font="theme.type.caption" color="theme.color.ink-muted"
+                text letter.to testId="mail-letter-to" flex=1 min-width=0 font="theme.type.caption" color="theme.color.ink" overflow-wrap="anywhere"
+      column padding="theme.space.lg"
+        text letter.body testId="mail-letter-body" font="theme.type.body" color="theme.color.ink" white-space="pre-line" overflow-wrap="anywhere"
+      row padding="theme.space.lg" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+        MailReplies(replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, focal=true, reply=reply, replyAll=replyAll, forward=forward)
+
+component MailScreen
+  props
+    title: string
+    mark: string
+    navLabel: string
+    foldersTitle: string
+    folderTitle: string
+    accountName: string
+    accountDetail: string
+    composeLabel: string
+    backLabel: string
+    unreadLabel: string
+    orderLabel: string
+    paneLabel: string
+    paneEmptyText: string
+    paneQuietText: string
+    emptyText: string
+    failedText: string
+    retryLabel: string
+    toolbarLabel: string
+    toLabel: string
+    replyLabel: string
+    replyAllLabel: string
+    forwardLabel: string
+    agentNote: string
+    proposedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    changedNote: string
+    undoLabel: string
+    waitingNote: string
+    folders: MailFolder[]
+    folderKey: string
+    messages: Message[]
+    letter: MailLetter
+    agentKey: string
+    data: enum<"many", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed", "waiting">
+    which: enum<"list", "message", "folders">
+    compose: action
+    retry: action
+    reply: action
+    replyAll: action
+    forward: action
+    showFolders: action
+    showList: action
+    accept: action
+    reject: action
+    undo: action
+  resource viewport = exactViewport() as shape MailViewport
+  derive wide = viewport.width >= mailWideFrom()
+  derive shown = data == "many" or data == "long"
+  derive open = shown and messages.filter(m => m.key == letter.key).length > 0
+  // The pane a phone shows: the one `which` names, but the list's own state while there is no message to open.
+  derive pane = which == "message" and not open ? "list" : which
+  // The open message's body is its row's preview, so MessageList's reading pane reads it whole.
+  derive listed = messages.map(m => m.key == letter.key ? Message(m, snippet=letter.body) : m)
+  derive entries = folders.map(f => NavEntry(key=f.key, label=f.label, href=f.href, group=f.group, badge=f.count, current=(f.key == folderKey)))
+  // One fill per state: Compose, unless failed's Try again, an assistant's Accept or a phone's Reply is the act.
+  derive composeFocal = data != "failed" and agent != "proposed" and (wide or pane != "message")
+  view
+    if wide
+      row testId="mail" position="absolute" inset=0 display="flex" align-items="stretch" background-color="theme.color.page" color="theme.color.ink"
+        scroll id="mail-rail" width="screens.mail-rail" flex-shrink=0 min-height=0 background-color="theme.color.surface"
+          column min-height="100%"
+            SideNav(productName=title, productMark=mark, navLabel=navLabel, entries=entries, data="many", emptyText="", emptyLabel="", empty=compose, loadingText="", failedText="", retryLabel="", retry=retry, accountName=accountName, accountDetail=accountDetail, agent="none", agentKey="", agentNote="", testId="mail-folders")
+              ActionButton(label=composeLabel, kind=(composeFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=compose, testId="mail-compose")
+            box flex=1 border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line" aria-hidden=true
+        scroll id="mail-main" flex=1 min-width=0 min-height=0
+          column role="main" padding="theme.space.xl" gap="theme.space.lg"
+            if shown
+              MailAgent(agent=agent, proposedNote=proposedNote, changedNote=changedNote, waitingNote=waitingNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, accept=accept, reject=reject, undo=undo)
+            if open
+              row role="group" aria-label=toolbarLabel testId="mail-toolbar" justify-content="flex-end"
+                MailReplies(replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, focal=false, reply=reply, replyAll=replyAll, forward=forward)
+            MessageList(title=folderTitle, unreadLabel=unreadLabel, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, orderLabel=orderLabel, paneLabel=paneLabel, paneEmptyText=paneEmptyText, paneQuietText=paneQuietText, openLabel="", agentNote=agentNote, chosenKey=(open ? letter.key : ""), agentKey=agentKey, data=data, agent=(agent == "changed" ? "changed" : "none"), messages=listed, compose=compose, retry=retry, openMessage=reply, testId="mail-list")
+    else
+      column testId="mail" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
+        TopBar(title=title, agentNote="", agent="none")
+          ActionButton(label=composeLabel, kind=(composeFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=compose, testId="mail-compose")
+        scroll id="mail-scroll" flex=1 min-height=0
+          column role="main" width="100%" max-width="screens.mail-pane-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.xl" gap="theme.space.md"
+            if pane == "list"
+              MailBack(label=backLabel, target=foldersTitle, press=showFolders, testId="mail-back")
+            else if pane == "message"
+              MailBack(label=backLabel, target=folderTitle, press=showList, testId="mail-back")
+            if shown
+              MailAgent(agent=agent, proposedNote=proposedNote, changedNote=changedNote, waitingNote=waitingNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, accept=accept, reject=reject, undo=undo)
+            if pane == "folders"
+              column padding-top="theme.space.sm"
+                SideNav(productName=foldersTitle, productMark="", navLabel=navLabel, entries=entries, data="many", emptyText="", emptyLabel="", empty=compose, loadingText="", failedText="", retryLabel="", retry=retry, accountName=accountName, accountDetail=accountDetail, agent="none", agentKey="", agentNote="", testId="mail-folders")
+            else if pane == "message"
+              MailLetterCard(letter=letter, toLabel=toLabel, replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, reply=reply, replyAll=replyAll, forward=forward)
+            else
+              MessageList(title=folderTitle, unreadLabel=unreadLabel, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, orderLabel=orderLabel, paneLabel=paneLabel, paneEmptyText=paneEmptyText, paneQuietText=paneQuietText, openLabel="", agentNote=agentNote, chosenKey="", agentKey=agentKey, data=data, agent=(agent == "changed" ? "changed" : "none"), messages=listed, compose=compose, retry=retry, openMessage=reply, testId="mail-list")

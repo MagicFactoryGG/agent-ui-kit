@@ -3,3 +3,4 @@
 use ItemList, Item from "./item-list.contract"
 use OnboardingScreen, OnboardingAnswer from "./onboarding.contract"
 use MediaViewer, Media from "./media-viewer.contract"
+use MailScreen, MailFolder, MailLetter, MailViewport from "./mail.contract"

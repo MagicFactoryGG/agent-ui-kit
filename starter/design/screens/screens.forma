@@ -27,3 +27,11 @@ theme
   screens.media-bone-line: length = 12px
   screens.media-action-min: length = 44px  // ActionButton's least height (components.row-min): the caption centres on Previous and Next
   screens.media-wait-glyph: length = 48px
+  screens.mail-rail: length = 256px  // the folders' rail on a desktop: SideNav fills it (its basis is wider, so its spacer wraps away)
+  screens.mail-pane-max: length = 760px  // a phone layout's column on a window between a phone and a desktop
+  screens.mail-band-min: length = 240px  // under this a band's sentence takes its own line and the answers wrap under it
+  screens.mail-mark-line: length = 3px  // the band's start edge: the kit's agent mark (components.mark-line)
+  screens.mail-glyph: length = 16px
+  screens.mail-glyph-top: length = 2px  // a 16px glyph centred on the body type's first line (21px)
+  screens.mail-avatar: length = 40px
+  screens.mail-tap: length = 44px  // Back's least height, ActionButton's own (components.row-min)
