@@ -3,6 +3,7 @@
 //   data   many, one, empty, loading, failed, long
 use Swatch from "__SCOPE__/theme"
 use Words, ActionButton from "__SCOPE__/components"
+use StatTiles, Stat from "./stat-tiles.contract"
 use DetailPanel, Fact, Event from "./detail-panel.contract"
 use StatePanel from "./state-panel.contract"
 use DataTable, Record, Checked, Marks, Viewport from "./data-table.contract"

@@ -4,6 +4,15 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
+  blocks.stat-max: length = 960px
+  blocks.stat-tile-height: length = 100px
+  blocks.stat-tile-min: length = 160px
+  blocks.stat-trend: length = 12px
+  blocks.stat-spin: length = 16px  // the platform activity mark beside the loading words, square as DetailPanel draws it
+  blocks.stat-ghost-label: length = 96px
+  blocks.stat-ghost-value: length = 128px
+  blocks.stat-ghost-change: length = 72px
+  blocks.stat-note-min: length = 280px  // the agent's sentence keeps this much; on a phone its two answers wrap beneath it
   blocks.detail-max: length = 880px
   blocks.notes-hold: length = 96px
   blocks.stamp: length = 80px

@@ -408,5 +408,76 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "DashboardScreen: a tap on Month and setPeriod show the same period; the agent's is recorded and marked",
+    "person": [
+      "call openScreen {\"screen\":\"DashboardScreen\"}",
+      "tap dashboard-period-month"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"DashboardScreen\"}",
+      "call setPeriod {\"period\":\"month\"}"
+    ],
+    "same": [
+      "dashPeriod",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "DashboardScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "dashPeriod": "month",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": [
+        "dash-period"
+      ],
+      "book.changes.0.key": "dash-period",
+      "book.changes.0.was": "half"
+    },
+    "expectPerson": {
+      "dashPeriod": "month",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "DashboardScreen: Undo on the screen takes back the agent's setPeriod",
+    "person": [
+      "call openScreen {\"screen\":\"DashboardScreen\"}"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"DashboardScreen\"}",
+      "call setPeriod {\"period\":\"year\"}",
+      "tap dashboard-undo"
+    ],
+    "same": [
+      "dashPeriod",
+      "book.values",
+      "book.marked"
+    ],
+    "calls": [
+      [
+        "ok",
+        "DashboardScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "dashPeriod": "half",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]

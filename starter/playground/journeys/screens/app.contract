@@ -12,9 +12,9 @@
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
 use Ledger, ledger, personSet, valueOf, isOn, isMarked, undoLatest from "@agent-ui-kit/agent"
-use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer, AppShell, SettingsScreen, SettingsScreenGroup from "__SCOPE__/screens"
+use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer, AppShell, SettingsScreen, SettingsScreenGroup, DashboardScreen from "__SCOPE__/screens"
 use Message, Setting from "__SCOPE__/blocks"
-use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys, shellFound, shellEntries, settingsSections, settingsGroupsOf, settingsSwitches, settingsSwitchKeys, settingKey, settingKeys, settingSectionOf from "./model.contract"
+use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys, shellFound, shellEntries, settingsSections, settingsGroupsOf, settingsSwitches, settingsSwitchKeys, settingKey, settingKeys, settingSectionOf, dashPeriods, dashStats, dashPoints, dashNote, dashItems from "./model.contract"
 
 component App
   members "./tools.contract"
@@ -99,6 +99,14 @@ component App
   action toggleSettingByPerson(key: string)
     book = personSet(book, settingKey(key), isOn(book, settingKey(key)) ? "off" : "on")
 
+  // DashboardScreen: a shop's numbers; the period shown is a value in the ledger, by key, so the Segments, the
+  // numbers and the agent's mark all read it.
+  derive dashPeriod = valueOf(book, "dash-period")
+  derive dashText = dashPeriods().map(p => `${p.key}\t${p.label}${p.key == dashPeriod ? "\tshown" : ""}`).join("\n")
+  // The person's door: a tap on a period's Segment shows it, by key.
+  action choosePeriodByPerson(key: string)
+    book = personSet(book, "dash-period", key)
+
   // A retry and a proposal's answers: this use has none.
   action ignore
     book = book
@@ -106,7 +114,7 @@ component App
     book = book
 
   // The agent's door. Answer words: saved, delayed, proposed, off, unknown-id.
-  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen, OnboardingScreen, AppShell or SettingsScreen. Answers its name." = openScreen
+  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen, OnboardingScreen, AppShell, SettingsScreen or DashboardScreen. Answers its name." = openScreen
     returns shown
   tool readAlbum reads "The album's pictures, one per line: id, caption, and shown on the one on screen, tab-separated." = readAlbum
     returns albumText
@@ -141,6 +149,11 @@ component App
   tool searchProjects writes idempotent closed "Search the console's projects by words in their title or detail; empty text clears the search. Answers saved." = searchProjects
     returns book.answer
     fails when book.answer == "off"
+  tool readPeriods reads "The dashboard's periods, one per line: id, label, and shown on the one on screen, tab-separated." = readPeriods
+    returns dashText
+  tool setPeriod writes idempotent closed "Show the dashboard's numbers for a period, by id from readPeriods. Answers saved or unknown-id." = setPeriod
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off"
 
   view
     main testId="app" width="100%" height="100%"
@@ -156,3 +169,5 @@ component App
         AppShell(title="Projects", searchLabel="Search projects", searchText=shellQuery, actionLabel="New project", menuLabel="Open the menu", closeLabel="Close the menu", productName="Acme Console", productMark="AC", navLabel="Main menu", entries=shellEntries(), accountName="Ada Lovelace", accountDetail="Workspace admin", sectionTitle="Active projects", footer="Projects you have not opened for 90 days move to the archive.", rows=shellRows, emptyText=`No project holds “${shellQuery.trim()}”. Clear the search or start a new project.`, loadingText="", failedText="", retryLabel="", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, ["shell-search"]), markNote="", undoLabel="Undo", agentKey="", menuOpen=menuOpen, data=(shellRows.length == 0 ? "empty" : "many"), agent=(isMarked(book, "shell-search") ? "changed" : "none"), search=searchByPerson, act=ignore, openMenu=openMenuByPerson, closeMenu=closeMenuByPerson, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)
       else if shown == "SettingsScreen"
         SettingsScreen(title="Settings", navLabel="Settings sections", currentKey=settingsAt, sections=settingsSections(), groups=settingsGroups, groupEmptyText="Nothing to set here yet.", loadingText="", emptyTitle="", emptyText="", addLabel="", failedTitle="", failedText="", retryLabel="", agentSection=settingSectionOf(settingsMarkedKey), agentKey=settingsMarkedKey, proposalText="", acceptLabel="", declineLabel="", changedText=latestAbout(book, settingKeys()), waitingText="", waitingNote="", undoLabel="Undo", data="many", agent=(settingsMarkedKey != "" ? "changed" : "none"), pick=pickSectionByPerson, toggle=toggleSettingByPerson, choose=ignoreKey, open=ignoreKey, remove=ignoreKey, accept=ignore, decline=ignore, retry=ignore, add=ignore, undo=undoByPerson)
+      else if shown == "DashboardScreen"
+        DashboardScreen(title="Overview", periodLabel="Period", chartTitle="Orders", chartNote=dashNote(dashPeriod), chartLabel="Orders in the period", recentTitle="Recent orders", recentEmptyText="No orders yet.", allLabel="View all", loadingText="", chartLoadingText="", emptyText="", emptyLabel="", failedText="", retryLabel="", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, ["dash-period"]), undoLabel="Undo", periodKey=dashPeriod, periods=dashPeriods(), stats=dashStats(dashPeriod), points=dashPoints(dashPeriod), items=dashItems(), data="many", agent=(isMarked(book, "dash-period") ? "changed" : "none"), choose=choosePeriodByPerson, showAll=ignore, start=ignore, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)

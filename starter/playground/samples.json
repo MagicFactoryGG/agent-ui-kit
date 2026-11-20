@@ -1,6 +1,84 @@
 {
   "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only; a prop for one data state as \"<prop>@<data>\" (\"interaction@failed\": \"disabled\"). \"sections\": a second playground app per group (<playground>/<name>; bun play.mjs web <name>): the blocks in three apps by file name (a-f, g-r, s-z), every screen in one. The main app draws the components, each layer's index.contract pieces and wip/. One app drawing every state of every piece outgrew the web bundle.",
   "sections": { "blocks-a-f": { "layers": ["blocks"], "except": ["index.contract"], "match": "^[a-f]" }, "blocks-g-r": { "layers": ["blocks"], "except": ["index.contract"], "match": "^[g-r]" }, "blocks-s-z": { "layers": ["blocks"], "except": ["index.contract"], "match": "^[s-z]" }, "screens": { "layers": ["screens"], "except": ["index.contract"] } },
+  "Stat:many": [
+    { "key": "revenue", "label": "Revenue", "value": "$48,210", "change": "+12.4%", "trend": "up" },
+    { "key": "signups", "label": "New sign-ups", "value": "1,864", "change": "+8.2%", "trend": "up" },
+    { "key": "aov", "label": "Average order value", "value": "$63.20", "change": "-2.1%", "trend": "down" },
+    { "key": "on-time", "label": "Fulfilled on time", "value": "96.4%", "change": "0.0%", "trend": "flat" }
+  ],
+  "Stat:empty": [
+    {
+      "key": "revenue",
+      "label": "Revenue",
+      "value": "$0",
+      "change": "No orders yet",
+      "trend": "flat"
+    },
+    {
+      "key": "signups",
+      "label": "New sign-ups",
+      "value": "0",
+      "change": "No visits yet",
+      "trend": "flat"
+    },
+    {
+      "key": "aov",
+      "label": "Average order value",
+      "value": "–",
+      "change": "Needs an order",
+      "trend": "flat"
+    },
+    {
+      "key": "on-time",
+      "label": "Fulfilled on time",
+      "value": "–",
+      "change": "Needs an order",
+      "trend": "flat"
+    }
+  ],
+  "Stat:long": [
+    {
+      "key": "revenue",
+      "label": "Revenue after refunds, taxes and the payment provider’s fees",
+      "value": "$1,284,309.75",
+      "change": "+112.4% on the same six months of last year",
+      "trend": "up"
+    },
+    {
+      "key": "signups",
+      "label": "New sign-ups from the spring campaign and the newsletter",
+      "value": "18,642",
+      "change": "+8.2%",
+      "trend": "up"
+    },
+    {
+      "key": "aov",
+      "label": "Average order value",
+      "value": "$63.20",
+      "change": "-2.1% since the price change in April",
+      "trend": "down"
+    },
+    {
+      "key": "on-time",
+      "label": "Fulfilled on time",
+      "value": "96.4%",
+      "change": "0.0%",
+      "trend": "flat"
+    }
+  ],
+  "props:StatTiles": {
+    "title": "This week",
+    "loadingText": "Reading this week's numbers…",
+    "failedText": "This week's numbers could not be read.",
+    "retryLabel": "Try again",
+    "agentKey": "revenue",
+    "agentNote": "Your assistant suggests setting Revenue to $52,000.",
+    "changedNote": "Your assistant corrected Revenue to $48,210, counting yesterday's late orders.",
+    "yesLabel": "Accept",
+    "noLabel": "Reject",
+    "undoLabel": "Undo"
+  },
   "props:DetailPanel": {
     "title": "Aurora Desk Lamp",
     "statusLabel": "In production",
@@ -1955,26 +2033,25 @@
   "props:DashboardScreen": {
     "title": "Overview",
     "periodLabel": "Period",
-    "statsLabel": "This week in numbers",
     "chartTitle": "Orders",
-    "chartNote": "Per day, this week",
+    "chartNote": "Orders placed each month, January to June",
+    "chartLabel": "Orders per month",
     "recentTitle": "Recent orders",
-    "recentEmptyText": "No orders yet this week.",
+    "recentEmptyText": "No orders yet. The newest show here as they come in.",
     "allLabel": "View all",
-    "loadingText": "Loading this week’s numbers…",
-    "emptyTitle": "Nothing yet this week",
-    "emptyText": "Orders, visitors and revenue show here as they come in. Share your shop to bring in the first ones.",
+    "loadingText": "Loading your shop’s numbers…",
+    "chartLoadingText": "Loading orders…",
+    "emptyText": "No orders in these six months yet. Share your shop to bring in the first ones.",
     "emptyLabel": "Share your shop",
-    "failedTitle": "The numbers did not load",
-    "failedText": "We could not reach the server. Check your connection, then try again.",
+    "failedText": "Your numbers did not load. Check your connection, then try again.",
     "retryLabel": "Try again",
-    "proposedNote": "Your assistant suggests showing the month, to compare with the spring sale.",
+    "proposedNote": "Your assistant suggests showing the whole year, to compare with last year’s spring sale.",
     "acceptLabel": "Accept",
     "rejectLabel": "Not now",
-    "changedNote": "Your assistant switched the period to this month.",
+    "changedNote": "Your assistant switched the period to six months.",
     "undoLabel": "Undo",
-    "periodKey": "week",
-    "periodKey@long": "week",
+    "periodKey": "half",
+    "periodKey@long": "half",
     "allLabel@long": "View all",
     "retryLabel@long": "Try again",
     "acceptLabel@long": "Accept",
@@ -1983,75 +2060,146 @@
     "emptyLabel@long": "Share your shop"
   },
   "DashboardPeriod:many": [
-    {"key": "day", "label": "Today"},
-    {"key": "week", "label": "Week"},
-    {"key": "month", "label": "Month"},
-    {"key": "quarter", "label": "Quarter"}
+    {
+      "key": "week",
+      "label": "Week"
+    },
+    {
+      "key": "month",
+      "label": "Month"
+    },
+    {
+      "key": "half",
+      "label": "6 months"
+    },
+    {
+      "key": "year",
+      "label": "Year"
+    }
   ],
   "DashboardPeriod:empty": [
-    {"key": "day", "label": "Today"},
-    {"key": "week", "label": "Week"},
-    {"key": "month", "label": "Month"},
-    {"key": "quarter", "label": "Quarter"}
+    {
+      "key": "week",
+      "label": "Week"
+    },
+    {
+      "key": "month",
+      "label": "Month"
+    },
+    {
+      "key": "half",
+      "label": "6 months"
+    },
+    {
+      "key": "year",
+      "label": "Year"
+    }
   ],
   "DashboardPeriod:loading": [
-    {"key": "day", "label": "Today"},
-    {"key": "week", "label": "Week"},
-    {"key": "month", "label": "Month"},
-    {"key": "quarter", "label": "Quarter"}
+    {
+      "key": "week",
+      "label": "Week"
+    },
+    {
+      "key": "month",
+      "label": "Month"
+    },
+    {
+      "key": "half",
+      "label": "6 months"
+    },
+    {
+      "key": "year",
+      "label": "Year"
+    }
   ],
   "DashboardPeriod:failed": [
-    {"key": "day", "label": "Today"},
-    {"key": "week", "label": "Week"},
-    {"key": "month", "label": "Month"},
-    {"key": "quarter", "label": "Quarter"}
+    {
+      "key": "week",
+      "label": "Week"
+    },
+    {
+      "key": "month",
+      "label": "Month"
+    },
+    {
+      "key": "half",
+      "label": "6 months"
+    },
+    {
+      "key": "year",
+      "label": "Year"
+    }
   ],
   "DashboardPeriod:long": [
-    {"key": "day", "label": "Today"},
-    {"key": "week", "label": "Week"},
-    {"key": "month", "label": "Month"},
-    {"key": "quarter", "label": "Quarter"}
-  ],
-  "DashboardStat:many": [
-    {"key": "revenue", "label": "Revenue", "value": "€12,480", "change": "+12%", "note": "vs last week", "tone": "positive"},
-    {"key": "orders", "label": "Orders", "value": "318", "change": "+4%", "note": "vs last week", "tone": "positive"},
-    {"key": "visitors", "label": "Visitors", "value": "9,204", "change": "−3%", "note": "vs last week", "tone": "critical"},
-    {"key": "conversion", "label": "Conversion", "value": "3.4%", "change": "0%", "note": "no change", "tone": "none"}
-  ],
-  "DashboardStat:empty": [
-    {"key": "revenue", "label": "Revenue", "value": "€0", "change": "", "note": "No orders yet", "tone": "none"},
-    {"key": "orders", "label": "Orders", "value": "0", "change": "", "note": "No orders yet", "tone": "none"},
-    {"key": "visitors", "label": "Visitors", "value": "0", "change": "", "note": "No visits yet", "tone": "none"},
-    {"key": "conversion", "label": "Conversion", "value": "–", "change": "", "note": "Needs a visit", "tone": "none"}
-  ],
-  "DashboardStat:long": [
-    {"key": "revenue", "label": "Revenue after refunds, taxes and the payment provider’s fees", "value": "€1,284,309.75", "change": "+112.4%", "note": "against the same week of last year, before the price change", "tone": "positive"},
-    {"key": "orders", "label": "Orders placed through the shop and the marketplace", "value": "31,804", "change": "−18.2%", "note": "against last week", "tone": "critical"}
-  ],
-  "DashboardBar:many": [
-    {"key": "mon", "label": "Mon", "share": 51, "valueText": "38 orders", "current": false},
-    {"key": "tue", "label": "Tue", "share": 70, "valueText": "52 orders", "current": false},
-    {"key": "wed", "label": "Wed", "share": 61, "valueText": "45 orders", "current": false},
-    {"key": "thu", "label": "Thu", "share": 82, "valueText": "61 orders", "current": false},
-    {"key": "fri", "label": "Fri", "share": 100, "valueText": "74 orders", "current": true},
-    {"key": "sat", "label": "Sat", "share": 0, "valueText": "No orders yet", "current": false},
-    {"key": "sun", "label": "Sun", "share": 0, "valueText": "No orders yet", "current": false}
-  ],
-  "DashboardBar:long": [
-    {"key": "w1", "label": "First week of October", "share": 54, "valueText": "1,204 orders", "current": false},
-    {"key": "w2", "label": "Second week of October", "share": 74, "valueText": "1,630 orders", "current": false},
-    {"key": "w3", "label": "Third week of October", "share": 44, "valueText": "980 orders", "current": false},
-    {"key": "w4", "label": "Fourth week of October, the sale", "share": 100, "valueText": "2,214 orders in the fourth week of October, during the autumn sale", "current": true}
+    {
+      "key": "week",
+      "label": "Week"
+    },
+    {
+      "key": "month",
+      "label": "Month"
+    },
+    {
+      "key": "half",
+      "label": "6 months"
+    },
+    {
+      "key": "year",
+      "label": "Year"
+    }
   ],
   "DashboardItem:many": [
-    {"key": "o1048", "title": "Order 1048 · Priya Nair", "detail": "2 items · 4 minutes ago", "trailing": "€84.00", "tone": "none"},
-    {"key": "o1047", "title": "Order 1047 · Jonas Weber", "detail": "1 item · 22 minutes ago", "trailing": "Paid", "tone": "success"},
-    {"key": "o1046", "title": "Order 1046 · Maya Okafor", "detail": "3 items · 1 hour ago", "trailing": "Refunded", "tone": "cancelled"},
-    {"key": "o1045", "title": "Order 1045 · Sam Delacroix", "detail": "1 item · 2 hours ago", "trailing": "Payment failed", "tone": "error"},
-    {"key": "o1044", "title": "Order 1044 · Ada Lovelace", "detail": "5 items · 3 hours ago", "trailing": "€212.50", "tone": "none"}
+    {
+      "key": "o1048",
+      "title": "Order 1048 · Priya Nair",
+      "detail": "2 items · 4 minutes ago",
+      "trailing": "$84.00",
+      "tone": "none"
+    },
+    {
+      "key": "o1047",
+      "title": "Order 1047 · Jonas Weber",
+      "detail": "1 item · 22 minutes ago",
+      "trailing": "Paid",
+      "tone": "success"
+    },
+    {
+      "key": "o1046",
+      "title": "Order 1046 · Maya Okafor",
+      "detail": "3 items · 1 hour ago",
+      "trailing": "Refunded",
+      "tone": "cancelled"
+    },
+    {
+      "key": "o1045",
+      "title": "Order 1045 · Sam Delacroix",
+      "detail": "1 item · 2 hours ago",
+      "trailing": "Payment failed",
+      "tone": "error"
+    },
+    {
+      "key": "o1044",
+      "title": "Order 1044 · Ada Lovelace",
+      "detail": "5 items · 3 hours ago",
+      "trailing": "$212.50",
+      "tone": "none"
+    }
   ],
   "DashboardItem:long": [
-    {"key": "o2001", "title": "Order 2001 · Maximiliana Theodora Featherstonehaugh-Montgomery of the Northern Isles", "detail": "14 items, two of them on back order, sent in three parcels · 4 minutes ago", "trailing": "€1,284.00", "tone": "none"},
-    {"key": "o2000", "title": "Order 2000 · A gift for the whole studio team, wrapped and with a card", "detail": "1 item · yesterday", "trailing": "Waiting for the bank to confirm the payment", "tone": "blocked"}
+    {
+      "key": "o2001",
+      "title": "Order 2001 · Maximiliana Theodora Featherstonehaugh-Montgomery of the Northern Isles",
+      "detail": "14 items, two of them on back order, sent in three parcels · 4 minutes ago",
+      "trailing": "$1,284.00",
+      "tone": "none"
+    },
+    {
+      "key": "o2000",
+      "title": "Order 2000 · A gift for the whole studio team, wrapped and with a card",
+      "detail": "1 item · yesterday",
+      "trailing": "Waiting for the bank to confirm the payment",
+      "tone": "blocked"
+    }
   ]
 }
