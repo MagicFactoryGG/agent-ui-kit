@@ -17,7 +17,8 @@
 // Props: the words (title, positionText, previousLabel, nextLabel, stripTitle, loadingText, failedText,
 // retryLabel, proposedNote, acceptLabel, rejectLabel, changedNote, undoLabel), the album (`items`, the
 // `currentKey` chosen), the states, and the app's actions (previous, next, choose(key), retry, accept, reject,
-// undo). Choosing is by key, so a person's tap and an agent's tool reach the same picture.
+// undo). Choosing is by key, so a person's tap and an agent's tool reach the same picture. The arrow keys
+// run Previous and Next from any focused control of the album.
 use Swatch from "__SCOPE__/theme"
 use Words, ActionButton from "__SCOPE__/components"
 use TopBar from "__SCOPE__/blocks"
@@ -94,13 +95,22 @@ component MediaViewer
     undo: action
   derive shown = data == "many" or data == "one" or data == "long"
   derive album = data == "many" or data == "long"
+  // The arrow keys step as Previous and Next do (the same actions), from any control of the album that has the
+  // focus: a thumbnail just chosen, a button. The strip does not also scroll under them.
+  action step(k: string)
+    if album and k == "ArrowLeft"
+      preventDefault()
+      previous()
+    else if album and k == "ArrowRight"
+      preventDefault()
+      next()
   view
     column testId="media-viewer" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
       TopBar(title=title, agentNote="", agent="none")
       scroll id="media-viewer-scroll" flex=1 min-height=0
         column width="100%" max-width="screens.media-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding="theme.space.lg" gap="theme.space.xl"
           if shown
-            column gap="theme.space.lg"
+            column gap="theme.space.lg" key=step
               MediaStage(tone="clear", testId="media-viewer-stage")
                 for m in items.filter(x => x.key == currentKey) key=m.key
                   image m.src alt=m.caption width="100%" height="100%" object-fit="contain" testId="media-viewer-picture"
@@ -125,7 +135,7 @@ component MediaViewer
                     ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="media-viewer-no")
                     ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="media-viewer-yes")
             if album
-              column gap="theme.space.sm"
+              column gap="theme.space.sm" key=step
                 Words(text=stripTitle, kind="heading", outcome="none", level=2, testId="media-viewer-strip-title")
                 scroll testId="media-viewer-strip" overflow-x="auto" overflow-y="hidden"
                   row role="list" aria-label=stripTitle gap="theme.space.sm" padding-bottom="theme.space.xs"
