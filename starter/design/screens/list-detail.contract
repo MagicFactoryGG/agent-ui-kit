@@ -241,7 +241,7 @@ component ListDetail
         // on a phone the one `pane` names, at the full width.
         row flex=1 min-height=0 align-items="stretch"
           if not narrow or pane == "list"
-            scroll id="list-detail-list" flex=(narrow ? 1 : 0) width=(narrow ? "auto" : "34%") min-width=(narrow ? "0" : "screens.list-detail-list-min") max-width=(narrow ? "none" : "screens.list-detail-list-max") flex-shrink=(narrow ? 1 : 0) background-color=(narrow ? "transparent" : "theme.color.surface") border-right-width=(narrow ? "0" : "theme.line.width") border-right-style="solid" border-right-color="theme.color.line"
+            scroll id="list-detail-list" flex-grow=(narrow ? 1 : 0) width=(narrow ? "auto" : "34%") min-width=(narrow ? "0" : "screens.list-detail-list-min") max-width=(narrow ? "none" : "screens.list-detail-list-max") flex-shrink=(narrow ? 1 : 0) background-color=(narrow ? "transparent" : "theme.color.surface") border-right-width=(narrow ? "0" : "theme.line.width") border-right-style="solid" border-right-color="theme.color.line"
               ListDetailList(listTitle=listTitle, loadingText=loadingText, items=items, chosenKey=chosenKey, agentNote=mark, loading=loading, push=narrow, pulse=pulse)
           if not narrow or pane == "detail"
             scroll id="list-detail-detail" flex=1 min-width=0
