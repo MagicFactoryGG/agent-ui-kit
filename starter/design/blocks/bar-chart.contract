@@ -11,7 +11,8 @@
 // Two layouts, one chart (`size`, which the app chooses from its window's width, as it does for Hero: a piece
 // cannot read its host):
 //   compact  horizontal bars, one row each: the label and its value on one line, the bar under them on the full
-//            track, the baseline a hairline down the bars' start. A phone's one column; long labels wrap.
+//            track, the baseline a hairline down the bars' start. A phone's one column; long labels wrap. On a
+//            wider window the card holds to blocks.bar-chart-compact-max, so a bar never runs the width of a page.
 //   wide     columns on a baseline: each value on its column's cap, the labels under the baseline, the columns
 //            sharing the card's width up to blocks.bar-chart-col-max each, centred, the card held to
 //            blocks.bar-chart-max, so a desktop's width is used without stretching thin bars apart.
@@ -182,7 +183,7 @@ component BarChart
   derive bare = (data == "many" or data == "one" or data == "long") and points.length == 0
   derive wide = size == "wide"
   view
-    column testId=testId width="100%" max-width="blocks.bar-chart-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(wide ? "theme.space.xl" : "theme.space.lg") gap="theme.space.xl" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" color="theme.color.ink"
+    column testId=testId width="100%" max-width=(wide ? "blocks.bar-chart-max" : "blocks.bar-chart-compact-max") margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(wide ? "theme.space.xl" : "theme.space.lg") gap="theme.space.xl" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" color="theme.color.ink"
       row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.lg" row-gap="theme.space.md"
         column flex=1 min-width="blocks.bar-chart-head-min" gap="theme.space.xs"
           Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
