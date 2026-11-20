@@ -8,7 +8,7 @@
 // strip: there is nowhere to go); loading breathes the stage (a drawn picture mark in it), a caption bar and the
 // strip's squares under `loadingText` (role status), with no control a person could press into nothing; failed
 // puts `failedText` (role alert, in ink on the surface; the warning glyph in the critical hue) and the way on, Try
-// again, in the stage's place; long is many with captions and a title that run long and wrap. agent
+// again, in the stage's place, in a frame as tall as the note needs; long is many with captions and a title that run long and wrap. agent
 // none|proposed|changed — an assistant's caption, through the other door: proposed waits in an accent-edged band
 // under the caption (one sentence, two answer words; Accept is the state's one fill, so Next steps back to plain);
 // changed marks the caption with the accent line at its start, says `changedNote` and offers Undo. The band is
@@ -32,15 +32,16 @@ shape Media
 keyframes mediaBreathe
   50% opacity=0.55
 
-// The stage: a box of one ratio for every state, never taller than screens.media-stage-max, so the caption and
-// the strip stay where they are while the picture loads, shows or fails.
+// The stage: a box of one ratio while the picture loads or shows, never taller than screens.media-stage-max, so
+// the caption and the strip stay where they are. Failed takes its note's height with room around it: at the
+// picture's size the note sat small in a large empty frame on a desktop.
 component MediaStage
   props
     tone: enum<"clear", "loading", "failed">
     testId: string
   slot
   view
-    column testId=testId width="100%" aspect-ratio="3 / 2" max-height="screens.media-stage-max" box-sizing="border-box" align-items="center" justify-content="center" overflow=(tone == "clear" ? "hidden" : "visible") border-radius="theme.radius.card" background-color=(tone == "loading" ? "theme.color.fill" : tone == "failed" ? "theme.color.surface" : "transparent") border-width=(tone == "failed" ? "theme.line.width" : "0") border-style="solid" border-color="theme.color.line" animation=(tone == "loading" ? "mediaBreathe 1.8s ease-in-out infinite" : "none")
+    column testId=testId width="100%" aspect-ratio=(tone == "failed" ? "auto" : "3 / 2") max-height=(tone == "failed" ? "none" : "screens.media-stage-max") padding-top=(tone == "failed" ? "theme.space.xxl" : "0") padding-bottom=(tone == "failed" ? "theme.space.xxl" : "0") box-sizing="border-box" align-items="center" justify-content="center" overflow=(tone == "clear" ? "hidden" : "visible") border-radius="theme.radius.card" background-color=(tone == "loading" ? "theme.color.fill" : tone == "failed" ? "theme.color.surface" : "transparent") border-width=(tone == "failed" ? "theme.line.width" : "0") border-style="solid" border-color="theme.color.line" animation=(tone == "loading" ? "mediaBreathe 1.8s ease-in-out infinite" : "none")
       children
 
 // One thumbnail: a button named by its caption. The current one wears the accent ring and full strength; the
