@@ -99,6 +99,20 @@
       },
       "startTrial": {
         "title": "Start Trial"
+      },
+      "readFaq": {
+        "title": "Read Faq"
+      },
+      "openQuestion": {
+        "title": "Open Question",
+        "parameters": {
+          "question": {
+            "title": "Question"
+          },
+          "open": {
+            "title": "Open"
+          }
+        }
       }
     }
   }

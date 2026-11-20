@@ -4,6 +4,7 @@
 // docs/recipes/exact-workarounds.md, 3).
 use act from "@agent-ui-kit/agent"
 use switchAct, statusAct, loadAct, continueFrom, readAct, addHomeAct, pickAct, addFeatureAct, planAct, trialAct from "./model.contract"
+use faqAct from "./model.contract"
 
 members App
   action readSettings
@@ -36,3 +37,6 @@ members App
   action readTrial
   action startTrial
     book = act(book, trialAct())
+  action readFaq
+  action openQuestion(question: enum<"returns", "delivery", "change", "payment">, open: bool)
+    book = act(book, faqAct(question, open))

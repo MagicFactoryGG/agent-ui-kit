@@ -2,6 +2,7 @@
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf, isMarked from "@agent-ui-kit/agent"
 use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint from "__SCOPE__/blocks"
+use Question from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -107,6 +108,21 @@ fn heroPoints(): HeroPoint[] = [
 ]
 fn trialAct(): Act = Act(tool="startTrial", door="agent", key="trial", title="Free trial", value="started", did="Your assistant started the free trial for your team.", asks="Your assistant suggests starting the free trial for your team.", will="Your assistant will start the free trial for your team in 5 seconds.")
 
+// Faq: a shop's help page; each question's disclosure ("open" or "closed") is a value in the ledger, under
+// "faq-<key>". A person's press on a question opens it, or closes it once open; the agent's openQuestion does the
+// same for a question it names, as an assistant showing the person the answer to what they asked would.
+fn faqKeys(): string[] = ["returns", "delivery", "change", "payment"]
+fn faqKey(key: string): string = `faq-${key}`
+fn faqLedgerKeys(): string[] = faqKeys().map(k => faqKey(k))
+fn faqQuestion(key: string): string = key == "returns" ? "How do I return something?" : key == "delivery" ? "When will my order arrive?" : key == "change" ? "Can I change an order after placing it?" : key == "payment" ? "Which ways can I pay?" : key
+fn faqAnswer(key: string): string = key == "returns" ? "Start a return from your orders page within 30 days of delivery. Print the label we email you, pack the item and drop it at any parcel point." : key == "delivery" ? "Most orders arrive in two to four working days. You get a tracking link by email as soon as the parcel leaves our depot." : key == "change" ? "Yes, until it is packed. Open the order and choose Edit; once it shows Packed, it can only be returned." : key == "payment" ? "Cards, bank transfer and pay-later. You are charged when the order ships, not when you place it." : ""
+fn openWord(open: bool): string = open ? "open" : "closed"
+fn faqQuestions(l: Ledger): Question[] = faqKeys().map(k => Question(key=k, question=faqQuestion(k), answer=faqAnswer(k), open=(valueOf(l, faqKey(k)) == "open")))
+fn faqText(l: Ledger): string = faqKeys().map(k => `${k}\t${faqQuestion(k)}\t${valueOf(l, faqKey(k))}`).join("\n")
+// The question the agent's mark is on, by key ("" when none): the row wears it, with the change's sentence.
+fn faqMarkedKey(l: Ledger): string = faqKeys().filter(k => isMarked(l, faqKey(k))).slice(0, 1).join("")
+fn faqAct(key: string, open: bool): Act = Act(tool="openQuestion", door="agent", key=faqKey(key), title=faqQuestion(key), value=openWord(open), did=`Your assistant ${open ? "opened" : "closed"} this question for you.`, asks=`Your assistant suggests ${open ? "opening" : "closing"} “${faqQuestion(key)}”.`, will=`Your assistant will ${open ? "open" : "close"} “${faqQuestion(key)}” in 5 seconds.`)
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
@@ -118,7 +134,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="selectRecord", title="Deploy queue", sentence="Selects a record in the deploy queue, or clears it.", floor="recorded", reach="self", secret=false),
   AgentTool(name="addFeature", title="Features", sentence="Adds the first feature, Live sync, to the empty features section.", floor="recorded", reach="self", secret=false),
   AgentTool(name="choosePlan", title="Plan", sentence="Chooses the workspace's plan: starter, team or business.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="startTrial", title="Free trial", sentence="Starts the free trial, as the page's Start free trial does.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="startTrial", title="Free trial", sentence="Starts the free trial, as the page's Start free trial does.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="openQuestion", title="Help questions", sentence="Opens a question on the help page to show its answer, or closes it.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -131,5 +148,6 @@ fn startValues(): Value[] = [
   Value(key="audit", value="unselected"), Value(key="rotate", value="unselected"), Value(key="invoices", value="unselected"),
   Value(key="features", value="empty"),
   Value(key="plan", value="none"),
-  Value(key="trial", value="off")
+  Value(key="trial", value="off"),
+  Value(key="faq-returns", value="open"), Value(key="faq-delivery", value="closed"), Value(key="faq-change", value="closed"), Value(key="faq-payment", value="closed")
 ]
