@@ -221,5 +221,76 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "DataTable: a record's selection: its checkbox and selectRecord reach the same value; the agent's is recorded and marked",
+    "person": [
+      "tap queue-check-rotate"
+    ],
+    "agent": [
+      "call selectRecord {\"record\":\"rotate\",\"selected\":true}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.11.value": "selected",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "rotate",
+      "book.changes.0.was": "unselected",
+      "book.marked": [
+        "rotate"
+      ]
+    },
+    "expectPerson": {
+      "book.values.11.value": "selected",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "DataTable: a record selected, then cleared: two checkbox taps and two selectRecord calls end at the same value",
+    "person": [
+      "tap queue-check-audit",
+      "tap queue-check-audit"
+    ],
+    "agent": [
+      "call selectRecord {\"record\":\"audit\",\"selected\":true}",
+      "call selectRecord {\"record\":\"audit\",\"selected\":false}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.10.value": "unselected",
+      "book.changes.length": 2,
+      "book.changes.0.was": "selected",
+      "book.changes.0.now": "unselected",
+      "book.marked": [
+        "audit"
+      ]
+    },
+    "expectPerson": {
+      "book.values.10.value": "unselected",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]

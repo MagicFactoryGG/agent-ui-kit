@@ -22,7 +22,9 @@
 // (no invented data, still under the person's motion preference), so the frame does not move when the rows
 // arrive, and the app's loading line sits under them in the card's foot (a status, seen and said, in both
 // layouts). The foot carries the agent's mark too, at the same edge as the rows it marks, so the note and the
-// rows read as one sign. States: data
+// rows read as one sign. While busy each checkbox is drawn as its own disabled box, in the platform's grey:
+// a theme accent on a disabled box is not drawn on macOS (AppKit greys it whatever its tint), so the busy box
+// carries none and the idle box carries no `disabled`. States: data
 // many|one|empty|loading|failed|long, interaction idle|busy (the card says it, and the checkboxes wait),
 // agent none|changed. Every word is a prop.
 use Words, ActionButton from "__SCOPE__/components"
@@ -176,7 +178,10 @@ component DataTable
                 SortArrow(dir=sortDir, ink="theme.color.ink-muted")
             for r, i in records key=r.key
               row align-items="center" gap="theme.space.md" min-height="blocks.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" background-color=(checked.keys.includes(r.key) ? "theme.color.fill" : "transparent") border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(marked(agent, marks, r.key))
-                input type="checkbox" accent-color="theme.color.accent" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=(interaction == "busy") aria-label=`${selectLabel} ${r.title}` flex-shrink=0 testId=`${testId}-check-${r.key}`
+                if interaction == "busy"
+                  input type="checkbox" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=true aria-label=`${selectLabel} ${r.title}` flex-shrink=0 testId=`${testId}-check-${r.key}`
+                else
+                  input type="checkbox" accent-color="theme.color.accent" checked=checked.keys.includes(r.key) change=pick(r.key) aria-label=`${selectLabel} ${r.title}` flex-shrink=0 testId=`${testId}-check-${r.key}`
                 column flex=1 min-width=0 gap="theme.space.xs"
                   link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
                     :hover
@@ -193,7 +198,10 @@ component DataTable
             tr
               th scope="col" vertical-align="middle" width="blocks.select-col" box-sizing="border-box" text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="transparent"
                 if not noRows
-                  input type="checkbox" accent-color="theme.color.accent" checked=allOn change=pickAll disabled=(interaction == "busy") aria-label=selectAllLabel testId=`${testId}-check-all`
+                  if interaction == "busy"
+                    input type="checkbox" checked=allOn change=pickAll disabled=true aria-label=selectAllLabel testId=`${testId}-check-all`
+                  else
+                    input type="checkbox" accent-color="theme.color.accent" checked=allOn change=pickAll aria-label=selectAllLabel testId=`${testId}-check-all`
               th scope="col" vertical-align="baseline" aria-sort=(sort == "title" ? sortDir : "none") text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
                 row align-items="center" gap="theme.space.xs"
                   text titleLabel font="theme.type.caption" color=(sort == "title" ? "theme.color.ink" : "theme.color.ink-muted")
@@ -250,7 +258,10 @@ component DataTable
                 for r, i in records key=r.key
                   tr background-color=(checked.keys.includes(r.key) ? "theme.color.fill" : "transparent")
                     td text-align="start" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color=markInk(marked(agent, marks, r.key))
-                      input type="checkbox" accent-color="theme.color.accent" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=(interaction == "busy") aria-label=`${selectLabel} ${r.title}` testId=`${testId}-check-${r.key}`
+                      if interaction == "busy"
+                        input type="checkbox" checked=checked.keys.includes(r.key) change=pick(r.key) disabled=true aria-label=`${selectLabel} ${r.title}` testId=`${testId}-check-${r.key}`
+                      else
+                        input type="checkbox" accent-color="theme.color.accent" checked=checked.keys.includes(r.key) change=pick(r.key) aria-label=`${selectLabel} ${r.title}` testId=`${testId}-check-${r.key}`
                     td text-align="start" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
                       link href=r.href color="theme.color.ink" testId=`${testId}-link-${r.key}`
                         :hover

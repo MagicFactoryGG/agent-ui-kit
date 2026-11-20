@@ -10,8 +10,8 @@
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
 use Ledger, ledger, personSet, undo, isOn, isMarked, valueOf from "@agent-ui-kit/agent"
-use SettingsGroup, Setting, DetailPanel, StatePanel, OnboardingSteps, MessageList, SideNav from "__SCOPE__/blocks"
-use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, latestAbout, incidentTitle, statusWord, incidentFacts, incidentEvents, setupTitle, setupDetail, setupNext, setupBack, setupSteps, latestIdAbout, mailKey, mailLedgerKeys, mailMessages, mailText, mailMarkedKey, homeEntries, menuText from "./model.contract"
+use SettingsGroup, Setting, DetailPanel, StatePanel, OnboardingSteps, MessageList, SideNav, DataTable, Checked, Marks from "__SCOPE__/blocks"
+use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, latestAbout, incidentTitle, statusWord, incidentFacts, incidentEvents, setupTitle, setupDetail, setupNext, setupBack, setupSteps, latestIdAbout, mailKey, mailLedgerKeys, mailMessages, mailText, mailMarkedKey, homeEntries, menuText, recordKeys, queueRecords, pickWord from "./model.contract"
 
 component App
   members "./tools.contract"
@@ -43,6 +43,11 @@ component App
   // SideNav: a new workspace's menu, empty until Home is added; given to the piece's `data` inline.
   derive menu = valueOf(book, "menu")
   derive menuMarked = isMarked(book, "menu")
+  // DataTable: the deploy queue; each record's selection is one value in the ledger, "selected" or "unselected".
+  derive queueChecked = Checked(keys=recordKeys().filter(k => valueOf(book, k) == "selected"))
+  derive queueAll = queueChecked.keys.length == recordKeys().length
+  derive queueMarks = Marks(keys=recordKeys().filter(k => isMarked(book, k)))
+  derive queueText = recordKeys().map(k => `${k}\t${valueOf(book, k)}`).join("\n")
 
   // The person's door: the switch says which row; the app flips its own value.
   action toggleByPerson(key: string)
@@ -69,6 +74,12 @@ component App
   // The empty menu's way on adds its first place, Home.
   action addHomeByPerson
     book = personSet(book, "menu", "home")
+  // A record's checkbox says which row; the app flips its selection. Select all selects every row, or clears
+  // them all once every row is selected.
+  action pickByPerson(key: string)
+    book = personSet(book, key, pickWord(valueOf(book, key) != "selected"))
+  action pickAllByPerson
+    book = personSet(personSet(personSet(book, "audit", pickWord(not queueAll)), "rotate", pickWord(not queueAll)), "invoices", pickWord(not queueAll))
   // Rows of other kinds, a retry and a proposal's answers: this use has none.
   action ignoreKey(key: string)
     book = book
@@ -106,6 +117,11 @@ component App
   tool addHome writes idempotent closed "Add Home to the empty menu, as its Add Home does. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readMenu." = addHome
     returns book.answer
     fails when book.answer == "off"
+  tool readQueue reads "Each record in the deploy queue, one per line: id (audit, rotate or invoices), then selected or unselected, tab-separated." = readQueue
+    returns queueText
+  tool selectRecord writes idempotent closed "Select a record in the deploy queue, or clear it: audit, rotate or invoices. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readQueue." = selectRecord
+    returns book.answer
+    fails when book.answer == "off"
 
   view
     main testId="app" width="100%" height="100%"
@@ -115,3 +131,4 @@ component App
       OnboardingSteps(steps=(setupStep == "done" ? [] : setupSteps(setupStep)), lead=setupDetail(setupStep), countLabel="Workspace setup", backLabel="Back", continueLabel=(setupStep == "done" ? "Go to your workspace" : "Continue"), skipLabel=(setupStep == "done" ? "" : "Skip for now"), errorText="", emptyText="Your workspace is ready. You can change any of these later in Settings.", completeText="All steps complete", loadingText="", failedText="", retryLabel="", agentNote=latestAbout(book, ["onboarding"]), acceptLabel="Keep", rejectLabel="Undo", data=(setupStep == "done" ? "empty" : "many"), interaction="idle", outcome="none", agent=(setupMarked ? "proposed" : "none"), testId="onboarding", back=backByPerson, advance=continueByPerson, skip=continueByPerson, retry=ignore, accept=keepSetup, reject=undoSetup)
       MessageList(title="Inbox", unreadLabel="unread", emptyText="No messages yet.", failedText="Your messages did not load.", composeLabel="Write a message", retryLabel="Try again", orderLabel="Newest first", paneLabel="Message preview", paneEmptyText="Choose a message to read it here.", paneQuietText="When a message arrives, it opens here.", openLabel=(mailChosenUnread ? "Mark as read" : "Mark as unread"), agentNote=latestAbout(book, mailLedgerKeys()), chosenKey=mailChosen, agentKey=mailAgentKey, data="many", agent=(mailAgentKey != "" ? "changed" : "none"), messages=mailMessages(book), compose=ignore, retry=ignore, openMessage=markMailByPerson, testId="mail")
       SideNav(productName="Acme Console", productMark="AC", navLabel="Main menu", entries=(menu == "home" ? homeEntries() : []), data=(menu == "home" ? "one" : "empty"), emptyText="This workspace's menu has no places yet.", emptyLabel="Add Home", empty=addHomeByPerson, loadingText="", failedText="", retryLabel="", retry=ignore, accountName="Ada Lovelace", accountDetail="Workspace admin", agent=(menuMarked ? "changed" : "none"), agentKey="home", agentNote=latestAbout(book, ["menu"]), testId="nav")
+      DataTable(records=queueRecords(), checked=queueChecked, marks=queueMarks, titleLabel="Change", statusLabel="Status", ownerLabel="Owner", updatedLabel="Updated", selectLabel="Select", selectAllLabel="Select every change", emptyText="", loadingText="", failedText="", busyText="", agentNote=latestAbout(book, recordKeys()), retryLabel="", createLabel="", sort="updated", sortDir="descending", data="many", interaction="idle", agent=(queueMarks.keys.length > 0 ? "changed" : "none"), toggle=pickByPerson, toggleAll=pickAllByPerson, retry=ignore, create=ignore, testId="queue")

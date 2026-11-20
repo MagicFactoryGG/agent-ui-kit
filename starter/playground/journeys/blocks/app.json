@@ -62,6 +62,20 @@
       },
       "addHome": {
         "title": "Add Home"
+      },
+      "readQueue": {
+        "title": "Read Queue"
+      },
+      "selectRecord": {
+        "title": "Select Record",
+        "parameters": {
+          "record": {
+            "title": "Record"
+          },
+          "selected": {
+            "title": "Selected"
+          }
+        }
       }
     }
   }
