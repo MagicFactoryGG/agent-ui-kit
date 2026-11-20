@@ -32,16 +32,11 @@
       "loadFiles": {
         "title": "Load Files"
       },
-      "readPlaces": {
-        "title": "Read Places"
+      "readMenu": {
+        "title": "Read Menu"
       },
-      "openPlace": {
-        "title": "Open Place",
-        "parameters": {
-          "place": {
-            "title": "Place"
-          }
-        }
+      "addHome": {
+        "title": "Add Home"
       }
     }
   }

@@ -95,12 +95,12 @@
     }
   },
   {
-    "name": "SideNav: a place in the menu: a tap on Deploys and openPlace open the same place; the agent's is recorded and marked",
+    "name": "SideNav: the empty menu: Add Home and addHome reach the same menu; the agent's is recorded and marked",
     "person": [
-      "tap nav-entry-deploys"
+      "tap nav-add"
     ],
     "agent": [
-      "call openPlace {\"place\":\"deploys\"}"
+      "call addHome {}"
     ],
     "same": [
       "book.values"
@@ -112,16 +112,16 @@
       ]
     ],
     "expect": {
-      "book.values.5.value": "deploys",
+      "book.values.5.value": "home",
       "book.changes.length": 1,
       "book.changes.0.mode": "recorded",
-      "book.changes.0.key": "place",
+      "book.changes.0.was": "empty",
       "book.marked": [
-        "place"
+        "menu"
       ]
     },
     "expectPerson": {
-      "book.values.5.value": "deploys",
+      "book.values.5.value": "home",
       "book.changes.length": 0,
       "book.marked": []
     }

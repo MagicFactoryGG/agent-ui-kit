@@ -3,7 +3,7 @@
 // which door called it. A tool's action calls functions only, never another action with arguments (the kit's
 // docs/recipes/exact-workarounds.md, 3).
 use act from "@agent-ui-kit/agent"
-use switchAct, statusAct, loadAct, placeAct from "./model.contract"
+use switchAct, statusAct, loadAct, addHomeAct from "./model.contract"
 
 members App
   action readSettings
@@ -15,6 +15,6 @@ members App
   action readFiles
   action loadFiles
     book = act(book, loadAct("loadFiles"))
-  action readPlaces
-  action openPlace(place: enum<"overview", "inbox", "deploys", "settings">)
-    book = act(book, placeAct(place))
+  action readMenu
+  action addHome
+    book = act(book, addHomeAct())
