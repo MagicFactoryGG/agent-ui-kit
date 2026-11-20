@@ -166,8 +166,11 @@ component ListDetailPane
         Proposal(id="list-detail", sentence=proposedNote, yesLabel=acceptLabel, noLabel=rejectLabel, agent="proposed", yes=accept, no=reject)
       if agent == "changed" and found and not loading
         row testId="list-detail-changed" role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.sm" padding="theme.space.md" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" background-color="theme.color.surface"
-          row flex=1 min-width="screens.list-detail-note-min" align-items="baseline" gap="theme.space.sm"
-            box width="screens.list-detail-dot" height="screens.list-detail-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color="theme.color.accent" aria-hidden=true
+          // The dot sits in a gutter one body line tall, so it centres on the sentence's first line however many
+          // lines the sentence wraps to (on the baseline its bottom sat on the letters' foot, below their middle).
+          row flex=1 min-width="screens.list-detail-note-min" align-items="flex-start" gap="theme.space.sm"
+            box height="screens.list-detail-line" display="flex" align-items="center" flex-shrink=0 aria-hidden=true
+              box width="screens.list-detail-dot" height="screens.list-detail-dot" border-radius="theme.radius.pill" background-color="theme.color.accent"
             text changedNote testId="list-detail-changed-text" flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
           ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="list-detail-undo")
       if found or loading

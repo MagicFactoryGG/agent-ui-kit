@@ -25,3 +25,4 @@ theme
   screens.list-detail-bone: length = 10px
   screens.list-detail-note-min: length = 200px  // under this the changed sentence takes its own line and Undo wraps under it
   screens.list-detail-state-top: length = 56px
+  screens.list-detail-line: length = 21px  // one body line (15px at 1.4): the changed note's dot centres on it
