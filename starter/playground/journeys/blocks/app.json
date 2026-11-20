@@ -130,6 +130,12 @@
             "title": "Range"
           }
         }
+      },
+      "readNotes": {
+        "title": "Read Notes"
+      },
+      "markNotesRead": {
+        "title": "Mark Notes Read"
       }
     }
   }

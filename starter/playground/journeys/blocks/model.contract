@@ -4,7 +4,7 @@ use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf, isMarked from "@ag
 use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint, LinkGroup, FooterLink from "__SCOPE__/blocks"
 use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint from "__SCOPE__/blocks"
 use Question from "__SCOPE__/blocks"
-use BarPoint, BarRange from "__SCOPE__/blocks"
+use BarPoint, BarRange, NotificationNote from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -149,6 +149,18 @@ fn chartPoints(key: string): BarPoint[] = key == "month" ? [
 ]
 fn chartText(key: string): string = [key].concat(chartPoints(key).map(p => `${p.label}\t${p.value}`)).join("\n")
 fn rangeAct(key: string): Act = Act(tool="setChartRange", door="agent", key="chart-range", title="Orders chart", value=key, did=`Your assistant switched the orders chart to ${chartRangeName(key)}.`, asks=`Your assistant suggests showing the orders chart in ${chartRangeName(key)}.`, will=`Your assistant will switch the orders chart to ${chartRangeName(key)} in 5 seconds.`)
+// NotificationList: a person's notifications; whether the new ones are read is one value in the ledger, "notes":
+// "unread" while two wait, "read" once they are. The header's Mark all read sets it for a person, the agent's
+// markNotesRead for the agent, whose change the list then shows with one Undo (or, held for the person, asks).
+fn notesRead(l: Ledger): bool = valueOf(l, "notes") == "read"
+fn inboxNotes(read: bool): NotificationNote[] = [
+  NotificationNote(key="storage", title="Storage is 90% full", detail="New exports pause once it is full.", when="1 h ago", unread=(not read), kind="warning", yesLabel="Manage storage", noLabel=""),
+  NotificationNote(key="shared", title="Sam Rivera shared “Q3 plan” with you", detail="You can view and comment.", when="3 h ago", unread=(not read), kind="info", yesLabel="", noLabel=""),
+  NotificationNote(key="paid", title="Invoice INV-2041 was paid", detail="Northwind Traders paid €1,240.00.", when="Yesterday", unread=false, kind="success", yesLabel="", noLabel=""),
+  NotificationNote(key="archived", title="Your assistant archived 12 old threads.", detail="They stay in Archive for 30 days.", when="Mon", unread=false, kind="agent", yesLabel="", noLabel="")
+]
+fn notesText(l: Ledger): string = inboxNotes(notesRead(l)).map(n => `${n.key}\t${n.title}\t${n.unread ? "unread" : "read"}`).join("\n")
+fn notesReadAct(): Act = Act(tool="markNotesRead", door="agent", key="notes", title="Notifications", value="read", did="Your assistant marked 2 notifications read.", asks="Your assistant suggests marking 2 notifications read.", will="Your assistant will mark 2 notifications read in 5 seconds.")
 
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
@@ -164,7 +176,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="startTrial", title="Free trial", sentence="Starts the free trial, as the page's Start free trial does.", floor="recorded", reach="self", secret=false),
   AgentTool(name="addFooterLinks", title="Footer links", sentence="Adds the first column, Help with Contact us, to the footer that has no links.", floor="recorded", reach="self", secret=false),
   AgentTool(name="openQuestion", title="Help questions", sentence="Opens a question on the help page to show its answer, or closes it.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="setChartRange", title="Orders chart", sentence="Shows the orders chart by week or by month.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="setChartRange", title="Orders chart", sentence="Shows the orders chart by week or by month.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="markNotesRead", title="Notifications", sentence="Marks the new notifications read, as the list's Mark all read does.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -180,5 +193,6 @@ fn startValues(): Value[] = [
   Value(key="trial", value="off"),
   Value(key="footer", value="empty"),
   Value(key="faq-returns", value="open"), Value(key="faq-delivery", value="closed"), Value(key="faq-change", value="closed"), Value(key="faq-payment", value="closed"),
-  Value(key="chart-range", value="week")
+  Value(key="chart-range", value="week"),
+  Value(key="notes", value="unread")
 ]
