@@ -922,8 +922,8 @@
     "emptyTitle": "No alerts to set yet",
     "emptyText": "Alerts appear here once you follow a project or a person.",
     "addLabel": "Follow a project",
-    "failedTitle": "Notifications",
-    "failedText": "Your notification settings could not be loaded. Nothing was changed.",
+    "failedTitle": "These settings did not load",
+    "failedText": "Check your connection, then try again. Nothing was changed.",
     "retryLabel": "Try again",
     "agentSection": "notifications",
     "agentKey": "digest",
@@ -932,7 +932,10 @@
     "declineLabel": "Not now",
     "changedText": "Your assistant turned the weekly digest on.",
     "waitingText": "This change waits for your answer.",
-    "waitingNote": "Your assistant is waiting for your answer on one change."
+    "waitingNote": "Your assistant is waiting for your answer on one change.",
+    "currentKey@long": "notifications",
+    "agentSection@long": "notifications",
+    "agentKey@long": "digest"
   },
   "SettingsSection:many": [
     { "key": "account", "label": "Account", "detail": "Your name, email and password." },
