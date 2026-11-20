@@ -64,5 +64,38 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "AppShell: typing in the search and searchProjects keep the same projects; the agent's is recorded and marked",
+    "person": ["call openScreen {\"screen\":\"AppShell\"}", "type app-shell-search harbour"],
+    "agent": ["call openScreen {\"screen\":\"AppShell\"}", "call searchProjects {\"text\":\"harbour\"}"],
+    "same": ["shellQuery", "shellText", "book.values"],
+    "calls": [["ok", "AppShell"], ["ok", "saved"]],
+    "expect": {
+      "shellQuery": "harbour",
+      "shellRows.length": 1,
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": ["shell-search"]
+    },
+    "expectPerson": {
+      "shellQuery": "harbour",
+      "shellRows.length": 1,
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "AppShell: Undo on the shell takes back the agent's search, even one that keeps no project",
+    "person": ["call openScreen {\"screen\":\"AppShell\"}"],
+    "agent": ["call openScreen {\"screen\":\"AppShell\"}", "call searchProjects {\"text\":\"lighthouse\"}", "tap app-shell-undo"],
+    "same": ["shellQuery", "shellText", "book.values", "book.marked"],
+    "calls": [["ok", "AppShell"], ["ok", "saved"]],
+    "expect": {
+      "shellQuery": "",
+      "shellRows.length": 4,
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]

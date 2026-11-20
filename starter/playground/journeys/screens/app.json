@@ -7,7 +7,9 @@
       "readMail": { "title": "Read Mail" },
       "flagMessage": { "title": "Flag Message", "parameters": { "message": { "title": "Message" }, "flagged": { "title": "Flagged" } } },
       "readProjects": { "title": "Read Projects" },
-      "openProject": { "title": "Open Project", "parameters": { "project": { "title": "Project" } } }
+      "openProject": { "title": "Open Project", "parameters": { "project": { "title": "Project" } } },
+      "readProjectList": { "title": "Read Project List" },
+      "searchProjects": { "title": "Search Projects", "parameters": { "text": { "title": "Text" } } }
     }
   }
 }

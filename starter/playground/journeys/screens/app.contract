@@ -12,9 +12,9 @@
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
 use Ledger, ledger, personSet, valueOf, isOn, isMarked, undoLatest from "@agent-ui-kit/agent"
-use MediaViewer, Media, ListDetail, MailScreen from "__SCOPE__/screens"
+use MediaViewer, Media, ListDetail, MailScreen, AppShell from "__SCOPE__/screens"
 use Message from "__SCOPE__/blocks"
-use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter from "./model.contract"
+use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, shellFound, shellEntries from "./model.contract"
 
 component App
   members "./tools.contract"
@@ -58,12 +58,26 @@ component App
   action backByPerson
     opened = false
 
+  // AppShell: the search's words are a value in the ledger, by key; the rows it keeps follow. The phone's menu is
+  // the person's view (`menuOpen`: navigation, not data, so no ledger and no record).
+  state menuOpen = false
+  derive shellQuery = valueOf(book, "shell-search")
+  derive shellRows = shellFound(shellQuery)
+  derive shellText = shellRows.map(r => `${r.key}\t${r.title}\t${r.detail}`).join("\n")
+  // The person's door: what they type in the search; the menu button and the scrim open and close the sheet.
+  action searchByPerson(text: string)
+    book = personSet(book, "shell-search", text)
+  action openMenuByPerson
+    menuOpen = true
+  action closeMenuByPerson
+    menuOpen = false
+
   // A retry and a proposal's answers: this use has none.
   action ignore
     book = book
 
   // The agent's door. Answer words: saved, delayed, proposed, off, unknown-id.
-  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail or MailScreen. Answers its name." = openScreen
+  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen or AppShell. Answers its name." = openScreen
     returns shown
   tool readAlbum reads "The album's pictures, one per line: id, caption, and shown on the one on screen, tab-separated." = readAlbum
     returns albumText
@@ -81,6 +95,12 @@ component App
     returns book.answer
     fails when book.answer == "unknown-id" or book.answer == "off"
 
+  tool readProjectList reads "The projects the console's search keeps, one per line: id, title and detail, tab-separated." = readProjectList
+    returns shellText
+  tool searchProjects writes idempotent closed "Search the console's projects by words in their title or detail; empty text clears the search. Answers saved." = searchProjects
+    returns book.answer
+    fails when book.answer == "off"
+
   view
     main testId="app" width="100%" height="100%"
       if shown == "MediaViewer"
@@ -89,3 +109,5 @@ component App
         ListDetail(title="Studio", listTitle="Projects", loadingText="", detailLoadingText="", emptyText="", createLabel="", failedText="", retryLabel="", backLabel="Projects", pickText="Choose a project to see its details.", factsTitle="Details", factsEmptyText="No details yet.", notesTitle="Notes", activityTitle="Activity", activityEmptyText="No activity yet.", primaryLabel="Edit project", secondaryLabel="Share", proposedNote="", acceptLabel="", rejectLabel="", proposedMark="", changedNote=latestAbout(book, ["project"]), changedMark="Opened by your assistant", undoLabel="Undo", chosenKey=projectKey, items=projects(), facts=projectFacts(projectKey), notes="", events=[], data="many", agent=(isMarked(book, "project") ? "changed" : "none"), pane=(opened ? "detail" : "list"), primaryPress=ignore, secondaryPress=ignore, back=backByPerson, choose=openProjectByPerson, create=ignore, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)
       else if shown == "MailScreen"
         MailScreen(title="Mail", mark="M", navLabel="Mailboxes", foldersTitle="Mailboxes", folderTitle="Inbox", accountName="Ada Lovelace", accountDetail="ada@studio.example", composeLabel="Compose", backLabel="Back to", unreadLabel="unread", orderLabel="Newest first", paneLabel="Open message", paneEmptyText="Choose a message to read it here.", paneQuietText="When a message arrives, it opens here.", emptyText="No messages in your inbox.", failedText="Your messages did not load.", retryLabel="Try again", toolbarLabel="Message actions", toLabel="To", replyLabel="Reply", replyAllLabel="Reply all", forwardLabel="Forward", flagLabel="Flag", agentNote="Flagged by your assistant", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, flagKeys()), undoLabel="Undo", waitingNote="", waitingLabel="", folders=mailFolders(), folderKey="inbox", messages=mailMessages, letter=mailLetter(), agentKey=mailMarkedKey, data="many", agent=(mailMarkedKey != "" ? "changed" : "none"), which="message", compose=ignore, retry=ignore, reply=ignore, replyAll=ignore, forward=ignore, flag=flagByPerson, showFolders=ignore, showList=ignore, accept=ignore, reject=ignore, undo=undoByPerson, review=ignore)
+      else if shown == "AppShell"
+        AppShell(title="Projects", searchLabel="Search projects", searchText=shellQuery, actionLabel="New project", menuLabel="Open the menu", closeLabel="Close the menu", productName="Acme Console", productMark="AC", navLabel="Main menu", entries=shellEntries(), accountName="Ada Lovelace", accountDetail="Workspace admin", sectionTitle="Active projects", footer="Projects you have not opened for 90 days move to the archive.", rows=shellRows, emptyText=`No project holds “${shellQuery.trim()}”. Clear the search or start a new project.`, loadingText="", failedText="", retryLabel="", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, ["shell-search"]), markNote="", undoLabel="Undo", agentKey="", menuOpen=menuOpen, data=(shellRows.length == 0 ? "empty" : "many"), agent=(isMarked(book, "shell-search") ? "changed" : "none"), search=searchByPerson, act=ignore, openMenu=openMenuByPerson, closeMenu=closeMenuByPerson, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)

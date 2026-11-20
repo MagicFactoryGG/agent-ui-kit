@@ -145,6 +145,9 @@ component AppShell
   derive wide = viewport.width >= shellWideFrom()
   derive sheet = menuOpen and not wide
   derive shown = data == "many" or data == "long"
+  // An assistant's band stands over any page that has arrived: a search it ran that keeps no row still says so,
+  // with Undo, over the empty page.
+  derive arrived = data != "loading" and data != "failed"
   // One fill per state: the bar's action, unless the page's own way on (empty's, failed's Try again) or an
   // assistant's Accept is the state's focal act.
   derive barFocal = (data == "many" or data == "long" or data == "loading") and agent != "proposed"
@@ -183,11 +186,11 @@ component AppShell
                 input type="search" value=searchText input=search placeholder=searchLabel aria-label=searchLabel testId="app-shell-search" flex=1 min-width=0
             scroll id="app-shell-page" flex=1 min-height=0
               column width="100%" max-width="screens.shell-page-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(wide ? "theme.space.xl" : "theme.space.lg") gap="theme.space.lg"
-                if agent == "proposed" and shown
+                if agent == "proposed" and arrived
                   ShellBand(sentence=proposedNote, tone="proposed", testId="app-shell-proposal")
                     ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="app-shell-no")
                     ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="app-shell-yes")
-                if agent == "changed" and shown
+                if agent == "changed" and arrived
                   ShellBand(sentence=changedNote, tone="changed", testId="app-shell-changed")
                     ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="app-shell-undo")
                 column gap="theme.space.sm"

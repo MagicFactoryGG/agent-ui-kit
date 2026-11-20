@@ -3,10 +3,10 @@
 // which door called it. A tool's action calls functions only, never another action with arguments (the kit's
 // docs/recipes/exact-workarounds.md, 3).
 use Ledger, act from "@agent-ui-kit/agent"
-use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys from "./model.contract"
+use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys, shellSearchAct from "./model.contract"
 
 members App
-  action openScreen(screen: enum<"MediaViewer", "ListDetail", "MailScreen">)
+  action openScreen(screen: enum<"MediaViewer", "ListDetail", "MailScreen", "AppShell">)
     shown = screen
   action readAlbum
   action showPicture(picture: string)
@@ -18,3 +18,6 @@ members App
   action openProject(project: string)
     book = projectKeys().includes(project) ? act(book, projectAct(project)) : Ledger(book, answer="unknown-id")
     opened = projectKeys().includes(project) ? true : opened
+  action readProjectList
+  action searchProjects(text: string)
+    book = act(book, shellSearchAct(text))
