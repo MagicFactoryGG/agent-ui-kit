@@ -31,6 +31,17 @@
       },
       "loadFiles": {
         "title": "Load Files"
+      },
+      "readOnboarding": {
+        "title": "Read Onboarding"
+      },
+      "continueOnboarding": {
+        "title": "Continue Onboarding",
+        "parameters": {
+          "step": {
+            "title": "Step"
+          }
+        }
       }
     }
   }

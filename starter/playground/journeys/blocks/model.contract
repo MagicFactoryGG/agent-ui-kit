@@ -1,7 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
-use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Fact, Event from "__SCOPE__/blocks"
+use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf from "@agent-ui-kit/agent"
+use Fact, Event, Step from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -31,15 +31,32 @@ fn statusAct(status: string): Act = Act(tool="setIncidentStatus", door="agent", 
 // StatePanel: the files area, whose last load failed; its one act starts the load again (its value: loading).
 fn loadAct(tool: string): Act = Act(tool=tool, door="agent", key="files", title="Your files", value="loading", did="Your assistant is loading your files again.", asks="Your assistant suggests loading your files again.", will="Your assistant will load your files again in 5 seconds.")
 
+// OnboardingSteps: a workspace's setup; the value is the step the person is on ("done" past the last). Continue
+// moves it on one step, Back one step back; the agent continues past a step it names, so a call twice moves once.
+fn setupKeys(): string[] = ["account", "profile", "team", "plan"]
+fn setupTitle(key: string): string = key == "account" ? "Create your account" : key == "profile" ? "About your work" : key == "team" ? "Invite your team" : key == "plan" ? "Choose a plan" : "Setup complete"
+fn setupDetail(key: string): string = key == "account" ? "Your name and a password." : key == "profile" ? "Your role and how big your team is, so the workspace starts with the right layout." : key == "team" ? "Add the people you work with; they get an invitation by email." : key == "plan" ? "Pick the plan that fits; you can change it at any time." : ""
+fn setupAt(step: string): number = step == "done" ? setupKeys().length : setupKeys().indexOf(step)
+fn setupNext(step: string): string = match setupKeys().at(setupAt(step) + 1) { case some(k) => k, case none => "done" }
+fn setupBack(step: string): string = setupAt(step) <= 0 ? "account" : match setupKeys().at(setupAt(step) - 1) { case some(k) => k, case none => "account" }
+fn setupSteps(step: string): Step[] = setupKeys().map((k, i) => Step(key=k, title=setupTitle(k), state=(i < setupAt(step) ? "done" : i == setupAt(step) ? "current" : "next")))
+fn continueAct(from: string): Act = Act(tool="continueOnboarding", door="agent", key="onboarding", title="Workspace setup", value=setupNext(from), did=`Your assistant finished ${setupTitle(from)} and moved you on.`, asks=`Your assistant suggests finishing ${setupTitle(from)} and moving on.`, will=`Your assistant will finish ${setupTitle(from)} and move you on in 5 seconds.`)
+// The agent continues only from the step the person is on; any other step answers not-current and moves nothing.
+fn continueFrom(l: Ledger, step: string): Ledger = valueOf(l, "onboarding") == step ? act(l, continueAct(step)) : Ledger(l, answer="not-current")
+// The newest change on a key, by id ("" when none): the note's Undo takes back that one.
+fn latestIdAbout(l: Ledger, key: string): string = l.changes.filter(c => c.key == key).slice(0, 1).map(c => c.id).join("")
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
   AgentTool(name="setIncidentStatus", title="Incident status", sentence="Marks the incident open or resolved.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="loadFiles", title="Your files", sentence="Loads the files area again.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="loadFiles", title="Your files", sentence="Loads the files area again.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="continueOnboarding", title="Workspace setup", sentence="Finishes the setup step the person is on and moves on to the next.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="digest", value="on"), Value(key="failures", value="on"), Value(key="marketing", value="off"),
   Value(key="incident", value="open"),
-  Value(key="files", value="failed")
+  Value(key="files", value="failed"),
+  Value(key="onboarding", value="profile")
 ]
