@@ -592,7 +592,10 @@
     "agentKey": "status",
     "agentKey@long": "status",
     "agentNote": "Your assistant added System status under Resources.",
-    "proposedNote": "Your assistant suggests adding System status under Resources.",
+    "proposedNote": "Your assistant suggests adding Security under Legal.",
+    "proposedGroup": "legal",
+    "proposedGroup@long": "company",
+    "proposedLabel": "Security",
     "acceptLabel": "Accept",
     "rejectLabel": "Not now",
     "undoLabel": "Undo"
