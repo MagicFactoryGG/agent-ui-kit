@@ -12,14 +12,13 @@
 //
 // The list is rows, not cards: one frame holds them (the line and corner of the kit's StatePanel, so the column
 // keeps one shape whether it holds rows, their skeleton, or the empty or failed panel), hairline seams between
-// the rows, no box around each. The open question is a band of the surface, the list's one filled element, so the
-// eye lands on the answer being read, set in the level ink at the measure; its glyph (a small disc on the fill, a
-// muted plus when closed, the accent's minus when open) stays quiet beside the page's title. On a wide window the
-// side column's first line meets the list's top edge.
+// the rows, no box around each, all on the frame's surface. The open question carries the list's one filled
+// glyph (the accent's minus on a disc of the fill; a closed one is a bare muted plus) and its answer, set in the
+// level ink at the measure. On a wide window the side column's first line meets the list's top edge.
 //
 // States, declared once as axes:
 //   data   many | one | empty | loading | failed | long. Loading draws the rows' own grid with every word a
-//          breathing bar (five rows, the first open on its band, its answer's lines under it), so the real rows
+//          breathing bar (five rows, the first open, its answer's lines at the body's line height), so the real rows
 //          arrive into a room they already fit. Empty and failed are the kit's StatePanel in the list's place:
 //          empty's way on is the app's ask (`contact`, the primary), failed's way back is `retry`. Long words wrap;
 //          nothing is cut but the eyebrow, a one-line label.
@@ -28,7 +27,7 @@
 //          (accent for proposed and changed, caution while it waits: LinkRow's grammar) and says its note under
 //          the question. A proposal is said there too, one sentence, its two answer words after the answer
 //          they decide on (docs/recipes/one-sentence-two-words.md). When the question is not in the list (empty,
-//          loading, failed), the note stands at the head of the list, and the ask in the kit's Proposal look. (The kit's Proposal lives in this package's index.contract, which imports this file
+//          loading, failed), the note stands at the head of the list, and the ask under the list's state, framed. (The kit's Proposal lives in this package's index.contract, which imports this file
 //          back, so the ask is drawn here from Words' kin and ActionButton.)
 use Words, ActionButton from "__SCOPE__/components"
 use StatePanel from "./state-panel.contract"
@@ -55,15 +54,24 @@ fn faqMark(a: string): string = a == "waiting" ? "theme.color.caution" : a == "n
 // The words of that mark: status as words in its -text ink on the page.
 fn faqMarkInk(a: string): string = a == "waiting" ? "theme.color.caution-text" : "theme.color.accent"
 
-// The open or closed glyph: a disc on the fill with a muted plus (closed) or the accent's minus (open). The open
-// row's band, not its glyph, is the state's filled focal point, so the glyph stays quiet beside the title.
+// The open or closed glyph: a bare muted plus when closed; the accent's minus on a disc of the fill when open, the
+// one filled glyph of the list, so the eye runs to the open answer, not down a column of discs.
 component FaqGlyph
   props
     open: bool
   view
     svg viewBox="0 0 24 24" width="blocks.faq-glyph" height="blocks.faq-glyph" aria-hidden=true flex-shrink=0
-      circle cx=12 cy=12 r=12 fill="theme.color.fill"
+      if open
+        circle cx=12 cy=12 r=12 fill="theme.color.fill"
       path d=(open ? "M7.5 12h9" : "M7.5 12h9M12 7.5v9") stroke=(open ? "theme.color.accent" : "theme.color.ink-muted") stroke-width=2 stroke-linecap="round"
+
+// The agent's mark on a row: a short tab at its start, inset from top and bottom so it never runs into the
+// frame's rounded corner, taking no width, so the row's words keep their edge (LinkRow's mark line, as a tab).
+component FaqTab
+  props
+    agent: enum<"none", "proposed", "changed", "waiting">
+  view
+    box position="absolute" top="theme.space.md" bottom="theme.space.md" left=0 width="blocks.faq-mark" border-top-right-radius="theme.radius.pill" border-bottom-right-radius="theme.radius.pill" background-color=faqMark(agent) aria-hidden=true
 
 // An agent's line: a dot and one sentence in the mark's ink, said where a person reads it.
 component FaqNote
@@ -89,9 +97,10 @@ component FaqAnswers
       ActionButton(label=declineLabel, kind="plain", interaction="idle", outcome="none", press=decline, testId=`${testId}-decline`)
       ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
 
-// An agent's proposal with no row here to sit on (the questions are loading, failed or none): the kit's Proposal
-// look — a surface edged in the accent at the card's corner, the list's own width — its one sentence, then the two
-// answer words. One sentence, two words (docs/recipes/one-sentence-two-words.md): it reads aloud as it is.
+// An agent's proposal with no row here to sit on (the questions are loading, failed or none): under the list's
+// state, so the state is read first, in the list's own frame (surface, line, the card's corner) wearing the rows'
+// mark tab at its start — the accent said once — then its one sentence and the two answer words. One sentence,
+// two words (docs/recipes/one-sentence-two-words.md): it reads aloud as it is.
 component FaqAsk
   props
     text: string
@@ -101,7 +110,8 @@ component FaqAsk
     decline: action
     testId: string
   view
-    column testId=`${testId}-proposal` role="status" gap="theme.space.md" min-width=0 padding="theme.space.lg" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent"
+    column testId=`${testId}-proposal` role="status" position="relative" gap="theme.space.md" min-width=0 padding="theme.space.lg" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+      FaqTab(agent="proposed")
       FaqNote(text=text, agent="proposed", testId=`${testId}-proposal-text`)
       FaqAnswers(acceptLabel=acceptLabel, declineLabel=declineLabel, accept=accept, decline=decline, testId=testId)
 
@@ -109,9 +119,9 @@ component FaqAsk
 // with the question's first line), and when open the answer under it at the measure. The agent's mark line is an
 // overlay at the row's start, taking no width, so every row's words keep the heading's edge. Under the question one
 // stack, one rhythm in every state: the agent's note (or its proposal's sentence), the answer when open, then the
-// proposal's two answers — after the words they decide on. The open row is a band of the surface: the one filled
-// element of the list, so the eye lands on the answer being read (the answer itself shows it too, so a theme
-// that paints page and surface alike loses nothing). The first row draws no seam: the list's frame is its edge.
+// proposal's two answers — after the words they decide on. The open row says so by its glyph (the list's one
+// filled glyph), its answer and its air; every row sits on the frame's surface. The first row draws no seam: the
+// list's frame is its edge.
 component FaqRow
   props
     item: Question
@@ -128,9 +138,9 @@ component FaqRow
   derive said = mark == "proposed" ? ask : mark != "none" ? note : ""
   derive more = item.open or said != ""
   view
-    column role="listitem" position="relative" background-color=(item.open ? "theme.color.surface" : "transparent") border-top-width=(first ? "0" : "theme.line.width") border-top-style="solid" border-top-color="theme.color.line"
+    column role="listitem" position="relative" border-top-width=(first ? "0" : "theme.line.width") border-top-style="solid" border-top-color="theme.color.line"
       if mark != "none"
-        box position="absolute" top=0 bottom=0 left=0 width="blocks.faq-mark" background-color=faqMark(mark) aria-hidden=true
+        FaqTab(agent=mark)
       column role="heading" aria-level=3
         button press=toggle(item.key) testId=testId aria-expanded=item.open aria-controls=`${testId}-answer` display="flex" flex-direction="row" align-items="flex-start" gap="theme.space.lg" text-align="start" min-height="blocks.faq-row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.lg" padding-bottom=(more ? "theme.space.sm" : "theme.space.lg") border-width=0 background-color="transparent" color="theme.color.ink"
           :hover
@@ -142,7 +152,7 @@ component FaqRow
           text item.question testId=`${testId}-question` flex=1 min-width=0 padding-top="blocks.faq-glyph-lead" font="theme.type.label" color="theme.color.ink"
           FaqGlyph(open=item.open)
       if more
-        column gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.xs" padding-bottom=(item.open ? "theme.space.xl" : "theme.space.lg")
+        column gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom=(item.open ? "theme.space.xl" : "theme.space.lg")
           if said != ""
             column role=(mark == "proposed" ? "status" : "none")
               FaqNote(text=said, agent=mark, testId=(mark == "proposed" ? `${testId}-proposal-text` : `${testId}-agent`))
@@ -162,7 +172,8 @@ component FaqBone
     box width=share height=tall background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
 
 // One row while the questions load: the real row's grid (its seam, paddings and the glyph's disc), the question a
-// bar; the first row open on the surface's band as the real open row is, its answer two bars and a ragged third.
+// bar; the first row open (its glyph's disc), its answer three lines at the body's own line height (two full, one
+// ragged), so the real rows arrive into the height they need and nothing under them moves.
 component FaqGhost
   props
     share: string
@@ -170,16 +181,25 @@ component FaqGhost
     first: bool
     pulse: string
   view
-    column background-color=(open ? "theme.color.surface" : "transparent") border-top-width=(first ? "0" : "theme.line.width") border-top-style="solid" border-top-color="theme.color.line"
+    column border-top-width=(first ? "0" : "theme.line.width") border-top-style="solid" border-top-color="theme.color.line"
       row align-items="center" gap="theme.space.lg" min-height="blocks.faq-row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.lg" padding-bottom=(open ? "theme.space.sm" : "theme.space.lg")
         row flex=1 min-width=0
           FaqBone(share=share, tall="blocks.faq-bone", pulse=pulse)
-        box width="blocks.faq-glyph" height="blocks.faq-glyph" flex-shrink=0 border-radius="theme.radius.pill" background-color="theme.color.fill" animation=pulse
+        box width="blocks.faq-glyph" height="blocks.faq-glyph" flex-shrink=0 border-radius="theme.radius.pill" background-color=(open ? "theme.color.fill" : "transparent")
       if open
-        column gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.xl"
-          FaqBone(share="100%", tall="blocks.faq-bone-thin", pulse=pulse)
-          FaqBone(share="92%", tall="blocks.faq-bone-thin", pulse=pulse)
-          FaqBone(share="56%", tall="blocks.faq-bone-thin", pulse=pulse)
+        column max-width="blocks.faq-measure" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.xl"
+          FaqLine(share="100%", pulse=pulse)
+          FaqLine(share="94%", pulse=pulse)
+          FaqLine(share="58%", pulse=pulse)
+
+// One line of a ghost answer: a bar centred in the body's own line height.
+component FaqLine
+  props
+    share: string
+    pulse: string
+  view
+    row height="blocks.faq-line" align-items="center"
+      FaqBone(share=share, tall="blocks.faq-bone-thin", pulse=pulse)
 
 // The page's head: a short eyebrow in the accent (one line: a label, cut with an ellipsis rather than stacking
 // over the title), the title, the lead at the measure.
@@ -219,8 +239,8 @@ component FaqContact
         row margin-top="theme.space.sm"
           ActionButton(label=label, kind="plain", interaction="idle", outcome="none", press=press, testId=`${testId}-contact`)
 
-// The list's place: the proposal or a note with no row to sit on, then the rows, their skeleton, or the state
-// panel.
+// The list's place: a note with no row to sit on, then the rows, their skeleton, or the state panel, then a
+// proposal with no row to sit on.
 component FaqList
   props
     title: string
@@ -258,24 +278,24 @@ component FaqList
       contact()
   view
     column flex=1 min-width=0 gap="theme.space.lg"
-      if agent == "proposed" and not agentInList
-        FaqAsk(text=proposalText, acceptLabel=acceptLabel, declineLabel=declineLabel, accept=accept, decline=decline, testId=testId)
-      else if rowNote != "" and not agentInList
+      if rowNote != "" and not agentInList
         column role="status" padding-left="theme.space.lg" padding-right="theme.space.lg"
           FaqNote(text=rowNote, agent=agent, testId=`${testId}-agent`)
       if data == "empty" or data == "failed"
         StatePanel(title=(data == "failed" ? failedTitle : emptyTitle), message=emptyText, failedText=failedText, agentNote="", actionLabel=contactLabel, retryLabel=retryLabel, data=(data == "failed" ? "failed" : "empty"), agent="none", size="full", press=wayOn, testId=`${testId}-state`)
       else if data == "loading"
-        column role="status" aria-label=loadingText aria-busy=true border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.card" overflow="hidden"
+        column role="status" aria-label=loadingText aria-busy=true background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.card" overflow="hidden"
           FaqGhost(share="72%", open=true, first=true, pulse=pulse)
           FaqGhost(share="54%", open=false, first=false, pulse=pulse)
           FaqGhost(share="66%", open=false, first=false, pulse=pulse)
           FaqGhost(share="48%", open=false, first=false, pulse=pulse)
           FaqGhost(share="60%", open=false, first=false, pulse=pulse)
       else
-        column role="list" aria-label=title border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.card" overflow="hidden"
+        column role="list" aria-label=title background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.card" overflow="hidden"
           for q, i in questions key=q.key
             FaqRow(item=q, mark=(q.key == agentKey ? agent : "none"), note=(q.key == agentKey ? rowNote : ""), ask=proposalText, acceptLabel=acceptLabel, declineLabel=declineLabel, first=(i == 0), toggle=toggle, accept=accept, decline=decline, testId=`${testId}-q-${q.key}`)
+      if agent == "proposed" and not agentInList
+        FaqAsk(text=proposalText, acceptLabel=acceptLabel, declineLabel=declineLabel, accept=accept, decline=decline, testId=testId)
 
 component Faq
   props
