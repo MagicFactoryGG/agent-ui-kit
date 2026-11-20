@@ -150,5 +150,44 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "MessageList: the chosen message: Mark as read and markMessage reach the same read state; the agent's is recorded and marked on its row",
+    "person": [
+      "resize 1280x900",
+      "tap mail-pane-open"
+    ],
+    "agent": [
+      "call markMessage {\"message\":\"review\",\"read\":true}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.6.key": "mail-review",
+      "book.values.6.value": "read",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "mail-review",
+      "book.changes.0.was": "unread",
+      "book.marked": [
+        "mail-review"
+      ],
+      "mailAgentKey": "review",
+      "mailChosenUnread": false
+    },
+    "expectPerson": {
+      "book.values.6.value": "read",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "mailAgentKey": "",
+      "mailChosenUnread": false
+    }
   }
 ]
