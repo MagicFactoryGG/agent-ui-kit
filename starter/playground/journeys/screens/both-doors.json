@@ -16,7 +16,25 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "MailScreen: Flag and flagMessage flag the same message; the agent's is recorded and marked",
+    "person": ["call openScreen {\"screen\":\"MailScreen\"}", "tap mail-flag"],
+    "agent": ["call openScreen {\"screen\":\"MailScreen\"}", "call flagMessage {\"message\":\"m2\",\"flagged\":true}"],
+    "same": ["mailMessages", "book.values"],
+    "calls": [["ok", "MailScreen"], ["ok", "saved"]],
+    "expect": {
+      "mailMarkedKey": "m2",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": ["flag-m2"]
     },
+    "expectPerson": {
+      "mailMarkedKey": "",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
   {
     "name": "ListDetail: a tap on a row and openProject open the same project; the agent's is recorded and marked",
     "person": ["call openScreen {\"screen\":\"ListDetail\"}", "tap list-detail-row-north"],
