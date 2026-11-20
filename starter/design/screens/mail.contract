@@ -26,7 +26,8 @@
 //          band over the panes (the same band on a phone and a desktop, so what waits is held in one place):
 //          proposed: its sentence and two answer words (Accept is the state's one fill); changed: its sentence
 //          and Undo, and the message it changed carries MessageList's accent mark and `agentNote` on its row;
-//          waiting: what the assistant waits for, marked in the caution colour with a clock.
+//          waiting: what the assistant waits for, marked in the caution colour with a clock, and the way to it
+//          (`waitingLabel`, plain: the person goes when they choose; nothing is decided by the press).
 //   which  list|message|folders: the pane a phone shows (a desktop shows all three).
 // Every word is the app's; every value a Theme token or a screens.mail-* size. The words of a band take ink on
 // the surface (another party's theme need not hold a status colour as text on a tint); the band's start edge and
@@ -103,9 +104,8 @@ component MailBand
           else
             path d="M8 1.5l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z" fill="theme.color.accent"
         text sentence testId=`${testId}-sentence` flex=1 min-width=0 font="theme.type.body" color="theme.color.ink" overflow-wrap="anywhere"
-      if tone != "waiting"
-        row flex-wrap="wrap" gap="theme.space.sm" flex-shrink=0
-          children
+      row flex-wrap="wrap" gap="theme.space.sm" flex-shrink=0
+        children
 
 // The assistant's band for this state, the same on a phone and a desktop.
 component MailAgent
@@ -117,9 +117,11 @@ component MailAgent
     acceptLabel: string
     rejectLabel: string
     undoLabel: string
+    waitingLabel: string
     accept: action
     reject: action
     undo: action
+    review: action
   view
     if agent == "proposed"
       MailBand(tone="proposed", sentence=proposedNote, testId="mail-proposal")
@@ -130,6 +132,7 @@ component MailAgent
         ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="mail-undo")
     else if agent == "waiting"
       MailBand(tone="waiting", sentence=waitingNote, testId="mail-waiting")
+        ActionButton(label=waitingLabel, kind="plain", interaction="idle", outcome="none", press=review, testId="mail-review")
 
 // The reply actions for the open message: Reply, Reply all, Forward. `focal` fills Reply when it is the pane's one
 // thing to do (a phone's open message); on a desktop's toolbar all three stay plain beside Compose.
@@ -216,6 +219,7 @@ component MailScreen
     changedNote: string
     undoLabel: string
     waitingNote: string
+    waitingLabel: string
     folders: MailFolder[]
     folderKey: string
     messages: Message[]
@@ -234,6 +238,7 @@ component MailScreen
     accept: action
     reject: action
     undo: action
+    review: action
   resource viewport = exactViewport() as shape MailViewport
   derive wide = viewport.width >= mailWideFrom()
   derive shown = data == "many" or data == "long"
@@ -256,7 +261,7 @@ component MailScreen
         scroll id="mail-main" flex=1 min-width=0 min-height=0
           column role="main" padding="theme.space.xl" gap="theme.space.lg"
             if shown
-              MailAgent(agent=agent, proposedNote=proposedNote, changedNote=changedNote, waitingNote=waitingNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, accept=accept, reject=reject, undo=undo)
+              MailAgent(agent=agent, proposedNote=proposedNote, changedNote=changedNote, waitingNote=waitingNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, waitingLabel=waitingLabel, accept=accept, reject=reject, undo=undo, review=review)
             if open
               row role="group" aria-label=toolbarLabel testId="mail-toolbar" justify-content="flex-end"
                 MailReplies(replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, focal=false, reply=reply, replyAll=replyAll, forward=forward)
@@ -272,7 +277,7 @@ component MailScreen
             else if pane == "message"
               MailBack(label=backLabel, target=folderTitle, press=showList, testId="mail-back")
             if shown
-              MailAgent(agent=agent, proposedNote=proposedNote, changedNote=changedNote, waitingNote=waitingNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, accept=accept, reject=reject, undo=undo)
+              MailAgent(agent=agent, proposedNote=proposedNote, changedNote=changedNote, waitingNote=waitingNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, waitingLabel=waitingLabel, accept=accept, reject=reject, undo=undo, review=review)
             if pane == "folders"
               column padding-top="theme.space.sm"
                 SideNav(productName=foldersTitle, productMark="", navLabel=navLabel, entries=entries, data="many", emptyText="", emptyLabel="", empty=compose, loadingText="", failedText="", retryLabel="", retry=retry, accountName=accountName, accountDetail=accountDetail, agent="none", agentKey="", agentNote="", testId="mail-folders")

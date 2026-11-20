@@ -1000,6 +1000,8 @@
     "rejectLabel": "Not now",
     "changedNote": "Your assistant flagged the venue contract so the deposit is not missed.",
     "undoLabel": "Undo",
+    "waitingLabel": "Read the draft",
+    "waitingLabel@long": "Read the draft",
     "waitingNote": "Your assistant drafted a reply to Jonas and waits for you to read it before it is sent.",
     "folderKey": "inbox",
     "agentKey": "message-5",
@@ -1016,42 +1018,197 @@
     "rejectLabel@long": "Not now",
     "undoLabel@long": "Undo",
     "retryLabel@long": "Try again",
-    "unreadLabel@long": "unread"
+    "unreadLabel@long": "unread",
+    "orderLabel@long": "Newest first",
+    "paneLabel@long": "Open message"
   },
   "MailFolder:many": [
     {
       "key": "inbox",
       "label": "Inbox",
       "href": "/",
-      "group": "Mailboxes",
+      "group": "",
       "count": 2
     },
     {
       "key": "flagged",
       "label": "Flagged",
       "href": "/",
-      "group": "Mailboxes",
+      "group": "",
       "count": 1
     },
     {
       "key": "drafts",
       "label": "Drafts",
       "href": "/",
-      "group": "Mailboxes",
+      "group": "",
       "count": 0
     },
     {
       "key": "sent",
       "label": "Sent",
       "href": "/",
-      "group": "Mailboxes",
+      "group": "",
       "count": 0
     },
     {
       "key": "archive",
       "label": "Archive",
       "href": "/",
-      "group": "Mailboxes",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "receipts",
+      "label": "Receipts",
+      "href": "/",
+      "group": "Folders",
+      "count": 4
+    },
+    {
+      "key": "travel",
+      "label": "Travel",
+      "href": "/",
+      "group": "Folders",
+      "count": 0
+    }
+  ],
+  "MailFolder:empty": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "flagged",
+      "label": "Flagged",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "drafts",
+      "label": "Drafts",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "archive",
+      "label": "Archive",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "receipts",
+      "label": "Receipts",
+      "href": "/",
+      "group": "Folders",
+      "count": 4
+    },
+    {
+      "key": "travel",
+      "label": "Travel",
+      "href": "/",
+      "group": "Folders",
+      "count": 0
+    }
+  ],
+  "MailFolder:loading": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 2
+    },
+    {
+      "key": "flagged",
+      "label": "Flagged",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "drafts",
+      "label": "Drafts",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "archive",
+      "label": "Archive",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "receipts",
+      "label": "Receipts",
+      "href": "/",
+      "group": "Folders",
+      "count": 4
+    },
+    {
+      "key": "travel",
+      "label": "Travel",
+      "href": "/",
+      "group": "Folders",
+      "count": 0
+    }
+  ],
+  "MailFolder:failed": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 2
+    },
+    {
+      "key": "flagged",
+      "label": "Flagged",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "drafts",
+      "label": "Drafts",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "archive",
+      "label": "Archive",
+      "href": "/",
+      "group": "",
       "count": 0
     },
     {
@@ -1074,7 +1231,7 @@
       "key": "inbox",
       "label": "Inbox",
       "href": "/",
-      "group": "Mailboxes",
+      "group": "",
       "count": 1
     },
     {
