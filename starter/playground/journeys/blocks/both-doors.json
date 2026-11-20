@@ -572,5 +572,45 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "NotificationList: the new notifications marked read: Mark all read and markNotesRead reach the same read list; the agent's is recorded and shown with Undo",
+    "person": [
+      "tap notes-mark-all"
+    ],
+    "agent": [
+      "call markNotesRead {}"
+    ],
+    "same": [
+      "book.values",
+      "notesAllRead"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.21.key": "notes",
+      "book.values.21.value": "read",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "notes",
+      "book.changes.0.was": "unread",
+      "book.marked": [
+        "notes"
+      ],
+      "notesMarked": true,
+      "notesAllRead": true
+    },
+    "expectPerson": {
+      "book.values.21.key": "notes",
+      "book.values.21.value": "read",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "notesMarked": false,
+      "notesAllRead": true
+    }
   }
 ]

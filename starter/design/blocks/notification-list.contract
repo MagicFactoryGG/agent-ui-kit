@@ -32,8 +32,9 @@
 use Words, ActionButton from "__SCOPE__/components"
 
 // One notification: its key, what it says, more about it, when it came, whether the person has read it, its kind
-// ("info", "success", "warning" or "agent"), and the words of its up to two answers ("" for none).
-shape Note
+// ("info", "success", "warning" or "agent"), and the words of its up to two answers ("" for none). Named for the
+// piece: @agent-ui-kit/agent exports its own Note (the ledger's note), and an app imports both packages.
+shape NotificationNote
   key: string
   title: string
   detail: string
@@ -74,7 +75,7 @@ component KindMark
 // filled answer and the row's answers step back.
 component NoteRow
   props
-    note: Note
+    note: NotificationNote
     first: bool
     focal: bool
     yes: action
@@ -119,7 +120,7 @@ component NotificationList
     markAll: action
     newTitle: string
     earlierTitle: string
-    notes: Note[]
+    notes: NotificationNote[]
     answer: action
     loadingText: string
     emptyTitle: string

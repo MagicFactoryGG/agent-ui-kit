@@ -1825,17 +1825,17 @@
     "summary@one": "1 new",
     "summary@long": "1 new"
   },
-  "Note:many": [
+  "NotificationNote:many": [
     {"key":  "move-review", "title":  "Your assistant suggests moving Thursday's review to 15:00.", "detail":  "It overlaps the supplier call Priya booked.", "when":  "2 min ago", "unread":  true, "kind":  "agent", "yesLabel":  "Accept", "noLabel":  "Reject"},
     {"key":  "storage", "title":  "Storage is 90% full", "detail":  "New exports pause once it is full.", "when":  "1 h ago", "unread":  true, "kind":  "warning", "yesLabel":  "Manage storage", "noLabel":  ""},
     {"key":  "paid", "title":  "Invoice INV-2041 was paid", "detail":  "Northwind Traders paid €1,240.00.", "when":  "Yesterday", "unread":  false, "kind":  "success", "yesLabel":  "", "noLabel":  ""},
     {"key":  "shared", "title":  "Sam Rivera shared “Q3 plan” with you", "detail":  "You can view and comment.", "when":  "Mon", "unread":  false, "kind":  "info", "yesLabel":  "", "noLabel":  ""},
     {"key":  "archived", "title":  "Your assistant archived 12 old threads.", "detail":  "They stay in Archive for 30 days.", "when":  "Mon", "unread":  false, "kind":  "agent", "yesLabel":  "", "noLabel":  ""}
   ],
-  "Note:one": [
+  "NotificationNote:one": [
     {"key":  "move-review", "title":  "Your assistant suggests moving Thursday's review to 15:00.", "detail":  "It overlaps the supplier call Priya booked.", "when":  "2 min ago", "unread":  true, "kind":  "agent", "yesLabel":  "Accept", "noLabel":  "Reject"}
   ],
-  "Note:long": [
+  "NotificationNote:long": [
     {"key":  "move-review", "title":  "Your assistant suggests moving Thursday's quarterly planning review with the whole regional team to Friday afternoon at 15:00.", "detail":  "It overlaps the supplier call Priya booked last week, and three of the seven people invited have already said that Friday afternoon suits them better.", "when":  "2 min ago", "unread":  true, "kind":  "agent", "yesLabel":  "Accept", "noLabel":  "Reject"},
     {"key":  "export", "title":  "The export of every invoice, credit note and receipt from the last financial year finished", "detail":  "Northwind_Traders_2025_full_ledger_export_with_attachments_and_audit_trail.zip is ready to download for the next seven days.", "when":  "Yesterday, 16:47", "unread":  false, "kind":  "success", "yesLabel":  "Download", "noLabel":  ""}
   ]

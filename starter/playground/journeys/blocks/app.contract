@@ -18,6 +18,8 @@ use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, 
 
 use Faq from "__SCOPE__/blocks"
 use faqKey, faqLedgerKeys, faqQuestions, faqText, faqMarkedKey from "./model.contract"
+use NotificationList from "__SCOPE__/blocks"
+use notesRead, inboxNotes, notesText from "./model.contract"
 
 // The window's width, for the Hero's size (compact under 600 px): an app reads the viewport, a piece cannot.
 shape JourneyViewport
@@ -80,6 +82,12 @@ component App
   derive faqAgentKey = faqMarkedKey(book)
   derive faqMarked = faqAgentKey != ""
   derive faqReadText = faqText(book)
+  // NotificationList: the person's notifications; whether the new ones are read is one value in the ledger. An
+  // agent's mark is shown on the list (changed, with Undo); one held for the person's answer shows as its ask.
+  derive notesAllRead = notesRead(book)
+  derive notesMarked = isMarked(book, "notes")
+  derive notesAsks = waitingSentence(book, "notes")
+  derive notesReadText = notesText(book)
 
   // The person's door: the switch says which row; the app flips its own value.
   action toggleByPerson(key: string)
@@ -138,6 +146,19 @@ component App
   // A question's press opens it, or closes it once open.
   action toggleQuestionByPerson(key: string)
     book = personSet(book, faqKey(key), valueOf(book, faqKey(key)) == "open" ? "closed" : "open")
+  // The list's Mark all read marks the new notifications read; the agent's band answers its ask or takes its
+  // change back.
+  action markNotesByPerson
+    book = personSet(book, "notes", "read")
+  action undoNotes
+    book = undo(book, latestIdAbout(book, "notes"))
+  action acceptNotes
+    book = answerKey(book, "notes", true, "person")
+  action rejectNotes
+    book = answerKey(book, "notes", false, "person")
+  // A note's own answers (Manage storage) lead elsewhere in a real app; this use has none.
+  action ignoreAnswer(key: string, yes: bool)
+    book = book
   // Rows of other kinds, a retry and a proposal's answers: this use has none.
   action ignoreKey(key: string)
     book = book
@@ -205,6 +226,11 @@ component App
   tool openQuestion writes idempotent closed "Open a question on the help page to show the person its answer, or close it, as a press on the question does: returns, delivery, change or payment. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readFaq." = openQuestion
     returns book.answer
     fails when book.answer == "off"
+  tool readNotes reads "The notifications, one per line: id, title, then read or unread, tab-separated." = readNotes
+    returns notesReadText
+  tool markNotesRead writes idempotent closed "Mark the new notifications read, as the list's Mark all read does. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readNotes." = markNotesRead
+    returns book.answer
+    fails when book.answer == "off"
 
   view
     main testId="app" width="100%" height="100%"
@@ -220,3 +246,4 @@ component App
       Hero(kicker="New in version 4", headline="Plan the week your whole team will keep", lead="Shared calendars, honest estimates and one list of what matters. Set it up in an afternoon and change it whenever plans do.", primaryLabel=(trialOn ? "Trial started" : "Start free trial"), secondaryLabel="See how it works", pictureLabel="A calm week, drawn", panelTitle="In every plan", items=heroPoints(), emptyText="", loadingText="", failedText="", retryLabel="", errorText="", proposedNote=trialAsks, acceptLabel="Accept", rejectLabel="Not now", changedNote=latestAbout(book, ["trial"]), undoLabel="Undo", data="many", interaction="idle", size=(viewport.width < 600 ? "compact" : "wide"), outcome="none", agent=(trialAsks != "" ? "proposed" : trialMarked ? "changed" : "none"), primary=startTrialByPerson, secondary=ignore, retry=ignore, accept=acceptTrial, reject=rejectTrial, undo=undoTrial, testId="trial")
       SiteFooter(productName="Acme", productMark="AC", tagline="Deploys you can trust, from the first commit to the last.", navLabel="Footer", groups=(footerLinks == "help" ? helpGroups() : []), legal="© 2026 Acme, Inc. All rights reserved.", emptyText="This footer has no links yet. Add the first column so visitors can find help.", emptyLabel="Add links", loadingText="", failedText="", retryLabel="", agentKey="contact", agentNote=latestAbout(book, ["footer"]), proposedNote="", proposedGroup="", proposedLabel="", acceptLabel="", rejectLabel="", undoLabel="Undo", data=(footerLinks == "help" ? "one" : "empty"), agent=(footerMarked ? "changed" : "none"), add=addFooterLinksByPerson, retry=ignore, accept=ignore, reject=ignore, undo=undoFooter, testId="footer")
       Faq(eyebrow="Help centre", title="Questions, answered", lead="Short answers about orders, delivery and payment. Open a question to read its answer.", contactTitle="", contactText="", contactLabel="", emptyTitle="", emptyText="", failedTitle="", failedText="", loadingText="", retryLabel="", agentKey=faqAgentKey, agentNote=latestAbout(book, faqLedgerKeys()), waitingNote="", proposalText="", acceptLabel="", declineLabel="", data="many", agent=(faqMarked ? "changed" : "none"), questions=faqQuestions(book), toggle=toggleQuestionByPerson, retry=ignore, contact=ignore, accept=ignore, decline=ignore, testId="faq")
+      NotificationList(title="Notifications", summary=(notesAllRead ? "All read" : "2 new"), markAllLabel="Mark all read", markAll=markNotesByPerson, newTitle="New", earlierTitle="Earlier", notes=inboxNotes(notesAllRead), answer=ignoreAnswer, loadingText="", emptyTitle="", emptyText="", emptyActionLabel="", emptyPress=ignore, failedTitle="", failedText="", retryLabel="", retry=ignore, proposedNote=notesAsks, acceptLabel="Mark read", rejectLabel="Not now", accept=acceptNotes, reject=rejectNotes, changedNote=latestAbout(book, ["notes"]), undoLabel="Undo", undo=undoNotes, data="many", agent=(notesAsks != "" ? "proposed" : notesMarked ? "changed" : "none"), testId="notes")
