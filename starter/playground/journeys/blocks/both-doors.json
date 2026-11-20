@@ -613,6 +613,46 @@
     }
   },
   {
+    "name": "NotificationList: the new notifications marked read: Mark all read and markNotesRead reach the same read list; the agent's is recorded and shown with Undo",
+    "person": [
+      "tap notes-mark-all"
+    ],
+    "agent": [
+      "call markNotesRead {}"
+    ],
+    "same": [
+      "book.values",
+      "notesAllRead"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.22.key": "notes",
+      "book.values.22.value": "read",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "notes",
+      "book.changes.0.was": "unread",
+      "book.marked": [
+        "notes"
+      ],
+      "notesMarked": true,
+      "notesAllRead": true
+    },
+    "expectPerson": {
+      "book.values.22.key": "notes",
+      "book.values.22.value": "read",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "notesMarked": false,
+      "notesAllRead": true
+    }
+  },
+  {
     "name": "StatTiles: this week's numbers failed to read: Try again and loadStats reach the same numbers; the agent's is recorded and said under the row",
     "person": [
       "tap stats-retry"
@@ -630,8 +670,8 @@
       ]
     ],
     "expect": {
-      "book.values.22.key": "stats",
-      "book.values.22.value": "many",
+      "book.values.23.key": "stats",
+      "book.values.23.value": "many",
       "book.changes.length": 1,
       "book.changes.0.mode": "recorded",
       "book.changes.0.was": "failed",
@@ -641,7 +681,7 @@
       "statsMarked": true
     },
     "expectPerson": {
-      "book.values.22.value": "many",
+      "book.values.23.value": "many",
       "book.changes.length": 0,
       "book.marked": [],
       "statsMarked": false
@@ -664,8 +704,8 @@
       ]
     ],
     "expect": {
-      "book.values.22.key": "stats",
-      "book.values.22.value": "failed",
+      "book.values.23.key": "stats",
+      "book.values.23.value": "failed",
       "book.changes.length": 0,
       "book.marked": [],
       "statsMarked": false

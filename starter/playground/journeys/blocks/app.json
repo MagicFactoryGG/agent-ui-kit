@@ -131,6 +131,12 @@
           }
         }
       },
+      "readNotes": {
+        "title": "Read Notes"
+      },
+      "markNotesRead": {
+        "title": "Mark Notes Read"
+      },
       "readStats": {
         "title": "Read Stats"
       },

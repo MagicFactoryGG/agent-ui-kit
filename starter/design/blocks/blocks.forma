@@ -167,3 +167,8 @@ theme
   blocks.bar-chart-glyph: length = 32px
   blocks.bar-chart-bone: length = 10px  // a ghost label's height, the caption's x-height and air
   blocks.bar-chart-measure: length = 420px  // a state's sentence, held to a short line
+  blocks.notes-kind-mark: length = 20px  // a notification's kind mark: one line of the title's type
+  blocks.notes-title-min: length = 160px  // a notification's title keeps this much before its time wraps under it
+  blocks.notes-head-min: length = 160px  // the list's name keeps this much before "Mark all read" wraps under it
+  blocks.notes-when: length = 64px  // the time's stand-in while the notes load
+  blocks.notes-max: length = 560px  // the list's own measure: rows read at ~64 characters, a side panel's width
