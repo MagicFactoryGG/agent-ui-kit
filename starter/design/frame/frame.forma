@@ -8,8 +8,13 @@ theme
   frame.ink-muted = light-dark(#5f5f66, #a0a0a8)  pair=frame.panel
   frame.line = light-dark(#dcdce0, #2c2c31)
   frame.on = light-dark(#e2e2e6, #2a2a2f)
+  // The map page's status tones.
+  frame.done = light-dark(#1b6e35, #6fd394)  pair=frame.panel
+  frame.moving = light-dark(#8a4f00, #f2b552)  pair=frame.panel
+  frame.held = light-dark(#5b45b0, #bba9ff)  pair=frame.panel
   frame.nav-width: length = 220px
   frame.field-width: length = 168px
+  frame.field-height: length = 56px
   frame.pad: length = 16px
   frame.gap: length = 12px
   frame.small: length = 4px

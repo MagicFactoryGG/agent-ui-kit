@@ -1,5 +1,6 @@
 {
-  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only.",
+  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only; a prop for one data state as \"<prop>@<data>\" (\"interaction@failed\": \"disabled\"). \"sections\": a second playground app per group (<playground>/<name>; bun play.mjs web <name>): every block, every screen. The main app draws the components, each layer's index.contract pieces and wip/. One app drawing every state of every piece outgrew the web bundle.",
+  "sections": { "blocks": { "layers": ["blocks"], "except": ["index.contract"] }, "screens": { "layers": ["screens"], "except": ["index.contract"] } },
   "props:DetailPanel": {
     "title": "Aurora Desk Lamp",
     "statusLabel": "In production",
@@ -16,7 +17,9 @@
     "activityTitle": "Activity",
     "activityEmptyText": "No activity yet.",
     "loadingText": "Loading this record…",
-    "failedText": "This record did not load. Check your connection and try again."
+    "failedText": "This record did not load. Check your connection and try again.",
+    "interaction@failed": "disabled",
+    "interaction@loading": "disabled"
   },
   "Fact:one": [
     { "key": "item", "label": "Item code", "value": "AUR-DL-8841" },
@@ -35,5 +38,937 @@
   ],
   "Event:long": [
     { "key": "note", "who": "Sam Rivera", "what": "Left a long note on the packing slip explaining that the spare bulb travels taped to the lamp's base so it cannot rattle loose on the way to the customer's door", "when": "Today, 14:06" }
+  ],
+  "props:StatePanel": {
+    "title": "Your files",
+    "message": "Everything you add to this project will appear here, ready to share.",
+    "failedText": "We couldn't load your files. Check your connection, then try again.",
+    "agentNote": "Your assistant is taking care of this.",
+    "actionLabel": "Add files",
+    "retryLabel": "Try again"
+  },
+  "Record:many": [
+    {
+      "key": "record-1",
+      "title": "Q3 expense review — EMEA marketing, all card spend",
+      "status": "Draft",
+      "owner": "Maya Okafor",
+      "updated": "Nov 12, 09:41",
+      "href": "/",
+      "tone": "neutral"
+    },
+    {
+      "key": "record-2",
+      "title": "Renew the design tool licences before the December cut",
+      "status": "In review",
+      "owner": "Jonas Weber",
+      "updated": "Nov 11, 17:03",
+      "href": "/",
+      "tone": "progress"
+    },
+    {
+      "key": "record-3",
+      "title": "Move the 2024 audit log to cold storage, free the disk",
+      "status": "Scheduled",
+      "owner": "Priya Nair",
+      "updated": "Nov 10, 14:20",
+      "href": "/",
+      "tone": "attention"
+    },
+    {
+      "key": "record-4",
+      "title": "Rotate the deploy service credentials and note it",
+      "status": "Filed",
+      "owner": "Sam Delacroix",
+      "updated": "Nov 8, 08:15",
+      "href": "/",
+      "tone": "done"
+    }
+  ],
+  "Record:one": [
+    {
+      "key": "record-1",
+      "title": "Q3 expense review — EMEA marketing, all card spend",
+      "status": "Draft",
+      "owner": "Maya Okafor",
+      "updated": "Nov 12, 09:41",
+      "href": "/",
+      "tone": "neutral"
+    }
+  ],
+  "Record:long": [
+    {
+      "key": "record-1",
+      "title": "A very long record title, the kind a person writes when the record carries its whole context in its name and runs past the width a designer planned",
+      "status": "Draft",
+      "owner": "Maya Okafor",
+      "updated": "Nov 12, 09:41",
+      "href": "/",
+      "tone": "neutral"
+    },
+    {
+      "key": "record-2",
+      "title": "Another long record title that wraps onto a second line inside its column, so its row grows taller and nothing is clipped or covered",
+      "status": "In review",
+      "owner": "Jonas Weber",
+      "updated": "Nov 11, 17:03",
+      "href": "/",
+      "tone": "progress"
+    }
+  ],
+  "Checked:many": [
+    {
+      "keys": [
+        "record-2"
+      ]
+    }
+  ],
+  "Checked:one": [
+    {
+      "keys": []
+    }
+  ],
+  "Checked:long": [
+    {
+      "keys": [
+        "record-1"
+      ]
+    }
+  ],
+  "Marks:many": [
+    {
+      "keys": [
+        "record-3"
+      ]
+    }
+  ],
+  "Marks:one": [
+    {
+      "keys": [
+        "record-1"
+      ]
+    }
+  ],
+  "Marks:long": [
+    {
+      "keys": [
+        "record-1"
+      ]
+    }
+  ],
+  "props:DataTable": {
+    "titleLabel": "Record",
+    "statusLabel": "Status",
+    "ownerLabel": "Owner",
+    "updatedLabel": "Updated",
+    "selectLabel": "Select",
+    "selectAllLabel": "Select all",
+    "emptyText": "No records yet. Create one to get started.",
+    "loadingText": "Loading records…",
+    "failedText": "Couldn't load records. Check your connection and try again.",
+    "busyText": "Updating records…",
+    "agentNote": "Your assistant changed \u201cMove the 2024 audit log to cold storage\u201d.",
+    "retryLabel": "Try again",
+    "createLabel": "New record"
+  },
+  "props:SettingsGroup": {
+    "title": "General",
+    "footer": "Changes apply everywhere at once.",
+    "emptyText": "Nothing to set in this group yet.",
+    "loadingText": "Loading your settings",
+    "failedText": "Your settings could not be loaded.",
+    "failedDetail": "Nothing was changed.",
+    "retryLabel": "Try again",
+    "proposalText": "Your assistant suggests turning the weekly digest off.",
+    "proposalKey": "digest",
+    "acceptLabel": "Accept",
+    "declineLabel": "Decline",
+    "changedText": "Your assistant turned the weekly digest on.",
+    "waitingText": "One change is waiting for your answer.",
+    "outcomeText": "How your last change ended."
+  },
+  "Setting:many": [
+    { "key": "digest", "kind": "switch", "label": "Weekly digest", "detail": "A summary of your week, each Monday.", "value": "", "on": true },
+    { "key": "units", "kind": "value", "label": "Units", "detail": "Used wherever something is measured.", "value": "Metric", "on": false },
+    { "key": "help", "kind": "link", "label": "Help and support", "detail": "Guides, answers and a way to reach us.", "value": "", "on": false },
+    { "key": "reset", "kind": "danger", "label": "Reset all settings", "detail": "Every setting back the way it began.", "value": "", "on": false }
+  ],
+  "Setting:one": [
+    { "key": "digest", "kind": "switch", "label": "Weekly digest", "detail": "A summary of your week, each Monday.", "value": "", "on": true }
+  ],
+  "Setting:long": [
+    { "key": "units", "kind": "value", "label": "A very long label for one setting, the way a person might really name it, running past the width a designer planned", "detail": "A very long detail line, as a person might really write it, that has to wrap instead of pushing the row apart", "value": "A very long chosen value", "on": false },
+    { "key": "digest", "kind": "switch", "label": "A very long label for a switch row, written the way a person might really write it, going past the width of a narrow phone", "detail": "A very long detail line under the switch, as a person might really write it, that wraps to keep the switch in reach", "value": "", "on": true }
+  ],
+  "Step:many": [
+    { "key": "account", "title": "Create your account", "state": "done" },
+    { "key": "profile", "title": "About your work", "state": "current" },
+    { "key": "team", "title": "Invite your team", "state": "next" },
+    { "key": "plan", "title": "Choose a plan", "state": "next" }
+  ],
+  "Step:one": [
+    { "key": "account", "title": "Create your account", "state": "current" }
+  ],
+  "Step:long": [
+    { "key": "account", "title": "Create your account with the details you already use every day", "state": "done" },
+    { "key": "profile", "title": "Tell us about your work so the workspace fits the way your team plans", "state": "done" },
+    { "key": "team", "title": "Invite your team and set what each person can see and change", "state": "current" },
+    { "key": "apps", "title": "Connect the apps your team already uses so everything stays in one place", "state": "next" },
+    { "key": "billing", "title": "Choose the plan that fits your team and enter your payment details", "state": "next" },
+    { "key": "finish", "title": "Review the setup and finish, with a checklist you can come back to", "state": "next" }
+  ],
+  "props:OnboardingSteps": {
+    "lead": "A few details to set your workspace up. You can change any of them later.",
+    "countLabel": "Setup progress",
+    "backLabel": "Back",
+    "continueLabel": "Continue",
+    "skipLabel": "Skip for now",
+    "errorText": "That didn't save. Check the highlighted answers and try again.",
+    "emptyText": "Nothing needs setting up right now. You can go straight in.",
+    "completeText": "All steps complete",
+    "loadingText": "Loading the steps…",
+    "failedText": "The steps could not be loaded.",
+    "retryLabel": "Try again",
+    "agentNote": "Your assistant filled this step in from your account details.",
+    "acceptLabel": "Keep it",
+    "rejectLabel": "Clear it"
+  },
+  "Step:loading": [
+    { "key": "account", "title": "Create your account", "state": "done" },
+    { "key": "profile", "title": "About your work", "state": "current" },
+    { "key": "team", "title": "Invite your team", "state": "next" },
+    { "key": "plan", "title": "Choose a plan", "state": "next" }
+  ],
+  "Step:failed": [
+    { "key": "account", "title": "Create your account", "state": "done" },
+    { "key": "profile", "title": "About your work", "state": "current" },
+    { "key": "team", "title": "Invite your team", "state": "next" },
+    { "key": "plan", "title": "Choose a plan", "state": "next" }
+  ],
+  "OnboardingAnswer:many": [
+    { "key": "workspace", "label": "Workspace name", "hint": "People see this when you invite them.", "value": "Northwind Studio", "placeholder": "Your team or company", "error": "", "byAgent": true },
+    { "key": "role", "label": "Your role", "hint": "It sets the layout you start with.", "value": "Product designer", "placeholder": "What you do", "error": "", "byAgent": true },
+    { "key": "size", "label": "Team size", "hint": "A rough number is fine.", "value": "", "placeholder": "For example, 12", "error": "Enter how many people will use the workspace.", "byAgent": false }
+  ],
+  "OnboardingAnswer:long": [
+    { "key": "workspace", "label": "The name of the workspace, as your colleagues and every guest you invite will see it", "hint": "People see this on every invitation, in the address of each shared page and at the top of the weekly summary.", "value": "Northwind Studio for Sustainable Product Design and Research, Rotterdam Office", "placeholder": "Your team or company", "error": "", "byAgent": true },
+    { "key": "size", "label": "How many people will use the workspace in the first three months", "hint": "A rough number is fine.", "value": "", "placeholder": "For example, 12", "error": "Enter how many people will use the workspace, as a number, so the plan can be sized for your team before the trial ends.", "byAgent": false }
+  ],
+  "props:OnboardingScreen": {
+    "productName": "Northwind",
+    "exitLabel": "Save and exit",
+    "lead": "A few details to set your workspace up. You can change any of them later.",
+    "countLabel": "Setup progress",
+    "backLabel": "Back",
+    "continueLabel": "Continue",
+    "skipLabel": "Skip for now",
+    "retryLabel": "Try again",
+    "errorText": "That didn't save. One answer needs a change before you continue.",
+    "loadingText": "Loading your details…",
+    "failedText": "Your details for this step could not be loaded. Try again, or skip it and come back later.",
+    "listTitle": "Your setup",
+    "listNote": "Your answers are saved as you go. Leave at any time and pick up where you stopped.",
+    "doneWord": "done",
+    "currentWord": "in progress",
+    "nextWord": "to come",
+    "markNote": "Filled in by your assistant",
+    "proposedNote": "Your assistant filled this step in from your account details.",
+    "acceptLabel": "Keep it",
+    "rejectLabel": "Clear it",
+    "waitingNote": "Your assistant is waiting for you to finish this step.",
+    "productName@long": "Northwind Studio Workspace for Product Teams",
+    "exitLabel@long": "Save and exit",
+    "countLabel@long": "Setup progress",
+    "backLabel@long": "Back",
+    "continueLabel@long": "Continue",
+    "skipLabel@long": "Skip for now",
+    "retryLabel@long": "Try again",
+    "acceptLabel@long": "Keep it",
+    "rejectLabel@long": "Clear it",
+    "listTitle@long": "Your setup",
+    "markNote@long": "Filled in by your assistant from the details on your account profile",
+    "doneWord@long": "done",
+    "currentWord@long": "in progress",
+    "nextWord@long": "to come"
+  },
+  "props:Hero": {
+    "kicker": "New in version 4",
+    "headline": "Plan the week your whole team will keep",
+    "lead": "Shared calendars, honest estimates and one list of what matters. Set it up in an afternoon and change it whenever plans do.",
+    "primaryLabel": "Start free trial",
+    "secondaryLabel": "See how it works",
+    "pictureLabel": "A calm week, drawn",
+    "panelTitle": "In every plan",
+    "emptyText": "Your plan's features appear here once you pick one. Start a trial to see them.",
+    "loadingText": "Loading what's in your plan…",
+    "failedText": "We couldn't load what's in your plan. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "errorText": "The trial didn't start. Your details are kept; try again in a moment.",
+    "proposedNote": "Your assistant suggests starting the free trial for your team of 8.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "changedNote": "Your assistant started the free trial for your team of 8.",
+    "undoLabel": "Undo"
+  },
+  "HeroPoint:many": [
+    { "key": "calendars", "title": "Shared calendars", "detail": "Everyone's week on one page, with time off and focus blocks." },
+    { "key": "estimates", "title": "Honest estimates", "detail": "Plans that learn from how long work really took." },
+    { "key": "assistant", "title": "An assistant that asks first", "detail": "It suggests; you decide. Every change can be undone." }
+  ],
+  "HeroPoint:one": [
+    { "key": "calendars", "title": "Shared calendars", "detail": "Everyone's week on one page, with time off and focus blocks." }
+  ],
+  "NavEntry:many": [
+    { "key": "naventry-1", "label": "Overview", "href": "/", "group": "Workspace", "badge": 0, "current": true },
+    { "key": "naventry-2", "label": "Reports", "href": "/reports", "group": "Workspace", "badge": 12, "current": false },
+    { "key": "naventry-3", "label": "Invoices", "href": "/invoices", "group": "Workspace", "badge": 0, "current": false },
+    { "key": "naventry-4", "label": "Expenses", "href": "/expenses", "group": "Workspace", "badge": 0, "current": false },
+    { "key": "naventry-5", "label": "Team", "href": "/team", "group": "People", "badge": 0, "current": false },
+    { "key": "naventry-6", "label": "Guests", "href": "/guests", "group": "People", "badge": 3, "current": false },
+    { "key": "naventry-7", "label": "Permissions", "href": "/permissions", "group": "People", "badge": 0, "current": false },
+    { "key": "naventry-8", "label": "Billing", "href": "/billing", "group": "Admin", "badge": 5, "current": false },
+    { "key": "naventry-9", "label": "Integrations", "href": "/integrations", "group": "Admin", "badge": 0, "current": false },
+    { "key": "naventry-10", "label": "Settings", "href": "/settings", "group": "Admin", "badge": 0, "current": false }
+  ],
+  "NavEntry:one": [
+    { "key": "naventry-2", "label": "Overview", "href": "/", "group": "Workspace", "badge": 0, "current": true }
+  ],
+  "NavEntry:long": [
+    { "key": "naventry-1", "label": "A very long line of text, as a person might really write it, that runs past the width a designer planned for and has to wrap or be cut short", "href": "/reports", "group": "Workspace", "badge": 2, "current": false },
+    { "key": "naventry-2", "label": "Another very long line of text that a person wrote without thinking about the side panel's width at all", "href": "/archive", "group": "Archive", "badge": 0, "current": true }
+  ],
+  "props:SideNav": {
+    "productName": "Acme Console",
+    "productMark": "AC",
+    "navLabel": "Main menu",
+    "emptyText": "Nothing here yet.",
+    "emptyLabel": "Add a place",
+    "loadingText": "Loading the menu…",
+    "failedText": "The menu could not be loaded.",
+    "retryLabel": "Try again",
+    "accountName": "Ada Lovelace",
+    "accountDetail": "Workspace admin",
+    "agentKey": "naventry-2",
+    "agentNote": "Added by your assistant"
+  },
+  "props:MessageList": {
+    "title": "Inbox",
+    "unreadLabel": "unread",
+    "emptyText": "No messages yet.",
+    "failedText": "Your messages did not load.",
+    "composeLabel": "Write a message",
+    "retryLabel": "Try again",
+    "orderLabel": "Newest first",
+    "paneLabel": "Message preview",
+    "paneEmptyText": "Choose a message to read it here.",
+    "paneQuietText": "When a message arrives, it opens here.",
+    "openLabel": "Open message",
+    "agentNote": "Your assistant filed the invoice from ACME.",
+    "chosenKey": "message-2",
+    "agentKey": "message-4"
+  },
+  "Message:many": [
+    {
+      "key": "message-1",
+      "from": "Priya Nair",
+      "subject": "Design review notes",
+      "snippet": "Three small changes before we cut the release, all in the section you wrote last week.",
+      "when": "09:41",
+      "unread": true,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-2",
+      "from": "Jonas Weber",
+      "subject": "Q3 report is ready to file",
+      "snippet": "The numbers are reconciled and the summary page waits on your sign-off before Friday.",
+      "when": "08:15",
+      "unread": false,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-3",
+      "from": "Maya Okafor",
+      "subject": "Lunch on Thursday?",
+      "snippet": "There is a new place two streets down with a good menu and a table big enough for eight.",
+      "when": "Wed 14:05",
+      "unread": true,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-4",
+      "from": "ACME Supplies",
+      "subject": "Invoice 4821 for the studio order",
+      "snippet": "Your order shipped on Monday; the invoice is attached and due at the end of the month.",
+      "when": "Tue 09:12",
+      "unread": false,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-5",
+      "from": "Sam Delacroix",
+      "subject": "Fwd: the venue contract",
+      "snippet": "Flagging this one so it does not get lost before the deposit is due.",
+      "when": "Mon 16:20",
+      "unread": false,
+      "flagged": true,
+      "href": "/"
+    }
+  ],
+  "Message:one": [
+    {
+      "key": "message-2",
+      "from": "Jonas Weber",
+      "subject": "Q3 report is ready to file",
+      "snippet": "The numbers are reconciled and the summary page waits on your sign-off before Friday.",
+      "when": "08:15",
+      "unread": false,
+      "flagged": false,
+      "href": "/"
+    }
+  ],
+  "Message:long": [
+    {
+      "key": "message-1",
+      "from": "Constance Beauregard-Villeneuve at the regional licensing office",
+      "subject": "A subject line that keeps going because the sender put the whole question in it and expected nobody to mind",
+      "snippet": "The snippet is one line in the list, cut with an ellipsis, and wraps to several lines in the reading pane, which is as it should be: a preview may never push the layout around, it holds.",
+      "when": "Wed 14:05",
+      "unread": true,
+      "flagged": false,
+      "href": "/"
+    },
+    {
+      "key": "message-2",
+      "from": "Sam Delacroix",
+      "subject": "Fwd: the venue contract, with the rider the venue's own lawyer added after the last call we all had together",
+      "snippet": "Flagging this one so it does not get lost before the deposit is due at the end of the month, which is closer than the last note made it sound.",
+      "when": "Mon 16:20",
+      "unread": false,
+      "flagged": true,
+      "href": "/"
+    }
+  ],
+  "props:FeatureGrid": {
+    "eyebrow": "Features",
+    "title": "Everything your team needs",
+    "lead": "One place to plan, write and ship together, on every device you use.",
+    "actionLabel": "See all features",
+    "emptyText": "No features to show yet. Add the first one and it appears here.",
+    "addLabel": "Add a feature",
+    "loadingText": "Loading features…",
+    "failedText": "The features did not load. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "agentKey": "feature-2",
+    "proposalText": "Your assistant suggests a shorter description for Shared spaces.",
+    "changedText": "Your assistant rewrote the description of Shared spaces.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Reject"
+  },
+  "Feature:many": [
+    {
+      "key": "feature-1",
+      "title": "Works offline",
+      "detail": "Edits save on the device first and sync the moment you are back online."
+    },
+    {
+      "key": "feature-2",
+      "title": "Shared spaces",
+      "detail": "Invite your team to one space and decide who can view, comment or edit."
+    },
+    {
+      "key": "feature-3",
+      "title": "Version history",
+      "detail": "Every change is kept for a year, so any earlier draft is one step away."
+    },
+    {
+      "key": "feature-4",
+      "title": "Quick search",
+      "detail": "Find any page, file or comment by a word in it, as fast as you can type."
+    },
+    {
+      "key": "feature-5",
+      "title": "Private by default",
+      "detail": "Your work stays yours: encrypted at rest and never used to train models."
+    },
+    {
+      "key": "feature-6",
+      "title": "Works with your tools",
+      "detail": "Connect your calendar, mail and storage once; changes flow both ways."
+    }
+  ],
+  "Feature:one": [
+    {
+      "key": "feature-1",
+      "title": "Works offline",
+      "detail": "Edits save on the device first and sync the moment you are back online."
+    }
+  ],
+  "Feature:long": [
+    {
+      "key": "feature-1",
+      "title": "Works offline, on every device you carry, even on a long flight with no connection at all",
+      "detail": "Edits save on the device first and sync the moment you are back online; nothing you write is lost, even when two people change the same page while both are offline."
+    },
+    {
+      "key": "feature-2",
+      "title": "Shared spaces",
+      "detail": "Invite your team to one space and decide who can view, comment or edit."
+    },
+    {
+      "key": "feature-3",
+      "title": "Version history",
+      "detail": "Every change is kept for a year, so any earlier draft is one step away."
+    }
+  ],
+  "props:Pricing": {
+    "title": "Choose your plan",
+    "lead": "Every plan includes unlimited projects and a 14-day free trial. Change or cancel any time.",
+    "tagLabel": "Most popular",
+    "chosenKey": "business",
+    "loadingText": "Loading plans…",
+    "emptyTitle": "No plans to choose from yet",
+    "emptyText": "Plans for your region are on their way. Talk to us and we will set one up for you.",
+    "contactLabel": "Talk to us",
+    "failedTitle": "Plans did not load",
+    "failedText": "Check your connection, then try again. Your current plan has not changed.",
+    "retryLabel": "Try again",
+    "outcomeText": "You are on Business now.",
+    "proposalText": "Your assistant suggests moving to Business.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Reject",
+    "changedText": "Your assistant moved you to Business.",
+    "undoLabel": "Undo",
+    "waitingText": "Your assistant is waiting for you to confirm Business."
+  },
+  "Plan:many": [
+    {
+      "key": "starter",
+      "name": "Starter",
+      "price": "$0",
+      "period": "per month",
+      "detail": "For one person trying things out.",
+      "points": [
+        "3 projects",
+        "1 GB of storage",
+        "Community help"
+      ],
+      "featured": false,
+      "action": "Start with Starter"
+    },
+    {
+      "key": "team",
+      "name": "Team",
+      "price": "$12",
+      "period": "per person, per month",
+      "detail": "For small teams that ship together.",
+      "points": [
+        "Unlimited projects",
+        "100 GB of storage",
+        "Shared workspaces",
+        "Help within a day"
+      ],
+      "featured": true,
+      "action": "Choose Team"
+    },
+    {
+      "key": "business",
+      "name": "Business",
+      "price": "$29",
+      "period": "per person, per month",
+      "detail": "For companies with rules to follow.",
+      "points": [
+        "Everything in Team",
+        "Single sign-on",
+        "Audit log",
+        "A named contact"
+      ],
+      "featured": false,
+      "action": "Choose Business"
+    }
+  ],
+  "Plan:one": [
+    {
+      "key": "business",
+      "name": "Business",
+      "price": "$29",
+      "period": "per person, per month",
+      "detail": "The one plan your organisation offers.",
+      "points": [
+        "Unlimited projects",
+        "Single sign-on",
+        "Audit log",
+        "A named contact"
+      ],
+      "featured": false,
+      "action": "Choose Business"
+    }
+  ],
+  "Plan:long": [
+    {
+      "key": "team",
+      "name": "Team for growing studios and agencies with many clients",
+      "price": "$1,249.99",
+      "period": "per person, per month, billed every year in advance",
+      "detail": "For teams that share work across several clients, time zones and review rounds every week.",
+      "points": [
+        "Unlimited projects, each with its own client workspace and permissions",
+        "500 GB of storage shared by everyone on the team, with older versions kept for a year",
+        "Help from a person within one working day, in your own language"
+      ],
+      "featured": true,
+      "action": "Choose Team for growing studios"
+    },
+    {
+      "key": "business",
+      "name": "Business with single sign-on and an audit trail",
+      "price": "$2,999.00",
+      "period": "per person, per month",
+      "detail": "For organisations whose security review asks for every sign-in to be recorded and kept.",
+      "points": [
+        "Everything in Team, with the same limits raised for large organisations",
+        "Single sign-on through your own identity provider"
+      ],
+      "featured": false,
+      "action": "Choose Business with single sign-on"
+    }
+  ],
+  "props:MediaViewer": {
+    "title": "Lisbon in spring",
+    "positionText": "2 of 6",
+    "currentKey": "harbour",
+    "previousLabel": "Previous",
+    "nextLabel": "Next",
+    "stripTitle": "In this album",
+    "loadingText": "Loading the album…",
+    "failedText": "The pictures did not load. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "proposedNote": "Your assistant suggests the caption “Harbour lights at dusk, Cais do Sodré”.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "changedNote": "Your assistant wrote this caption.",
+    "undoLabel": "Undo",
+    "currentKey@one": "harbour",
+    "positionText@one": "1 of 1",
+    "currentKey@long": "harbour",
+    "positionText@long": "1 of 2",
+    "previousLabel@long": "Previous",
+    "nextLabel@long": "Next",
+    "stripTitle@long": "In this album"
+  },
+  "Media:many": [
+    {
+      "key": "lake",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800' width='1200' height='800'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%239cc4e8'/%3E%3Cstop offset='1' stop-color='%23e3eef7'/%3E%3C/linearGradient%3E%3ClinearGradient id='l' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%235a8db8'/%3E%3Cstop offset='1' stop-color='%232d5d86'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23s)'/%3E%3Cpath d='M0 520 L260 220 L430 420 L620 160 L860 440 L1000 300 L1200 520 Z' fill='%236c7f99'/%3E%3Cpath d='M560 230 L620 160 L680 230 L650 222 L620 245 L590 222 Z' fill='%23fff'/%3E%3Cpath d='M0 520 h1200 v40 h-1200 Z' fill='%233e6b4f'/%3E%3Crect y='560' width='1200' height='240' fill='url(%23l)'/%3E%3C/svg%3E",
+      "caption": "Morning on the lake above Sintra"
+    },
+    {
+      "key": "harbour",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800' width='1200' height='800'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%232b2d5c'/%3E%3Cstop offset='0.55' stop-color='%23c8607a'/%3E%3Cstop offset='1' stop-color='%23f2a65a'/%3E%3C/linearGradient%3E%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%233a3f73'/%3E%3Cstop offset='1' stop-color='%23141632'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23s)'/%3E%3Ccircle cx='820' cy='470' r='70' fill='%23ffd39a'/%3E%3Crect y='500' width='1200' height='300' fill='url(%23w)'/%3E%3Crect x='640' y='520' width='360' height='6' rx='3' fill='%23ffd39a' opacity='0.5'/%3E%3Crect x='700' y='550' width='240' height='5' rx='2.5' fill='%23ffd39a' opacity='0.35'/%3E%3Cpath d='M180 500 L260 330 L270 500 Z' fill='%231b1d3f'/%3E%3Cpath d='M120 500 h260 l-30 44 h-200 Z' fill='%231b1d3f'/%3E%3Cpath d='M0 500 h90 v-90 h40 v-40 h50 v130 Z' fill='%231b1d3f'/%3E%3C/svg%3E",
+      "caption": "The harbour at dusk, from the ferry"
+    },
+    {
+      "key": "forest",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1200' width='800' height='1200'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23cfe3d8'/%3E%3Cstop offset='1' stop-color='%238fb9a6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='1200' fill='url(%23s)'/%3E%3Cpath d='M120 520 l130 360 h-260 Z' fill='%235d8f78'/%3E%3Cpath d='M120 660 l170 380 h-340 Z' fill='%235d8f78'/%3E%3Cpath d='M330 460 l130 360 h-260 Z' fill='%234f8069'/%3E%3Cpath d='M330 600 l170 380 h-340 Z' fill='%234f8069'/%3E%3Cpath d='M560 540 l130 360 h-260 Z' fill='%235d8f78'/%3E%3Cpath d='M560 680 l170 380 h-340 Z' fill='%235d8f78'/%3E%3Cpath d='M700 480 l130 360 h-260 Z' fill='%234f8069'/%3E%3Cpath d='M700 620 l170 380 h-340 Z' fill='%234f8069'/%3E%3Cpath d='M40 700 l130 360 h-260 Z' fill='%232f5a49'/%3E%3Cpath d='M40 840 l170 380 h-340 Z' fill='%232f5a49'/%3E%3Cpath d='M250 660 l130 360 h-260 Z' fill='%232a5242'/%3E%3Cpath d='M250 800 l170 380 h-340 Z' fill='%232a5242'/%3E%3Cpath d='M470 720 l130 360 h-260 Z' fill='%232f5a49'/%3E%3Cpath d='M470 860 l170 380 h-340 Z' fill='%232f5a49'/%3E%3Cpath d='M680 650 l130 360 h-260 Z' fill='%232a5242'/%3E%3Cpath d='M680 790 l170 380 h-340 Z' fill='%232a5242'/%3E%3Crect y='1060' width='800' height='140' fill='%231f3d32'/%3E%3C/svg%3E",
+      "caption": "Pines on the walk to the castle"
+    },
+    {
+      "key": "dunes",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' width='1600' height='900'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23f6e3c4'/%3E%3Cstop offset='1' stop-color='%23f0c48c'/%3E%3C/linearGradient%3E%3ClinearGradient id='d' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23d9884a'/%3E%3Cstop offset='1' stop-color='%23a95a2c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1600' height='900' fill='url(%23s)'/%3E%3Ccircle cx='1220' cy='260' r='90' fill='%23fff4dc'/%3E%3Cpath d='M0 620 C 300 480, 600 520, 900 600 S 1400 560, 1600 520 V900 H0 Z' fill='%23e2a065'/%3E%3Cpath d='M0 760 C 400 600, 800 700, 1100 760 S 1500 700, 1600 690 V900 H0 Z' fill='url(%23d)'/%3E%3C/svg%3E",
+      "caption": "Dunes at Comporta"
+    },
+    {
+      "key": "city",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 1000' width='1000' height='1000'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%230e1630'/%3E%3Cstop offset='1' stop-color='%2325345e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1000' height='1000' fill='url(%23s)'/%3E%3Ccircle cx='780' cy='200' r='60' fill='%23e8ecff' opacity='0.9'/%3E%3Crect x='60' y='520' width='140' height='480' fill='%230a1024'/%3E%3Crect x='78' y='550' width='18' height='26' fill='%23ffd27a' opacity='0.5'/%3E%3Crect x='114' y='550' width='18' height='26' fill='%23ffd27a' opacity='0.7'/%3E%3Crect x='150' y='550' width='18' height='26' fill='%23ffd27a' opacity='0.9'/%3E%3Crect x='78' y='610' width='18' height='26' fill='%23ffd27a' opacity='0.6'/%3E%3Crect x='114' y='610' width='18' height='26' fill='%23ffd27a' opacity='0.8'/%3E%3Crect x='150' y='610' width='18' height='26' fill='%23ffd27a' opacity='0.5'/%3E%3Crect x='78' y='670' width='18' height='26' fill='%23ffd27a' opacity='0.7'/%3E%3Crect x='114' y='670' width='18' height='26' fill='%23ffd27a' opacity='0.9'/%3E%3Crect x='220' y='420' width='120' height='580' fill='%230a1024'/%3E%3Crect x='238' y='450' width='18' height='26' fill='%23ffd27a' opacity='0.5'/%3E%3Crect x='274' y='450' width='18' height='26' fill='%23ffd27a' opacity='0.7'/%3E%3Crect x='310' y='450' width='18' height='26' fill='%23ffd27a' opacity='0.9'/%3E%3Crect x='238' y='510' width='18' height='26' fill='%23ffd27a' opacity='0.6'/%3E%3Crect x='274' y='510' width='18' height='26' fill='%23ffd27a' opacity='0.8'/%3E%3Crect x='310' y='510' width='18' height='26' fill='%23ffd27a' opacity='0.5'/%3E%3Crect x='238' y='570' width='18' height='26' fill='%23ffd27a' opacity='0.7'/%3E%3Crect x='274' y='570' width='18' height='26' fill='%23ffd27a' opacity='0.9'/%3E%3Crect x='360' y='560' width='110' height='440' fill='%230a1024'/%3E%3Crect x='378' y='590' width='18' height='26' fill='%23ffd27a' opacity='0.5'/%3E%3Crect x='414' y='590' width='18' height='26' fill='%23ffd27a' opacity='0.7'/%3E%3Crect x='450' y='590' width='18' height='26' fill='%23ffd27a' opacity='0.9'/%3E%3Crect x='378' y='650' width='18' height='26' fill='%23ffd27a' opacity='0.6'/%3E%3Crect x='414' y='650' width='18' height='26' fill='%23ffd27a' opacity='0.8'/%3E%3Crect x='450' y='650' width='18' height='26' fill='%23ffd27a' opacity='0.5'/%3E%3Crect x='378' y='710' width='18' height='26' fill='%23ffd27a' opacity='0.7'/%3E%3Crect x='414' y='710' width='18' height='26' fill='%23ffd27a' opacity='0.9'/%3E%3Crect x='490' y='360' width='150' height='640' fill='%230a1024'/%3E%3Crect x='508' y='390' width='18' height='26' fill='%23ffd27a' opacity='0.5'/%3E%3Crect x='544' y='390' width='18' height='26' fill='%23ffd27a' opacity='0.7'/%3E%3Crect x='580' y='390' width='18' height='26' fill='%23ffd27a' opacity='0.9'/%3E%3Crect x='508' y='450' width='18' height='26' fill='%23ffd27a' opacity='0.6'/%3E%3Crect x='544' y='450' width='18' height='26' fill='%23ffd27a' opacity='0.8'/%3E%3Crect x='580' y='450' width='18' height='26' fill='%23ffd27a' opacity='0.5'/%3E%3Crect x='508' y='510' width='18' height='26' fill='%23ffd27a' opacity='0.7'/%3E%3Crect x='544' y='510' width='18' height='26' fill='%23ffd27a' opacity='0.9'/%3E%3Crect x='660' y='480' width='130' height='520' fill='%230a1024'/%3E%3Crect x='678' y='510' width='18' height='26' fill='%23ffd27a' opacity='0.5'/%3E%3Crect x='714' y='510' width='18' height='26' fill='%23ffd27a' opacity='0.7'/%3E%3Crect x='750' y='510' width='18' height='26' fill='%23ffd27a' opacity='0.9'/%3E%3Crect x='678' y='570' width='18' height='26' fill='%23ffd27a' opacity='0.6'/%3E%3Crect x='714' y='570' width='18' height='26' fill='%23ffd27a' opacity='0.8'/%3E%3Crect x='750' y='570' width='18' height='26' fill='%23ffd27a' opacity='0.5'/%3E%3Crect x='678' y='630' width='18' height='26' fill='%23ffd27a' opacity='0.7'/%3E%3Crect x='714' y='630' width='18' height='26' fill='%23ffd27a' opacity='0.9'/%3E%3Crect x='810' y='400' width='150' height='600' fill='%230a1024'/%3E%3Crect x='828' y='430' width='18' height='26' fill='%23ffd27a' opacity='0.5'/%3E%3Crect x='864' y='430' width='18' height='26' fill='%23ffd27a' opacity='0.7'/%3E%3Crect x='900' y='430' width='18' height='26' fill='%23ffd27a' opacity='0.9'/%3E%3Crect x='828' y='490' width='18' height='26' fill='%23ffd27a' opacity='0.6'/%3E%3Crect x='864' y='490' width='18' height='26' fill='%23ffd27a' opacity='0.8'/%3E%3Crect x='900' y='490' width='18' height='26' fill='%23ffd27a' opacity='0.5'/%3E%3Crect x='828' y='550' width='18' height='26' fill='%23ffd27a' opacity='0.7'/%3E%3Crect x='864' y='550' width='18' height='26' fill='%23ffd27a' opacity='0.9'/%3E%3C/svg%3E",
+      "caption": "Alfama after dark"
+    },
+    {
+      "key": "meadow",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1000' width='800' height='1000'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23bfe0f0'/%3E%3Cstop offset='1' stop-color='%23eaf5fa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='1000' fill='url(%23s)'/%3E%3Cpath d='M0 520 C 250 470, 550 480, 800 530 V1000 H0 Z' fill='%237fae5a'/%3E%3Cpath d='M0 700 C 300 640, 500 660, 800 700 V1000 H0 Z' fill='%235e9442'/%3E%3Ccircle cx='10' cy='560' r='10' fill='%23d8443a'/%3E%3Ccircle cx='10' cy='560' r='3.3333333333333335' fill='%233a1d1a'/%3E%3Ccircle cx='147' cy='649' r='15' fill='%23d8443a'/%3E%3Ccircle cx='147' cy='649' r='5' fill='%233a1d1a'/%3E%3Ccircle cx='284' cy='738' r='20' fill='%23d8443a'/%3E%3Ccircle cx='284' cy='738' r='6.666666666666667' fill='%233a1d1a'/%3E%3Ccircle cx='421' cy='827' r='25' fill='%23d8443a'/%3E%3Ccircle cx='421' cy='827' r='8.333333333333334' fill='%233a1d1a'/%3E%3Ccircle cx='558' cy='916' r='10' fill='%23d8443a'/%3E%3Ccircle cx='558' cy='916' r='3.3333333333333335' fill='%233a1d1a'/%3E%3Ccircle cx='695' cy='605' r='15' fill='%23d8443a'/%3E%3Ccircle cx='695' cy='605' r='5' fill='%233a1d1a'/%3E%3Ccircle cx='52' cy='694' r='20' fill='%23d8443a'/%3E%3Ccircle cx='52' cy='694' r='6.666666666666667' fill='%233a1d1a'/%3E%3Ccircle cx='189' cy='783' r='25' fill='%23d8443a'/%3E%3Ccircle cx='189' cy='783' r='8.333333333333334' fill='%233a1d1a'/%3E%3Ccircle cx='326' cy='872' r='10' fill='%23d8443a'/%3E%3Ccircle cx='326' cy='872' r='3.3333333333333335' fill='%233a1d1a'/%3E%3Ccircle cx='463' cy='561' r='15' fill='%23d8443a'/%3E%3Ccircle cx='463' cy='561' r='5' fill='%233a1d1a'/%3E%3Ccircle cx='600' cy='650' r='20' fill='%23d8443a'/%3E%3Ccircle cx='600' cy='650' r='6.666666666666667' fill='%233a1d1a'/%3E%3Ccircle cx='737' cy='739' r='25' fill='%23d8443a'/%3E%3Ccircle cx='737' cy='739' r='8.333333333333334' fill='%233a1d1a'/%3E%3Ccircle cx='94' cy='828' r='10' fill='%23d8443a'/%3E%3Ccircle cx='94' cy='828' r='3.3333333333333335' fill='%233a1d1a'/%3E%3Ccircle cx='231' cy='917' r='15' fill='%23d8443a'/%3E%3Ccircle cx='231' cy='917' r='5' fill='%233a1d1a'/%3E%3Ccircle cx='368' cy='606' r='20' fill='%23d8443a'/%3E%3Ccircle cx='368' cy='606' r='6.666666666666667' fill='%233a1d1a'/%3E%3Ccircle cx='505' cy='695' r='25' fill='%23d8443a'/%3E%3Ccircle cx='505' cy='695' r='8.333333333333334' fill='%233a1d1a'/%3E%3Ccircle cx='642' cy='784' r='10' fill='%23d8443a'/%3E%3Ccircle cx='642' cy='784' r='3.3333333333333335' fill='%233a1d1a'/%3E%3Ccircle cx='779' cy='873' r='15' fill='%23d8443a'/%3E%3Ccircle cx='779' cy='873' r='5' fill='%233a1d1a'/%3E%3Ccircle cx='136' cy='562' r='20' fill='%23d8443a'/%3E%3Ccircle cx='136' cy='562' r='6.666666666666667' fill='%233a1d1a'/%3E%3Ccircle cx='273' cy='651' r='25' fill='%23d8443a'/%3E%3Ccircle cx='273' cy='651' r='8.333333333333334' fill='%233a1d1a'/%3E%3Ccircle cx='410' cy='740' r='10' fill='%23d8443a'/%3E%3Ccircle cx='410' cy='740' r='3.3333333333333335' fill='%233a1d1a'/%3E%3Ccircle cx='547' cy='829' r='15' fill='%23d8443a'/%3E%3Ccircle cx='547' cy='829' r='5' fill='%233a1d1a'/%3E%3C/svg%3E",
+      "caption": "Poppies by the road south"
+    }
+  ],
+  "Media:one": [
+    {
+      "key": "harbour",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800' width='1200' height='800'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%232b2d5c'/%3E%3Cstop offset='0.55' stop-color='%23c8607a'/%3E%3Cstop offset='1' stop-color='%23f2a65a'/%3E%3C/linearGradient%3E%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%233a3f73'/%3E%3Cstop offset='1' stop-color='%23141632'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23s)'/%3E%3Ccircle cx='820' cy='470' r='70' fill='%23ffd39a'/%3E%3Crect y='500' width='1200' height='300' fill='url(%23w)'/%3E%3Crect x='640' y='520' width='360' height='6' rx='3' fill='%23ffd39a' opacity='0.5'/%3E%3Crect x='700' y='550' width='240' height='5' rx='2.5' fill='%23ffd39a' opacity='0.35'/%3E%3Cpath d='M180 500 L260 330 L270 500 Z' fill='%231b1d3f'/%3E%3Cpath d='M120 500 h260 l-30 44 h-200 Z' fill='%231b1d3f'/%3E%3Cpath d='M0 500 h90 v-90 h40 v-40 h50 v130 Z' fill='%231b1d3f'/%3E%3C/svg%3E",
+      "caption": "The harbour at dusk, from the ferry"
+    }
+  ],
+  "Media:long": [
+    {
+      "key": "harbour",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800' width='1200' height='800'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%232b2d5c'/%3E%3Cstop offset='0.55' stop-color='%23c8607a'/%3E%3Cstop offset='1' stop-color='%23f2a65a'/%3E%3C/linearGradient%3E%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%233a3f73'/%3E%3Cstop offset='1' stop-color='%23141632'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23s)'/%3E%3Ccircle cx='820' cy='470' r='70' fill='%23ffd39a'/%3E%3Crect y='500' width='1200' height='300' fill='url(%23w)'/%3E%3Crect x='640' y='520' width='360' height='6' rx='3' fill='%23ffd39a' opacity='0.5'/%3E%3Crect x='700' y='550' width='240' height='5' rx='2.5' fill='%23ffd39a' opacity='0.35'/%3E%3Cpath d='M180 500 L260 330 L270 500 Z' fill='%231b1d3f'/%3E%3Cpath d='M120 500 h260 l-30 44 h-200 Z' fill='%231b1d3f'/%3E%3Cpath d='M0 500 h90 v-90 h40 v-40 h50 v130 Z' fill='%231b1d3f'/%3E%3C/svg%3E",
+      "caption": "The harbour at dusk from the late ferry back to Cais do Sodré, with the lights coming on along the water and the last of the sun going down behind the bridge to the west"
+    },
+    {
+      "key": "forest",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1200' width='800' height='1200'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23cfe3d8'/%3E%3Cstop offset='1' stop-color='%238fb9a6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='1200' fill='url(%23s)'/%3E%3Cpath d='M120 520 l130 360 h-260 Z' fill='%235d8f78'/%3E%3Cpath d='M120 660 l170 380 h-340 Z' fill='%235d8f78'/%3E%3Cpath d='M330 460 l130 360 h-260 Z' fill='%234f8069'/%3E%3Cpath d='M330 600 l170 380 h-340 Z' fill='%234f8069'/%3E%3Cpath d='M560 540 l130 360 h-260 Z' fill='%235d8f78'/%3E%3Cpath d='M560 680 l170 380 h-340 Z' fill='%235d8f78'/%3E%3Cpath d='M700 480 l130 360 h-260 Z' fill='%234f8069'/%3E%3Cpath d='M700 620 l170 380 h-340 Z' fill='%234f8069'/%3E%3Cpath d='M40 700 l130 360 h-260 Z' fill='%232f5a49'/%3E%3Cpath d='M40 840 l170 380 h-340 Z' fill='%232f5a49'/%3E%3Cpath d='M250 660 l130 360 h-260 Z' fill='%232a5242'/%3E%3Cpath d='M250 800 l170 380 h-340 Z' fill='%232a5242'/%3E%3Cpath d='M470 720 l130 360 h-260 Z' fill='%232f5a49'/%3E%3Cpath d='M470 860 l170 380 h-340 Z' fill='%232f5a49'/%3E%3Cpath d='M680 650 l130 360 h-260 Z' fill='%232a5242'/%3E%3Cpath d='M680 790 l170 380 h-340 Z' fill='%232a5242'/%3E%3Crect y='1060' width='800' height='140' fill='%231f3d32'/%3E%3C/svg%3E",
+      "caption": "Pines on the long walk up to the Moorish castle above Sintra, where the path climbs through the fog and the trees close over it for most of an hour"
+    }
+  ],
+  "props:SiteFooter": {
+    "productName": "Northwind",
+    "productMark": "N",
+    "tagline": "Plans, people and the week ahead, kept in one calm place.",
+    "navLabel": "Site links",
+    "legal": "© 2026 Northwind Labs, Inc. All rights reserved. Registered in Amsterdam, KvK 81234567.",
+    "emptyText": "No links have been added to this footer yet.",
+    "emptyLabel": "Add a link",
+    "loadingText": "Loading the site's links…",
+    "failedText": "The footer's links could not be loaded. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "agentKey": "status",
+    "agentKey@long": "status",
+    "agentNote": "Your assistant added System status under Resources.",
+    "proposedNote": "Your assistant suggests adding Security under Legal.",
+    "proposedGroup": "legal",
+    "proposedGroup@long": "company",
+    "proposedLabel": "Security",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "undoLabel": "Undo"
+  },
+  "LinkGroup:many": [
+    {
+      "key": "product",
+      "title": "Product",
+      "links": [
+        {
+          "key": "features",
+          "label": "Features",
+          "href": "/features"
+        },
+        {
+          "key": "pricing",
+          "label": "Pricing",
+          "href": "/pricing"
+        },
+        {
+          "key": "changelog",
+          "label": "Changelog",
+          "href": "/changelog"
+        },
+        {
+          "key": "integrations",
+          "label": "Integrations",
+          "href": "/integrations"
+        }
+      ]
+    },
+    {
+      "key": "resources",
+      "title": "Resources",
+      "links": [
+        {
+          "key": "guides",
+          "label": "Guides",
+          "href": "/guides"
+        },
+        {
+          "key": "api",
+          "label": "API reference",
+          "href": "/api"
+        },
+        {
+          "key": "status",
+          "label": "System status",
+          "href": "/status"
+        }
+      ]
+    },
+    {
+      "key": "company",
+      "title": "Company",
+      "links": [
+        {
+          "key": "about",
+          "label": "About us",
+          "href": "/about"
+        },
+        {
+          "key": "careers",
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "key": "press",
+          "label": "Press kit",
+          "href": "/press"
+        },
+        {
+          "key": "contact",
+          "label": "Contact",
+          "href": "/contact"
+        }
+      ]
+    },
+    {
+      "key": "legal",
+      "title": "Legal",
+      "links": [
+        {
+          "key": "privacy",
+          "label": "Privacy",
+          "href": "/privacy"
+        },
+        {
+          "key": "terms",
+          "label": "Terms of service",
+          "href": "/terms"
+        },
+        {
+          "key": "cookies",
+          "label": "Cookie settings",
+          "href": "/cookies"
+        }
+      ]
+    }
+  ],
+  "LinkGroup:one": [
+    {
+      "key": "product",
+      "title": "Product",
+      "links": [
+        {
+          "key": "features",
+          "label": "Features",
+          "href": "/features"
+        },
+        {
+          "key": "pricing",
+          "label": "Pricing",
+          "href": "/pricing"
+        },
+        {
+          "key": "changelog",
+          "label": "Changelog",
+          "href": "/changelog"
+        },
+        {
+          "key": "integrations",
+          "label": "Integrations",
+          "href": "/integrations"
+        }
+      ]
+    }
+  ],
+  "LinkGroup:long": [
+    {
+      "key": "resources",
+      "title": "Resources for teams that plan across many time zones and offices",
+      "links": [
+        {
+          "key": "guides",
+          "label": "Guides for setting up shared calendars across every office and every team you work with",
+          "href": "/guides"
+        },
+        {
+          "key": "status",
+          "label": "System status",
+          "href": "/status"
+        },
+        {
+          "key": "api",
+          "label": "API reference",
+          "href": "/api"
+        }
+      ]
+    },
+    {
+      "key": "company",
+      "title": "Company",
+      "links": [
+        {
+          "key": "about",
+          "label": "About us and the people who build Northwind from three countries",
+          "href": "/about"
+        },
+        {
+          "key": "careers",
+          "label": "Careers",
+          "href": "/careers"
+        }
+      ]
+    }
+  ],
+  "props:Faq": {
+    "eyebrow": "Help centre",
+    "title": "Questions, answered",
+    "lead": "Short answers about orders, delivery and your account. Open a question to read its answer.",
+    "contactTitle": "Still need a hand?",
+    "contactText": "Our team answers within one working day.",
+    "contactLabel": "Ask our team",
+    "emptyTitle": "No questions yet",
+    "emptyText": "When people ask about orders and delivery, the answers will gather here.",
+    "failedTitle": "The questions did not load",
+    "failedText": "Check your connection, then try again.",
+    "agentKey@long": "returns",
+    "loadingText": "Loading the questions",
+    "retryLabel": "Try again",
+    "agentKey": "returns",
+    "agentNote": "Your assistant rewrote this answer to match the new returns policy.",
+    "waitingNote": "Your assistant will publish its new answer once the returns policy goes live.",
+    "proposalText": "Your assistant suggests adding the 60-day window to the answer on returns.",
+    "acceptLabel": "Accept",
+    "declineLabel": "Reject"
+  },
+  "Question:many": [
+    {
+      "key": "returns",
+      "question": "How do I return something?",
+      "answer": "Start a return from your orders page within 30 days of delivery. Print the label we email you, pack the item in its original box and drop it at any parcel point. Your refund lands within five working days of our receiving it.",
+      "open": true
+    },
+    {
+      "key": "delivery",
+      "question": "When will my order arrive?",
+      "answer": "Most orders arrive in two to four working days. You get a tracking link by email as soon as the parcel leaves our depot.",
+      "open": false
+    },
+    {
+      "key": "change",
+      "question": "Can I change an order after placing it?",
+      "answer": "Yes, until it is packed. Open the order and choose Edit; once it shows Packed, it can only be returned.",
+      "open": false
+    },
+    {
+      "key": "payment",
+      "question": "Which ways can I pay?",
+      "answer": "Cards, bank transfer and pay-later. You are charged when the order ships, not when you place it.",
+      "open": false
+    },
+    {
+      "key": "account",
+      "question": "How do I close my account?",
+      "answer": "Go to Settings, then Account, then Close account. We keep your order history for seven years, as the law asks.",
+      "open": false
+    }
+  ],
+  "Question:one": [
+    {
+      "key": "returns",
+      "question": "How do I return something?",
+      "answer": "Start a return from your orders page within 30 days of delivery. Print the label we email you, pack the item in its original box and drop it at any parcel point. Your refund lands within five working days of our receiving it.",
+      "open": true
+    }
+  ],
+  "Question:long": [
+    {
+      "key": "returns",
+      "question": "How do I return something I bought as a gift for someone else, when the order was sent straight to their address and paid for with a card I have since cancelled?",
+      "answer": "Start the return from your own orders page, not the recipient's: the order belongs to the account that paid. We email you a label for the recipient's address, and because the original card is cancelled the refund comes back as store credit on your account, which you can move to a new card from Settings, then Payments, at any time within the next twelve months, without a fee.",
+      "open": true
+    },
+    {
+      "key": "international-shipping-and-customs-duties-explained",
+      "question": "Do you ship internationally, and who pays the customs duties and import taxes at the border?",
+      "answer": "We ship to most countries. Duties are shown at checkout and paid up front, so nothing is due at the door.",
+      "open": false
+    }
   ]
 }

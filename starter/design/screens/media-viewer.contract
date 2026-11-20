@@ -1,0 +1,170 @@
+// MediaViewer: a viewer for pictures. The bar names the album. Under it the chosen picture stands large on the page
+// colour, fitted whole without distortion (object-fit contain in a 3:2 stage, held to a named height on a desktop),
+// then where the person is ("2 of 6", a prop) over its caption, beside Previous and Next (they wrap under the
+// caption on a phone), then the album as a strip of thumbnails, the current one ringed in the accent and the others
+// quieter. The strip scrolls sideways inside its own row, so a long album never widens the page. On a desktop the
+// column keeps a width that holds a 3:2 picture at the stage's full height (screens.media-max), centred.
+// States: data many|one|loading|failed|long — one draws the picture and its caption alone (no Previous, Next or
+// strip: there is nowhere to go); loading breathes the stage (a drawn picture mark in it), a caption bar and the
+// strip's squares under `loadingText` (role status), with no control a person could press into nothing; failed
+// puts `failedText` (role alert, in ink on the surface; the warning glyph in the critical hue) and the way on, Try
+// again, in the stage's place, in a frame as tall as the note needs; long is many with captions and a title that run long and wrap. agent
+// none|proposed|changed — an assistant's caption, through the other door: proposed waits in an accent-edged band
+// under the caption (one sentence, two answer words; Accept is the state's one fill, so Next steps back to plain);
+// changed marks the caption with the accent line at its start, says `changedNote` and offers Undo. The band is
+// drawn here, not the kit's Proposal: Proposal keeps its sentence and both answers on one line, which squeezes the
+// sentence to a third of a phone's width and breaks "Not now" in two; this one wraps the answers under the
+// sentence when the sentence would fall under its least width, and keeps one line on a desktop.
+// Props: the words (title, positionText, previousLabel, nextLabel, stripTitle, loadingText, failedText,
+// retryLabel, proposedNote, acceptLabel, rejectLabel, changedNote, undoLabel), the album (`items`, the
+// `currentKey` chosen), the states, and the app's actions (previous, next, choose(key), retry, accept, reject,
+// undo). Choosing is by key, so a person's tap and an agent's tool reach the same picture. The arrow keys
+// run Previous and Next from any focused control of the album.
+use Swatch from "__SCOPE__/theme"
+use Words, ActionButton from "__SCOPE__/components"
+use TopBar from "__SCOPE__/blocks"
+
+// One picture in the album: its key, where its image is, and what it shows in words (also its alternative text).
+shape Media
+  key: string
+  src: string
+  caption: string
+
+// Loading breathes, so it reads as on its way rather than as drawn shapes.
+keyframes mediaBreathe
+  50% opacity=0.55
+
+// The stage: a box of one ratio while the picture loads or shows, never taller than screens.media-stage-max, so
+// the caption and the strip stay where they are. Failed takes its note's height with room around it: at the
+// picture's size the note sat small in a large empty frame on a desktop.
+component MediaStage
+  props
+    tone: enum<"clear", "loading", "failed">
+    testId: string
+  slot
+  view
+    column testId=testId width="100%" aspect-ratio=(tone == "failed" ? "auto" : "3 / 2") max-height=(tone == "failed" ? "none" : "screens.media-stage-max") padding-top=(tone == "failed" ? "theme.space.xxl" : "0") padding-bottom=(tone == "failed" ? "theme.space.xxl" : "0") box-sizing="border-box" align-items="center" justify-content="center" overflow=(tone == "clear" ? "hidden" : "visible") border-radius="theme.radius.card" background-color=(tone == "loading" ? "theme.color.fill" : tone == "failed" ? "theme.color.surface" : "transparent") border-width=(tone == "failed" ? "theme.line.width" : "0") border-style="solid" border-color="theme.color.line" animation=(tone == "loading" ? "mediaBreathe 1.8s ease-in-out infinite" : "none")
+      children
+
+// One thumbnail: a button named by its caption. The current one wears the accent ring and full strength; the
+// others sit back until hovered.
+component MediaThumb
+  props
+    src: string
+    caption: string
+    current: bool
+    press: action
+    testId: string
+  view
+    button press=press testId=testId aria-label=caption aria-current=(current ? "true" : "false") flex-shrink=0 width="screens.media-thumb" height="screens.media-thumb" box-sizing="border-box" padding="screens.media-ring" border-radius="theme.radius.control" border-width="screens.media-ring" border-style="solid" border-color=(current ? "theme.color.accent" : "transparent") background-color="transparent" opacity=(current ? 1 : 0.72)
+      :hover
+        opacity=1
+      :focus-visible
+        box-shadow="0 0 0 2px theme.color.focus"
+      image src width="100%" height="100%" object-fit="cover" border-radius="theme.radius.control" background-color="theme.color.fill" aria-hidden=true
+
+// A square still loading in the strip's place.
+component MediaBone
+  view
+    box flex-shrink=0 width="screens.media-thumb" height="screens.media-thumb" box-sizing="border-box" border-radius="theme.radius.control" background-color="theme.color.fill" aria-hidden=true
+
+component MediaViewer
+  props
+    title: string
+    positionText: string
+    previousLabel: string
+    nextLabel: string
+    stripTitle: string
+    loadingText: string
+    failedText: string
+    retryLabel: string
+    proposedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    changedNote: string
+    undoLabel: string
+    currentKey: string
+    items: Media[]
+    data: enum<"many", "one", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed">
+    previous: action
+    next: action
+    choose: action
+    retry: action
+    accept: action
+    reject: action
+    undo: action
+  derive shown = data == "many" or data == "one" or data == "long"
+  derive album = data == "many" or data == "long"
+  // The arrow keys step as Previous and Next do (the same actions), from any control of the album that has the
+  // focus: a thumbnail just chosen, a button. The strip does not also scroll under them.
+  action step(k: string)
+    if album and k == "ArrowLeft"
+      preventDefault()
+      previous()
+    else if album and k == "ArrowRight"
+      preventDefault()
+      next()
+  view
+    column testId="media-viewer" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
+      TopBar(title=title, agentNote="", agent="none")
+      scroll id="media-viewer-scroll" flex=1 min-height=0
+        column width="100%" max-width="screens.media-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding="theme.space.lg" gap="theme.space.xl"
+          if shown
+            column gap="theme.space.lg" key=step
+              MediaStage(tone="clear", testId="media-viewer-stage")
+                for m in items.filter(x => x.key == currentKey) key=m.key
+                  image m.src alt=m.caption width="100%" height="100%" object-fit="contain" testId="media-viewer-picture"
+              row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.md"
+                column flex=1 min-width="screens.media-caption-min" min-height="screens.media-action-min" box-sizing="border-box" justify-content="center" gap="theme.space.xs" padding-left=(agent == "changed" ? "theme.space.md" : "0") border-left-width=(agent == "changed" ? "screens.media-mark-line" : "0") border-left-style="solid" border-left-color="theme.color.accent"
+                  if positionText != ""
+                    Words(text=positionText, kind="caption", outcome="none", level=0, testId="media-viewer-position")
+                  for m in items.filter(x => x.key == currentKey) key=m.key
+                    text m.caption testId="media-viewer-caption" overflow-wrap="break-word" font="theme.type.label" color="theme.color.ink"
+                  if agent == "changed"
+                    row testId="media-viewer-changed" role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.sm" padding-top="theme.space.xs"
+                      text changedNote testId="media-viewer-agent" flex-shrink=1 min-width=0 overflow-wrap="break-word" font="theme.type.caption" color="theme.color.accent"
+                      ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="media-viewer-undo")
+                if album
+                  row role="group" aria-label=positionText gap="theme.space.sm" flex-shrink=0
+                    ActionButton(label=previousLabel, kind="plain", interaction="idle", outcome="none", press=previous, testId="media-viewer-previous")
+                    ActionButton(label=nextLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=next, testId="media-viewer-next")
+              if agent == "proposed"
+                row testId="media-viewer-proposal" role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.md" padding="theme.space.lg" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" background-color="theme.color.surface"
+                  text proposedNote testId="media-viewer-sentence" flex=1 min-width="screens.media-caption-min" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+                  row flex-wrap="wrap" gap="theme.space.sm" flex-shrink=0
+                    ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="media-viewer-no")
+                    ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="media-viewer-yes")
+            if album
+              column gap="theme.space.sm" key=step
+                Words(text=stripTitle, kind="heading", outcome="none", level=2, testId="media-viewer-strip-title")
+                scroll testId="media-viewer-strip" overflow-x="auto" overflow-y="hidden"
+                  row role="list" aria-label=stripTitle gap="theme.space.sm" padding-bottom="theme.space.xs"
+                    for m in items key=m.key
+                      box role="listitem" flex-shrink=0
+                        MediaThumb(src=m.src, caption=m.caption, current=(m.key == currentKey), press=choose(m.key), testId=`media-viewer-thumb-${m.key}`)
+          else if data == "loading"
+            column gap="theme.space.lg"
+              MediaStage(tone="loading", testId="media-viewer-stage")
+                svg viewBox="0 0 48 48" width="screens.media-wait-glyph" height="screens.media-wait-glyph" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
+                  rect x=5 y=9 width=38 height=30 rx=4 stroke-width=2
+                  circle cx=17 cy=19 r=3.5 stroke-width=2
+                  path d="M6 35l11-10 8 7 6-5 11 9" stroke-width=2 stroke-linejoin="round" stroke-linecap="round"
+              column gap="theme.space.sm"
+                text loadingText testId="media-viewer-loading" role="status" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
+                box width="screens.media-bone-caption" max-width="100%" height="screens.media-bone-line" border-radius="theme.radius.pill" background-color="theme.color.fill" aria-hidden=true animation="mediaBreathe 1.8s ease-in-out infinite"
+              row gap="theme.space.sm" overflow="hidden" aria-hidden=true animation="mediaBreathe 1.8s ease-in-out infinite"
+                MediaBone()
+                MediaBone()
+                MediaBone()
+                MediaBone()
+          else
+            MediaStage(tone="failed", testId="media-viewer-stage")
+              column role="alert" align-items="center" gap="theme.space.lg" padding="theme.space.xl" max-width="screens.media-note-max" box-sizing="border-box"
+                box width="screens.media-wait-glyph" height="screens.media-wait-glyph" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.pill" background-color="color-mix(in srgb, theme.color.critical 12%, theme.color.surface)" aria-hidden=true
+                  svg viewBox="0 0 24 24" width="screens.media-glyph" height="screens.media-glyph" fill="none" stroke="theme.color.critical" flex-shrink=0
+                    path d="M12 3.5L21.5 20H2.5Z" stroke-width=1.6 stroke-linejoin="round"
+                    path d="M12 9.5v4.5" stroke-width=1.6 stroke-linecap="round"
+                    path d="M12 16.8v0.01" stroke-width=1.8 stroke-linecap="round"
+                text failedText testId="media-viewer-failed" text-align="center" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+                ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId="media-viewer-retry")

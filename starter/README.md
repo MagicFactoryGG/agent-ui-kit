@@ -102,3 +102,24 @@ named on the web and macOS, in light and dark. The generated playground filters 
 are compared from each host's own layout, with the numbers, and the cell's pixels are compared too. A frame's
 size is reported, not judged (each host measures the border box its own way); the pixels decide. It writes
 `parity.md` and `parity.json` and fails beyond the tolerances it prints.
+
+## Both doors
+
+Every block and screen proves both doors: an agent reaches a state through its tools, and a person's real input
+reaches the same state, in a real browser. The playground holds two hand-written Exact apps for it,
+`journeys/blocks` and `journeys/screens` (made runnable by the create step and `bun play.mjs gen`: manifest,
+package, launcher and links, with `@agent-ui-kit/agent` from this kit by path). Each places its pieces in a small
+real use whose values live in the app's ledger (`book`), as `apps/agent-gallery` does: the person's door calls
+`personSet`, the agent's door is a `tool` whose action calls `act` (`tools.contract`), and the tool list with its
+floors, the words and the start values are in `model.contract`. Screens fill the window, so one shows at a time;
+`openScreen` picks it.
+
+A piece adds its use, its tool (a face in `app.json`) and its cases to `both-doors.json`, each named
+`"<Piece>: …"`: the person's ops (`tap`, `type` on the piece's own testIds), the agent's (`call`), the paths that
+must be the `same`, and `expect` for the agent's recorded change. Run one piece's cases:
+
+    bun tools/both-doors.mjs <playground>/journeys/blocks web --only "SettingsGroup: "
+    bun tools/both-doors.mjs <playground>/journeys/screens web --only "MediaViewer: "
+
+`--only` fails when no case has the prefix. The guard (`bun play.mjs check`) holds the journeys apps to imports
+and data, as every app.

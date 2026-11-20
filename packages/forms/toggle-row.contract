@@ -9,6 +9,7 @@ component ToggleRow
   params
     markInk: color = "forms.mark" control = "token" group = "Color" priority = 2 label = "Change mark"
     proposalInk: color = "forms.proposal" control = "token" group = "Color" priority = 1 label = "Proposal"
+    tint: color = "forms.switch" control = "token" group = "Color" priority = 1 label = "Switch on"
   props
     // Names its testIds: the switch is `id`; `<id>-row`, `<id>-mark`,
     // `<id>-proposed`, `<id>-accept`, `<id>-reject`.
@@ -37,6 +38,7 @@ component ToggleRow
           testId=id
           checked=checked
           change=set
+          accent-color="param.tint"
           aria-label=title
       if sentence != ""
         text sentence part="sentence" testId=`${id}-proposed` color="param.proposalInk" font="-exact-footnote"

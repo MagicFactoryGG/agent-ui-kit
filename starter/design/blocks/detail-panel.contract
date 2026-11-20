@@ -170,7 +170,8 @@ component DetailPanel
               circle cx=8 cy=11.6 r=0.7 fill="theme.color.critical" stroke="none"
             Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed-text`)
           if retryLabel != ""
-            ActionButton(label=retryLabel, kind="plain", interaction=interaction, outcome="none", press=retryPress, testId=`${testId}-retry`)
+            row
+              ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retryPress, testId=`${testId}-retry`)
       else
         // Wide, the record's own groups sit in the left column and its activity beside them at the end; a phone
         // stacks the two columns unchanged. The columns are bare rows, so the shorter one ends on the page, not

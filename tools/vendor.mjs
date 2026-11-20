@@ -79,6 +79,14 @@ function main(argv) {
     writeFileSync(join(vendor, 'ui-guard.d.mts'), 'export interface Finding {\n  file: string;\n  line: number;\n  what: string;\n}\nexport function guard(app: string): Finding[];\n');
     for (const f of ['ui-guard.mjs', 'ui-guard.d.mts']) files[f] = createHash('sha256').update(readFileSync(join(vendor, f))).digest('hex');
   }
+  // The Brand layer: the registry, its lock and the icon list, with the check the guard runs (tools/brand.mjs).
+  for (const f of ['brand.json', 'brand.lock', 'icons.json', 'tools/brand.mjs']) {
+    const src = join(DESIGN, f);
+    if (!existsSync(src)) continue;
+    const to = basename(f);
+    writeFileSync(join(vendor, to), readFileSync(src));
+    files[to] = createHash('sha256').update(readFileSync(join(vendor, to))).digest('hex');
+  }
   writeFileSync(join(vendor, 'MANIFEST.json'), `${JSON.stringify({ from: 'the design repo (agent-ui-kit starter)', commit: dirty ? `${commit} with uncommitted changes` : commit, files }, null, 2)}\n`);
   writeFileSync(join(app, 'package.json'), `${JSON.stringify(pkg, null, 2)}\n`);
   console.log(`vendor: ${dirs.length} packages, ${Object.keys(files).length} files, from ${commit}${dirty ? ' (uncommitted changes: commit the design repo first)' : ''} into ${vendor}`);
