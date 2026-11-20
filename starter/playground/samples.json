@@ -652,5 +652,190 @@
       "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1200' width='800' height='1200'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23cfe3d8'/%3E%3Cstop offset='1' stop-color='%238fb9a6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='1200' fill='url(%23s)'/%3E%3Cpath d='M120 520 l130 360 h-260 Z' fill='%235d8f78'/%3E%3Cpath d='M120 660 l170 380 h-340 Z' fill='%235d8f78'/%3E%3Cpath d='M330 460 l130 360 h-260 Z' fill='%234f8069'/%3E%3Cpath d='M330 600 l170 380 h-340 Z' fill='%234f8069'/%3E%3Cpath d='M560 540 l130 360 h-260 Z' fill='%235d8f78'/%3E%3Cpath d='M560 680 l170 380 h-340 Z' fill='%235d8f78'/%3E%3Cpath d='M700 480 l130 360 h-260 Z' fill='%234f8069'/%3E%3Cpath d='M700 620 l170 380 h-340 Z' fill='%234f8069'/%3E%3Cpath d='M40 700 l130 360 h-260 Z' fill='%232f5a49'/%3E%3Cpath d='M40 840 l170 380 h-340 Z' fill='%232f5a49'/%3E%3Cpath d='M250 660 l130 360 h-260 Z' fill='%232a5242'/%3E%3Cpath d='M250 800 l170 380 h-340 Z' fill='%232a5242'/%3E%3Cpath d='M470 720 l130 360 h-260 Z' fill='%232f5a49'/%3E%3Cpath d='M470 860 l170 380 h-340 Z' fill='%232f5a49'/%3E%3Cpath d='M680 650 l130 360 h-260 Z' fill='%232a5242'/%3E%3Cpath d='M680 790 l170 380 h-340 Z' fill='%232a5242'/%3E%3Crect y='1060' width='800' height='140' fill='%231f3d32'/%3E%3C/svg%3E",
       "caption": "Pines on the long walk up to the Moorish castle above Sintra, where the path climbs through the fog and the trees close over it for most of an hour"
     }
+  ],
+  "props:SiteFooter": {
+    "productName": "Northwind",
+    "productMark": "N",
+    "tagline": "Plans, people and the week ahead, kept in one calm place.",
+    "navLabel": "Site links",
+    "legal": "© 2026 Northwind Labs, Inc. All rights reserved. Registered in Amsterdam, KvK 81234567.",
+    "emptyText": "No links have been added to this footer yet.",
+    "emptyLabel": "Add a link",
+    "loadingText": "Loading the site's links…",
+    "failedText": "The footer's links could not be loaded. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "agentKey": "status",
+    "agentKey@long": "status",
+    "agentNote": "Your assistant added System status under Resources.",
+    "proposedNote": "Your assistant suggests adding Security under Legal.",
+    "proposedGroup": "legal",
+    "proposedGroup@long": "company",
+    "proposedLabel": "Security",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "undoLabel": "Undo"
+  },
+  "LinkGroup:many": [
+    {
+      "key": "product",
+      "title": "Product",
+      "links": [
+        {
+          "key": "features",
+          "label": "Features",
+          "href": "/features"
+        },
+        {
+          "key": "pricing",
+          "label": "Pricing",
+          "href": "/pricing"
+        },
+        {
+          "key": "changelog",
+          "label": "Changelog",
+          "href": "/changelog"
+        },
+        {
+          "key": "integrations",
+          "label": "Integrations",
+          "href": "/integrations"
+        }
+      ]
+    },
+    {
+      "key": "resources",
+      "title": "Resources",
+      "links": [
+        {
+          "key": "guides",
+          "label": "Guides",
+          "href": "/guides"
+        },
+        {
+          "key": "api",
+          "label": "API reference",
+          "href": "/api"
+        },
+        {
+          "key": "status",
+          "label": "System status",
+          "href": "/status"
+        }
+      ]
+    },
+    {
+      "key": "company",
+      "title": "Company",
+      "links": [
+        {
+          "key": "about",
+          "label": "About us",
+          "href": "/about"
+        },
+        {
+          "key": "careers",
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "key": "press",
+          "label": "Press kit",
+          "href": "/press"
+        },
+        {
+          "key": "contact",
+          "label": "Contact",
+          "href": "/contact"
+        }
+      ]
+    },
+    {
+      "key": "legal",
+      "title": "Legal",
+      "links": [
+        {
+          "key": "privacy",
+          "label": "Privacy",
+          "href": "/privacy"
+        },
+        {
+          "key": "terms",
+          "label": "Terms of service",
+          "href": "/terms"
+        },
+        {
+          "key": "cookies",
+          "label": "Cookie settings",
+          "href": "/cookies"
+        }
+      ]
+    }
+  ],
+  "LinkGroup:one": [
+    {
+      "key": "product",
+      "title": "Product",
+      "links": [
+        {
+          "key": "features",
+          "label": "Features",
+          "href": "/features"
+        },
+        {
+          "key": "pricing",
+          "label": "Pricing",
+          "href": "/pricing"
+        },
+        {
+          "key": "changelog",
+          "label": "Changelog",
+          "href": "/changelog"
+        },
+        {
+          "key": "integrations",
+          "label": "Integrations",
+          "href": "/integrations"
+        }
+      ]
+    }
+  ],
+  "LinkGroup:long": [
+    {
+      "key": "resources",
+      "title": "Resources for teams that plan across many time zones and offices",
+      "links": [
+        {
+          "key": "guides",
+          "label": "Guides for setting up shared calendars across every office and every team you work with",
+          "href": "/guides"
+        },
+        {
+          "key": "status",
+          "label": "System status",
+          "href": "/status"
+        },
+        {
+          "key": "api",
+          "label": "API reference",
+          "href": "/api"
+        }
+      ]
+    },
+    {
+      "key": "company",
+      "title": "Company",
+      "links": [
+        {
+          "key": "about",
+          "label": "About us and the people who build Northwind from three countries",
+          "href": "/about"
+        },
+        {
+          "key": "careers",
+          "label": "Careers",
+          "href": "/careers"
+        }
+      ]
+    }
   ]
 }
