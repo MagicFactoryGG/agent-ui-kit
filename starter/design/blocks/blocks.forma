@@ -94,7 +94,7 @@ theme
   blocks.faq-max: length = 992px  // the list column comes to 640px, StatePanel's own full width, so its card meets the seams
   blocks.faq-aside: length = 240px
   blocks.faq-main: length = 320px
-  blocks.faq-measure: length = 600px
+  blocks.faq-measure: length = 560px  // near 70 characters of body type a line
   blocks.faq-glyph: length = 24px
   blocks.faq-glyph-lead: length = 3px  // the label's line (18px) centred on the glyph's 24px
   blocks.faq-row-min: length = 56px

@@ -383,7 +383,7 @@
     "retryLabel": "Try again",
     "agentKey": "returns",
     "agentNote": "Your assistant rewrote this answer to match the new returns policy.",
-    "waitingNote": "Your assistant is waiting for your go-ahead to publish this answer.",
+    "waitingNote": "Your assistant will publish its new answer once the returns policy goes live.",
     "proposalText": "Your assistant suggests adding the 60-day window to the answer on returns.",
     "acceptLabel": "Accept",
     "declineLabel": "Reject"
