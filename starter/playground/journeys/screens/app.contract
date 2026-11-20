@@ -12,9 +12,9 @@
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
 use Ledger, ledger, personSet, valueOf, isOn, isMarked, undoLatest from "@agent-ui-kit/agent"
-use MediaViewer, Media, MailScreen from "__SCOPE__/screens"
+use MediaViewer, Media, ListDetail, MailScreen from "__SCOPE__/screens"
 use Message from "__SCOPE__/blocks"
-use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter from "./model.contract"
+use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter from "./model.contract"
 
 component App
   members "./tools.contract"
@@ -46,12 +46,24 @@ component App
     book = personSet(book, flagKey(mailLetter().key), isOn(book, flagKey(mailLetter().key)) ? "off" : "on")
   action undoByPerson
     book = undoLatest(book)
+  // ListDetail: the project open beside the list is a value in the ledger, by key. On a phone the list or the
+  // detail fills the window (`opened`: navigation, not data, so no ledger and no record).
+  state opened = false
+  derive projectKey = valueOf(book, "project")
+  derive projectsText = projects().map(p => `${p.key}\t${p.title}${p.key == projectKey ? "\topen" : ""}`).join("\n")
+  // The person's door: a tap on a row opens its project by key; Back shows the list on a phone.
+  action openProjectByPerson(key: string)
+    book = personSet(book, "project", key)
+    opened = true
+  action backByPerson
+    opened = false
+
   // A retry and a proposal's answers: this use has none.
   action ignore
     book = book
 
   // The agent's door. Answer words: saved, delayed, proposed, off, unknown-id.
-  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer or MailScreen. Answers its name." = openScreen
+  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail or MailScreen. Answers its name." = openScreen
     returns shown
   tool readAlbum reads "The album's pictures, one per line: id, caption, and shown on the one on screen, tab-separated." = readAlbum
     returns albumText
@@ -63,10 +75,17 @@ component App
   tool flagMessage writes idempotent closed "Flag or unflag a message, by id from readMail. Answers saved or unknown-id." = flagMessage
     returns book.answer
     fails when book.answer == "unknown-id" or book.answer == "off"
+  tool readProjects reads "The projects, one per line: id, title, and open on the one shown beside the list, tab-separated." = readProjects
+    returns projectsText
+  tool openProject writes idempotent closed "Open a project beside the list, by id from readProjects. Answers saved or unknown-id." = openProject
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off"
 
   view
     main testId="app" width="100%" height="100%"
       if shown == "MediaViewer"
         MediaViewer(title="Lisbon in spring", positionText=`${pictureIndex + 1} of ${albumKeys().length}`, previousLabel="Previous", nextLabel="Next", stripTitle="In this album", loadingText="", failedText="", retryLabel="", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, ["picture"]), undoLabel="Undo", currentKey=pictureKey, items=album(), data="many", agent=(isMarked(book, "picture") ? "changed" : "none"), previous=previousByPerson, next=nextByPerson, choose=chooseByPerson, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)
-      if shown == "MailScreen"
+      else if shown == "ListDetail"
+        ListDetail(title="Studio", listTitle="Projects", loadingText="", detailLoadingText="", emptyText="", createLabel="", failedText="", retryLabel="", backLabel="Projects", pickText="Choose a project to see its details.", factsTitle="Details", factsEmptyText="No details yet.", notesTitle="Notes", activityTitle="Activity", activityEmptyText="No activity yet.", primaryLabel="Edit project", secondaryLabel="Share", proposedNote="", acceptLabel="", rejectLabel="", proposedMark="", changedNote=latestAbout(book, ["project"]), changedMark="Opened by your assistant", undoLabel="Undo", chosenKey=projectKey, items=projects(), facts=projectFacts(projectKey), notes="", events=[], data="many", agent=(isMarked(book, "project") ? "changed" : "none"), pane=(opened ? "detail" : "list"), primaryPress=ignore, secondaryPress=ignore, back=backByPerson, choose=openProjectByPerson, create=ignore, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)
+      else if shown == "MailScreen"
         MailScreen(title="Mail", mark="M", navLabel="Mailboxes", foldersTitle="Mailboxes", folderTitle="Inbox", accountName="Ada Lovelace", accountDetail="ada@studio.example", composeLabel="Compose", backLabel="Back to", unreadLabel="unread", orderLabel="Newest first", paneLabel="Open message", paneEmptyText="Choose a message to read it here.", paneQuietText="When a message arrives, it opens here.", emptyText="No messages in your inbox.", failedText="Your messages did not load.", retryLabel="Try again", toolbarLabel="Message actions", toLabel="To", replyLabel="Reply", replyAllLabel="Reply all", forwardLabel="Forward", flagLabel="Flag", agentNote="Flagged by your assistant", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, flagKeys()), undoLabel="Undo", waitingNote="", waitingLabel="", folders=mailFolders(), folderKey="inbox", messages=mailMessages, letter=mailLetter(), agentKey=mailMarkedKey, data="many", agent=(mailMarkedKey != "" ? "changed" : "none"), which="message", compose=ignore, retry=ignore, reply=ignore, replyAll=ignore, forward=ignore, flag=flagByPerson, showFolders=ignore, showList=ignore, accept=ignore, reject=ignore, undo=undoByPerson, review=ignore)
