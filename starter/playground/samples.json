@@ -991,6 +991,7 @@
     "changedText": "Your assistant turned the weekly digest on.",
     "waitingText": "This change waits for your answer.",
     "waitingNote": "Your assistant is waiting for your answer on one change.",
+    "undoLabel": "Undo",
     "currentKey@long": "notifications",
     "agentSection@long": "notifications",
     "agentKey@long": "digest"

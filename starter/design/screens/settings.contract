@@ -26,15 +26,15 @@
 //   agent  none | proposed | changed | waiting: an assistant's act on one setting (`agentKey` names its row,
 //          `agentSection` its section). The group that holds the row shows it the kit's way (SettingsGroup:
 //          proposed marks the row and asks under the group with `proposalText` and the two answer words;
-//          changed keeps the accent edge and says `changedText`; waiting the caution edge and `waitingText`). The
+//          changed keeps the accent edge, says `changedText` and offers `undoLabel`, the way back, under it; waiting the caution edge and `waitingText`). The
 //          section's place in the list carries a dot of the same ink, so a person sees where an act is even from
 //          another section (a screen reader hears the act's sentence after the place's name); while an act waits, the bar says `waitingNote` under its title.
 //
 // Both doors: a person's press and an agent's tool reach the same actions, each by key: `pick` a section,
 // `toggle`, `choose`, `open` and `remove` a setting (SettingsGroup's own), `accept` and `decline` the proposal,
-// `retry`, `add`.
+// `undo` the agent's change, `retry`, `add`.
 use Swatch from "__SCOPE__/theme"
-use Words from "__SCOPE__/components"
+use Words, ActionButton from "__SCOPE__/components"
 use TopBar, StatePanel, SettingsGroup, Setting from "__SCOPE__/blocks"
 
 // One place in the list: its key, its name, and the line that says what it holds (shown under its name when
@@ -134,6 +134,7 @@ component SettingsScreen
     changedText: string
     waitingText: string
     waitingNote: string
+    undoLabel: string
     data: enum<"many", "empty", "loading", "failed", "long">
     agent: enum<"none", "proposed", "changed", "waiting">
     pick: action
@@ -145,6 +146,7 @@ component SettingsScreen
     decline: action
     retry: action
     add: action
+    undo: action
   // SettingsGroup's doors, each passed on with the row's key.
   action flip(key: string)
     toggle(key)
@@ -188,7 +190,16 @@ component SettingsScreen
                     text loadingText testId="settings-screen-loading" min-width=0 font="theme.type.caption" color="theme.color.ink-muted"
             if data == "many" or data == "long"
               for g in groups key=g.key
-                SettingsGroup(title=g.title, footer=g.footer, emptyText=groupEmptyText, loadingText=loadingText, failedText=failedText, failedDetail="", retryLabel=retryLabel, proposalText=proposalText, proposalKey=agentKey, acceptLabel=acceptLabel, declineLabel=declineLabel, changedText=changedText, waitingText=waitingText, outcomeText="", data=(g.rows.length == 0 ? "empty" : "many"), interaction="idle", outcome="none", agent=(holdsRow(g, agentKey) ? agent : "none"), rows=g.rows, toggle=flip, choose=chooseRow, open=openRow, remove=removeRow, retry=retry, accept=accept, decline=decline, testId=`settings-${g.key}`)
+                column gap="theme.space.sm"
+                  SettingsGroup(title=g.title, footer=g.footer, emptyText=groupEmptyText, loadingText=loadingText, failedText=failedText, failedDetail="", retryLabel=retryLabel, proposalText=proposalText, proposalKey=agentKey, acceptLabel=acceptLabel, declineLabel=declineLabel, changedText=changedText, waitingText=waitingText, outcomeText="", data=(g.rows.length == 0 ? "empty" : "many"), interaction="idle", outcome="none", agent=(holdsRow(g, agentKey) ? agent : "none"), rows=g.rows, toggle=flip, choose=chooseRow, open=openRow, remove=removeRow, retry=retry, accept=accept, decline=decline, testId=`settings-${g.key}`)
+                  if agent == "changed" and holdsRow(g, agentKey)
+                    // The way back from what the agent changed, under the group's own words about it, on the card's
+                    // edge: an empty title column of SettingsGroup's own least width holds the card's place on a
+                    // desktop and wraps away, zero tall, on a phone. Named by the change's sentence.
+                    row flex-wrap="wrap" column-gap="theme.space.xl"
+                      box flex=1 min-width="screens.settings-aside" aria-hidden=true
+                      row role="group" aria-label=changedText flex=2 min-width="screens.settings-card-min" box-sizing="border-box" padding-left="theme.space.lg"
+                        ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="settings-screen-undo")
             else if data == "loading"
               SettingsGhost(loadingText=loadingText, testId="settings-screen-loading-1")
               SettingsGhost(loadingText=loadingText, testId="settings-screen-loading-2")
