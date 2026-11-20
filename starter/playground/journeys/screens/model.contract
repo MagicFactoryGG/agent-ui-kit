@@ -1,7 +1,8 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Media from "__SCOPE__/screens"
+use Media, ListDetailItem from "__SCOPE__/screens"
+use Fact from "__SCOPE__/blocks"
 
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
 // The newest change on any of the keys, said in one sentence; "" when there is none.
@@ -22,11 +23,24 @@ fn stepAt(key: string, by: number): number = max(0, min(albumKeys().length - 1, 
 fn stepKey(key: string, by: number): string = albumKeys().slice(stepAt(key, by), stepAt(key, by) + 1).join("")
 fn pictureAct(key: string): Act = Act(tool="showPicture", door="agent", key="picture", title="Picture", value=key, did=`Your assistant showed ${captionOf(key)}.`, asks=`Your assistant suggests showing ${captionOf(key)}.`, will=`Your assistant will show ${captionOf(key)} in 5 seconds.`)
 
+// ListDetail: three projects; the one open is a value in the ledger, by key. Each project's facts are data only.
+fn projects(): ListDetailItem[] = [
+  ListDetailItem(key="atlas", title="Atlas rebrand", detail="Identity, signage and the new site", status="In review", href=""),
+  ListDetailItem(key="harbour", title="Harbour cafés spring campaign", detail="Posters, ferry film and a printed map", status="In progress", href=""),
+  ListDetailItem(key="north", title="North Line timetable", detail="Print and screen editions", status="Scheduled", href="")
+]
+fn projectKeys(): string[] = projects().map(p => p.key)
+fn projectTitle(key: string): string = projects().filter(p => p.key == key).map(p => p.title).join("")
+fn projectFacts(key: string): Fact[] = key == "atlas" ? [Fact(key="owner", label="Owner", value="Maya Okafor"), Fact(key="launch", label="Launch", value="April 2")] : key == "north" ? [Fact(key="owner", label="Owner", value="Jonas Weber"), Fact(key="launch", label="Launch", value="May 18")] : [Fact(key="owner", label="Owner", value="Priya Nair"), Fact(key="launch", label="Launch", value="March 7")]
+fn projectAct(key: string): Act = Act(tool="openProject", door="agent", key="project", title="Project", value=key, did=`Your assistant opened ${projectTitle(key)}.`, asks=`Your assistant suggests opening ${projectTitle(key)}.`, will=`Your assistant will open ${projectTitle(key)} in 5 seconds.`)
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
-  AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="openProject", title="Project", sentence="Opens a project beside the list.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
-  Value(key="picture", value="harbour")
+  Value(key="picture", value="harbour"),
+  Value(key="project", value="harbour")
 ]

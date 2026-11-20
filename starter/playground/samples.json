@@ -711,6 +711,148 @@
       "caption": "Pines on the long walk up to the Moorish castle above Sintra, where the path climbs through the fog and the trees close over it for most of an hour"
     }
   ],
+  "props:ListDetail": {
+    "title": "Studio",
+    "listTitle": "Projects",
+    "loadingText": "Loading projects…",
+    "detailLoadingText": "Loading this project…",
+    "emptyText": "No projects yet. Start one and it will be listed here.",
+    "createLabel": "New project",
+    "failedText": "Your projects did not load. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "backLabel": "Projects",
+    "pickText": "Choose a project to see its details.",
+    "factsTitle": "Details",
+    "factsEmptyText": "No details yet.",
+    "notesTitle": "Notes",
+    "activityTitle": "Activity",
+    "activityEmptyText": "No activity yet.",
+    "primaryLabel": "Edit project",
+    "secondaryLabel": "Share",
+    "proposedNote": "Your assistant suggests moving the launch to March 14.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Reject",
+    "proposedMark": "Your assistant suggests a change",
+    "changedNote": "Your assistant set the owner to Priya Nair.",
+    "changedMark": "Changed by your assistant",
+    "undoLabel": "Undo",
+    "chosenKey": "harbour",
+    "notes": "The spring campaign for the harbour cafés: posters, a short film for the ferry screens and a printed map. Print files go to the press on the first of the month.",
+    "chosenKey@long": "harbour",
+    "primaryLabel@long": "Edit project",
+    "secondaryLabel@long": "Share",
+    "backLabel@long": "Projects",
+    "acceptLabel@long": "Accept",
+    "rejectLabel@long": "Reject",
+    "undoLabel@long": "Undo",
+    "createLabel@long": "New project",
+    "retryLabel@long": "Try again",
+    "chosenKey@one": "harbour"
+  },
+  "ListDetailItem:many": [
+    {
+      "key": "atlas",
+      "title": "Atlas rebrand",
+      "detail": "Identity, signage and the new site",
+      "status": "In review",
+      "href": "/"
+    },
+    {
+      "key": "harbour",
+      "title": "Harbour cafés spring campaign",
+      "detail": "Posters, ferry film and a printed map",
+      "status": "In progress",
+      "href": "/"
+    },
+    {
+      "key": "north",
+      "title": "North Line timetable",
+      "detail": "Print and screen editions",
+      "status": "Scheduled",
+      "href": "/"
+    },
+    {
+      "key": "orchard",
+      "title": "Orchard annual report",
+      "detail": "Forty pages, two languages",
+      "status": "Draft",
+      "href": "/"
+    },
+    {
+      "key": "lumen",
+      "title": "Lumen app onboarding",
+      "detail": "Six screens and their illustrations",
+      "status": "Done",
+      "href": "/"
+    }
+  ],
+  "ListDetailItem:one": [
+    {
+      "key": "harbour",
+      "title": "Harbour cafés spring campaign",
+      "detail": "Posters, ferry film and a printed map",
+      "status": "In progress",
+      "href": "/"
+    }
+  ],
+  "ListDetailItem:long": [
+    {
+      "key": "harbour",
+      "title": "Harbour cafés spring campaign for the six cafés along the river, from Cais do Sodré to Belém",
+      "detail": "Posters for every café window, a ninety-second film for the ferry screens and a folded printed map of the walk between them",
+      "status": "In progress with the printer",
+      "href": "/"
+    },
+    {
+      "key": "atlas",
+      "title": "Atlas rebrand",
+      "detail": "Identity, signage, the new site and the guidelines that every agency working with Atlas will follow from next year",
+      "status": "In review",
+      "href": "/"
+    }
+  ],
+  "Fact:many": [
+    {
+      "key": "owner",
+      "label": "Owner",
+      "value": "Priya Nair"
+    },
+    {
+      "key": "client",
+      "label": "Client",
+      "value": "Harbour Cafés Co-op"
+    },
+    {
+      "key": "launch",
+      "label": "Launch",
+      "value": "March 7"
+    },
+    {
+      "key": "budget",
+      "label": "Budget",
+      "value": "€18,400"
+    }
+  ],
+  "Event:many": [
+    {
+      "key": "proof",
+      "who": "Sam Rivera",
+      "what": "Sent the poster proofs to the co-op",
+      "when": "Today, 10:12"
+    },
+    {
+      "key": "film",
+      "who": "Priya Nair",
+      "what": "Approved the ferry film's final cut",
+      "when": "Yesterday, 17:30"
+    },
+    {
+      "key": "kickoff",
+      "who": "Jonas Weber",
+      "what": "Opened the project",
+      "when": "Feb 2"
+    }
+  ],
   "props:SiteFooter": {
     "productName": "Northwind",
     "productMark": "N",

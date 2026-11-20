@@ -1,6 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
+use Fact, Event from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -13,16 +14,32 @@ fn titleOf(key: string): string = key == "digest" ? "Weekly digest" : key == "fa
 fn detailOf(key: string): string = key == "digest" ? "A summary of your week, each Monday." : key == "failures" ? "An email when a deploy fails." : key == "marketing" ? "New features, now and then." : ""
 fn switchAct(tool: string, key: string, on: bool): Act = Act(tool=tool, door="agent", key=key, title=titleOf(key), value=onOff(on), did=`Your assistant turned ${titleOf(key)} ${onOff(on)}.`, asks=`Your assistant suggests turning ${titleOf(key)} ${onOff(on)}.`, will=`Your assistant will turn ${titleOf(key)} ${onOff(on)} in 5 seconds.`)
 
+// DetailPanel: one incident's record; its status (open or resolved) is the value both doors set.
+fn incidentTitle(): string = "Checkout returns 502 on retry"
+fn statusWord(status: string): string = status == "resolved" ? "Resolved" : "Open"
+fn incidentFacts(): Fact[] = [
+  Fact(key="service", label="Service", value="payments-api"),
+  Fact(key="owner", label="Owner", value="Rui Costa"),
+  Fact(key="opened", label="Opened", value="Today, 09:12"),
+  Fact(key="impact", label="Impact", value="About one in twenty checkouts fail when the card form is sent a second time.")
+]
+fn incidentEvents(): Event[] = [
+  Event(key="deploy", who="Ana Sousa", what="Rolled back the 09:05 deploy", when="09:40"),
+  Event(key="opened", who="Rui Costa", what="Opened the incident", when="09:12")
+]
+fn statusAct(status: string): Act = Act(tool="setIncidentStatus", door="agent", key="incident", title="Incident status", value=status, did=`Your assistant marked the incident ${status}.`, asks=`Your assistant suggests marking the incident ${status}.`, will=`Your assistant will mark the incident ${status} in 5 seconds.`)
 // StatePanel: the files area, whose last load failed; its one act starts the load again (its value: loading).
 fn loadAct(tool: string): Act = Act(tool=tool, door="agent", key="files", title="Your files", value="loading", did="Your assistant is loading your files again.", asks="Your assistant suggests loading your files again.", will="Your assistant will load your files again in 5 seconds.")
 
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setIncidentStatus", title="Incident status", sentence="Marks the incident open or resolved.", floor="recorded", reach="self", secret=false),
   AgentTool(name="loadFiles", title="Your files", sentence="Loads the files area again.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="digest", value="on"), Value(key="failures", value="on"), Value(key="marketing", value="off"),
+  Value(key="incident", value="open"),
   Value(key="files", value="failed")
 ]
