@@ -82,6 +82,12 @@
       },
       "addFeature": {
         "title": "Add Feature"
+      },
+      "readFooter": {
+        "title": "Read Footer"
+      },
+      "addFooterLinks": {
+        "title": "Add Footer Links"
       }
     }
   }

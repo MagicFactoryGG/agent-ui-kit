@@ -1,7 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf, isMarked from "@agent-ui-kit/agent"
-use Fact, Event, Step, Message, NavEntry, Record, Feature from "__SCOPE__/blocks"
+use Fact, Event, Step, Message, NavEntry, Record, Feature, LinkGroup, FooterLink from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -84,6 +84,12 @@ fn pickAct(key: string, on: bool): Act = Act(tool="selectRecord", door="agent", 
 fn firstFeatures(): Feature[] = [Feature(key="sync", title="Live sync", detail="Every change reaches each of your devices in a moment, even on a slow connection.")]
 fn featuresText(features: string): string = features == "sync" ? "sync\tLive sync" : ""
 fn addFeatureAct(): Act = Act(tool="addFeature", door="agent", key="features", title="Features", value="sync", did="Your assistant added Live sync to the features.", asks="Your assistant suggests adding Live sync to the features.", will="Your assistant will add Live sync to the features in 5 seconds.")
+// SiteFooter: a product site's closing band, with no links yet. Its links are one value in the ledger: "empty", or
+// "help" once its first column, Help with its Contact us link, is in it. Adding it is the footer's real act: the empty
+// band's Add links for a person, addFooterLinks for the agent, whose link then wears the accent dot.
+fn helpGroups(): LinkGroup[] = [LinkGroup(key="help", title="Help", links=[FooterLink(key="contact", label="Contact us", href="#contact")])]
+fn footerText(links: string): string = links == "help" ? "help\tHelp\tcontact\tContact us" : ""
+fn addFooterLinksAct(): Act = Act(tool="addFooterLinks", door="agent", key="footer", title="Footer links", value="help", did="Your assistant added Help, with Contact us, to the footer.", asks="Your assistant suggests adding Help, with Contact us, to the footer.", will="Your assistant will add Help, with Contact us, to the footer in 5 seconds.")
 
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
@@ -94,7 +100,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="markMessage", title="Inbox", sentence="Marks a message in the inbox read or unread.", floor="recorded", reach="self", secret=false),
   AgentTool(name="addHome", title="Menu", sentence="Adds Home to the empty menu.", floor="recorded", reach="self", secret=false),
   AgentTool(name="selectRecord", title="Deploy queue", sentence="Selects a record in the deploy queue, or clears it.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="addFeature", title="Features", sentence="Adds the first feature, Live sync, to the empty features section.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="addFeature", title="Features", sentence="Adds the first feature, Live sync, to the empty features section.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="addFooterLinks", title="Footer links", sentence="Adds the first column, Help with Contact us, to the footer that has no links.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -105,5 +112,6 @@ fn startValues(): Value[] = [
   Value(key="mail-review", value="unread"), Value(key="mail-report", value="read"), Value(key="mail-lunch", value="unread"),
   Value(key="menu", value="empty"),
   Value(key="audit", value="unselected"), Value(key="rotate", value="unselected"), Value(key="invoices", value="unselected"),
-  Value(key="features", value="empty")
+  Value(key="features", value="empty"),
+  Value(key="footer", value="empty")
 ]
