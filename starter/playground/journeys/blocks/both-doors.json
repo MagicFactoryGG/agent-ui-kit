@@ -294,6 +294,42 @@
     }
   },
   {
+    "name": "FeatureGrid: the empty features section: Add a feature and addFeature reach the same first feature; the agent's is recorded and ringed",
+    "person": [
+      "tap features-add"
+    ],
+    "agent": [
+      "call addFeature {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.13.key": "features",
+      "book.values.13.value": "sync",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "features",
+      "book.changes.0.was": "empty",
+      "book.marked": [
+        "features"
+      ],
+      "featuresMarked": true
+    },
+    "expectPerson": {
+      "book.values.13.value": "sync",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "featuresMarked": false
+    }
+  },
+  {
     "name": "Hero: the free trial: Start free trial and startTrial reach the same started trial; the agent's is recorded and marked on the hero",
     "person": [
       "tap trial-primary"
@@ -311,8 +347,8 @@
       ]
     ],
     "expect": {
-      "book.values.13.key": "trial",
-      "book.values.13.value": "started",
+      "book.values.14.key": "trial",
+      "book.values.14.value": "started",
       "book.changes.length": 1,
       "book.changes.0.mode": "recorded",
       "book.changes.0.key": "trial",
@@ -324,7 +360,7 @@
       "trialOn": true
     },
     "expectPerson": {
-      "book.values.13.value": "started",
+      "book.values.14.value": "started",
       "book.changes.length": 0,
       "book.marked": [],
       "trialMarked": false,
@@ -348,8 +384,8 @@
       ]
     ],
     "expect": {
-      "book.values.13.key": "trial",
-      "book.values.13.value": "off",
+      "book.values.14.key": "trial",
+      "book.values.14.value": "off",
       "book.changes.length": 0,
       "book.marked": [],
       "trialMarked": false
