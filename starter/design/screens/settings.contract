@@ -70,7 +70,8 @@ fn markInk(m: string): string = m == "waiting" ? "theme.color.caution" : "theme.
 // One place in the list: a button that picks its section by key. The chosen one is the list's one fill, in the
 // label's heavier type and the ink; the rest sit back in the muted ink. Its name keeps one line and carries the
 // whole of itself as its title. A dot after the name says an agent acted in that section; a screen reader hears
-// the act's own sentence, `note`, after the name (the dot alone says nothing to it).
+// the act's own sentence, `note`, after the name (the dot alone says nothing to it). Its insets are the lg the
+// heading and SettingsGroup's titles take, so a pill's words on a phone start on the same edge as theirs.
 component SettingsPlace
   props
     label: string
@@ -80,7 +81,7 @@ component SettingsPlace
     press: action
     testId: string
   view
-    button press=press testId=testId aria-current=(current ? "page" : "false") aria-label=(note == "" ? label : `${label}. ${note}`) title=label display="flex" flex-direction="row" align-items="center" gap="theme.space.sm" flex-grow=0 flex-shrink=1 flex-basis="calc((screens.settings-fold - 100%) * 999)" max-width="100%" min-height="screens.settings-place-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" border-width=0 border-radius="theme.radius.control" text-align="start" background-color=(current ? "theme.color.fill" : "transparent")
+    button press=press testId=testId aria-current=(current ? "page" : "false") aria-label=(note == "" ? label : `${label}. ${note}`) title=label display="flex" flex-direction="row" align-items="center" gap="theme.space.sm" flex-grow=0 flex-shrink=1 flex-basis="calc((screens.settings-fold - 100%) * 999)" max-width="100%" min-height="screens.settings-place-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" border-width=0 border-radius="theme.radius.control" text-align="start" background-color=(current ? "theme.color.fill" : "transparent")
       :hover
         background-color="theme.color.hover"
       :focus-visible
