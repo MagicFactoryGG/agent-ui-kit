@@ -1,7 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Fact, Event from "__SCOPE__/blocks"
+use Fact, Event, Record from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -31,15 +31,28 @@ fn statusAct(status: string): Act = Act(tool="setIncidentStatus", door="agent", 
 // StatePanel: the files area, whose last load failed; its one act starts the load again (its value: loading).
 fn loadAct(tool: string): Act = Act(tool=tool, door="agent", key="files", title="Your files", value="loading", did="Your assistant is loading your files again.", asks="Your assistant suggests loading your files again.", will="Your assistant will load your files again in 5 seconds.")
 
+// DataTable: the deploy queue; each record's selection (selected or not) is one value both doors set.
+fn recordKeys(): string[] = ["audit", "rotate", "invoices"]
+fn recordTitle(key: string): string = key == "audit" ? "Move the 2024 audit log to cold storage" : key == "rotate" ? "Rotate the payments API keys" : key == "invoices" ? "Resend the October invoices" : key
+fn queueRecords(): Record[] = [
+  Record(key="audit", title=recordTitle("audit"), status="In review", tone="progress", owner="Ana Sousa", updated="Today", href="#audit"),
+  Record(key="rotate", title=recordTitle("rotate"), status="Blocked", tone="attention", owner="Rui Costa", updated="Yesterday", href="#rotate"),
+  Record(key="invoices", title=recordTitle("invoices"), status="Done", tone="done", owner="Mei Lin", updated="Mon", href="#invoices")
+]
+fn pickWord(on: bool): string = on ? "selected" : "unselected"
+fn pickAct(key: string, on: bool): Act = Act(tool="selectRecord", door="agent", key=key, title=recordTitle(key), value=pickWord(on), did=`Your assistant ${on ? "selected" : "cleared"} “${recordTitle(key)}”.`, asks=`Your assistant suggests ${on ? "selecting" : "clearing"} “${recordTitle(key)}”.`, will=`Your assistant will ${on ? "select" : "clear"} “${recordTitle(key)}” in 5 seconds.`)
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
   AgentTool(name="setIncidentStatus", title="Incident status", sentence="Marks the incident open or resolved.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="loadFiles", title="Your files", sentence="Loads the files area again.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="loadFiles", title="Your files", sentence="Loads the files area again.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="selectRecord", title="Deploy queue", sentence="Selects a record in the deploy queue, or clears it.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="digest", value="on"), Value(key="failures", value="on"), Value(key="marketing", value="off"),
   Value(key="incident", value="open"),
-  Value(key="files", value="failed")
+  Value(key="files", value="failed"),
+  Value(key="audit", value="unselected"), Value(key="rotate", value="unselected"), Value(key="invoices", value="unselected")
 ]
