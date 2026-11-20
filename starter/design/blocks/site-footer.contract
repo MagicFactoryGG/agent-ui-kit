@@ -9,7 +9,8 @@
 //   breakpoint (Exact has no media query; the kit's responsive pair, see AGENTS): the brand and the columns share
 //   a wrapping row, and the columns wrap among themselves, each flex=1 over a named least width
 //   (blocks.footer-col-min). At 1280 the brand stands beside four columns; narrower, the columns fall to two
-//   under the brand; at a phone's 390 every column takes the whole width, one under the other.
+//   under the brand, and a 390 phone keeps two (a phone footer of one column runs past a whole screen); only a
+//   window narrower than two columns' least width takes one, each column the whole width.
 // - The bottom row, under a hairline: the legal line, small and muted, wrapping whole.
 //
 // States (the brand and the legal line stay in every one; only the columns are data):
@@ -168,7 +169,7 @@ component SiteFooter
                   ActionButton(label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
             if agent == "changed"
               row testId=`${testId}-changed` role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.sm" padding-left="theme.space.md" border-left-width="blocks.footer-rule" border-left-style="solid" border-left-color="theme.color.accent"
-                text agentNote testId=`${testId}-agent` flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+                text agentNote testId=`${testId}-agent` flex-shrink=1 min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
                 ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
             if shown
               row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.xl"

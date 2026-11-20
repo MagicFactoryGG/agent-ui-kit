@@ -125,7 +125,7 @@ theme
   blocks.footer-air: length = 48px
   blocks.footer-gap: length = 48px
   blocks.footer-brand-min: length = 240px
-  blocks.footer-col-min: length = 172px  // two columns need 368px with their gap: more than a 390px phone's 358px, less than a desktop's quarter
+  blocks.footer-col-min: length = 150px  // two columns need 324px with their gap, inside a 390px phone's 358px; three need 498px, so a phone holds two; four fit a desktop's 800px
   blocks.footer-link-min: length = 32px
   blocks.footer-head-min: length = 17px  // the heading type's own line (13px at 1.3)
   blocks.footer-bone: length = 10px
