@@ -46,7 +46,7 @@ const indentOf = (l) => l.length - l.trimStart().length;
 export function kindOf(line) {
   const t = line.trim();
   if (t.startsWith("//")) return null;
-  const el = /^(button|input|textarea|select|column|row|box|list)\b/.exec(t)?.[1];
+  const el = /^(button|input|textarea|select|column|row|box|list)\b(?!\s*:)/.exec(t)?.[1];
   if (el === "button") return "button";
   if (el === "input") {
     if (/\btype="checkbox"/.test(t)) return "check";
