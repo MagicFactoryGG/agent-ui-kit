@@ -20,6 +20,8 @@ use Faq from "__SCOPE__/blocks"
 use faqKey, faqLedgerKeys, faqQuestions, faqText, faqMarkedKey from "./model.contract"
 use BarChart from "__SCOPE__/blocks"
 use chartRanges, chartNote, chartLabel, chartPoints, chartText from "./model.contract"
+use CommandMenu from "__SCOPE__/blocks"
+use cmdKey, cmdLedgerKeys, menuCommands, cmdText, cmdMarkedKey from "./model.contract"
 
 // The window's width, for the Hero's size (compact under 600 px): an app reads the viewport, a piece cannot.
 shape JourneyViewport
@@ -86,6 +88,14 @@ component App
   // marked on the chart, with its sentence and Undo.
   derive chartRange = valueOf(book, "chart-range")
   derive chartMarked = isMarked(book, "chart-range")
+  // CommandMenu: the person's query is this use's view state (an agent runs a command by key, never types);
+  // the commands that match it are the menu's results, the first one highlighted. Each command's value is in the
+  // ledger, "off" until it runs; the agent's run is marked on its row and said above the results, with Undo.
+  state cmdQuery: string = ""
+  derive cmdShown = menuCommands(cmdQuery)
+  derive cmdFirst = cmdShown.slice(0, 1).map(c => c.key).join("")
+  derive cmdAgentKey = cmdMarkedKey(book)
+  derive cmdReadText = cmdText(book)
 
   // The person's door: the switch says which row; the app flips its own value.
   action toggleByPerson(key: string)
@@ -149,6 +159,16 @@ component App
     book = personSet(book, "chart-range", key)
   action undoRange
     book = undo(book, latestIdAbout(book, "chart-range"))
+  // The command menu: typing narrows the results; a press on a row runs its command; Clear search empties the
+  // query; Undo takes the agent's run back.
+  action searchCommands(text: string)
+    cmdQuery = text
+  action runCommandByPerson(key: string)
+    book = personSet(book, cmdKey(key), "on")
+  action clearCommands
+    cmdQuery = ""
+  action undoCommand
+    book = undo(book, latestIdAbout(book, cmdKey(cmdAgentKey)))
   // Rows of other kinds, a retry and a proposal's answers: this use has none.
   action ignoreKey(key: string)
     book = book
@@ -221,6 +241,11 @@ component App
   tool setChartRange writes idempotent closed "Show the orders chart by week or by month, as its Weeks and Months switch does: week or month. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readChart." = setChartRange
     returns book.answer
     fails when book.answer == "off"
+  tool readCommands reads "The command menu's commands, one per line: id (focus, mute or pin), its label, then on once it has run or off, tab-separated." = readCommands
+    returns cmdReadText
+  tool runCommand writes idempotent closed "Run a command from the command menu, as a press on its row does: focus (turn on focus mode), mute (pause notifications) or pin (pin this project). Answers saved, or delayed, proposed or off when the person raised its mode. Check with readCommands." = runCommand
+    returns book.answer
+    fails when book.answer == "off"
 
   view
     main testId="app" width="100%" height="100%"
@@ -237,3 +262,4 @@ component App
       SiteFooter(productName="Acme", productMark="AC", tagline="Deploys you can trust, from the first commit to the last.", navLabel="Footer", groups=(footerLinks == "help" ? helpGroups() : []), legal="© 2026 Acme, Inc. All rights reserved.", emptyText="This footer has no links yet. Add the first column so visitors can find help.", emptyLabel="Add links", loadingText="", failedText="", retryLabel="", agentKey="contact", agentNote=latestAbout(book, ["footer"]), proposedNote="", proposedGroup="", proposedLabel="", acceptLabel="", rejectLabel="", undoLabel="Undo", data=(footerLinks == "help" ? "one" : "empty"), agent=(footerMarked ? "changed" : "none"), add=addFooterLinksByPerson, retry=ignore, accept=ignore, reject=ignore, undo=undoFooter, testId="footer")
       Faq(eyebrow="Help centre", title="Questions, answered", lead="Short answers about orders, delivery and payment. Open a question to read its answer.", contactTitle="", contactText="", contactLabel="", emptyTitle="", emptyText="", failedTitle="", failedText="", loadingText="", retryLabel="", agentKey=faqAgentKey, agentNote=latestAbout(book, faqLedgerKeys()), waitingNote="", proposalText="", acceptLabel="", declineLabel="", data="many", agent=(faqMarked ? "changed" : "none"), questions=faqQuestions(book), toggle=toggleQuestionByPerson, retry=ignore, contact=ignore, accept=ignore, decline=ignore, testId="faq")
       BarChart(title="Orders", note=chartNote(chartRange), chartLabel=chartLabel(chartRange), points=chartPoints(chartRange), ranges=chartRanges(), range=chartRange, rangeLabel="Show orders by", emptyText="", emptyLabel="", loadingText="", failedText="", retryLabel="", agentKey="", agentNote=latestAbout(book, ["chart-range"]), undoLabel="Undo", proposalText="", acceptLabel="", rejectLabel="", data="many", agent=(chartMarked ? "changed" : "none"), size=(viewport.width < 600 ? "compact" : "wide"), choose=chooseRangeByPerson, add=ignore, retry=ignore, undo=undoRange, accept=ignore, reject=ignore, testId="orders")
+      CommandMenu(title="Command menu", searchLabel="Search commands", placeholder="Type a command", query=cmdQuery, hint="Press a command to run it.", commands=cmdShown, highlight=cmdFirst, emptyText=`No commands match “${cmdQuery}”.`, clearLabel="Clear search", loadingText="", failedText="", retryLabel="", agentKey=cmdAgentKey, agentNote=latestAbout(book, cmdLedgerKeys()), undoLabel="Undo", proposalText="", acceptLabel="", rejectLabel="", data=(cmdShown.length == 0 ? "empty" : cmdShown.length == 1 ? "one" : "many"), agent=(cmdAgentKey != "" ? "changed" : "none"), search=searchCommands, run=runCommandByPerson, clear=clearCommands, retry=ignore, undo=undoCommand, accept=ignore, reject=ignore, testId="commands")

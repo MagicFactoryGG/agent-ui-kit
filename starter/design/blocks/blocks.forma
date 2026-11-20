@@ -158,3 +158,11 @@ theme
   blocks.bar-chart-glyph: length = 32px
   blocks.bar-chart-bone: length = 10px  // a ghost label's height, the caption's x-height and air
   blocks.bar-chart-measure: length = 420px  // a state's sentence, held to a short line
+  blocks.command-menu-max: length = 640px  // a command menu's measure on a desktop: a label and its keys in one glance
+  blocks.command-menu-row: length = 44px  // a row's least height (the field's too): the press target the kit holds
+  blocks.command-menu-mark: length = 3px  // the agent's line at a band's start (LinkRow's mark)
+  blocks.command-menu-note-min: length = 200px  // the agent's sentence keeps this much before Undo wraps under it
+  blocks.command-menu-bone: length = 12px
+  blocks.command-menu-ghost: length = 136px
+  blocks.command-menu-ghost-wide: length = 208px
+  blocks.command-menu-ghost-keys: length = 48px

@@ -5,6 +5,7 @@ use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint, Link
 use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint from "__SCOPE__/blocks"
 use Question from "__SCOPE__/blocks"
 use BarPoint, BarRange from "__SCOPE__/blocks"
+use Command from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -150,6 +151,26 @@ fn chartPoints(key: string): BarPoint[] = key == "month" ? [
 fn chartText(key: string): string = [key].concat(chartPoints(key).map(p => `${p.label}\t${p.value}`)).join("\n")
 fn rangeAct(key: string): Act = Act(tool="setChartRange", door="agent", key="chart-range", title="Orders chart", value=key, did=`Your assistant switched the orders chart to ${chartRangeName(key)}.`, asks=`Your assistant suggests showing the orders chart in ${chartRangeName(key)}.`, will=`Your assistant will switch the orders chart to ${chartRangeName(key)} in 5 seconds.`)
 
+// CommandMenu: a workspace's command menu. Each command is a tool too (runCommand, by key); running one turns its
+// value on ("off" until then, under "cmd-<key>"). The person types to narrow the list and presses a row; the agent
+// calls runCommand with the same key; both reach the same value, and the agent's is marked on its row and said.
+fn cmdKeys(): string[] = ["focus", "mute", "pin"]
+fn cmdKey(key: string): string = `cmd-${key}`
+fn cmdLedgerKeys(): string[] = cmdKeys().map(k => cmdKey(k))
+fn cmdLabel(key: string): string = key == "focus" ? "Turn on focus mode" : key == "mute" ? "Pause notifications" : key == "pin" ? "Pin this project" : key
+fn cmdGroup(key: string): string = key == "pin" ? "Project" : "Workspace"
+fn cmdHint(key: string): string = key == "focus" ? "Hide everything but the task at hand." : key == "mute" ? "Until tomorrow morning." : key == "pin" ? "Keep it at the top of your projects." : ""
+fn cmdShortcut(key: string): string = key == "focus" ? "⌘ ⇧ F" : key == "mute" ? "⌘ ⇧ N" : key == "pin" ? "⌘ P" : ""
+fn cmdDid(key: string): string = key == "focus" ? "turned on focus mode" : key == "mute" ? "paused notifications" : key == "pin" ? "pinned this project" : key
+fn cmdAsks(key: string): string = key == "focus" ? "turning on focus mode" : key == "mute" ? "pausing notifications" : key == "pin" ? "pinning this project" : key
+fn cmdWill(key: string): string = key == "focus" ? "turn on focus mode" : key == "mute" ? "pause notifications" : key == "pin" ? "pin this project" : key
+// The commands whose label holds the person's query, in the menu's order.
+fn menuCommands(query: string): Command[] = cmdKeys().filter(k => cmdLabel(k).toLowerCase().includes(query.trim().toLowerCase())).map(k => Command(key=k, group=cmdGroup(k), label=cmdLabel(k), hint=cmdHint(k), shortcut=cmdShortcut(k)))
+fn cmdText(l: Ledger): string = cmdKeys().map(k => `${k}\t${cmdLabel(k)}\t${valueOf(l, cmdKey(k))}`).join("\n")
+// The command the agent's mark is on, by key ("" when none).
+fn cmdMarkedKey(l: Ledger): string = cmdKeys().filter(k => isMarked(l, cmdKey(k))).slice(0, 1).join("")
+fn runAct(key: string): Act = Act(tool="runCommand", door="agent", key=cmdKey(key), title=cmdLabel(key), value="on", did=`Your assistant ${cmdDid(key)}.`, asks=`Your assistant suggests ${cmdAsks(key)}.`, will=`Your assistant will ${cmdWill(key)} in 5 seconds.`)
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
@@ -164,7 +185,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="startTrial", title="Free trial", sentence="Starts the free trial, as the page's Start free trial does.", floor="recorded", reach="self", secret=false),
   AgentTool(name="addFooterLinks", title="Footer links", sentence="Adds the first column, Help with Contact us, to the footer that has no links.", floor="recorded", reach="self", secret=false),
   AgentTool(name="openQuestion", title="Help questions", sentence="Opens a question on the help page to show its answer, or closes it.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="setChartRange", title="Orders chart", sentence="Shows the orders chart by week or by month.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="setChartRange", title="Orders chart", sentence="Shows the orders chart by week or by month.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="runCommand", title="Commands", sentence="Runs a command from the command menu: focus mode, pausing notifications or pinning the project.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -180,5 +202,6 @@ fn startValues(): Value[] = [
   Value(key="trial", value="off"),
   Value(key="footer", value="empty"),
   Value(key="faq-returns", value="open"), Value(key="faq-delivery", value="closed"), Value(key="faq-change", value="closed"), Value(key="faq-payment", value="closed"),
-  Value(key="chart-range", value="week")
+  Value(key="chart-range", value="week"),
+  Value(key="cmd-focus", value="off"), Value(key="cmd-mute", value="off"), Value(key="cmd-pin", value="off")
 ]

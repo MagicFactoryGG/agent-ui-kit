@@ -8,3 +8,4 @@ theme
   components.chevron: length = 12px
   components.picture: length = 96px
   components.mark-line: length = 3px
+  components.key-min: length = 22px  // a key cap holds one glyph square: the caption line (18px) and a hairline each side

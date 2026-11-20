@@ -611,5 +611,43 @@
       "chartRange": "month",
       "chartMarked": false
     }
+  },
+  {
+    "name": "CommandMenu: a command run from the menu: typing “focus” and pressing its row, and runCommand, reach the same value; the agent's run is recorded, marked on its row and said with Undo",
+    "person": [
+      "type commands-search focus",
+      "tap commands-focus"
+    ],
+    "agent": [
+      "call runCommand {\"command\":\"focus\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.22.key": "cmd-focus",
+      "book.values.22.value": "on",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "cmd-focus",
+      "book.changes.0.was": "off",
+      "book.marked": [
+        "cmd-focus"
+      ],
+      "cmdAgentKey": "focus"
+    },
+    "expectPerson": {
+      "book.values.22.key": "cmd-focus",
+      "book.values.22.value": "on",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "cmdAgentKey": ""
+    }
   }
 ]

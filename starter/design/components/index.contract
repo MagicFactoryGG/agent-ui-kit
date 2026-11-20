@@ -9,6 +9,7 @@
 // The state matrix (tools/matrix.mjs) is generated from them; a component with none fails. A host's own hover,
 // press and focus still draw the same looks live (the :hover, :active and :focus-visible parts).
 use Swatch from "__SCOPE__/theme"
+use PressRow from "./press-row.contract"
 
 // Status as words takes the -text colours (they read on a surface); fills and outlines take the status colours.
 fn outcomeInk(o: string): string = o == "success" ? "theme.color.positive-text" : o == "error" ? "theme.color.critical-text" : o == "blocked" ? "theme.color.caution-text" : o == "cancelled" ? "theme.color.ink-muted" : "theme.color.ink"

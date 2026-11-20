@@ -1845,5 +1845,22 @@
   "BarRange:empty": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
   "BarRange:loading": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
   "BarRange:failed": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
-  "BarRange:long": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }]
+  "BarRange:long": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
+  "props:CommandMenu": {"title": "Command menu", "searchLabel": "Search commands", "placeholder": "Type a command or search", "query": "", "hint": "Press a command to run it, or use its keys.", "highlight": "new-task", "emptyText": "No commands match “invoices”. Try a shorter word.", "clearLabel": "Clear search", "loadingText": "Loading commands…", "failedText": "The commands did not load. Check your connection, then try again.", "retryLabel": "Try again", "agentKey": "focus", "agentNote": "Your assistant turned on focus mode.", "undoLabel": "Undo", "proposalText": "Your assistant suggests turning on focus mode until your 3 pm meeting.", "acceptLabel": "Run", "rejectLabel": "Not now", "query@empty": "invoices", "highlight@one": "focus", "highlight@long": "share", "agentKey@long": "share"},
+  "Command:many": [
+    {"key": "new-task", "group": "Suggestions", "label": "New task", "hint": "Add a task to this project", "shortcut": "⌘ N"},
+    {"key": "focus", "group": "Suggestions", "label": "Turn on focus mode", "hint": "Hide everything but the task at hand", "shortcut": "⌘ ⇧ F"},
+    {"key": "inbox", "group": "Go to", "label": "Inbox", "hint": "", "shortcut": "G I"},
+    {"key": "calendar", "group": "Go to", "label": "Calendar", "hint": "", "shortcut": "G C"},
+    {"key": "settings", "group": "Go to", "label": "Settings", "hint": "", "shortcut": "⌘ ,"},
+    {"key": "theme", "group": "Preferences", "label": "Switch to dark appearance", "hint": "", "shortcut": ""}
+  ],
+  "Command:one": [
+    {"key": "focus", "group": "Suggestions", "label": "Turn on focus mode", "hint": "Hide everything but the task at hand", "shortcut": "⌘ ⇧ F"}
+  ],
+  "Command:long": [
+    {"key": "share", "group": "Sharing and permissions for everyone in this workspace", "label": "Share the spring launch plan with the whole retail and wholesale team, including guests", "hint": "Everyone with the link can comment; guests from partner companies can only read", "shortcut": "⌘ ⌥ ⇧ S"},
+    {"key": "export", "group": "Sharing and permissions for everyone in this workspace", "label": "Export every task, comment and attachment as one archive", "hint": "", "shortcut": "⌘ E"},
+    {"key": "archive", "group": "Housekeeping", "label": "Archive finished tasks older than ninety days", "hint": "They stay searchable", "shortcut": ""}
+  ]
 }
