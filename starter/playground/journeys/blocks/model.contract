@@ -28,14 +28,18 @@ fn incidentEvents(): Event[] = [
   Event(key="opened", who="Rui Costa", what="Opened the incident", when="09:12")
 ]
 fn statusAct(status: string): Act = Act(tool="setIncidentStatus", door="agent", key="incident", title="Incident status", value=status, did=`Your assistant marked the incident ${status}.`, asks=`Your assistant suggests marking the incident ${status}.`, will=`Your assistant will mark the incident ${status} in 5 seconds.`)
+// StatePanel: the files area, whose last load failed; its one act starts the load again (its value: loading).
+fn loadAct(tool: string): Act = Act(tool=tool, door="agent", key="files", title="Your files", value="loading", did="Your assistant is loading your files again.", asks="Your assistant suggests loading your files again.", will="Your assistant will load your files again in 5 seconds.")
 
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="setIncidentStatus", title="Incident status", sentence="Marks the incident open or resolved.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="setIncidentStatus", title="Incident status", sentence="Marks the incident open or resolved.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="loadFiles", title="Your files", sentence="Loads the files area again.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="digest", value="on"), Value(key="failures", value="on"), Value(key="marketing", value="off"),
-  Value(key="incident", value="open")
+  Value(key="incident", value="open"),
+  Value(key="files", value="failed")
 ]
