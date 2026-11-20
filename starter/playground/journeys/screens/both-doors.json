@@ -441,7 +441,7 @@
         "dash-period"
       ],
       "book.changes.0.key": "dash-period",
-      "book.changes.0.was": "half"
+      "book.changes.0.was": "quarter"
     },
     "expectPerson": {
       "dashPeriod": "month",
@@ -475,7 +475,7 @@
       ]
     ],
     "expect": {
-      "dashPeriod": "half",
+      "dashPeriod": "quarter",
       "book.changes.length": 0,
       "book.marked": []
     }

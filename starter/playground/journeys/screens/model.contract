@@ -143,20 +143,20 @@ fn settingAct(key: string, on: bool): Act = Act(tool="setSetting", door="agent",
 fn dashPeriods(): DashboardPeriod[] = [
   DashboardPeriod(key="week", label="Week"),
   DashboardPeriod(key="month", label="Month"),
-  DashboardPeriod(key="half", label="6 months"),
+  DashboardPeriod(key="quarter", label="Quarter"),
   DashboardPeriod(key="year", label="Year")
 ]
 fn dashPeriodKeys(): string[] = dashPeriods().map(p => p.key)
-fn dashPeriodWord(key: string): string = key == "week" ? "this week" : key == "month" ? "this month" : key == "half" ? "the last six months" : "the year"
-fn dashAgainst(key: string): string = key == "week" ? "on last week" : key == "month" ? "on last month" : key == "half" ? "on the six before" : "on last year"
+fn dashPeriodWord(key: string): string = key == "week" ? "this week" : key == "month" ? "this month" : key == "quarter" ? "this quarter" : "the year"
+fn dashAgainst(key: string): string = key == "week" ? "on last week" : key == "month" ? "on last month" : key == "quarter" ? "on last quarter" : "on last year"
 fn dashStats(key: string): Stat[] = [
-  Stat(key="revenue", label="Revenue", value=(key == "week" ? "$2,140" : key == "month" ? "$9,310" : key == "half" ? "$48,210" : "$91,870"), change=`+12.4% ${dashAgainst(key)}`, trend="up"),
-  Stat(key="orders", label="Orders", value=(key == "week" ? "41" : key == "month" ? "176" : key == "half" ? "9,760" : "18,204"), change=`+4.1% ${dashAgainst(key)}`, trend="up"),
+  Stat(key="revenue", label="Revenue", value=(key == "week" ? "$2,140" : key == "month" ? "$9,310" : key == "quarter" ? "$26,480" : "$91,870"), change=`+12.4% ${dashAgainst(key)}`, trend="up"),
+  Stat(key="orders", label="Orders", value=(key == "week" ? "41" : key == "month" ? "176" : key == "quarter" ? "4,812" : "18,204"), change=`+4.1% ${dashAgainst(key)}`, trend="up"),
   Stat(key="aov", label="Average order value", value="$63.20", change=`-2.1% ${dashAgainst(key)}`, trend="down"),
   Stat(key="on-time", label="Fulfilled on time", value="96.4%", change="0.0%", trend="flat")
 ]
-fn dashPoints(key: string): BarPoint[] = key == "week" ? [BarPoint(key="mon", label="Mon", value="5", share=0.5), BarPoint(key="tue", label="Tue", value="7", share=0.7), BarPoint(key="wed", label="Wed", value="6", share=0.6), BarPoint(key="thu", label="Thu", value="10", share=1), BarPoint(key="fri", label="Fri", value="8", share=0.8), BarPoint(key="sat", label="Sat", value="3", share=0.3), BarPoint(key="sun", label="Sun", value="2", share=0.2)] : key == "month" ? [BarPoint(key="w1", label="Week 1", value="38", share=0.79), BarPoint(key="w2", label="Week 2", value="44", share=0.92), BarPoint(key="w3", label="Week 3", value="48", share=1), BarPoint(key="w4", label="Week 4", value="46", share=0.96)] : key == "half" ? [BarPoint(key="jan", label="Jan", value="1,180", share=0.52), BarPoint(key="feb", label="Feb", value="1,420", share=0.63), BarPoint(key="mar", label="Mar", value="2,260", share=1), BarPoint(key="apr", label="Apr", value="1,940", share=0.86), BarPoint(key="may", label="May", value="1,610", share=0.71), BarPoint(key="jun", label="Jun", value="1,350", share=0.6)] : [BarPoint(key="q1", label="Q1", value="4,860", share=1), BarPoint(key="q2", label="Q2", value="4,900", share=1), BarPoint(key="q3", label="Q3", value="4,310", share=0.88), BarPoint(key="q4", label="Q4", value="4,134", share=0.84)]
-fn dashNote(key: string): string = key == "week" ? "Orders placed each day of this week" : key == "month" ? "Orders placed each week of this month" : key == "half" ? "Orders placed each month, January to June" : "Orders placed each quarter of the year"
+fn dashPoints(key: string): BarPoint[] = key == "week" ? [BarPoint(key="mon", label="Mon", value="5", share=0.5), BarPoint(key="tue", label="Tue", value="7", share=0.7), BarPoint(key="wed", label="Wed", value="6", share=0.6), BarPoint(key="thu", label="Thu", value="10", share=1), BarPoint(key="fri", label="Fri", value="8", share=0.8), BarPoint(key="sat", label="Sat", value="3", share=0.3), BarPoint(key="sun", label="Sun", value="2", share=0.2)] : key == "month" ? [BarPoint(key="w1", label="Week 1", value="38", share=0.79), BarPoint(key="w2", label="Week 2", value="44", share=0.92), BarPoint(key="w3", label="Week 3", value="48", share=1), BarPoint(key="w4", label="Week 4", value="46", share=0.96)] : key == "quarter" ? [BarPoint(key="apr", label="Apr", value="1,940", share=1), BarPoint(key="may", label="May", value="1,610", share=0.83), BarPoint(key="jun", label="Jun", value="1,350", share=0.7)] : [BarPoint(key="q1", label="Q1", value="4,860", share=1), BarPoint(key="q2", label="Q2", value="4,900", share=1), BarPoint(key="q3", label="Q3", value="4,310", share=0.88), BarPoint(key="q4", label="Q4", value="4,134", share=0.84)]
+fn dashNote(key: string): string = key == "week" ? "Orders placed each day of this week" : key == "month" ? "Orders placed each week of this month" : key == "quarter" ? "Orders placed each month of this quarter" : "Orders placed each quarter of the year"
 fn dashItems(): DashboardItem[] = [
   DashboardItem(key="o1048", title="Order 1048 · Priya Nair", detail="2 items · 4 minutes ago", trailing="$84.00", tone="none"),
   DashboardItem(key="o1047", title="Order 1047 · Jonas Weber", detail="1 item · 22 minutes ago", trailing="Paid", tone="success"),
@@ -178,4 +178,4 @@ fn agentTools(): AgentTool[] = [
 fn startValues(): Value[] = [
   Value(key="picture", value="harbour"),
   Value(key="project", value="harbour")
-].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on")))).concat([Value(key="dash-period", value="half")])
+].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on")))).concat([Value(key="dash-period", value="quarter")])

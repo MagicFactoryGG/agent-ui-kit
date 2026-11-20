@@ -42,7 +42,7 @@
       "key": "revenue",
       "label": "Revenue after refunds, taxes and the payment provider’s fees",
       "value": "$1,284,309.75",
-      "change": "+112.4% on the same six months of last year",
+      "change": "+112.4% on the same months of last year",
       "trend": "up"
     },
     {
@@ -2034,24 +2034,24 @@
     "title": "Overview",
     "periodLabel": "Period",
     "chartTitle": "Orders",
-    "chartNote": "Orders placed each month, January to June",
+    "chartNote": "Orders placed each month this year, January to June",
     "chartLabel": "Orders per month",
     "recentTitle": "Recent orders",
     "recentEmptyText": "No orders yet. The newest show here as they come in.",
     "allLabel": "View all",
     "loadingText": "Loading your shop’s numbers…",
     "chartLoadingText": "Loading orders…",
-    "emptyText": "No orders in these six months yet. Share your shop to bring in the first ones.",
+    "emptyText": "No orders this year yet. Share your shop to bring in the first ones.",
     "emptyLabel": "Share your shop",
     "failedText": "Your numbers did not load. Check your connection, then try again.",
     "retryLabel": "Try again",
-    "proposedNote": "Your assistant suggests showing the whole year, to compare with last year’s spring sale.",
+    "proposedNote": "Your assistant suggests showing the year, to compare the months since the spring sale.",
     "acceptLabel": "Accept",
     "rejectLabel": "Not now",
-    "changedNote": "Your assistant switched the period to six months.",
+    "changedNote": "Your assistant switched the period to this year, to compare the months since the spring sale.",
     "undoLabel": "Undo",
-    "periodKey": "half",
-    "periodKey@long": "half",
+    "periodKey": "year",
+    "periodKey@long": "year",
     "allLabel@long": "View all",
     "retryLabel@long": "Try again",
     "acceptLabel@long": "Accept",
@@ -2069,8 +2069,8 @@
       "label": "Month"
     },
     {
-      "key": "half",
-      "label": "6 months"
+      "key": "quarter",
+      "label": "Quarter"
     },
     {
       "key": "year",
@@ -2087,8 +2087,8 @@
       "label": "Month"
     },
     {
-      "key": "half",
-      "label": "6 months"
+      "key": "quarter",
+      "label": "Quarter"
     },
     {
       "key": "year",
@@ -2105,8 +2105,8 @@
       "label": "Month"
     },
     {
-      "key": "half",
-      "label": "6 months"
+      "key": "quarter",
+      "label": "Quarter"
     },
     {
       "key": "year",
@@ -2123,8 +2123,8 @@
       "label": "Month"
     },
     {
-      "key": "half",
-      "label": "6 months"
+      "key": "quarter",
+      "label": "Quarter"
     },
     {
       "key": "year",
@@ -2141,8 +2141,8 @@
       "label": "Month"
     },
     {
-      "key": "half",
-      "label": "6 months"
+      "key": "quarter",
+      "label": "Quarter"
     },
     {
       "key": "year",
@@ -2177,13 +2177,6 @@
       "detail": "1 item · 2 hours ago",
       "trailing": "Payment failed",
       "tone": "error"
-    },
-    {
-      "key": "o1044",
-      "title": "Order 1044 · Ada Lovelace",
-      "detail": "5 items · 3 hours ago",
-      "trailing": "$212.50",
-      "tone": "none"
     }
   ],
   "DashboardItem:long": [
