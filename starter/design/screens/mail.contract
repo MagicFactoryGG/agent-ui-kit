@@ -5,10 +5,10 @@
 //   so it sits at the top of the folders, as the rail's own control), the folders with their counts, the account.
 //   Beside it, on the page, the kit's MessageList: the folder's name and unread count, the messages, and its own
 //   reading pane, which holds the open message (who and when, the subject, the body). Over the list, a toolbar
-//   with the open message's actions (Reply, Reply all, Forward, and Flag, which an agent may set too). MessageList draws its reading pane itself on any window wider
-//   than a phone, so the screen uses that pane as its third and does not draw a second copy of the message beside
-//   it: the open message's body is passed in as its row's preview (`snippet`), so the pane reads it whole while
-//   the row still shows its first line, as a mail list does.
+//   with the open message's actions (Reply, Reply all, Forward, and Flag, which an agent may set too). MessageList
+//   draws its reading pane itself on any window wider than a phone, so the screen uses that pane as its third and
+//   does not draw a second copy of the message beside it: the open message's body is passed in as its row's
+//   preview (`snippet`), so the pane reads it whole while the row still shows its first line, as a mail list does.
 // - A phone shows one pane at a time, the one `which` names: the folders (SideNav, full width), the list
 //   (MessageList, which draws the list alone on a phone) or the open message (drawn here: the subject, the sender
 //   with their address, the recipients, the body and the reply actions), each under the kit's TopBar (the
@@ -136,10 +136,32 @@ component MailAgent
       MailBand(tone="waiting", sentence=waitingNote, testId="mail-waiting")
         ActionButton(label=waitingLabel, kind="plain", interaction="idle", outcome="none", press=review, testId="mail-review")
 
-// The actions on the open message: Reply, Reply all, Forward, then Flag (a value an agent may set too, so the
-// button says it is pressed while the message is flagged, and its words, `flagLabel`, are the app's for that
-// state). `focal` fills Reply when it is the pane's one thing to do (a phone's open message); on a desktop's
-// toolbar every one stays plain beside Compose.
+// Flag: the open message's flag, as a toggle that says it is pressed. Flagged, its flag fills in the caution colour
+// (a glyph, never words, takes the status colour) and its outline follows. `compact` draws the flag alone, named by
+// `label`, where a phone's card has no room for a fourth word beside the replies.
+component MailFlag
+  props
+    label: string
+    flagged: bool
+    compact: bool
+    press: action
+  view
+    button press=press testId="mail-flag" aria-pressed=flagged aria-label=label display="flex" flex-direction="row" align-items="center" justify-content="center" gap="theme.space.sm" flex-shrink=0 min-width="screens.mail-tap" min-height="screens.mail-tap" box-sizing="border-box" padding-left=(compact ? "0" : "theme.space.lg") padding-right=(compact ? "0" : "theme.space.lg") border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color=(flagged ? "theme.color.caution" : "theme.color.line") background-color="theme.color.surface" color="theme.color.ink"
+      :hover
+        background-color="theme.color.hover"
+      :active
+        background-color="theme.color.fill"
+      :focus-visible
+        box-shadow="0 0 0 2px theme.color.focus"
+      svg viewBox="0 0 16 16" width="screens.mail-glyph" height="screens.mail-glyph" fill="none" aria-hidden=true flex-shrink=0
+        path d="M4.5 2.5v11" stroke=(flagged ? "theme.color.caution" : "theme.color.ink-muted") stroke-width=1.75 stroke-linecap="round"
+        path d="M5.5 3.5H13l-2.8 3 2.8 3H5.5z" fill=(flagged ? "theme.color.caution" : "none") stroke=(flagged ? "theme.color.caution" : "theme.color.ink-muted") stroke-width=1.25 stroke-linejoin="round"
+      if not compact
+        text label font="theme.type.label" color="theme.color.ink"
+
+// The actions on the open message: Reply, Reply all, Forward, then (`showFlag`, a desktop's toolbar) Flag. `focal`
+// fills Reply when it is the pane's one thing to do (a phone's open message); on a desktop's toolbar every one stays
+// plain beside Compose.
 component MailReplies
   props
     replyLabel: string
@@ -147,6 +169,7 @@ component MailReplies
     forwardLabel: string
     flagLabel: string
     flagged: bool
+    showFlag: bool
     focal: bool
     reply: action
     replyAll: action
@@ -157,22 +180,13 @@ component MailReplies
       ActionButton(label=replyLabel, kind=(focal ? "primary" : "plain"), interaction="idle", outcome="none", press=reply, testId="mail-reply")
       ActionButton(label=replyAllLabel, kind="plain", interaction="idle", outcome="none", press=replyAll, testId="mail-reply-all")
       ActionButton(label=forwardLabel, kind="plain", interaction="idle", outcome="none", press=forward, testId="mail-forward")
-      button press=flag testId="mail-flag" aria-pressed=flagged display="flex" flex-direction="row" align-items="center" gap="theme.space.sm" min-height="screens.mail-tap" padding-left="theme.space.lg" padding-right="theme.space.lg" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color=(flagged ? "theme.color.caution" : "theme.color.line") background-color="theme.color.surface" color="theme.color.ink"
-        :hover
-          background-color="theme.color.hover"
-        :active
-          background-color="theme.color.fill"
-        :focus-visible
-          box-shadow="0 0 0 2px theme.color.focus"
-        svg viewBox="0 0 16 16" width="screens.mail-glyph" height="screens.mail-glyph" fill="none" aria-hidden=true flex-shrink=0
-          path d="M4.5 2.5v11" stroke=(flagged ? "theme.color.caution" : "theme.color.ink-muted") stroke-width=1.75 stroke-linecap="round"
-          path d="M5.5 3.5H13l-2.8 3 2.8 3H5.5z" fill=(flagged ? "theme.color.caution" : "none") stroke=(flagged ? "theme.color.caution" : "theme.color.ink-muted") stroke-width=1.25 stroke-linejoin="round"
-        text flagLabel font="theme.type.label" color="theme.color.ink"
+      if showFlag
+        MailFlag(label=flagLabel, flagged=flagged, compact=false, press=flag)
 
 // The open message on a phone: one card, as MessageList's own, in three bands. The subject first, at title size
-// (the pane's focal words), with the sender under it (a round initial, the name and when on one line, the
-// address, then the recipients after `toLabel`); the body next, wrapping and keeping the app's own line breaks;
-// last the reply actions, on their own band, attached to the words they answer.
+// (the pane's focal words), Flag beside it as a compact toggle, with the sender under it (a round initial, the name
+// and when on one line, the address, then the recipients after `toLabel`); the body next, wrapping and keeping the
+// app's own line breaks; last the reply actions, on their own band, attached to the words they answer.
 component MailLetterCard
   props
     letter: MailLetter
@@ -189,8 +203,10 @@ component MailLetterCard
   view
     column testId="mail-letter" role="article" aria-label=letter.subject min-width=0 background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
       column gap="theme.space.lg" padding="theme.space.lg" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
-        column overflow-wrap="anywhere"
-          Words(text=letter.subject, kind="title", outcome="none", level=2, testId="mail-letter-subject")
+        row gap="theme.space.md" align-items="flex-start"
+          column flex=1 min-width=0 overflow-wrap="anywhere"
+            Words(text=letter.subject, kind="title", outcome="none", level=2, testId="mail-letter-subject")
+          MailFlag(label=flagLabel, flagged=flagged, compact=true, press=flag)
         row gap="theme.space.md" align-items="flex-start"
           column width="screens.mail-avatar" height="screens.mail-avatar" flex-shrink=0 align-items="center" justify-content="center" border-radius="theme.radius.pill" background-color="theme.color.fill" aria-hidden=true
             text letter.from.trim().slice(0, 1) font="theme.type.label" color="theme.color.ink"
@@ -207,7 +223,7 @@ component MailLetterCard
       column padding="theme.space.lg"
         text letter.body testId="mail-letter-body" font="theme.type.body" color="theme.color.ink" white-space="pre-line" overflow-wrap="anywhere"
       row padding="theme.space.lg" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
-        MailReplies(replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, flagLabel=flagLabel, flagged=flagged, focal=true, reply=reply, replyAll=replyAll, forward=forward, flag=flag)
+        MailReplies(replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, flagLabel=flagLabel, flagged=flagged, showFlag=false, focal=true, reply=reply, replyAll=replyAll, forward=forward, flag=flag)
 
 component MailScreen
   props
@@ -234,7 +250,6 @@ component MailScreen
     replyAllLabel: string
     forwardLabel: string
     flagLabel: string
-    unflagLabel: string
     agentNote: string
     proposedNote: string
     acceptLabel: string
@@ -290,7 +305,7 @@ component MailScreen
               MailAgent(agent=agent, proposedNote=proposedNote, changedNote=changedNote, waitingNote=waitingNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, waitingLabel=waitingLabel, accept=accept, reject=reject, undo=undo, review=review)
             if open
               row role="group" aria-label=toolbarLabel testId="mail-toolbar" justify-content="flex-end"
-                MailReplies(replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, flagLabel=(openFlagged ? unflagLabel : flagLabel), flagged=openFlagged, focal=false, reply=reply, replyAll=replyAll, forward=forward, flag=flag)
+                MailReplies(replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, flagLabel=flagLabel, flagged=openFlagged, showFlag=true, focal=false, reply=reply, replyAll=replyAll, forward=forward, flag=flag)
             MessageList(title=folderTitle, unreadLabel=unreadLabel, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, orderLabel=orderLabel, paneLabel=paneLabel, paneEmptyText=paneEmptyText, paneQuietText=paneQuietText, openLabel="", agentNote=agentNote, chosenKey=(open ? letter.key : ""), agentKey=agentKey, data=data, agent=(agent == "changed" ? "changed" : "none"), messages=listed, compose=compose, retry=retry, openMessage=reply, testId="mail-list")
     else
       column testId="mail" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
@@ -308,6 +323,6 @@ component MailScreen
               column padding-top="theme.space.sm"
                 SideNav(productName=foldersTitle, productMark="", navLabel=navLabel, entries=entries, data="many", emptyText="", emptyLabel="", empty=compose, loadingText="", failedText="", retryLabel="", retry=retry, accountName=accountName, accountDetail=accountDetail, agent="none", agentKey="", agentNote="", testId="mail-folders")
             else if pane == "message"
-              MailLetterCard(letter=letter, toLabel=toLabel, replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, flagLabel=(openFlagged ? unflagLabel : flagLabel), flagged=openFlagged, reply=reply, replyAll=replyAll, forward=forward, flag=flag)
+              MailLetterCard(letter=letter, toLabel=toLabel, replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, flagLabel=flagLabel, flagged=openFlagged, reply=reply, replyAll=replyAll, forward=forward, flag=flag)
             else
               MessageList(title=folderTitle, unreadLabel=unreadLabel, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, orderLabel=orderLabel, paneLabel=paneLabel, paneEmptyText=paneEmptyText, paneQuietText=paneQuietText, openLabel="", agentNote=agentNote, chosenKey="", agentKey=agentKey, data=data, agent=(agent == "changed" ? "changed" : "none"), messages=listed, compose=compose, retry=retry, openMessage=reply, testId="mail-list")
