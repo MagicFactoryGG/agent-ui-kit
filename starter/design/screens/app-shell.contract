@@ -80,6 +80,20 @@ component ShellMenuGlyph
       else
         path d="M3.5 6h13M3.5 10h13M3.5 14h13" stroke-width=1.75 stroke-linecap="round"
 
+// The kit's SideNav, as the shell shows it in the rail and in the sheet alike: its places are ready (the shell's
+// data axis is the page's), so its own states' words and actions are not the shell's to give.
+component ShellNav
+  props
+    productName: string
+    productMark: string
+    navLabel: string
+    entries: NavEntry[]
+    accountName: string
+    accountDetail: string
+    retry: action
+  view
+    SideNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, data="many", emptyText="", emptyLabel="", empty=retry, loadingText="", failedText="", retryLabel="", retry=retry, accountName=accountName, accountDetail=accountDetail, agent="none", agentKey="", agentNote="", testId="app-shell-nav")
+
 component AppShell
   props
     title: string
@@ -132,7 +146,7 @@ component AppShell
     row testId="app-shell" position="absolute" inset=0 display="flex" align-items="stretch" background-color="theme.color.page" color="theme.color.ink"
       if wide
         scroll id="app-shell-rail" width="screens.shell-rail" flex-shrink=0 min-height=0 background-color="theme.color.surface"
-          SideNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, data="many", emptyText="", emptyLabel="", empty=retry, loadingText="", failedText="", retryLabel="", retry=retry, accountName=accountName, accountDetail=accountDetail, agent="none", agentKey="", agentNote="", testId="app-shell-nav")
+          ShellNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, accountName=accountName, accountDetail=accountDetail, retry=retry)
       column flex=1 min-width=0 position="relative" display="flex" flex-direction="column"
         row role="banner" align-items="center" gap="theme.space.md" min-height="screens.shell-bar-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" background-color="theme.color.page"
           if not wide
@@ -185,4 +199,4 @@ component AppShell
         if sheet
           button press=closeMenu testId="app-shell-scrim" aria-label=closeLabel position="absolute" left=0 right=0 bottom=0 top="screens.shell-bar-min" border-width=0 background-color="color-mix(in srgb, theme.color.page 72%, transparent)"
           scroll id="app-shell-sheet" position="absolute" left=0 bottom=0 top="screens.shell-bar-min" width="screens.shell-sheet" max-width="calc(100% - theme.space.xxl)" background-color="theme.color.surface"
-            SideNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, data="many", emptyText="", emptyLabel="", empty=retry, loadingText="", failedText="", retryLabel="", retry=retry, accountName=accountName, accountDetail=accountDetail, agent="none", agentKey="", agentNote="", testId="app-shell-nav")
+            ShellNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, accountName=accountName, accountDetail=accountDetail, retry=retry)
