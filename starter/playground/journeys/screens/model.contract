@@ -1,8 +1,8 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Media, ListDetailItem from "__SCOPE__/screens"
-use Fact from "__SCOPE__/blocks"
+use Media, ListDetailItem, MailFolder, MailLetter from "__SCOPE__/screens"
+use Fact, Message from "__SCOPE__/blocks"
 
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
 // The newest change on any of the keys, said in one sentence; "" when there is none.
@@ -23,6 +23,27 @@ fn stepAt(key: string, by: number): number = max(0, min(albumKeys().length - 1, 
 fn stepKey(key: string, by: number): string = albumKeys().slice(stepAt(key, by), stepAt(key, by) + 1).join("")
 fn pictureAct(key: string): Act = Act(tool="showPicture", door="agent", key="picture", title="Picture", value=key, did=`Your assistant showed ${captionOf(key)}.`, asks=`Your assistant suggests showing ${captionOf(key)}.`, will=`Your assistant will show ${captionOf(key)} in 5 seconds.`)
 
+// MailScreen: a small inbox. Each message's flag is a value in the ledger (`flag-<key>`, on or off); the open
+// message is m2 (which message is open is the person's view, not a value).
+fn mailBase(): Message[] = [
+  Message(key="m1", from="Priya Nair", subject="Design review notes", snippet="Three small changes before we cut the release.", when="09:41", unread=true, flagged=false, href="/"),
+  Message(key="m2", from="Jonas Weber", subject="Q3 report is ready to file", snippet="The numbers are reconciled and wait on your sign-off.", when="08:15", unread=false, flagged=false, href="/"),
+  Message(key="m3", from="Maya Okafor", subject="Lunch on Thursday?", snippet="A new place two streets down, with a table for eight.", when="Wed 14:05", unread=true, flagged=false, href="/"),
+  Message(key="m4", from="Sam Delacroix", subject="Fwd: the venue contract", snippet="Flagging this one before the deposit is due.", when="Mon 16:20", unread=false, flagged=false, href="/")
+]
+fn mailKeys(): string[] = mailBase().map(m => m.key)
+fn flagKey(key: string): string = `flag-${key}`
+fn flagKeys(): string[] = mailKeys().map(k => flagKey(k))
+fn mailSubject(key: string): string = mailBase().filter(m => m.key == key).map(m => m.subject).join("")
+fn mailFolders(): MailFolder[] = [
+  MailFolder(key="inbox", label="Inbox", href="/", group="", count=2),
+  MailFolder(key="flagged", label="Flagged", href="/", group="", count=0),
+  MailFolder(key="sent", label="Sent", href="/", group="", count=0),
+  MailFolder(key="receipts", label="Receipts", href="/", group="Folders", count=0)
+]
+fn mailLetter(): MailLetter = MailLetter(key="m2", from="Jonas Weber", address="jonas.weber@studio.example", to="Ada Lovelace", when="Today, 08:15", subject="Q3 report is ready to file", body="Hi Ada,\nThe numbers are reconciled and the summary page waits on your sign-off before Friday.\nJonas")
+fn flagAct(key: string, on: bool): Act = Act(tool="flagMessage", door="agent", key=flagKey(key), title="Flag", value=(on ? "on" : "off"), did=`Your assistant ${on ? "flagged" : "unflagged"} ${mailSubject(key)}.`, asks=`Your assistant suggests ${on ? "flagging" : "unflagging"} ${mailSubject(key)}.`, will=`Your assistant will ${on ? "flag" : "unflag"} ${mailSubject(key)} in 5 seconds.`)
+
 // ListDetail: three projects; the one open is a value in the ledger, by key. Each project's facts are data only.
 fn projects(): ListDetailItem[] = [
   ListDetailItem(key="atlas", title="Atlas rebrand", detail="Identity, signage and the new site", status="In review", href=""),
@@ -37,10 +58,11 @@ fn projectAct(key: string): Act = Act(tool="openProject", door="agent", key="pro
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="openProject", title="Project", sentence="Opens a project beside the list.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="openProject", title="Project", sentence="Opens a project beside the list.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="flagMessage", title="Flags", sentence="Flags or unflags a message.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="picture", value="harbour"),
   Value(key="project", value="harbour")
-]
+].concat(flagKeys().map(k => Value(key=k, value="off")))

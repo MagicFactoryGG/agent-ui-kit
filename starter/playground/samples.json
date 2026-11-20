@@ -1112,5 +1112,300 @@
       "answer": "We ship to most countries. Duties are shown at checkout and paid up front, so nothing is due at the door.",
       "open": false
     }
+  ],
+  "props:MailScreen": {
+    "title": "Mail",
+    "mark": "M",
+    "navLabel": "Mailboxes",
+    "foldersTitle": "Mailboxes",
+    "folderTitle": "Inbox",
+    "accountName": "Ada Lovelace",
+    "accountDetail": "ada@studio.example",
+    "composeLabel": "Compose",
+    "backLabel": "Back to",
+    "unreadLabel": "unread",
+    "orderLabel": "Newest first",
+    "paneLabel": "Open message",
+    "paneEmptyText": "Choose a message to read it here.",
+    "paneQuietText": "When a message arrives, it opens here.",
+    "emptyText": "No messages in your inbox.",
+    "failedText": "Your messages did not load.",
+    "retryLabel": "Try again",
+    "toolbarLabel": "Reply actions",
+    "toLabel": "To",
+    "replyLabel": "Reply",
+    "replyAllLabel": "Reply all",
+    "forwardLabel": "Forward",
+    "flagLabel": "Flag",
+    "flagLabel@long": "Flag",
+    "agentNote": "Flagged by your assistant",
+    "proposedNote": "Your assistant suggests filing the ACME invoice in Receipts.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "changedNote": "Your assistant flagged the venue contract so the deposit is not missed.",
+    "undoLabel": "Undo",
+    "waitingLabel": "Read the draft",
+    "waitingLabel@long": "Read the draft",
+    "waitingNote": "Your assistant drafted a reply to Jonas and waits for you to read it before it is sent.",
+    "folderKey": "inbox",
+    "agentKey": "message-5",
+    "agentKey@long": "message-2",
+    "title@long": "Mail",
+    "mark@long": "M",
+    "composeLabel@long": "Compose",
+    "backLabel@long": "Back to",
+    "toLabel@long": "To",
+    "replyLabel@long": "Reply",
+    "replyAllLabel@long": "Reply all",
+    "forwardLabel@long": "Forward",
+    "acceptLabel@long": "Accept",
+    "rejectLabel@long": "Not now",
+    "undoLabel@long": "Undo",
+    "retryLabel@long": "Try again",
+    "unreadLabel@long": "unread",
+    "orderLabel@long": "Newest first",
+    "paneLabel@long": "Open message"
+  },
+  "MailFolder:many": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 2
+    },
+    {
+      "key": "flagged",
+      "label": "Flagged",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "drafts",
+      "label": "Drafts",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "archive",
+      "label": "Archive",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "receipts",
+      "label": "Receipts",
+      "href": "/",
+      "group": "Folders",
+      "count": 4
+    },
+    {
+      "key": "travel",
+      "label": "Travel",
+      "href": "/",
+      "group": "Folders",
+      "count": 0
+    }
+  ],
+  "MailFolder:empty": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "flagged",
+      "label": "Flagged",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "drafts",
+      "label": "Drafts",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "archive",
+      "label": "Archive",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "receipts",
+      "label": "Receipts",
+      "href": "/",
+      "group": "Folders",
+      "count": 4
+    },
+    {
+      "key": "travel",
+      "label": "Travel",
+      "href": "/",
+      "group": "Folders",
+      "count": 0
+    }
+  ],
+  "MailFolder:loading": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 2
+    },
+    {
+      "key": "flagged",
+      "label": "Flagged",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "drafts",
+      "label": "Drafts",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "archive",
+      "label": "Archive",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "receipts",
+      "label": "Receipts",
+      "href": "/",
+      "group": "Folders",
+      "count": 4
+    },
+    {
+      "key": "travel",
+      "label": "Travel",
+      "href": "/",
+      "group": "Folders",
+      "count": 0
+    }
+  ],
+  "MailFolder:failed": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 2
+    },
+    {
+      "key": "flagged",
+      "label": "Flagged",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "drafts",
+      "label": "Drafts",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "archive",
+      "label": "Archive",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "receipts",
+      "label": "Receipts",
+      "href": "/",
+      "group": "Folders",
+      "count": 4
+    },
+    {
+      "key": "travel",
+      "label": "Travel",
+      "href": "/",
+      "group": "Folders",
+      "count": 0
+    }
+  ],
+  "MailFolder:long": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "studio",
+      "label": "Studio renovation: contractors, permits and every quote we asked for this year",
+      "href": "/",
+      "group": "Folders shared with the whole studio team",
+      "count": 128
+    }
+  ],
+  "MailLetter:many": [
+    {
+      "key": "message-2",
+      "from": "Jonas Weber",
+      "address": "jonas.weber@studio.example",
+      "to": "Ada Lovelace, Priya Nair",
+      "when": "Today, 08:15",
+      "subject": "Q3 report is ready to file",
+      "body": "Hi Ada,\nThe numbers are reconciled and the summary page waits on your sign-off before Friday. Priya checked the travel lines twice; the only open item is the studio's rent, which moved to October.\nIf you are happy with it, reply and I will file it the same day.\nJonas"
+    }
+  ],
+  "MailLetter:long": [
+    {
+      "key": "message-1",
+      "from": "Constance Beauregard-Villeneuve at the regional licensing office",
+      "address": "constance.beauregard-villeneuve@licensing-office.regional-authority.example",
+      "to": "Ada Lovelace, Priya Nair, Jonas Weber, Maya Okafor, Sam Delacroix and the studio's shared inbox for licences",
+      "when": "Wed 14:05",
+      "subject": "A subject line that keeps going because the sender put the whole question in it and expected nobody to mind",
+      "body": "The body of a long message wraps in the pane and keeps its own paragraphs, however long a line runs, and a word without a break such as https://licensing-office.regional-authority.example/applications/2026/studio-renovation/attachments breaks where it must rather than push the page sideways.\nA second paragraph follows, so the reader sees that the letter keeps the sender's own line breaks."
+    }
   ]
 }
