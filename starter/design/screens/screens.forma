@@ -36,6 +36,7 @@ theme
   screens.settings-measure: length = 560px  // the lead under the heading: near 70 characters of body type a line
   screens.settings-place-min: length = 40px
   screens.settings-dot: length = 6px
+  screens.settings-spin: length = 14px
   screens.settings-aside: length = 200px  // SettingsGroup's own title column's least width, so a ghost wraps where a group does
   screens.settings-card-min: length = 320px  // SettingsGroup's own card's least width
   screens.settings-aside-top: length = 10px  // SettingsGroup's own title inset, so a ghost title stands where the title will
