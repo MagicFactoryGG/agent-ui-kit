@@ -1,0 +1,28 @@
+{
+  "blocks/data-table.contract": {
+    "check": 6
+  },
+  "blocks/faq.contract": {
+    "button": 1
+  },
+  "blocks/settings-group.contract": {
+    "button": 1,
+    "check": 1
+  },
+  "screens/app-shell.contract": {
+    "button": 3,
+    "field": 2
+  },
+  "screens/list-detail.contract": {
+    "button": 1
+  },
+  "screens/mail.contract": {
+    "button": 2
+  },
+  "screens/media-viewer.contract": {
+    "button": 1
+  },
+  "screens/settings.contract": {
+    "button": 1
+  }
+}
