@@ -1,0 +1,272 @@
+// ListDetail: a list beside the detail of the chosen item. The bar names the screen. On a desktop the list keeps
+// about a third of the width (34%, held between screens.list-detail-list-min and -max) on its own scroll and on the
+// surface ground, its rows set in from the column's edges: title, then its detail; the chosen row is a fill band
+// with the accent's short rail at its start and `aria-current` (a fill alone never says it: a theme may give fill
+// and surface one colour). The one meaningful line divides list from detail. The detail, on its own scroll on the
+// page, is the kit's DetailPanel (title and status tag, the record's facts as label-value rows, its notes and
+// activity, two actions), under the place where an agent's act is said. On a phone (a window narrower than 760px,
+// read from exactViewport as MessageList does) one column: the list alone, its rows pushing (a chevron says so), or,
+// when `pane` is "detail", the chosen item's detail alone with a Back action above it (the app's `back`; a
+// person's tap and an agent's tool reach the same route). A row chooses by key: its press calls the app's
+// `choose(key)`, the act an agent's tool reaches too (MediaViewer's way), and its `href` is the app's route when it
+// has routes ("" when the choice lives in the app's state). Both columns sit in one row and each is placed once, so
+// the playground's hundreds of cells do not compile DetailPanel more than once a cell.
+//
+// States: `data` many, one, empty, loading, failed and long (the list's data; the detail follows it). Loading keeps
+// the layout: quiet rows breathe in the list's own grid under `loadingText` (role status), and the detail is
+// DetailPanel's own loading, so completing a load moves nothing. Empty and failed have no rows to choose from, so
+// the split collapses to the kit's StatePanel in the middle of the page: empty says `emptyText` and offers the way
+// on (`createLabel`, the app's `create`), failed says `failedText` (role alert) and offers `retryLabel`. Long is
+// many with titles and facts that wrap (no ellipsis anywhere: a long name holds its whole words). `agent` none,
+// proposed and changed, on the chosen item: proposed waits at the top of the detail in the kit's Proposal (one
+// sentence, two answer words); its Accept is the state's one fill, so the record's own primary action steps back
+// to the plain place while the proposal waits (the secondary rests until the answer). Changed says the agent's
+// "did" sentence at the same place, quietly, with Undo. Either way the chosen row carries the agent's note in the
+// accent (`proposedMark`, `changedMark`), so on a phone's list a person sees it before opening the item.
+//
+// Props: the words (title, listTitle, loadingText, detailLoadingText, emptyText, createLabel, failedText,
+// retryLabel, backLabel, pickText, the detail's titles and empty lines, primaryLabel, secondaryLabel, proposedNote,
+// acceptLabel, rejectLabel, proposedMark, changedNote, changedMark, undoLabel), the rows (`items`, `chosenKey`),
+// the chosen record (`facts`, `notes`, `events`), the states, and the app's actions. Every word is a prop.
+use Words, ActionButton from "__SCOPE__/components"
+use TopBar, Proposal, StatePanel, DetailPanel, Fact, Event from "__SCOPE__/blocks"
+
+// One row of the list: its key (the app names the chosen one by key), what it reads as, a short status for the
+// detail's tag, and where it opens (the app builds `href` from its routes).
+shape ListDetailItem
+  key: string
+  title: string
+  detail: string
+  status: string
+  href: string
+
+// The window's width and the person's motion preference: what the screen reads to lay itself out.
+shape ListDetailViewport
+  width: number
+  prefersReducedMotion: bool
+
+// Rows on their way breathe, so they read as coming rather than as drawn shapes.
+keyframes listDetailBreathe
+  50% opacity=0.45
+
+// One row: a link (on a phone it pushes the detail, on a desktop it opens it beside), its title over its detail.
+// The chosen row is a fill band with the accent's rail; an agent's note follows the words it marks.
+component ListDetailRow
+  props
+    item: ListDetailItem
+    chosen: bool
+    note: string
+    push: bool
+    press: action
+    testId: string
+  view
+    link href=item.href press=press testId=testId aria-current=(chosen ? "page" : "false") position="relative" display="flex" flex-direction="row" align-items="center" gap="theme.space.md" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(chosen ? "theme.color.fill" : "transparent")
+      :hover
+        background-color="theme.color.hover"
+      :active
+        background-color="theme.color.fill"
+      :focus-visible
+        box-shadow="inset 0 0 0 2px theme.color.focus"
+      if chosen
+        box position="absolute" left=0 top="theme.space.sm" bottom="theme.space.sm" width="screens.list-detail-rail" background-color="theme.color.accent" border-radius="theme.radius.pill" aria-hidden=true
+      column flex=1 min-width=0 gap="theme.space.xs"
+        text item.title testId=`${testId}-title` overflow-wrap="break-word" font="theme.type.label" color="theme.color.ink"
+        if item.detail != ""
+          text item.detail testId=`${testId}-detail` overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
+        if note != ""
+          row align-items="center" gap="theme.space.xs" testId=`${testId}-agent`
+            box width="screens.list-detail-dot" height="screens.list-detail-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color="theme.color.accent" aria-hidden=true
+            text note min-width=0 overflow-wrap="break-word" font="theme.type.caption" color="theme.color.accent"
+      if push
+        svg viewBox="0 0 12 12" width="screens.list-detail-chevron" height="screens.list-detail-chevron" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
+          path d="M4.5 2.5L8 6l-3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+
+// A row still coming: the real row's insets and height, a bar where the title sits and a shorter one for its
+// detail.
+component ListDetailGhost
+  props
+    share: string
+    pulse: string
+  view
+    column aria-hidden=true justify-content="center" gap="theme.space.sm" min-height="screens.list-detail-ghost-row" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" animation=pulse
+      box width=share height="screens.list-detail-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+      box width="40%" height="screens.list-detail-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+
+// The list column: its heading (with the loading line beside it while rows are on the way), then the rows or
+// their quiet stand-ins. Drawn alone on a phone and beside the detail on a desktop.
+component ListDetailList
+  props
+    listTitle: string
+    loadingText: string
+    items: ListDetailItem[]
+    chosenKey: string
+    agentNote: string
+    loading: bool
+    push: bool
+    pulse: string
+    choose: action
+  view
+    column gap="theme.space.xs" padding="theme.space.sm" aria-busy=loading
+      row flex-wrap="wrap" align-items="baseline" column-gap="theme.space.md" row-gap="theme.space.xs" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.sm"
+        Words(text=listTitle, kind="heading", outcome="none", level=2, testId="list-detail-list-title")
+        if loading
+          text loadingText testId="list-detail-loading" role="status" font="theme.type.caption" color="theme.color.ink-muted"
+      if loading
+        column
+          ListDetailGhost(share="72%", pulse=pulse)
+          ListDetailGhost(share="56%", pulse=pulse)
+          ListDetailGhost(share="64%", pulse=pulse)
+          ListDetailGhost(share="48%", pulse=pulse)
+      else
+        column role="list" aria-label=listTitle gap="theme.space.xs" testId="list-detail-rows"
+          for item in items key=item.key
+            column role="listitem"
+              ListDetailRow(item=item, chosen=(not push and item.key == chosenKey), note=(item.key == chosenKey ? agentNote : ""), push=push, press=choose(item.key), testId=`list-detail-row-${item.key}`)
+
+// The detail column's content: where an agent's act is said (proposed: the kit's Proposal; changed: its sentence
+// and Undo), then the kit's DetailPanel for the chosen record, placed once (each placement compiles DetailPanel's
+// whole body again). With nothing chosen it says `pickText` quietly. While a proposal waits its Accept is the one
+// fill, so the record's primary action takes the panel's plain place (`secondary` chooses which press runs: Exact
+// passes an action by name, not by a ternary) and the secondary rests until the answer. While the record loads
+// there is nothing to act on, so no fill either: the primary action waits in the plain place, disabled, holding
+// the header's height so nothing moves when the record arrives.
+component ListDetailPane
+  props
+    title: string
+    status: string
+    found: bool
+    loading: bool
+    long: bool
+    detailLoadingText: string
+    pickText: string
+    factsTitle: string
+    facts: Fact[]
+    factsEmptyText: string
+    notesTitle: string
+    notes: string
+    activityTitle: string
+    events: Event[]
+    activityEmptyText: string
+    primaryLabel: string
+    secondaryLabel: string
+    proposedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    changedNote: string
+    undoLabel: string
+    agent: enum<"none", "proposed", "changed">
+    primaryPress: action
+    secondaryPress: action
+    accept: action
+    reject: action
+    undo: action
+  derive asks = agent == "proposed" and not loading
+  action secondary
+    if asks
+      primaryPress()
+    else
+      secondaryPress()
+  view
+    column width="100%" max-width="screens.list-detail-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.xl"
+      if asks and found
+        Proposal(id="list-detail", sentence=proposedNote, yesLabel=acceptLabel, noLabel=rejectLabel, agent="proposed", yes=accept, no=reject)
+      if agent == "changed" and found and not loading
+        row testId="list-detail-changed" role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.sm" padding="theme.space.md" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" background-color="theme.color.surface"
+          // The dot sits in a gutter one body line tall, so it centres on the sentence's first line however many
+          // lines the sentence wraps to (on the baseline its bottom sat on the letters' foot, below their middle).
+          row flex=1 min-width="screens.list-detail-note-min" align-items="flex-start" gap="theme.space.sm"
+            box height="screens.list-detail-line" display="flex" align-items="center" flex-shrink=0 aria-hidden=true
+              box width="screens.list-detail-dot" height="screens.list-detail-dot" border-radius="theme.radius.pill" background-color="theme.color.accent"
+            text changedNote testId="list-detail-changed-text" flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+          ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="list-detail-undo")
+      if found or loading
+        DetailPanel(testId="list-detail-panel", title=title, statusLabel=status, status="none", primaryLabel=(asks or loading ? "" : primaryLabel), primaryPress=primaryPress, secondaryLabel=(asks or loading ? primaryLabel : secondaryLabel), secondaryPress=secondary, interaction=(loading ? "disabled" : "idle"), busyNote="", changedNote="", waitingNote="", retryLabel="", retryPress=primaryPress, factsTitle=factsTitle, facts=facts, factsEmptyText=factsEmptyText, notesTitle=notesTitle, notes=notes, activityTitle=activityTitle, events=events, activityEmptyText=activityEmptyText, loadingText=detailLoadingText, failedText="", data=(loading ? "loading" : long ? "long" : "one"), agent="none")
+      else
+        text pickText testId="list-detail-pick" role="status" padding-top="theme.space.xxl" text-align="center" font="theme.type.body" color="theme.color.ink-muted"
+
+component ListDetail
+  props
+    title: string
+    listTitle: string
+    loadingText: string
+    detailLoadingText: string
+    emptyText: string
+    createLabel: string
+    failedText: string
+    retryLabel: string
+    backLabel: string
+    pickText: string
+    factsTitle: string
+    factsEmptyText: string
+    notesTitle: string
+    activityTitle: string
+    activityEmptyText: string
+    primaryLabel: string
+    secondaryLabel: string
+    proposedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    proposedMark: string
+    changedNote: string
+    changedMark: string
+    undoLabel: string
+    chosenKey: string
+    items: ListDetailItem[]
+    facts: Fact[]
+    notes: string
+    events: Event[]
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed">
+    pane: enum<"list", "detail">
+    primaryPress: action
+    secondaryPress: action
+    back: action
+    choose: action
+    create: action
+    retry: action
+    accept: action
+    reject: action
+    undo: action
+  resource viewport = exactViewport() as shape ListDetailViewport
+  derive narrow = viewport.width < 760
+  derive pulse = viewport.prefersReducedMotion ? "none" : "listDetailBreathe 1.8s ease-in-out infinite"
+  derive loading = data == "loading"
+  derive picked = first(items.filter(i => i.key == chosenKey))
+  derive found = match picked { case some(c) => true, case none => false }
+  derive chosenTitle = match picked { case some(c) => c.title, case none => "" }
+  derive chosenStatus = match picked { case some(c) => c.status, case none => "" }
+  derive mark = agent == "proposed" ? proposedMark : agent == "changed" ? changedMark : ""
+  // A row chooses its item by key, through the app's `choose`: the same act an agent's tool calls.
+  action pick(key: string)
+    choose(key)
+  view
+    column testId="list-detail" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
+      TopBar(title=title, agentNote="", agent="none")
+      if data == "empty" or data == "failed"
+        scroll id="list-detail-scroll" flex=1 min-height=0
+          column box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top=(narrow ? "theme.space.xl" : "screens.list-detail-state-top") padding-bottom="theme.space.xl"
+            if data == "empty"
+              StatePanel(title=listTitle, message=emptyText, failedText=failedText, agentNote="", actionLabel=createLabel, retryLabel=retryLabel, data="empty", agent="none", size="full", press=create, testId="list-detail-empty")
+            else
+              StatePanel(title=listTitle, message=emptyText, failedText=failedText, agentNote="", actionLabel=createLabel, retryLabel=retryLabel, data="failed", agent="none", size="full", press=retry, testId="list-detail-failed")
+      else
+        // One row, each column placed once: on a desktop both, the list on the surface ground at about a third;
+        // on a phone the one `pane` names, at the full width.
+        row flex=1 min-height=0 align-items="stretch"
+          if not narrow or pane == "list"
+            scroll id="list-detail-list" flex-grow=(narrow ? 1 : 0) width=(narrow ? "auto" : "34%") min-width=(narrow ? "0" : "screens.list-detail-list-min") max-width=(narrow ? "none" : "screens.list-detail-list-max") flex-shrink=(narrow ? 1 : 0) background-color=(narrow ? "transparent" : "theme.color.surface") border-right-width=(narrow ? "0" : "theme.line.width") border-right-style="solid" border-right-color="theme.color.line"
+              ListDetailList(listTitle=listTitle, loadingText=loadingText, items=items, chosenKey=chosenKey, agentNote=mark, loading=loading, push=narrow, pulse=pulse, choose=pick)
+          if not narrow or pane == "detail"
+            scroll id="list-detail-detail" flex=1 min-width=0
+              column box-sizing="border-box" gap="theme.space.sm" padding-left=(narrow ? "theme.space.lg" : "theme.space.xl") padding-right=(narrow ? "theme.space.lg" : "theme.space.xl") padding-top=(narrow ? "0" : "theme.space.xl") padding-bottom="theme.space.xxl"
+                if narrow
+                  row padding-top="theme.space.sm"
+                    button press=back testId="list-detail-back" display="flex" flex-direction="row" align-items="center" gap="theme.space.xs" min-height="components.row-min" padding-left="0" padding-right="theme.space.sm" border-width=0 border-radius="theme.radius.control" background-color="transparent" color="theme.color.accent"
+                      :hover
+                        opacity=0.8
+                      :focus-visible
+                        box-shadow="0 0 0 2px theme.color.focus"
+                      svg viewBox="0 0 12 12" width="screens.list-detail-chevron" height="screens.list-detail-chevron" fill="none" stroke="theme.color.accent" aria-hidden=true flex-shrink=0
+                        path d="M7.5 2.5L4 6l3.5 3.5" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+                      text backLabel font="theme.type.label" color="theme.color.accent"
+                ListDetailPane(title=chosenTitle, status=chosenStatus, found=found, loading=loading, long=(data == "long"), detailLoadingText=detailLoadingText, pickText=pickText, factsTitle=factsTitle, facts=facts, factsEmptyText=factsEmptyText, notesTitle=notesTitle, notes=notes, activityTitle=activityTitle, events=events, activityEmptyText=activityEmptyText, primaryLabel=primaryLabel, secondaryLabel=secondaryLabel, proposedNote=proposedNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, changedNote=changedNote, undoLabel=undoLabel, agent=agent, primaryPress=primaryPress, secondaryPress=secondaryPress, accept=accept, reject=reject, undo=undo)
