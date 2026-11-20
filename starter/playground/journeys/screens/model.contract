@@ -1,8 +1,8 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, ShellRow from "__SCOPE__/screens"
-use Fact, Message, Step, NavEntry from "__SCOPE__/blocks"
+use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, ShellRow, SettingsSection, SettingsScreenGroup from "__SCOPE__/screens"
+use Fact, Message, Step, NavEntry, Setting from "__SCOPE__/blocks"
 
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
 // The newest change on any of the keys, said in one sentence; "" when there is none.
@@ -98,16 +98,57 @@ fn shellEntries(): NavEntry[] = [
 ]
 fn shellSearchAct(text: string): Act = Act(tool="searchProjects", door="agent", key="shell-search", title="Search", value=text, did=(text.trim() == "" ? "Your assistant cleared the search." : `Your assistant searched the projects for “${text.trim()}”.`), asks=`Your assistant suggests searching the projects for “${text.trim()}”.`, will=`Your assistant will search the projects for “${text.trim()}” in 5 seconds.`)
 
+// SettingsScreen: three sections of an account's settings. Which section is shown is the person's view (`settingsAt`
+// in the app, navigation, not data); each switch is a value in the ledger (`settings-<key>`, on or off), so the
+// switch, the agent's setSetting and the section's dot all read it. The other rows are data only.
+fn settingsSections(): SettingsSection[] = [
+  SettingsSection(key="account", label="Account", detail="Your name, the address we write to, and how you sign in."),
+  SettingsSection(key="notifications", label="Notifications", detail="What reaches you, and where."),
+  SettingsSection(key="privacy", label="Privacy", detail="Who sees what you share.")
+]
+fn settingsSectionKeys(): string[] = settingsSections().map(s => s.key)
+fn settingsSwitch(key: string, label: string, detail: string): Setting = Setting(key=key, kind="switch", label=label, detail=detail, value="", on=false)
+fn settingsGroupsOf(section: string): SettingsScreenGroup[] = section == "account" ? [
+  SettingsScreenGroup(key="profile", title="Profile", footer="People in your workspace see these.", rows=[
+    Setting(key="name", kind="value", label="Name", detail="", value="Ada Lovelace", on=false),
+    Setting(key="email", kind="value", label="Email", detail="", value="ada@studio.example", on=false),
+    Setting(key="password", kind="link", label="Password", detail="Changed three months ago.", value="", on=false)
+  ])
+] : section == "privacy" ? [
+  SettingsScreenGroup(key="sharing", title="Sharing", footer="Only people in your workspace.", rows=[
+    settingsSwitch("presence", "Show when I am online", "A green dot beside your name."),
+    settingsSwitch("receipts", "Read receipts", "Others see when you have read their message.")
+  ])
+] : [
+  SettingsScreenGroup(key="email", title="Email", footer="Sent to the address on your account.", rows=[
+    settingsSwitch("digest", "Weekly digest", "A summary of your week, each Monday."),
+    settingsSwitch("mentions", "Mentions", "When someone names you in a comment."),
+    settingsSwitch("news", "Product news", "")
+  ]),
+  SettingsScreenGroup(key="device", title="On this device", footer="Only this phone or computer.", rows=[
+    Setting(key="sound", kind="value", label="Sound", detail="", value="Chime", on=false),
+    Setting(key="quiet", kind="link", label="Quiet hours", detail="Nothing makes a sound from 22:00 to 07:00.", value="", on=false)
+  ])
+]
+fn settingsSwitches(): Setting[] = settingsSectionKeys().map(s => settingsGroupsOf(s).map(g => g.rows.filter(r => r.kind == "switch"))).flat().flat()
+fn settingsSwitchKeys(): string[] = settingsSwitches().map(r => r.key)
+fn settingKey(key: string): string = `settings-${key}`
+fn settingKeys(): string[] = settingsSwitchKeys().map(k => settingKey(k))
+fn settingLabel(key: string): string = settingsSwitches().filter(r => r.key == key).map(r => r.label).join("")
+fn settingSectionOf(key: string): string = settingsSectionKeys().filter(s => settingsGroupsOf(s).filter(g => g.rows.filter(r => r.key == key).length > 0).length > 0).join("")
+fn settingAct(key: string, on: bool): Act = Act(tool="setSetting", door="agent", key=settingKey(key), title=settingLabel(key), value=(on ? "on" : "off"), did=`Your assistant turned ${settingLabel(key)} ${on ? "on" : "off"}.`, asks=`Your assistant suggests turning ${settingLabel(key)} ${on ? "on" : "off"}.`, will=`Your assistant will turn ${settingLabel(key)} ${on ? "on" : "off"} in 5 seconds.`)
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false),
   AgentTool(name="openProject", title="Project", sentence="Opens a project beside the list.", floor="recorded", reach="self", secret=false),
   AgentTool(name="flagMessage", title="Flags", sentence="Flags or unflags a message.", floor="recorded", reach="self", secret=false),
   AgentTool(name="fillAnswer", title="Setup", sentence="Fills in an answer of the workspace setup.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="searchProjects", title="Search", sentence="Searches the projects.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="searchProjects", title="Search", sentence="Searches the projects.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setSetting", title="Settings", sentence="Turns a setting on or off.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="picture", value="harbour"),
   Value(key="project", value="harbour")
-].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")])
+].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on"))))

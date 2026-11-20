@@ -12,9 +12,9 @@
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
 use Ledger, ledger, personSet, valueOf, isOn, isMarked, undoLatest from "@agent-ui-kit/agent"
-use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer, AppShell from "__SCOPE__/screens"
-use Message from "__SCOPE__/blocks"
-use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys, shellFound, shellEntries from "./model.contract"
+use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer, AppShell, SettingsScreen, SettingsScreenGroup from "__SCOPE__/screens"
+use Message, Setting from "__SCOPE__/blocks"
+use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys, shellFound, shellEntries, settingsSections, settingsGroupsOf, settingsSwitches, settingsSwitchKeys, settingKey, settingKeys, settingSectionOf from "./model.contract"
 
 component App
   members "./tools.contract"
@@ -86,12 +86,27 @@ component App
   action closeMenuByPerson
     menuOpen = false
 
+  // SettingsScreen: an account's settings. The section shown is the person's view (navigation, not data: no
+  // ledger, no record); each switch is a value in the ledger, so the switch, the section's dot and the agent's mark
+  // all read it.
+  state settingsAt = "notifications"
+  derive settingsGroups = settingsGroupsOf(settingsAt).map(g => SettingsScreenGroup(g, rows=g.rows.map(r => r.kind == "switch" ? Setting(r, on=isOn(book, settingKey(r.key))) : r)))
+  derive settingsMarkedKey = settingsSwitchKeys().filter(k => isMarked(book, settingKey(k))).slice(0, 1).join("")
+  derive settingsText = [`section\t${settingsAt}`].concat(settingsSwitches().map(r => `${r.key}\t${settingSectionOf(r.key)}\t${r.label}\t${isOn(book, settingKey(r.key)) ? "on" : "off"}`)).join("\n")
+  // The person's door: a place in the list shows its section; a switch turns its setting on or off.
+  action pickSectionByPerson(key: string)
+    settingsAt = key
+  action toggleSettingByPerson(key: string)
+    book = personSet(book, settingKey(key), isOn(book, settingKey(key)) ? "off" : "on")
+
   // A retry and a proposal's answers: this use has none.
   action ignore
     book = book
+  action ignoreKey(key: string)
+    book = book
 
   // The agent's door. Answer words: saved, delayed, proposed, off, unknown-id.
-  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen, OnboardingScreen or AppShell. Answers its name." = openScreen
+  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen, OnboardingScreen, AppShell or SettingsScreen. Answers its name." = openScreen
     returns shown
   tool readAlbum reads "The album's pictures, one per line: id, caption, and shown on the one on screen, tab-separated." = readAlbum
     returns albumText
@@ -113,6 +128,13 @@ component App
   tool fillAnswer writes idempotent closed "Fill in an answer of the workspace setup, by id from readSetup, with the value to write. Answers saved or unknown-id." = fillAnswer
     returns book.answer
     fails when book.answer == "unknown-id" or book.answer == "off"
+  tool readSettings reads "The settings: first the section shown (account, notifications or privacy), then each setting that turns on or off, one per line: id, section, label, on or off, tab-separated." = readSettings
+    returns settingsText
+  tool showSettingsSection writes idempotent closed "Show a section of the settings: account, notifications or privacy. Answers its id." = showSettingsSection
+    returns settingsAt
+  tool setSetting writes idempotent closed "Turn a setting on or off, by id from readSettings. Answers saved or unknown-id." = setSetting
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off"
 
   tool readProjectList reads "The projects the console's search keeps, one per line: id, title and detail, tab-separated." = readProjectList
     returns shellText
@@ -132,3 +154,5 @@ component App
         OnboardingScreen(productName="Northwind", exitLabel="Save and exit", steps=setupStepsAt(setupStep), answers=setupFields, lead="A few details to set your workspace up. You can change any of them later.", countLabel="Setup progress", backLabel="Back", continueLabel="Continue", skipLabel="Skip for now", retryLabel="", errorText="", loadingText="", failedText="", listTitle="Your setup", listNote="Your answers are saved as you go. Leave at any time and pick up where you stopped.", doneWord="done", currentWord="in progress", nextWord="to come", markNote="Filled in by your assistant", proposedNote="", acceptLabel="", rejectLabel="", waitingNote="", data="many", interaction="idle", outcome="none", agent=(setupMarked ? "changed" : "none"), exit=ignore, back=setupBackByPerson, advance=continueByPerson, skip=continueByPerson, retry=ignore, accept=ignore, reject=ignore, edit=answerByPerson)
       else if shown == "AppShell"
         AppShell(title="Projects", searchLabel="Search projects", searchText=shellQuery, actionLabel="New project", menuLabel="Open the menu", closeLabel="Close the menu", productName="Acme Console", productMark="AC", navLabel="Main menu", entries=shellEntries(), accountName="Ada Lovelace", accountDetail="Workspace admin", sectionTitle="Active projects", footer="Projects you have not opened for 90 days move to the archive.", rows=shellRows, emptyText=`No project holds “${shellQuery.trim()}”. Clear the search or start a new project.`, loadingText="", failedText="", retryLabel="", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, ["shell-search"]), markNote="", undoLabel="Undo", agentKey="", menuOpen=menuOpen, data=(shellRows.length == 0 ? "empty" : "many"), agent=(isMarked(book, "shell-search") ? "changed" : "none"), search=searchByPerson, act=ignore, openMenu=openMenuByPerson, closeMenu=closeMenuByPerson, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)
+      else if shown == "SettingsScreen"
+        SettingsScreen(title="Settings", navLabel="Settings sections", currentKey=settingsAt, sections=settingsSections(), groups=settingsGroups, groupEmptyText="Nothing to set here yet.", loadingText="", emptyTitle="", emptyText="", addLabel="", failedTitle="", failedText="", retryLabel="", agentSection=settingSectionOf(settingsMarkedKey), agentKey=settingsMarkedKey, proposalText="", acceptLabel="", declineLabel="", changedText=latestAbout(book, settingKeys()), waitingText="", waitingNote="", undoLabel="Undo", data="many", agent=(settingsMarkedKey != "" ? "changed" : "none"), pick=pickSectionByPerson, toggle=toggleSettingByPerson, choose=ignoreKey, open=ignoreKey, remove=ignoreKey, accept=ignore, decline=ignore, retry=ignore, add=ignore, undo=undoByPerson)
