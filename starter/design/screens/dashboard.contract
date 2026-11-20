@@ -128,10 +128,10 @@ component DashboardTile
   view
     column role="listitem" testId=testId flex=1 min-width="screens.dashboard-tile-min" box-sizing="border-box" gap="theme.space.xs"
       Words(text=stat.label, kind="caption", outcome="none", level=0, testId=`${testId}-label`)
-      text stat.value testId=`${testId}-value` overflow-wrap="break-word" font="theme.type.display-compact" letter-spacing="theme.type.display-compact-tracking" color="theme.color.ink" font-variant-numeric="tabular-nums"
-      row flex-wrap="wrap" column-gap="theme.space.xs" row-gap="0" align-items="baseline"
+      text stat.value testId=`${testId}-value` padding-top="theme.space.xs" padding-bottom="theme.space.xs" overflow-wrap="break-word" font="theme.type.display-compact" letter-spacing="theme.type.display-compact-tracking" color="theme.color.ink" font-variant-numeric="tabular-nums"
+      row flex-wrap="wrap" column-gap="theme.space.xs" row-gap="theme.space.xs" align-items="flex-start"
         if stat.change != ""
-          text stat.change testId=`${testId}-change` overflow-wrap="break-word" font="theme.type.label" color=(stat.tone == "positive" ? "theme.color.positive-text" : stat.tone == "critical" ? "theme.color.critical-text" : "theme.color.ink-muted") font-variant-numeric="tabular-nums"
+          text stat.change testId=`${testId}-change` overflow-wrap="break-word" font="theme.type.caption" color=(stat.tone == "positive" ? "theme.color.positive-text" : stat.tone == "critical" ? "theme.color.critical-text" : "theme.color.ink-muted") font-variant-numeric="tabular-nums"
         if stat.note != ""
           text stat.note min-width=0 overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
 
@@ -190,7 +190,7 @@ component DashboardHead
     testId: string
   slot
   view
-    row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.lg" row-gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg"
+    row flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.sm" min-height="screens.dashboard-tap" padding-left="theme.space.lg" padding-right="theme.space.lg"
       column flex=1 min-width="screens.dashboard-head-min" gap="theme.space.xs"
         Words(text=title, kind="heading", outcome="none", level=2, testId=`${testId}-title`)
         if note != ""
@@ -249,7 +249,8 @@ component DashboardScreen
         TopBar(title=title, agentNote="", agent="none")
       else
         TopBar(title=title, agentNote="", agent="none")
-          DashboardPeriods(label=periodLabel, periods=periods, periodKey=periodKey, marked=(agent == "changed"), pick=pick)
+          row padding-top="theme.space.xs" padding-bottom="theme.space.xs"
+            DashboardPeriods(label=periodLabel, periods=periods, periodKey=periodKey, marked=(agent == "changed"), pick=pick)
       scroll id="dashboard-scroll" flex=1 min-height=0
         column testId="dashboard-content" aria-busy=loading width="100%" max-width="screens.dashboard-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(narrow ? "theme.space.lg" : "theme.space.xl") gap=(narrow ? "theme.space.lg" : "theme.space.xl")
           if narrow
