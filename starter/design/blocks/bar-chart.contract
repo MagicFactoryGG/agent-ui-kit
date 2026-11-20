@@ -20,7 +20,8 @@
 // States, declared once as axes:
 //   data   many (the bars), one (a single bar, its value said on its cap like any other), empty (the plot's place
 //          and its baseline stay, so the chart reads as this chart with nothing in it: `emptyText` over the axis
-//          and the way on, `emptyLabel`, the state's one filled element), loading (the title, note and switch stay,
+//          under a quiet disc of three bars (the fill, as the kit's other empty states draw theirs) and the way on,
+//          `emptyLabel`, the state's one filled element), loading (the title, note and switch stay,
 //          for they are known; `loadingText` is said as a status and ghost bars of the fill breathe in the bars'
 //          own place and height, so nothing moves when the figures arrive), failed (a critical disc, `failedText`
 //          in the ink — status ink is promised on the page and surface, and a disc carries the hue — and the retry,
@@ -244,6 +245,9 @@ component BarChart
       else if data == "empty" or bare
         column testId=`${testId}-empty` role="status"
           column min-height=(wide ? "blocks.bar-chart-plot" : "0px") justify-content="center" align-items="center" text-align="center" gap="theme.space.md" padding="theme.space.lg"
+            svg viewBox="0 0 24 24" width="blocks.bar-chart-glyph" height="blocks.bar-chart-glyph" aria-hidden=true flex-shrink=0
+              circle cx=12 cy=12 r=11 fill="theme.color.fill"
+              path d="M8 16.5v-3M12 16.5v-8M16 16.5v-5" stroke="theme.color.ink-muted" stroke-width=1.8 stroke-linecap="round"
             column max-width="blocks.bar-chart-measure" width="100%" align-items="center"
               Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-empty-text`)
             if emptyLabel != ""
