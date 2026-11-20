@@ -1,8 +1,8 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Media, ListDetailItem, MailFolder, MailLetter from "__SCOPE__/screens"
-use Fact, Message from "__SCOPE__/blocks"
+use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer from "__SCOPE__/screens"
+use Fact, Message, Step from "__SCOPE__/blocks"
 
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
 // The newest change on any of the keys, said in one sentence; "" when there is none.
@@ -55,14 +55,42 @@ fn projectTitle(key: string): string = projects().filter(p => p.key == key).map(
 fn projectFacts(key: string): Fact[] = key == "atlas" ? [Fact(key="owner", label="Owner", value="Maya Okafor"), Fact(key="launch", label="Launch", value="April 2")] : key == "north" ? [Fact(key="owner", label="Owner", value="Jonas Weber"), Fact(key="launch", label="Launch", value="May 18")] : [Fact(key="owner", label="Owner", value="Priya Nair"), Fact(key="launch", label="Launch", value="March 7")]
 fn projectAct(key: string): Act = Act(tool="openProject", door="agent", key="project", title="Project", value=key, did=`Your assistant opened ${projectTitle(key)}.`, asks=`Your assistant suggests opening ${projectTitle(key)}.`, will=`Your assistant will open ${projectTitle(key)} in 5 seconds.`)
 
+// OnboardingScreen: a three-step workspace setup. The step the person is on is a value in the ledger
+// (`setup-step`, by key), and so is each answer (`setup-<key>`), so the person's typing and the agent's fillAnswer
+// write the same value; an answer the agent wrote stays marked on its field until the person types over it.
+fn setupSteps(): Step[] = [
+  Step(key="workspace", title="Name your workspace", state="next"),
+  Step(key="team", title="Size your team", state="next"),
+  Step(key="invite", title="Invite people", state="next")
+]
+fn setupStepKeys(): string[] = setupSteps().map(s => s.key)
+fn setupStepsAt(at: string): Step[] = setupSteps().map((s, i) => Step(s, state=(i < setupStepKeys().indexOf(at) ? "done" : i == setupStepKeys().indexOf(at) ? "current" : "next")))
+// The step key `by` steps from `at`, held at the setup's ends.
+fn setupStepAt(at: string, by: number): number = max(0, min(setupStepKeys().length - 1, setupStepKeys().indexOf(at) + by))
+fn setupStepFrom(at: string, by: number): string = setupStepKeys().slice(setupStepAt(at, by), setupStepAt(at, by) + 1).join("")
+// Each step's answers, empty: the ledger holds their values.
+fn setupAnswers(): OnboardingAnswer[] = [
+  OnboardingAnswer(key="workspace", label="Workspace name", hint="People see this when you invite them.", value="", placeholder="Your team or company", error="", byAgent=false),
+  OnboardingAnswer(key="role", label="Your role", hint="It sets the layout you start with.", value="", placeholder="What you do", error="", byAgent=false),
+  OnboardingAnswer(key="size", label="Team size", hint="A rough number is fine.", value="", placeholder="For example, 12", error="", byAgent=false),
+  OnboardingAnswer(key="invite", label="Invite by email", hint="Separate addresses with commas.", value="", placeholder="name@example.com", error="", byAgent=false)
+]
+fn setupAnswerKeys(): string[] = setupAnswers().map(a => a.key)
+fn setupStepOf(answer: string): string = answer == "workspace" or answer == "role" ? "workspace" : answer == "size" ? "team" : "invite"
+fn setupKey(answer: string): string = `setup-${answer}`
+fn setupKeys(): string[] = setupAnswerKeys().map(k => setupKey(k))
+fn setupLabel(answer: string): string = setupAnswers().filter(a => a.key == answer).map(a => a.label).join("")
+fn answerAct(answer: string, value: string): Act = Act(tool="fillAnswer", door="agent", key=setupKey(answer), title=setupLabel(answer), value=value, did=`Your assistant filled in ${setupLabel(answer)}: ${value}.`, asks=`Your assistant suggests ${value} for ${setupLabel(answer)}.`, will=`Your assistant will fill in ${setupLabel(answer)} in 5 seconds.`)
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false),
   AgentTool(name="openProject", title="Project", sentence="Opens a project beside the list.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="flagMessage", title="Flags", sentence="Flags or unflags a message.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="flagMessage", title="Flags", sentence="Flags or unflags a message.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="fillAnswer", title="Setup", sentence="Fills in an answer of the workspace setup.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="picture", value="harbour"),
   Value(key="project", value="harbour")
-].concat(flagKeys().map(k => Value(key=k, value="off")))
+].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value="")))
