@@ -3,7 +3,9 @@
     "tools": {
       "openScreen": { "title": "Open Screen", "parameters": { "screen": { "title": "Screen" } } },
       "readAlbum": { "title": "Read Album" },
-      "showPicture": { "title": "Show Picture", "parameters": { "picture": { "title": "Picture" } } }
+      "showPicture": { "title": "Show Picture", "parameters": { "picture": { "title": "Picture" } } },
+      "readMail": { "title": "Read Mail" },
+      "flagMessage": { "title": "Flag Message", "parameters": { "message": { "title": "Message" }, "flagged": { "title": "Flagged" } } }
     }
   }
 }

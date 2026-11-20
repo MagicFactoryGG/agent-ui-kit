@@ -3,11 +3,14 @@
 // which door called it. A tool's action calls functions only, never another action with arguments (the kit's
 // docs/recipes/exact-workarounds.md, 3).
 use Ledger, act from "@agent-ui-kit/agent"
-use pictureAct, albumKeys from "./model.contract"
+use pictureAct, albumKeys, flagAct, mailKeys from "./model.contract"
 
 members App
-  action openScreen(screen: enum<"MediaViewer">)
+  action openScreen(screen: enum<"MediaViewer", "MailScreen">)
     shown = screen
   action readAlbum
   action showPicture(picture: string)
     book = albumKeys().includes(picture) ? act(book, pictureAct(picture)) : Ledger(book, answer="unknown-id")
+  action readMail
+  action flagMessage(message: string, flagged: bool)
+    book = mailKeys().includes(message) ? act(book, flagAct(message, flagged)) : Ledger(book, answer="unknown-id")
