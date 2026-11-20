@@ -51,7 +51,7 @@ component KindMark
   props
     kind: string
   view
-    svg viewBox="0 0 20 20" width="blocks.kind-mark" height="blocks.kind-mark" fill="none" stroke=kindInk(kind) aria-hidden=true flex-shrink=0
+    svg viewBox="0 0 20 20" width="blocks.notes-kind-mark" height="blocks.notes-kind-mark" fill="none" stroke=kindInk(kind) aria-hidden=true flex-shrink=0
       if kind == "success"
         circle cx=10 cy=10 r=8.25 stroke-width=1.5
         path d="M6.6 10.2l2.3 2.3 4.5-4.7" stroke-width=1.6 stroke-linecap="round" stroke-linejoin="round"
@@ -85,7 +85,7 @@ component NoteRow
       KindMark(kind=note.kind)
       column flex=1 min-width=0 gap="theme.space.xs"
         row flex-wrap="wrap" align-items="baseline" column-gap="theme.space.lg"
-          text note.title testId=`${testId}-title` flex=1 min-width="blocks.note-title-min" overflow-wrap="break-word" font=(note.unread ? "theme.type.label" : "theme.type.body") color="theme.color.ink"
+          text note.title testId=`${testId}-title` flex=1 min-width="blocks.notes-title-min" overflow-wrap="break-word" font=(note.unread ? "theme.type.label" : "theme.type.body") color="theme.color.ink"
           text note.when testId=`${testId}-when` font="theme.type.caption" color="theme.color.ink-muted"
         if note.detail != ""
           text note.detail testId=`${testId}-detail` overflow-wrap="break-word" hyphens="none" font="theme.type.caption" color="theme.color.ink-muted"
@@ -104,11 +104,11 @@ component GhostRow
     first: bool
   view
     row aria-hidden=true align-items="flex-start" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(first ? "0" : "theme.line.width") border-top-style="solid" border-top-color="theme.color.line" border-left-width="components.mark-line" border-left-style="solid" border-left-color="transparent"
-      box width="blocks.kind-mark" height="blocks.kind-mark" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
+      box width="blocks.notes-kind-mark" height="blocks.notes-kind-mark" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
       column flex=1 min-width=0 gap="theme.space.sm"
         row align-items="center" gap="theme.space.md"
           box flex=1 height="blocks.bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
-          box width="blocks.note-when" height="blocks.bone" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
+          box width="blocks.notes-when" height="blocks.bone" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill"
         box width=detailShare height="blocks.bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
 
 component NotificationList
@@ -146,7 +146,7 @@ component NotificationList
   view
     column testId=testId width="100%" max-width="blocks.notes-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.xl"
       row flex-wrap="wrap" align-items="center" gap="theme.space.md"
-        column flex=1 min-width="blocks.note-head-min" gap="theme.space.xs"
+        column flex=1 min-width="blocks.notes-head-min" gap="theme.space.xs"
           Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
           if status != ""
             text status testId=`${testId}-status` role=(data == "loading" ? "status" : "none") font="theme.type.caption" color="theme.color.ink-muted"
@@ -172,7 +172,7 @@ component NotificationList
         // block's single accent.
         column testId=`${testId}-failed` role="alert" gap="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.card" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" border-left-width="blocks.alert-line" border-left-style="solid" border-left-color="theme.color.critical" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md"
           row align-items="flex-start" gap="theme.space.md"
-            svg viewBox="0 0 20 20" width="blocks.kind-mark" height="blocks.kind-mark" fill="none" stroke="theme.color.critical" aria-hidden=true flex-shrink=0
+            svg viewBox="0 0 20 20" width="blocks.notes-kind-mark" height="blocks.notes-kind-mark" fill="none" stroke="theme.color.critical" aria-hidden=true flex-shrink=0
               path d="M10 3.1L18.1 16.9H1.9Z" stroke-width=1.5 stroke-linejoin="round"
               path d="M10 8.1v3.9" stroke-width=1.6 stroke-linecap="round"
               circle cx=10 cy=14.4 r=0.9 fill="theme.color.critical" stroke="none"
@@ -186,7 +186,7 @@ component NotificationList
         // way on. No group label above it - the zero state is the whole list's, not one group's.
         column role="status" testId=`${testId}-empty` background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
           row align-items="flex-start" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-left-width="components.mark-line" border-left-style="solid" border-left-color="transparent"
-            svg viewBox="0 0 20 20" width="blocks.kind-mark" height="blocks.kind-mark" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
+            svg viewBox="0 0 20 20" width="blocks.notes-kind-mark" height="blocks.notes-kind-mark" fill="none" stroke="theme.color.ink-muted" aria-hidden=true flex-shrink=0
               rect x=2.75 y=3.75 width=14.5 height=12.5 rx=2.5 stroke-width=1.5
               path d="M2.75 11h4l1.25 2h4l1.25-2h4" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
             column flex=1 min-width=0 gap="theme.space.sm"
@@ -200,7 +200,7 @@ component NotificationList
         for g in ["new", "earlier"] key=g
           column aria-hidden=true testId=`${testId}-ghost-${g}` gap="theme.space.md"
             column padding-left="theme.space.lg" padding-right="theme.space.lg" border-left-width="components.mark-line" border-left-style="solid" border-left-color="transparent"
-              box width="blocks.note-when" height="blocks.bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+              box width="blocks.notes-when" height="blocks.bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
             column background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
               if g == "new"
                 GhostRow(detailShare="62%", first=true)

@@ -4,5 +4,5 @@
   "private": true,
   "description": "Components: one control or one drawn piece each, every value from the Theme. No words: every word is a prop.",
   "exports": { ".": "./index.contract" },
-  "dependencies": { "__SCOPE__/theme": "workspace:*" }
+  "peerDependencies": { "__SCOPE__/theme": "*" }
 }

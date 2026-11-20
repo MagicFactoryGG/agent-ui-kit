@@ -28,8 +28,11 @@ export const REQUIRED = {
     'page', 'surface', 'raised', 'ink', 'ink-muted', 'line', 'fill', 'hover',
     'accent', 'accent-ink', 'focus', 'positive', 'caution', 'critical', 'critical-ink',
     'positive-text', 'caution-text', 'critical-text',
+    // The on state of a switch (its track), under the platform's white thumb.
+    'control-tint',
   ],
-  type: ['title', 'heading', 'body', 'label', 'caption'],
+  // display: above title, for prices and landing headlines; its compact size is the phone's.
+  type: ['display', 'title', 'heading', 'body', 'label', 'caption'],
   space: ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'],
   radius: ['control', 'card', 'pill'],
   line: ['width'],
@@ -92,6 +95,8 @@ export function problems(theme) {
         if (!(Number.isFinite(v.size) && v.size >= 9 && v.size <= 96)) say(`${at}.size`, 'a px number from 9 to 96');
         if (!([100, 200, 300, 400, 500, 600, 700, 800, 900].includes(v.weight))) say(`${at}.weight`, 'a weight from 100 to 900, in hundreds');
         if (!(Number.isFinite(v.line) && v.line >= 1 && v.line <= 2)) say(`${at}.line`, 'a line height from 1 to 2 (a multiple of the size)');
+        if (v.tracking !== undefined && !(Number.isFinite(v.tracking) && v.tracking >= -0.1 && v.tracking <= 0.1)) say(`${at}.tracking`, 'letter spacing in em, from -0.1 to 0.1');
+        if (name === 'display' && !(Number.isFinite(v.compact) && v.compact >= 9 && v.compact <= v.size)) say(`${at}.compact`, "the phone's size: a px number from 9 to display's own size");
       } else if (group === 'motion') {
         if (typeof v !== 'object' || v === null) { say(at, 'needs duration (ms) and easing'); continue; }
         if (!(Number.isInteger(v.duration) && v.duration >= 0 && v.duration <= 2000)) say(`${at}.duration`, 'whole ms from 0 to 2000');
@@ -127,10 +132,25 @@ export function problems(theme) {
       if (r < 4.5 && !open) say(`color.${fg} on color.${bg} (${mode})`, `${r.toFixed(2)}:1, under 4.5:1; change one of the two, or list it in $open (not decided yet)`);
     }
   }
+  // display sits above title: on a phone too.
+  const ty = theme.type ?? {};
+  if (ty.display && ty.title && Number.isFinite(ty.display.compact) && !(ty.display.compact > ty.title.size)) say('type.display.compact', `${ty.display.compact}px is not above title (${ty.title.size}px): display is the step above title, on a phone too`);
+  // A switch's on track: its white thumb on it, and it on the page, each at least 3:1 (WCAG 2.2, 1.4.11, non-text).
+  for (const mode of ['light', 'dark']) {
+    const tint = c['control-tint']?.[mode];
+    const page = c.page?.[mode];
+    if (!HEX.test(String(tint)) || !HEX.test(String(page))) continue;
+    const thumb = contrast('#ffffff', tint);
+    const track = contrast(tint, page);
+    if (thumb < 3) say(`color.control-tint (${mode})`, `a white switch thumb on it is ${thumb.toFixed(2)}:1, under 3:1`);
+    if (track < 3) say(`color.control-tint (${mode})`, `on color.page it is ${track.toFixed(2)}:1, under 3:1: the on track would not show`);
+  }
   return out;
 }
 
 const px = (n) => `${n}px`;
+// Tracking is em in theme.json, px in the tokens (letter-spacing is a length): a tenth of a px is enough.
+const track = (size, em) => Math.round(size * em * 10) / 10;
 // Type sizes are px on purpose: the same look on every host. Measured at Exact 51002ee77: a rem is 16px on the
 // web and 13px on macOS, so a 20px title in rem draws 16.25px on a Mac. Exact warns of px type (forma-type-fixed):
 // it does not follow the person's text size. That is the price of parity, recorded here, not hidden.
@@ -144,7 +164,14 @@ export function forma(t) {
     lines.push(`  theme.color.${name} = light-dark(${v.light}, ${v.dark})${pair}`);
   }
   lines.push(`  theme.family: family = ${t.family}`);
-  for (const [name, v] of Object.entries(t.type)) lines.push(`  theme.type.${name}: type = ${v.weight} ${px(v.size)}/${v.line} ${t.family}`);
+  for (const [name, v] of Object.entries(t.type)) {
+    lines.push(`  theme.type.${name}: type = ${v.weight} ${px(v.size)}/${v.line} ${t.family}`);
+    if (v.tracking !== undefined) lines.push(`  theme.type.${name}-tracking: length = ${px(track(v.size, v.tracking))}`);
+    if (v.compact !== undefined) {
+      lines.push(`  theme.type.${name}-compact: type = ${v.weight} ${px(v.compact)}/${v.line} ${t.family}`);
+      if (v.tracking !== undefined) lines.push(`  theme.type.${name}-compact-tracking: length = ${px(track(v.compact, v.tracking))}`);
+    }
+  }
   for (const group of ['space', 'radius', 'line']) for (const [name, v] of Object.entries(t[group])) lines.push(`  theme.${group}.${name}: length = ${px(v)}`);
   for (const [name, v] of Object.entries(t.motion)) {
     lines.push(`  theme.motion.${name}: duration = ${v.duration}ms`);
@@ -159,6 +186,8 @@ export function css(t) {
   v.push(`  --theme-family: ${t.family};`);
   for (const [name, x] of Object.entries(t.type)) {
     v.push(`  --theme-type-${name}-size: ${px(x.size)};`, `  --theme-type-${name}-weight: ${x.weight};`, `  --theme-type-${name}-line: ${x.line};`);
+    if (x.tracking !== undefined) v.push(`  --theme-type-${name}-tracking: ${x.tracking}em;`);
+    if (x.compact !== undefined) v.push(`  --theme-type-${name}-compact-size: ${px(x.compact)};`);
   }
   for (const group of ['space', 'radius', 'line']) for (const [name, x] of Object.entries(t[group])) v.push(`  --theme-${group}-${name}: ${px(x)};`);
   for (const [name, m] of Object.entries(t.motion)) v.push(`  --theme-motion-${name}: ${m.duration}ms;`, `  --theme-motion-${name}-easing: ${m.easing};`);
@@ -323,6 +352,7 @@ export function fromDistiller(d, base, { applyProposed = false } = {}) {
   const px = (t) => (t?.light ?? []).map((v) => parseFloat(v)).filter((n) => Number.isFinite(n)).sort((a, b) => a - b);
   const sizes = px(d.tokens['type.sizes']);
   const type = sizes.length >= 2 ? {
+    display: base.type.display,
     title: { ...base.type.title, size: sizes.find((n) => n >= 18) ?? sizes.at(-1) },
     heading: { ...base.type.heading, size: sizes[0] },
     body: { ...base.type.body, size: sizes[1] },

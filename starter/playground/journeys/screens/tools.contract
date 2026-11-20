@@ -1,0 +1,32 @@
+// The agent's door: the actions the root's `tool` lines name. Each is one line over the ledger's functions; the
+// mode comes from the tool list, never from an `if` here. The door is passed as "agent": an action cannot read
+// which door called it. A tool's action calls functions only, never another action with arguments (the kit's
+// docs/recipes/exact-workarounds.md, 3).
+use Ledger, act from "@agent-ui-kit/agent"
+use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys, answerAct, setupAnswerKeys, shellSearchAct, settingAct, settingsSwitchKeys from "./model.contract"
+
+members App
+  action openScreen(screen: enum<"MediaViewer", "ListDetail", "MailScreen", "OnboardingScreen", "AppShell", "SettingsScreen">)
+    shown = screen
+  action readAlbum
+  action showPicture(picture: string)
+    book = albumKeys().includes(picture) ? act(book, pictureAct(picture)) : Ledger(book, answer="unknown-id")
+  action readMail
+  action flagMessage(message: string, flagged: bool)
+    book = mailKeys().includes(message) ? act(book, flagAct(message, flagged)) : Ledger(book, answer="unknown-id")
+  action readProjects
+  action openProject(project: string)
+    book = projectKeys().includes(project) ? act(book, projectAct(project)) : Ledger(book, answer="unknown-id")
+    opened = projectKeys().includes(project) ? true : opened
+  action readSetup
+  action fillAnswer(answer: string, value: string)
+    book = setupAnswerKeys().includes(answer) ? act(book, answerAct(answer, value)) : Ledger(book, answer="unknown-id")
+  action readProjectList
+  action searchProjects(text: string)
+    book = act(book, shellSearchAct(text))
+  action readSettings
+  // The section shown is the person's view, as openScreen's screen is: set, not recorded.
+  action showSettingsSection(section: enum<"account", "notifications", "privacy">)
+    settingsAt = section
+  action setSetting(setting: string, on: bool)
+    book = settingsSwitchKeys().includes(setting) ? act(book, settingAct(setting, on)) : Ledger(book, answer="unknown-id")

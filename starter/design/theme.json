@@ -74,9 +74,20 @@
     "critical-text": {
       "light": "#c62828",
       "dark": "#f87171"
+    },
+    "control-tint": {
+      "light": "#2f5bd3",
+      "dark": "#3b63d8"
     }
   },
   "type": {
+    "display": {
+      "size": 40,
+      "compact": 30,
+      "weight": 600,
+      "line": 1.2,
+      "tracking": -0.02
+    },
     "title": {
       "size": 20,
       "weight": 600,
