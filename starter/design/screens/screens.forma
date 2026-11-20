@@ -85,7 +85,6 @@ theme
   screens.dashboard-head-min: length = 160px  // under this a card's title takes its own line and its end wraps under it
   screens.dashboard-bone: length = 10px
   screens.dashboard-ghost-row: length = 64px  // a real row's height: md paddings, a body line, xs, a caption line
-  screens.dashboard-tap: length = 44px  // a press's least height (components.row-min)
   screens.dashboard-band-min: length = 240px  // under this a band's sentence takes its own line and the answers wrap under it
   screens.dashboard-mark-line: length = 3px  // the band's start edge: the kit's agent mark (components.mark-line)
   screens.dashboard-glyph: length = 16px
