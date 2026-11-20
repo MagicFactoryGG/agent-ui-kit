@@ -77,6 +77,12 @@
           }
         }
       },
+      "readFeatures": {
+        "title": "Read Features"
+      },
+      "addFeature": {
+        "title": "Add Feature"
+      },
       "readPlan": {
         "title": "Read Plan"
       },

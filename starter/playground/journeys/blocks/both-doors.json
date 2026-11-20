@@ -294,6 +294,42 @@
     }
   },
   {
+    "name": "FeatureGrid: the empty features section: Add a feature and addFeature reach the same first feature; the agent's is recorded and ringed",
+    "person": [
+      "tap features-add"
+    ],
+    "agent": [
+      "call addFeature {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.13.key": "features",
+      "book.values.13.value": "sync",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "features",
+      "book.changes.0.was": "empty",
+      "book.marked": [
+        "features"
+      ],
+      "featuresMarked": true
+    },
+    "expectPerson": {
+      "book.values.13.value": "sync",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "featuresMarked": false
+    }
+  },
+  {
     "name": "Pricing: a plan chosen: the Team card's button and choosePlan reach the same plan; the agent's is recorded and marked on the card",
     "person": [
       "tap pricing-choose-team"
@@ -311,8 +347,8 @@
       ]
     ],
     "expect": {
-      "book.values.13.key": "plan",
-      "book.values.13.value": "team",
+      "book.values.14.key": "plan",
+      "book.values.14.value": "team",
       "book.changes.length": 1,
       "book.changes.0.mode": "recorded",
       "book.changes.0.key": "plan",
@@ -323,7 +359,7 @@
       "planMarked": true
     },
     "expectPerson": {
-      "book.values.13.value": "team",
+      "book.values.14.value": "team",
       "book.changes.length": 0,
       "book.marked": [],
       "planMarked": false
@@ -353,7 +389,7 @@
       ]
     ],
     "expect": {
-      "book.values.13.value": "business",
+      "book.values.14.value": "business",
       "book.changes.length": 2,
       "book.changes.0.was": "starter",
       "book.changes.0.now": "business",
@@ -362,7 +398,7 @@
       ]
     },
     "expectPerson": {
-      "book.values.13.value": "business",
+      "book.values.14.value": "business",
       "book.changes.length": 0,
       "book.marked": []
     }
