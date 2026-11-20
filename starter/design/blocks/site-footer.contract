@@ -22,7 +22,9 @@
 //          inside its own column (overflow-wrap) and nothing is cut.
 //   agent  none|proposed|changed — the footer's links through the other door. proposed: a band above the columns,
 //          edged in the accent, with one sentence and two answer words (both plain, so the mark stays the one
-//          fill); changed: the link `agentKey` names carries the accent dot and the accent ink, and a line above the
+//          fill), and the link it would add already stands at the foot of its column (`proposedGroup` names the
+//          group, `proposedLabel` the words): the accent ink and a hollow ring, words but not yet a link, so a
+//          person sees where it would go before answering; changed: the link `agentKey` names carries the accent dot and the accent ink, and a line above the
 //          columns, marked by the accent rule at its start, says `agentNote` with one answer (undo).
 // The kit's Proposal is drawn inline in blocks/index.contract, which imports this file (a use cycle), and its yes
 // is filled: the band is drawn here. Every word is a prop; every value a Theme token or a blocks.footer-* size.
@@ -64,12 +66,15 @@ component FooterLinkRow
           svg viewBox="0 0 8 8" width="blocks.footer-dot" height="blocks.footer-dot" aria-hidden=true flex-shrink=0
             circle cx=4 cy=4 r=4 fill="theme.color.accent"
 
-// One column: the group's title as an eyebrow heading, then its links as rows.
+// One column: the group's title as an eyebrow heading, then its links as rows. While an agent proposes a link
+// for this group, it waits at the column's foot: the hollow ring is the filled dot's "not yet".
 component FooterColumn
   props
     group: LinkGroup
     agentKey: string
     agentNote: string
+    proposedGroup: string
+    proposedLabel: string
     agent: enum<"none", "proposed", "changed">
     testId: string
   view
@@ -78,6 +83,11 @@ component FooterColumn
       column role="list" aria-label=group.title
         for l in group.links key=l.key
           FooterLinkRow(label=l.label, href=l.href, marked=(agent == "changed" and l.key == agentKey), note=agentNote, testId=`${testId}-${l.key}`)
+        if agent == "proposed" and group.key == proposedGroup and proposedLabel != ""
+          row testId=`${testId}-proposed` role="listitem" align-items="center" gap="theme.space.sm" min-height="blocks.footer-link-min" padding-top="theme.space.xs" padding-bottom="theme.space.xs" box-sizing="border-box"
+            text proposedLabel min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.accent"
+            svg viewBox="0 0 8 8" width="blocks.footer-dot" height="blocks.footer-dot" aria-hidden=true flex-shrink=0
+              circle cx=4 cy=4 r=3.25 fill="none" stroke="theme.color.accent" stroke-width=1.5
 
 // A column still loading: a heading bar and link bars at the rows' own pitch, never a control. The heading's bar
 // is a step darker (the muted ink washed into the surface), as the heading is the column's bolder words; each
@@ -139,6 +149,8 @@ component SiteFooter
     agentKey: string
     agentNote: string
     proposedNote: string
+    proposedGroup: string
+    proposedLabel: string
     acceptLabel: string
     rejectLabel: string
     undoLabel: string
@@ -181,7 +193,7 @@ component SiteFooter
             if shown
               row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.xl"
                 for g in groups key=g.key
-                  FooterColumn(group=g, agentKey=agentKey, agentNote=agentNote, agent=agent, testId=`${testId}-group-${g.key}`)
+                  FooterColumn(group=g, agentKey=agentKey, agentNote=agentNote, proposedGroup=proposedGroup, proposedLabel=proposedLabel, agent=agent, testId=`${testId}-group-${g.key}`)
             else if data == "loading"
               column gap="theme.space.lg"
                 text loadingText testId=`${testId}-loading` role="status" overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
