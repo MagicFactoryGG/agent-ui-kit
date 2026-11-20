@@ -1,0 +1,20 @@
+[
+  {
+    "name": "SettingsGroup: the weekly digest: the switch and setSetting reach the same value; the agent's is recorded and marked",
+    "person": ["type notify-switch-digest false"],
+    "agent": ["call setSetting {\"setting\":\"digest\",\"on\":false}"],
+    "same": ["book.values"],
+    "calls": [["ok", "saved"]],
+    "expect": {
+      "book.values.0.value": "off",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": ["digest"]
+    },
+    "expectPerson": {
+      "book.values.0.value": "off",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  }
+]

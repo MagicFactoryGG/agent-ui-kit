@@ -3,6 +3,18 @@ forma screens
 
 theme
   screens.column-max: length = 720px
+  screens.onboarding-max: length = 960px  // the frame's width, the gap and the list's basis, with a little slack
+  screens.onboarding-main: length = 640px  // the frame's own readable width (OnboardingSteps caps there too)
+  screens.onboarding-aside: length = 280px
+  screens.onboarding-dot: length = 6px
+  screens.onboarding-glyph: length = 24px
+  screens.onboarding-ring: length = 2px
+  screens.onboarding-tick: length = 12px
+  screens.onboarding-title-top: length = 2px  // a body line (21px) centred on the 24px glyph
+  screens.onboarding-ghost-line: length = 12px
+  screens.onboarding-ghost-field: length = 36px
+  screens.onboarding-mark-line: length = 3px
+  screens.onboarding-alert: length = 16px
   screens.media-max: length = 812px  // the stage (780 wide inside lg padding) is then exactly 3:2 at its full height
   screens.media-stage-max: length = 520px  // the stage's height on a desktop: the picture, caption, a proposal and the strip fit a 900px window
   screens.media-caption-min: length = 240px  // under this the caption takes its own line and Previous and Next wrap under it

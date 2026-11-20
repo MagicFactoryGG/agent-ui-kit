@@ -1,0 +1,44 @@
+// Journeys: blocks. Each block in a small real use, so its two doors can be proved: a person's real input (a tap,
+// a switch) and an agent's tool reach the same value in the app's ledger (`book`, @agent-ui-kit/agent), and the
+// agent's is recorded and shown on the block. `bun <kit>/tools/both-doors.mjs . web --only "SettingsGroup: "`
+// runs one block's cases from both-doors.json.
+//
+// A block adds: its values in model.contract (startValues, a row in agentTools with its floor, its words), the
+// person's door here (actions that call personSet), the agent's door in tools.contract (an action that calls act)
+// with a `tool` line below and a face in app.json, its place in the view, and its cases, named "<Block>: …".
+// Keys in the ledger are unique in this app; a block's own view state stays out of it.
+//
+// Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
+use Ledger, ledger, personSet, isOn, isMarked from "@agent-ui-kit/agent"
+use SettingsGroup, Setting from "__SCOPE__/blocks"
+use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, latestAbout from "./model.contract"
+
+component App
+  members "./tools.contract"
+
+  state book: Ledger = ledger(startValues(), agentTools(), answerWords())
+
+  // SettingsGroup: the email notifications, each a switch row over one value in the ledger.
+  derive notifyRows = notifyKeys().map(k => Setting(key=k, kind="switch", label=titleOf(k), detail=detailOf(k), value="", on=isOn(book, k)))
+  derive notifyMarked = notifyKeys().filter(k => isMarked(book, k)).length > 0
+  derive notifyText = notifyKeys().map(k => `${k}\t${isOn(book, k) ? "on" : "off"}`).join("\n")
+
+  // The person's door: the switch says which row; the app flips its own value.
+  action toggleByPerson(key: string)
+    book = personSet(book, key, onOff(not isOn(book, key)))
+  // Rows of other kinds, a retry and a proposal's answers: this use has none.
+  action ignoreKey(key: string)
+    book = book
+  action ignore
+    book = book
+
+  // The agent's door. Answer words: saved, delayed, proposed, off.
+  tool readSettings reads "Each email notification, one per line: id (digest, failures or marketing), then on or off, tab-separated." = readSettings
+    returns notifyText
+  tool setSetting writes idempotent closed "Turn an email notification on or off: digest, failures or marketing. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readSettings." = setSetting
+    returns book.answer
+    fails when book.answer == "off"
+
+  view
+    main testId="app" width="100%" height="100%"
+      SettingsGroup(title="Email notifications", footer="Changes apply at once.", emptyText="", loadingText="", failedText="", failedDetail="", retryLabel="", proposalText="", proposalKey="", acceptLabel="", declineLabel="", changedText=latestAbout(book, notifyKeys()), waitingText="", outcomeText="", data="many", interaction="idle", outcome="none", agent=(notifyMarked ? "changed" : "none"), rows=notifyRows, toggle=toggleByPerson, choose=ignoreKey, open=ignoreKey, remove=ignoreKey, retry=ignore, accept=ignore, decline=ignore, testId="notify")
