@@ -35,6 +35,10 @@ authentication provider decide that ([proposed is not a security boundary](docs/
 5. **No words in a package.** Every label and sentence is the app's.
 6. **Secrets are filled, never read** ([secrets](docs/recipes/secrets.md)).
 7. **The accessibility tree alone completes each task**: every control a test uses has its own name.
+8. **Blocks and screens are made of primitives.** A design system's blocks and screens draw no button, field,
+   menu, chip, switch, checkbox, radio or tab of their own; they use its components. `tools/primitives.mjs` refuses
+   one at its file and line, naming the primitive to use; a truly new shape becomes a declared component. A
+   design system adopting it lists today's hand-drawn controls in `primitives-baseline.json`, which only shrinks.
 
 ## Run it
 
