@@ -60,7 +60,7 @@ theme
   screens.settings-bone-thick: length = 16px
   screens.settings-bone-title: length = 120px
   screens.settings-bone-note: length = 180px
-  screens.mail-rail: length = 256px  // the folders' rail on a desktop: SideNav fills it (its basis is wider, so its spacer wraps away)
+  screens.mail-rail: length = 304px  // the folders' rail on a desktop: SideNav's own least width (blocks.nav-min), so it lays out on one line and runs to the foot
   screens.mail-pane-max: length = 760px  // a phone layout's column on a window between a phone and a desktop
   screens.mail-band-min: length = 240px  // under this a band's sentence takes its own line and the answers wrap under it
   screens.mail-mark-line: length = 3px  // the band's start edge: the kit's agent mark (components.mark-line)
@@ -68,6 +68,9 @@ theme
   screens.mail-glyph-top: length = 2px  // a 16px glyph centred on the body type's first line (21px)
   screens.mail-avatar: length = 40px
   screens.mail-tap: length = 44px  // Back's least height, ActionButton's own (components.row-min)
+  screens.mail-card-max: length = 1100px  // MessageList's own card width (blocks.mail-max), so the actions' layer shares its edges
+  screens.mail-head: length = 51px  // MessageList's header band under the card's top line (blocks.bar-min less its rule)
+  screens.mail-badge-max: length = 160px  // MessageList's unread badge's own most width (blocks.badge-max)
   screens.list-detail-list-min: length = 280px  // the list column never narrows below this on a desktop
   screens.list-detail-list-max: length = 400px  // a third of a 1200px window; wider windows give the room to the detail
   screens.list-detail-max: length = 880px  // the detail's measure: DetailPanel's own, so the proposal above it shares its edges
