@@ -189,5 +189,37 @@
       "mailAgentKey": "",
       "mailChosenUnread": false
     }
+  },
+  {
+    "name": "SideNav: the empty menu: Add Home and addHome reach the same menu; the agent's is recorded and marked",
+    "person": [
+      "tap nav-add"
+    ],
+    "agent": [
+      "call addHome {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.9.value": "home",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.was": "empty",
+      "book.marked": [
+        "menu"
+      ]
+    },
+    "expectPerson": {
+      "book.values.9.value": "home",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]

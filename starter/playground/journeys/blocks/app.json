@@ -56,6 +56,12 @@
             "title": "Read"
           }
         }
+      },
+      "readMenu": {
+        "title": "Read Menu"
+      },
+      "addHome": {
+        "title": "Add Home"
       }
     }
   }
