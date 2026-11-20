@@ -2,8 +2,8 @@
 // month, a quarter: the app's) is a group of the kit's Segments, at the bar's end on a desktop and full width at
 // the top of the page on a phone, where a thumb reaches it. Under it the period's numbers, the kit's StatTiles (its
 // own cards, two to a row on a phone and four on a desktop); then two panels: the kit's BarChart of the period (its
-// largest bar the page's one filled focal element) and the few most recent items as rows, not cards (the kit's
-// TextRow, a hairline between), on a card of the chart's own kind. The panels sit side by side on a desktop (the
+// largest bar the page's one filled focal element) and the few most recent items as rows, not cards (a title, its
+// detail and a trailing word; a hairline between), on a card of the chart's own kind. The panels sit side by side on a desktop (the
 // chart takes three parts of five) and stack on a phone: a wrapping row whose items hold a named least width, so
 // the layout changes at narrow widths instead of squeezing. The content keeps a readable width
 // (screens.dashboard-max), centred. Every card wears the theme's line, so it holds on a theme whose page and
@@ -30,7 +30,7 @@
 // rejectLabel, changedNote, undoLabel), the data (`periods` and the chosen `periodKey`, `stats` (StatTiles' Stat),
 // `points` (BarChart's BarPoint), `items`), the states, and the app's actions (choose(key), showAll, start, retry,
 // accept, reject, undo). Every word is a prop.
-use ActionButton, Segment, TextRow, Words from "__SCOPE__/components"
+use ActionButton, Segment, Words from "__SCOPE__/components"
 use TopBar from "__SCOPE__/blocks"
 use StatTiles, Stat from "__SCOPE__/blocks"
 use BarChart, BarPoint from "__SCOPE__/blocks"
@@ -109,11 +109,31 @@ component DashboardPanel
 component DashboardGhostRow
   props
     share: string
+    side: string
     pulse: string
   view
-    column aria-hidden=true justify-content="center" gap="theme.space.sm" min-height="screens.dashboard-ghost-row" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" animation=pulse
+    column aria-hidden=true justify-content="center" gap="theme.space.sm" min-height="screens.dashboard-ghost-row" box-sizing="border-box" padding-left=side padding-right=side padding-top="theme.space.md" padding-bottom="theme.space.md" animation=pulse
       box width=share height="screens.dashboard-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
       box width="36%" height="screens.dashboard-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+
+// One recent item as a row: its title over its detail, and the trailing word or amount at the row's end in its
+// outcome's ink. The title keeps a named least width (screens.dashboard-item-min): a trailing word that would leave
+// it less wraps onto its own line under the detail instead of squeezing the title to a column of single words
+// (the kit's TextRow keeps its trailing word on one line beside the title, which a long one cannot share).
+component DashboardItemRow
+  props
+    item: DashboardItem
+    side: string
+    testId: string
+  view
+    row testId=testId flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.xs" box-sizing="border-box" padding-left=side padding-right=side padding-top="theme.space.md" padding-bottom="theme.space.md"
+      column flex=1 min-width="screens.dashboard-item-min" gap="theme.space.xs"
+        Words(text=item.title, kind="body", outcome="none", level=0, testId=`${testId}-title`)
+        if item.detail != ""
+          Words(text=item.detail, kind="caption", outcome="none", level=0, testId=`${testId}-detail`)
+      if item.trailing != ""
+        column min-width=0 margin-left="auto"
+          Words(text=item.trailing, kind="caption", outcome=(item.tone == "success" ? "success" : item.tone == "error" ? "error" : item.tone == "blocked" ? "blocked" : item.tone == "cancelled" ? "cancelled" : "none"), level=0, testId=`${testId}-trailing`)
 
 // The recent items: a card of the chart's own kind (the surface, the line, the card's corner and the chart's
 // insets), its title in the chart's title type with "View all" at its end, then the rows edge to edge, a hairline
@@ -131,26 +151,28 @@ component DashboardRecent
   // "View all" (the kit's plain ActionButton) is a press of the least tap height, taller than the title's line: while it shows, the card's top
   // inset gives back the difference, so the title centred beside it sits where the chart's title sits.
   derive more = not loading and allLabel != "" and items.length > 0
+  // The chart's own side inset (xl on a desktop, lg on a phone), so both cards' words start the same way in.
+  derive side = wide ? "theme.space.xl" : "theme.space.lg"
   view
     column testId="dashboard-recent" width="100%" box-sizing="border-box" gap="theme.space.md" padding-top=(more ? (wide ? "theme.space.lg" : "theme.space.sm") : (wide ? "theme.space.xl" : "theme.space.lg")) padding-bottom=(wide ? "theme.space.lg" : "theme.space.md") background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" color="theme.color.ink"
-      row flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg"
+      row flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.sm" padding-left=side padding-right=side
         column flex=1 min-width="screens.dashboard-head-min"
           Words(text=title, kind="title", outcome="none", level=2, testId="dashboard-recent-title")
         if more
           ActionButton(label=allLabel, kind="plain", interaction="idle", outcome="none", press=showAll, testId="dashboard-all")
       if loading
         column
-          DashboardGhostRow(share="68%", pulse=pulse)
-          DashboardGhostRow(share="54%", pulse=pulse)
-          DashboardGhostRow(share="62%", pulse=pulse)
-          DashboardGhostRow(share="48%", pulse=pulse)
+          DashboardGhostRow(share="68%", side=side, pulse=pulse)
+          DashboardGhostRow(share="54%", side=side, pulse=pulse)
+          DashboardGhostRow(share="62%", side=side, pulse=pulse)
+          DashboardGhostRow(share="48%", side=side, pulse=pulse)
       else if items.length == 0
-        text emptyText testId="dashboard-recent-empty" role="status" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.sm" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
+        text emptyText testId="dashboard-recent-empty" role="status" padding-left=side padding-right=side padding-bottom="theme.space.sm" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
       else
         column role="list" aria-label=title testId="dashboard-items"
           for item, i in items key=item.key
             column role="listitem" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-              TextRow(title=item.title, detail=item.detail, trailing=item.trailing, outcome=(item.tone == "success" ? "success" : item.tone == "error" ? "error" : item.tone == "blocked" ? "blocked" : item.tone == "cancelled" ? "cancelled" : "none"), testId=`dashboard-item-${item.key}`)
+              DashboardItemRow(item=item, side=side, testId=`dashboard-item-${item.key}`)
 
 component DashboardScreen
   props

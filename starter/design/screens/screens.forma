@@ -83,6 +83,7 @@ theme
   screens.dashboard-chart-min: length = 320px  // the chart and the list sit side by side once both least widths fit
   screens.dashboard-list-min: length = 280px
   screens.dashboard-head-min: length = 160px  // under this a card's title takes its own line and its end wraps under it
+  screens.dashboard-item-min: length = 200px  // a recent row's title keeps this much; a longer trailing word wraps under it
   screens.dashboard-bone: length = 10px
   screens.dashboard-ghost-row: length = 64px  // a real row's height: md paddings, a body line, xs, a caption line
   screens.dashboard-band-min: length = 240px  // under this a band's sentence takes its own line and the answers wrap under it
