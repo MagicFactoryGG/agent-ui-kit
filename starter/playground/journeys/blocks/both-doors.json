@@ -574,6 +574,45 @@
     }
   },
   {
+    "name": "BarChart: the orders chart's range: the Months segment and setChartRange reach the same range; the agent's is recorded and marked on the chart",
+    "person": [
+      "tap orders-range-month"
+    ],
+    "agent": [
+      "call setChartRange {\"range\":\"month\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.21.key": "chart-range",
+      "book.values.21.value": "month",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "chart-range",
+      "book.changes.0.was": "week",
+      "book.marked": [
+        "chart-range"
+      ],
+      "chartRange": "month",
+      "chartMarked": true
+    },
+    "expectPerson": {
+      "book.values.21.key": "chart-range",
+      "book.values.21.value": "month",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "chartRange": "month",
+      "chartMarked": false
+    }
+  },
+  {
     "name": "StatTiles: this week's numbers failed to read: Try again and loadStats reach the same numbers; the agent's is recorded and said under the row",
     "person": [
       "tap stats-retry"
@@ -591,19 +630,45 @@
       ]
     ],
     "expect": {
-      "book.values.21.key": "stats",
-      "book.values.21.value": "many",
+      "book.values.22.key": "stats",
+      "book.values.22.value": "many",
       "book.changes.length": 1,
       "book.changes.0.mode": "recorded",
       "book.changes.0.was": "failed",
       "book.marked": [
         "stats"
-      ]
+      ],
+      "statsMarked": true
     },
     "expectPerson": {
-      "book.values.21.value": "many",
+      "book.values.22.value": "many",
       "book.changes.length": 0,
-      "book.marked": []
+      "book.marked": [],
+      "statsMarked": false
+    }
+  },
+  {
+    "name": "StatTiles: the agent's read taken back: the note's Undo returns the numbers to failed, as if no one had read them",
+    "person": [],
+    "agent": [
+      "call loadStats {}",
+      "tap stats-undo"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.22.key": "stats",
+      "book.values.22.value": "failed",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "statsMarked": false
     }
   }
 ]

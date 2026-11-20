@@ -18,15 +18,16 @@
 //   edge band (role="alert"; the red stays on the band, never on the words), the way on — `retryLabel`'s
 //   bordered button at the end, the banner's raised slab alone carrying the state, so no ghost lies about
 //   numbers that are not coming. No tile lies with a stale number in either state.
-// - agent none|proposed|changed|waiting, one shape for all: `agentKey` names the stat the agent touched,
-//   and that tile takes the kit's mark as an inset band on its left edge (LinkRow's border-line mark, drawn
-//   as paint so no tile's words move a hair's width and no corner is ever clipped — the accent, caution
-//   while the person is waited on). Under the row, once for the group, `agentNote`'s sentence in the plain
-//   body ink on a row that carries the same band in the same ink at its own left edge — the marked tile's
-//   line continued under the grid, so the mark and the sentence read as one unit (a voice has no screen; the
-//   sentence names the stat itself). Whatever waits on the person is answered in its two words right there
-//   (`yesLabel`/`noLabel`, Proposal's shape — accept or reject a proposal, keep or undo a change, now or
-//   stop a wait; the app passes the pair in force, as the ledger's AnswerWords do), one group that keeps the
+// - agent none|proposed|changed|waiting: `agentKey` names the stat the agent touched, and that tile takes the
+//   kit's mark as an inset band on its left edge (LinkRow's border-line mark, drawn as paint so no tile's
+//   words move a hair's width and no corner is ever clipped — the accent, caution while the person is waited
+//   on). Under the row, once for the group, the agent's sentence in the plain body ink on a row that carries
+//   the same band in the same ink at its own left edge — the marked tile's line continued under the grid, so
+//   the mark and the sentence read as one unit (a voice has no screen; the sentence names the stat itself).
+//   What the sentence says follows the state. Proposed and waiting ask: `agentNote`, answered right there in
+//   its two words (`yesLabel`/`noLabel`, Proposal's shape: accept or reject, now or stop). Changed has already
+//   happened, so it asks nothing: `changedNote` says what the agent did, and the one way back is
+//   `undoLabel`'s plain button (Pricing's and Hero's changed note). The answers are one group that keeps the
 //   sentence's line on a desktop and, under blocks.stat-note-min, wraps beneath it at its own left edge.
 //   Nothing is marked when no key matches.
 //
@@ -79,6 +80,20 @@ component StatGhost
       box width="blocks.stat-ghost-value" height="theme.space.xl" background-color="theme.color.fill" border-radius="theme.radius.pill"
       box width="blocks.stat-ghost-change" height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill" margin-top="auto"
 
+// The agent's sentence under the row, said once for the group: the marked tile's band continued at its own left
+// edge, in the same ink (caution while the person is waited on), the sentence in the body ink, then the slot's
+// answers, which on a phone wrap beneath the sentence (it keeps blocks.stat-note-min).
+component StatNote
+  props
+    text: string
+    waiting: bool
+    testId: string
+  slot
+  view
+    row role="status" flex-wrap="wrap" align-items="center" gap="theme.space.md" padding-left="theme.space.lg" box-shadow=(waiting ? "inset 3px 0 0 theme.color.caution" : "inset 3px 0 0 theme.color.accent")
+      text text testId=testId flex=1 min-width="blocks.stat-note-min" font="theme.type.body" color="theme.color.ink"
+      children
+
 component StatTiles
   props
     title: string
@@ -95,6 +110,9 @@ component StatTiles
     noLabel: string
     yes: action
     no: action
+    changedNote: string
+    undoLabel: string
+    undo: action
     testId: string
   view
     column testId=testId gap="theme.space.sm" width="100%" max-width="blocks.stat-max" margin-left="auto" margin-right="auto"
@@ -120,9 +138,12 @@ component StatTiles
         row role="list" flex-wrap="wrap" gap="theme.space.md"
           for s in stats key=s.key
             StatTile(label=s.label, value=s.value, change=s.change, trend=s.trend, marked=(agent != "none" and s.key == agentKey), waiting=(agent == "waiting"), testId=`${testId}-${s.key}`)
-        if agent != "none" and agentNote != ""
-          row role="status" flex-wrap="wrap" align-items="center" gap="theme.space.md" padding-left="theme.space.lg" box-shadow=(agent == "waiting" ? "inset 3px 0 0 theme.color.caution" : "inset 3px 0 0 theme.color.accent")
-            text agentNote testId=`${testId}-note` flex=1 min-width="blocks.stat-note-min" font="theme.type.body" color="theme.color.ink"
+        if agent == "changed" and changedNote != ""
+          StatNote(text=changedNote, waiting=false, testId=`${testId}-note`)
+            if undoLabel != ""
+              ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+        else if (agent == "proposed" or agent == "waiting") and agentNote != ""
+          StatNote(text=agentNote, waiting=(agent == "waiting"), testId=`${testId}-note`)
             if yesLabel != ""
               row gap="theme.space.sm" flex-shrink=0
                 ActionButton(label=noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId=`${testId}-no`)

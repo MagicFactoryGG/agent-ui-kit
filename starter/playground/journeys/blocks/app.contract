@@ -18,6 +18,8 @@ use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, 
 
 use Faq from "__SCOPE__/blocks"
 use faqKey, faqLedgerKeys, faqQuestions, faqText, faqMarkedKey from "./model.contract"
+use BarChart from "__SCOPE__/blocks"
+use chartRanges, chartNote, chartLabel, chartPoints, chartText from "./model.contract"
 use StatTiles from "__SCOPE__/blocks"
 use weekStats, statsText from "./model.contract"
 
@@ -82,8 +84,12 @@ component App
   derive faqAgentKey = faqMarkedKey(book)
   derive faqMarked = faqAgentKey != ""
   derive faqReadText = faqText(book)
+  // BarChart: the orders chart; its range is one value in the ledger, "week" or "month". An agent's switch is
+  // marked on the chart, with its sentence and Undo.
+  derive chartRange = valueOf(book, "chart-range")
+  derive chartMarked = isMarked(book, "chart-range")
   // StatTiles: this week's numbers; the row's data state is one value in the ledger, "failed" until read again,
-  // then "many". The agent's read is said under the row, with Keep and Undo.
+  // then "many". The agent's read is said under the row (changed: what it did), with one Undo.
   derive stats = valueOf(book, "stats")
   derive statsMarked = isMarked(book, "stats")
 
@@ -144,12 +150,14 @@ component App
   // A question's press opens it, or closes it once open.
   action toggleQuestionByPerson(key: string)
     book = personSet(book, faqKey(key), valueOf(book, faqKey(key)) == "open" ? "closed" : "open")
-  // The failed banner's Try again reads the numbers again; Keep makes the agent's read the person's own (it
-  // clears the mark), Undo takes it back.
+  // The chart's range switch shows the range pressed; Undo takes the agent's switch back.
+  action chooseRangeByPerson(key: string)
+    book = personSet(book, "chart-range", key)
+  action undoRange
+    book = undo(book, latestIdAbout(book, "chart-range"))
+  // The failed banner's Try again reads the numbers again; the note's Undo takes the agent's read back.
   action loadStatsByPerson
     book = personSet(book, "stats", "many")
-  action keepStats
-    book = personSet(book, "stats", stats)
   action undoStats
     book = undo(book, latestIdAbout(book, "stats"))
   // Rows of other kinds, a retry and a proposal's answers: this use has none.
@@ -219,6 +227,11 @@ component App
   tool openQuestion writes idempotent closed "Open a question on the help page to show the person its answer, or close it, as a press on the question does: returns, delivery, change or payment. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readFaq." = openQuestion
     returns book.answer
     fails when book.answer == "off"
+  tool readChart reads "The orders chart: its range (week or month) on the first line, then each bar, one per line: label, then orders, tab-separated." = readChart
+    returns chartText(chartRange)
+  tool setChartRange writes idempotent closed "Show the orders chart by week or by month, as its Weeks and Months switch does: week or month. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readChart." = setChartRange
+    returns book.answer
+    fails when book.answer == "off"
 
   tool readStats reads "This week's numbers, one per line: id, label, value and change, tab-separated; or failed while they could not be read." = readStats
     returns statsText(stats)
@@ -240,4 +253,5 @@ component App
       Hero(kicker="New in version 4", headline="Plan the week your whole team will keep", lead="Shared calendars, honest estimates and one list of what matters. Set it up in an afternoon and change it whenever plans do.", primaryLabel=(trialOn ? "Trial started" : "Start free trial"), secondaryLabel="See how it works", pictureLabel="A calm week, drawn", panelTitle="In every plan", items=heroPoints(), emptyText="", loadingText="", failedText="", retryLabel="", errorText="", proposedNote=trialAsks, acceptLabel="Accept", rejectLabel="Not now", changedNote=latestAbout(book, ["trial"]), undoLabel="Undo", data="many", interaction="idle", size=(viewport.width < 600 ? "compact" : "wide"), outcome="none", agent=(trialAsks != "" ? "proposed" : trialMarked ? "changed" : "none"), primary=startTrialByPerson, secondary=ignore, retry=ignore, accept=acceptTrial, reject=rejectTrial, undo=undoTrial, testId="trial")
       SiteFooter(productName="Acme", productMark="AC", tagline="Deploys you can trust, from the first commit to the last.", navLabel="Footer", groups=(footerLinks == "help" ? helpGroups() : []), legal="© 2026 Acme, Inc. All rights reserved.", emptyText="This footer has no links yet. Add the first column so visitors can find help.", emptyLabel="Add links", loadingText="", failedText="", retryLabel="", agentKey="contact", agentNote=latestAbout(book, ["footer"]), proposedNote="", proposedGroup="", proposedLabel="", acceptLabel="", rejectLabel="", undoLabel="Undo", data=(footerLinks == "help" ? "one" : "empty"), agent=(footerMarked ? "changed" : "none"), add=addFooterLinksByPerson, retry=ignore, accept=ignore, reject=ignore, undo=undoFooter, testId="footer")
       Faq(eyebrow="Help centre", title="Questions, answered", lead="Short answers about orders, delivery and payment. Open a question to read its answer.", contactTitle="", contactText="", contactLabel="", emptyTitle="", emptyText="", failedTitle="", failedText="", loadingText="", retryLabel="", agentKey=faqAgentKey, agentNote=latestAbout(book, faqLedgerKeys()), waitingNote="", proposalText="", acceptLabel="", declineLabel="", data="many", agent=(faqMarked ? "changed" : "none"), questions=faqQuestions(book), toggle=toggleQuestionByPerson, retry=ignore, contact=ignore, accept=ignore, decline=ignore, testId="faq")
-      StatTiles(title="This week", stats=(stats == "many" ? weekStats() : []), data=(stats == "many" ? "many" : "failed"), loadingText="", failedText="This week's numbers could not be read.", retryLabel="Try again", retry=loadStatsByPerson, agent=(statsMarked ? "changed" : "none"), agentKey="", agentNote=latestAbout(book, ["stats"]), yesLabel="Keep", noLabel="Undo", yes=keepStats, no=undoStats, testId="stats")
+      BarChart(title="Orders", note=chartNote(chartRange), chartLabel=chartLabel(chartRange), points=chartPoints(chartRange), ranges=chartRanges(), range=chartRange, rangeLabel="Show orders by", emptyText="", emptyLabel="", loadingText="", failedText="", retryLabel="", agentKey="", agentNote=latestAbout(book, ["chart-range"]), undoLabel="Undo", proposalText="", acceptLabel="", rejectLabel="", data="many", agent=(chartMarked ? "changed" : "none"), size=(viewport.width < 600 ? "compact" : "wide"), choose=chooseRangeByPerson, add=ignore, retry=ignore, undo=undoRange, accept=ignore, reject=ignore, testId="orders")
+      StatTiles(title="This week", stats=(stats == "many" ? weekStats() : []), data=(stats == "many" ? "many" : "failed"), loadingText="", failedText="This week's numbers could not be read.", retryLabel="Try again", retry=loadStatsByPerson, agent=(statsMarked ? "changed" : "none"), agentKey="", agentNote="", yesLabel="", noLabel="", yes=ignore, no=ignore, changedNote=latestAbout(book, ["stats"]), undoLabel="Undo", undo=undoStats, testId="stats")
