@@ -464,5 +464,42 @@
       "book.marked": [],
       "trialMarked": false
     }
+  },
+  {
+    "name": "SiteFooter: the footer with no links: Add links and addFooterLinks reach the same first column; the agent's is recorded and its link marked",
+    "person": [
+      "tap footer-add"
+    ],
+    "agent": [
+      "call addFooterLinks {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.16.key": "footer",
+      "book.values.16.value": "help",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "footer",
+      "book.changes.0.was": "empty",
+      "book.marked": [
+        "footer"
+      ],
+      "footerMarked": true
+    },
+    "expectPerson": {
+      "book.values.16.key": "footer",
+      "book.values.16.value": "help",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "footerMarked": false
+    }
   }
 ]

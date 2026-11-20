@@ -99,6 +99,12 @@
       },
       "startTrial": {
         "title": "Start Trial"
+      },
+      "readFooter": {
+        "title": "Read Footer"
+      },
+      "addFooterLinks": {
+        "title": "Add Footer Links"
       }
     }
   }
