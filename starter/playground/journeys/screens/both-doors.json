@@ -16,5 +16,35 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+    },
+  {
+    "name": "ListDetail: a tap on a row and openProject open the same project; the agent's is recorded and marked",
+    "person": ["call openScreen {\"screen\":\"ListDetail\"}", "tap list-detail-row-north"],
+    "agent": ["call openScreen {\"screen\":\"ListDetail\"}", "call openProject {\"project\":\"north\"}"],
+    "same": ["projectKey", "opened", "book.values"],
+    "calls": [["ok", "ListDetail"], ["ok", "saved"]],
+    "expect": {
+      "projectKey": "north",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": ["project"]
+    },
+    "expectPerson": {
+      "projectKey": "north",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "ListDetail: Undo on the screen takes back the agent's openProject",
+    "person": ["call openScreen {\"screen\":\"ListDetail\"}"],
+    "agent": ["call openScreen {\"screen\":\"ListDetail\"}", "call openProject {\"project\":\"atlas\"}", "tap list-detail-undo"],
+    "same": ["projectKey", "book.values", "book.marked"],
+    "calls": [["ok", "ListDetail"], ["ok", "saved"]],
+    "expect": {
+      "projectKey": "harbour",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]

@@ -7,7 +7,9 @@
 // activity, two actions), under the place where an agent's act is said. On a phone (a window narrower than 760px,
 // read from exactViewport as MessageList does) one column: the list alone, its rows pushing (a chevron says so), or,
 // when `pane` is "detail", the chosen item's detail alone with a Back action above it (the app's `back`; a
-// person's tap and an agent's tool reach the same route). Both columns sit in one row and each is placed once, so
+// person's tap and an agent's tool reach the same route). A row chooses by key: its press calls the app's
+// `choose(key)`, the act an agent's tool reaches too (MediaViewer's way), and its `href` is the app's route when it
+// has routes ("" when the choice lives in the app's state). Both columns sit in one row and each is placed once, so
 // the playground's hundreds of cells do not compile DetailPanel more than once a cell.
 //
 // States: `data` many, one, empty, loading, failed and long (the list's data; the detail follows it). Loading keeps
@@ -55,9 +57,10 @@ component ListDetailRow
     chosen: bool
     note: string
     push: bool
+    press: action
     testId: string
   view
-    link href=item.href testId=testId aria-current=(chosen ? "page" : "false") position="relative" display="flex" flex-direction="row" align-items="center" gap="theme.space.md" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(chosen ? "theme.color.fill" : "transparent")
+    link href=item.href press=press testId=testId aria-current=(chosen ? "page" : "false") position="relative" display="flex" flex-direction="row" align-items="center" gap="theme.space.md" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(chosen ? "theme.color.fill" : "transparent")
       :hover
         background-color="theme.color.hover"
       :active
@@ -101,6 +104,7 @@ component ListDetailList
     loading: bool
     push: bool
     pulse: string
+    choose: action
   view
     column gap="theme.space.xs" padding="theme.space.sm" aria-busy=loading
       row flex-wrap="wrap" align-items="baseline" column-gap="theme.space.md" row-gap="theme.space.xs" min-height="components.row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.sm"
@@ -117,7 +121,7 @@ component ListDetailList
         column role="list" aria-label=listTitle gap="theme.space.xs" testId="list-detail-rows"
           for item in items key=item.key
             column role="listitem"
-              ListDetailRow(item=item, chosen=(not push and item.key == chosenKey), note=(item.key == chosenKey ? agentNote : ""), push=push, testId=`list-detail-row-${item.key}`)
+              ListDetailRow(item=item, chosen=(not push and item.key == chosenKey), note=(item.key == chosenKey ? agentNote : ""), push=push, press=choose(item.key), testId=`list-detail-row-${item.key}`)
 
 // The detail column's content: where an agent's act is said (proposed: the kit's Proposal; changed: its sentence
 // and Undo), then the kit's DetailPanel for the chosen record, placed once (each placement compiles DetailPanel's
@@ -217,6 +221,7 @@ component ListDetail
     primaryPress: action
     secondaryPress: action
     back: action
+    choose: action
     create: action
     retry: action
     accept: action
@@ -231,6 +236,9 @@ component ListDetail
   derive chosenTitle = match picked { case some(c) => c.title, case none => "" }
   derive chosenStatus = match picked { case some(c) => c.status, case none => "" }
   derive mark = agent == "proposed" ? proposedMark : agent == "changed" ? changedMark : ""
+  // A row chooses its item by key, through the app's `choose`: the same act an agent's tool calls.
+  action pick(key: string)
+    choose(key)
   view
     column testId="list-detail" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
       TopBar(title=title, agentNote="", agent="none")
@@ -247,7 +255,7 @@ component ListDetail
         row flex=1 min-height=0 align-items="stretch"
           if not narrow or pane == "list"
             scroll id="list-detail-list" flex-grow=(narrow ? 1 : 0) width=(narrow ? "auto" : "34%") min-width=(narrow ? "0" : "screens.list-detail-list-min") max-width=(narrow ? "none" : "screens.list-detail-list-max") flex-shrink=(narrow ? 1 : 0) background-color=(narrow ? "transparent" : "theme.color.surface") border-right-width=(narrow ? "0" : "theme.line.width") border-right-style="solid" border-right-color="theme.color.line"
-              ListDetailList(listTitle=listTitle, loadingText=loadingText, items=items, chosenKey=chosenKey, agentNote=mark, loading=loading, push=narrow, pulse=pulse)
+              ListDetailList(listTitle=listTitle, loadingText=loadingText, items=items, chosenKey=chosenKey, agentNote=mark, loading=loading, push=narrow, pulse=pulse, choose=pick)
           if not narrow or pane == "detail"
             scroll id="list-detail-detail" flex=1 min-width=0
               column box-sizing="border-box" gap="theme.space.sm" padding-left=(narrow ? "theme.space.lg" : "theme.space.xl") padding-right=(narrow ? "theme.space.lg" : "theme.space.xl") padding-top=(narrow ? "0" : "theme.space.xl") padding-bottom="theme.space.xxl"

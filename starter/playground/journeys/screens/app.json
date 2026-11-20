@@ -3,7 +3,9 @@
     "tools": {
       "openScreen": { "title": "Open Screen", "parameters": { "screen": { "title": "Screen" } } },
       "readAlbum": { "title": "Read Album" },
-      "showPicture": { "title": "Show Picture", "parameters": { "picture": { "title": "Picture" } } }
+      "showPicture": { "title": "Show Picture", "parameters": { "picture": { "title": "Picture" } } },
+      "readProjects": { "title": "Read Projects" },
+      "openProject": { "title": "Open Project", "parameters": { "project": { "title": "Project" } } }
     }
   }
 }
