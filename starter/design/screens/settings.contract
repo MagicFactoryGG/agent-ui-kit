@@ -26,12 +26,15 @@
 //   agent  none | proposed | changed | waiting: an assistant's act on one setting (`agentKey` names its row,
 //          `agentSection` its section). The group that holds the row shows it the kit's way (SettingsGroup:
 //          proposed marks the row and asks under the group with `proposalText` and the two answer words;
-//          changed keeps the accent edge, says `changedText` and offers `undoLabel`, the way back, under it; waiting the caution edge and `waitingText`). The
-//          section's place in the list carries a dot of the same ink, so a person sees where an act is even from
-//          another section (a screen reader hears the act's sentence after the place's name); while an act waits, the bar says `waitingNote` under its title.
+//          changed keeps the accent edge, says `changedText` and offers `undoLabel`, the way back, under it;
+//          waiting keeps the caution edge, says `waitingText` and puts `declineLabel` and `acceptLabel` under
+//          it, so what waits for the person is answered where it is said). The section's place in the list
+//          carries a dot of the same ink, so a person sees where an act is even from another section (a screen
+//          reader hears the act's sentence after the place's name); while an act waits, the bar says
+//          `waitingNote` under its title.
 //
 // Both doors: a person's press and an agent's tool reach the same actions, each by key: `pick` a section,
-// `toggle`, `choose`, `open` and `remove` a setting (SettingsGroup's own), `accept` and `decline` the proposal,
+// `toggle`, `choose`, `open` and `remove` a setting (SettingsGroup's own), `accept` and `decline` a proposal or a waiting act,
 // `undo` the agent's change, `retry`, `add`.
 use Swatch from "__SCOPE__/theme"
 use Words, ActionButton from "__SCOPE__/components"
@@ -192,17 +195,23 @@ component SettingsScreen
               for g in groups key=g.key
                 column gap="theme.space.sm"
                   SettingsGroup(title=g.title, footer=g.footer, emptyText=groupEmptyText, loadingText=loadingText, failedText=failedText, failedDetail="", retryLabel=retryLabel, proposalText=proposalText, proposalKey=agentKey, acceptLabel=acceptLabel, declineLabel=declineLabel, changedText=changedText, waitingText=waitingText, outcomeText="", data=(g.rows.length == 0 ? "empty" : "many"), interaction="idle", outcome="none", agent=(holdsRow(g, agentKey) ? agent : "none"), rows=g.rows, toggle=flip, choose=chooseRow, open=openRow, remove=removeRow, retry=retry, accept=accept, decline=decline, testId=`settings-${g.key}`)
-                  if agent == "changed" and holdsRow(g, agentKey)
-                    // The way back from what the agent changed, under the group's own words about it, on the card's
-                    // edge: an empty title column of SettingsGroup's own least width and insets holds the card's place on a
-                    // desktop and wraps away, zero tall, on a phone. Named by the change's sentence.
+                  if (agent == "changed" or agent == "waiting") and holdsRow(g, agentKey)
+                    // The person's answer, under the group's own words about the act, on the card's edge: Undo for
+                    // what the agent changed; for an act that waits, the two answer words (the waiting act is held
+                    // for the person, so the person can let it through or stop it here). An empty title column of
+                    // SettingsGroup's own least width and insets holds the card's place on a desktop and wraps
+                    // away, zero tall, on a phone. Named by the act's own sentence.
                     row flex-wrap="wrap" column-gap="theme.space.xl"
                       box flex=1 min-width="screens.settings-aside" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" aria-hidden=true
                       column flex=2 min-width="screens.settings-card-min" box-sizing="border-box"
                         // The inset is the wrapper's, not the flex item's: a basis-0 item's own padding takes part in
                         // sharing the width out, and the button had stood 11px off the card's edge.
-                        row role="group" aria-label=changedText padding-left="theme.space.lg"
-                          ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="settings-screen-undo")
+                        row role="group" aria-label=(agent == "changed" ? changedText : waitingText) flex-wrap="wrap" gap="theme.space.sm" padding-left="theme.space.lg"
+                          if agent == "changed"
+                            ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="settings-screen-undo")
+                          else
+                            ActionButton(label=declineLabel, kind="plain", interaction="idle", outcome="none", press=decline, testId="settings-screen-stop")
+                            ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="settings-screen-let")
             else if data == "loading"
               SettingsGhost(loadingText=loadingText, testId="settings-screen-loading-1")
               SettingsGhost(loadingText=loadingText, testId="settings-screen-loading-2")
