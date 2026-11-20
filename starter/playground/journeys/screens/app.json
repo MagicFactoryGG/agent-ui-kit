@@ -69,6 +69,28 @@
             "title": "Text"
           }
         }
+      },
+      "readSettings": {
+        "title": "Read Settings"
+      },
+      "showSettingsSection": {
+        "title": "Show Settings Section",
+        "parameters": {
+          "section": {
+            "title": "Section"
+          }
+        }
+      },
+      "setSetting": {
+        "title": "Set Setting",
+        "parameters": {
+          "setting": {
+            "title": "Setting"
+          },
+          "on": {
+            "title": "On"
+          }
+        }
       }
     }
   }

@@ -291,5 +291,122 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "SettingsScreen: the weekly digest's switch and setSetting turn it off alike; the agent's is recorded and marked",
+    "person": [
+      "call openScreen {\"screen\":\"SettingsScreen\"}",
+      "type settings-email-switch-digest false"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"SettingsScreen\"}",
+      "call setSetting {\"setting\":\"digest\",\"on\":false}"
+    ],
+    "same": [
+      "settingsAt",
+      "settingsGroups",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "SettingsScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "settingsGroups.0.rows.0.on": false,
+      "settingsMarkedKey": "digest",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": [
+        "settings-digest"
+      ]
+    },
+    "expectPerson": {
+      "settingsGroups.0.rows.0.on": false,
+      "settingsMarkedKey": "",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "SettingsScreen: a place in the list and showSettingsSection show the same section, and its switch and setSetting turn read receipts on alike",
+    "person": [
+      "call openScreen {\"screen\":\"SettingsScreen\"}",
+      "tap settings-screen-place-privacy",
+      "type settings-sharing-switch-receipts true"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"SettingsScreen\"}",
+      "call setSetting {\"setting\":\"receipts\",\"on\":true}",
+      "call showSettingsSection {\"section\":\"privacy\"}"
+    ],
+    "same": [
+      "settingsAt",
+      "settingsGroups",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "SettingsScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "privacy"
+      ]
+    ],
+    "expect": {
+      "settingsAt": "privacy",
+      "settingsGroups.0.rows.1.on": true,
+      "settingsMarkedKey": "receipts",
+      "book.marked": [
+        "settings-receipts"
+      ]
+    },
+    "expectPerson": {
+      "settingsAt": "privacy",
+      "book.marked": []
+    }
+  },
+  {
+    "name": "SettingsScreen: Undo on the screen takes back the agent's setSetting",
+    "person": [
+      "call openScreen {\"screen\":\"SettingsScreen\"}"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"SettingsScreen\"}",
+      "call setSetting {\"setting\":\"mentions\",\"on\":false}",
+      "tap settings-screen-undo"
+    ],
+    "same": [
+      "settingsGroups",
+      "book.values",
+      "book.marked"
+    ],
+    "calls": [
+      [
+        "ok",
+        "SettingsScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "settingsGroups.0.rows.1.on": true,
+      "settingsMarkedKey": "",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]

@@ -1113,6 +1113,83 @@
       "open": false
     }
   ],
+  "props:SettingsScreen": {
+    "title": "Settings",
+    "navLabel": "Settings sections",
+    "currentKey": "notifications",
+    "groupEmptyText": "Nothing to set in this group yet.",
+    "loadingText": "Loading your notification settings",
+    "emptyTitle": "No alerts to set yet",
+    "emptyText": "Alerts appear here once you follow a project or a person.",
+    "addLabel": "Follow a project",
+    "failedTitle": "These settings did not load",
+    "failedText": "Check your connection, then try again. Nothing was changed.",
+    "retryLabel": "Try again",
+    "agentSection": "notifications",
+    "agentKey": "digest",
+    "proposalText": "Your assistant suggests turning the weekly digest off.",
+    "acceptLabel": "Accept",
+    "declineLabel": "Not now",
+    "changedText": "Your assistant turned the weekly digest on.",
+    "waitingText": "This change waits for your answer.",
+    "waitingNote": "Your assistant is waiting for your answer on one change.",
+    "undoLabel": "Undo",
+    "currentKey@long": "notifications",
+    "agentSection@long": "notifications",
+    "agentKey@long": "digest"
+  },
+  "SettingsSection:many": [
+    { "key": "account", "label": "Account", "detail": "Your name, email and password." },
+    { "key": "notifications", "label": "Notifications", "detail": "What reaches you, where, and when it stays quiet." },
+    { "key": "privacy", "label": "Privacy", "detail": "Who sees what you share." },
+    { "key": "appearance", "label": "Appearance", "detail": "Light, dark and the size of text." },
+    { "key": "assistant", "label": "Assistant", "detail": "What your assistant may do for you." }
+  ],
+  "SettingsSection:empty": [
+    { "key": "account", "label": "Account", "detail": "Your name, email and password." },
+    { "key": "notifications", "label": "Notifications", "detail": "What reaches you, where, and when it stays quiet." },
+    { "key": "privacy", "label": "Privacy", "detail": "Who sees what you share." },
+    { "key": "appearance", "label": "Appearance", "detail": "Light, dark and the size of text." },
+    { "key": "assistant", "label": "Assistant", "detail": "What your assistant may do for you." }
+  ],
+  "SettingsSection:loading": [
+    { "key": "account", "label": "Account", "detail": "Your name, email and password." },
+    { "key": "notifications", "label": "Notifications", "detail": "What reaches you, where, and when it stays quiet." },
+    { "key": "privacy", "label": "Privacy", "detail": "Who sees what you share." },
+    { "key": "appearance", "label": "Appearance", "detail": "Light, dark and the size of text." },
+    { "key": "assistant", "label": "Assistant", "detail": "What your assistant may do for you." }
+  ],
+  "SettingsSection:failed": [
+    { "key": "account", "label": "Account", "detail": "Your name, email and password." },
+    { "key": "notifications", "label": "Notifications", "detail": "What reaches you, where, and when it stays quiet." },
+    { "key": "privacy", "label": "Privacy", "detail": "Who sees what you share." },
+    { "key": "appearance", "label": "Appearance", "detail": "Light, dark and the size of text." },
+    { "key": "assistant", "label": "Assistant", "detail": "What your assistant may do for you." }
+  ],
+  "SettingsSection:long": [
+    { "key": "account", "label": "Account and sign-in", "detail": "" },
+    { "key": "notifications", "label": "Notifications, reminders and the quiet hours that hold them back", "detail": "Everything that may reach you, on which of your devices, at which hours of the day, and what waits until morning instead of waking you up" },
+    { "key": "privacy", "label": "Privacy and data sharing with other people", "detail": "" },
+    { "key": "assistant", "label": "Assistant", "detail": "" }
+  ],
+  "SettingsScreenGroup:many": [
+    { "key": "email", "title": "Email", "footer": "Sent to the address on your account.", "rows": [
+      { "key": "digest", "kind": "switch", "label": "Weekly digest", "detail": "A summary of your week, each Monday.", "value": "", "on": true },
+      { "key": "mentions", "kind": "switch", "label": "Mentions", "detail": "When someone names you in a comment.", "value": "", "on": true },
+      { "key": "news", "kind": "switch", "label": "Product news", "detail": "", "value": "", "on": false }
+    ] },
+    { "key": "device", "title": "On this device", "footer": "Only this phone or computer.", "rows": [
+      { "key": "sound", "kind": "value", "label": "Sound", "detail": "", "value": "Chime", "on": false },
+      { "key": "quiet", "kind": "link", "label": "Quiet hours", "detail": "Nothing makes a sound from 22:00 to 07:00.", "value": "", "on": false },
+      { "key": "reset", "kind": "danger", "label": "Turn every alert off", "detail": "", "value": "", "on": false }
+    ] }
+  ],
+  "SettingsScreenGroup:long": [
+    { "key": "email", "title": "Email to the address on your account, and to the second address you added for work", "footer": "Sent to the address on your account, and copied to your work address when you turn that on in your account settings.", "rows": [
+      { "key": "digest", "kind": "switch", "label": "A very long label for a switch row, written the way a person might really write it, going past the width of a narrow phone", "detail": "A very long detail line under the switch, as a person might really write it, that wraps to keep the switch in reach", "value": "", "on": true },
+      { "key": "sound", "kind": "value", "label": "A very long label for one setting, the way a person might really name it", "detail": "A very long detail line, as a person might really write it, that has to wrap instead of pushing the row apart", "value": "A very long chosen value", "on": false }
+    ] }
+  ],
   "props:MailScreen": {
     "title": "Mail",
     "mark": "M",
