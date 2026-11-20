@@ -3,7 +3,10 @@
 // state paths must be equal; each side's `expect` paths must hold, and the
 // agent's calls must answer the listed outcome and value.
 //
-//   bun tools/both-doors.mjs <app dir> [web|macos|ios]
+//   bun tools/both-doors.mjs <app dir> [web|macos|ios] [--only <prefix>]
+//
+// --only runs only the cases whose name starts with the prefix ("SettingsGroup: "), and fails when none
+// does: a piece's journey (the playground's journeys/blocks and journeys/screens) names its cases "<Piece>: …".
 //
 // A case: { "name", "person": [ops], "agent": [ops], "same": [paths],
 //   "expect": {path: value}, "expectPerson": {path: value},
@@ -16,8 +19,20 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { args, at, drive, driveAll, runner, same } from "./lib.mjs";
 
-const { app, host } = args();
-const cases = JSON.parse(readFileSync(resolve(app, "both-doors.json"), "utf8"));
+const argv = process.argv.slice(2);
+const flag = argv.indexOf("--only");
+const only = flag >= 0 ? argv[flag + 1] : null;
+if (flag >= 0 && !only) {
+  console.error("usage: bun tools/both-doors.mjs <app dir> [web|macos|ios] [--only <prefix>]");
+  process.exit(2);
+}
+const { app, host } = args(flag >= 0 ? argv.filter((_, i) => i !== flag && i !== flag + 1) : argv);
+const all = JSON.parse(readFileSync(resolve(app, "both-doors.json"), "utf8"));
+const cases = only == null ? all : all.filter((c) => c.name.startsWith(only));
+if (only != null && !cases.length) {
+  console.log(`both-doors: no case in ${resolve(app, "both-doors.json")} is named "${only}…": FAILED`);
+  process.exit(1);
+}
 const { check, run } = runner("both-doors");
 
 for (const c of cases) {
