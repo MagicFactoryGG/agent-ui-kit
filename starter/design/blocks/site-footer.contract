@@ -114,7 +114,7 @@ component FooterNote
           svg viewBox="0 0 24 24" width="blocks.footer-mark-icon" height="blocks.footer-mark-icon" fill="none" stroke="theme.color.ink-muted" flex-shrink=0
             circle cx=12 cy=12 r=10.5 stroke-width=1.5 stroke-dasharray="3 3"
       column flex=1 min-width=0 gap="theme.space.md" align-items="flex-start" max-width="blocks.footer-measure"
-        text text testId=testId role=(kind == "failed" ? "alert" : "status") overflow-wrap="break-word" font="theme.type.body" color=(kind == "failed" ? "theme.color.ink" : "theme.color.ink-muted")
+        text text testId=testId role=(kind == "failed" ? "alert" : "status") text-wrap="balance" overflow-wrap="break-word" font="theme.type.body" color=(kind == "failed" ? "theme.color.ink" : "theme.color.ink-muted")
         children
 
 component SiteFooter
@@ -157,7 +157,7 @@ component SiteFooter
                   text productMark.slice(0, 2) white-space="nowrap" font="theme.type.label" color="theme.color.accent-ink"
               text productName testId=`${testId}-name` flex=1 min-width=0 padding-top="theme.space.xs" overflow-wrap="break-word" font="theme.type.title" color="theme.color.ink"
             if tagline != ""
-              text tagline testId=`${testId}-tagline` max-width="blocks.footer-measure" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
+              text tagline testId=`${testId}-tagline` max-width="blocks.footer-measure" text-wrap="balance" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
           // The columns (or the state that stands in their place), and the agent's band above them.
           column testId=`${testId}-nav` role="navigation" aria-label=navLabel flex=4 min-width="blocks.footer-col-min" box-sizing="border-box" gap="theme.space.xl"
             if agent == "proposed"

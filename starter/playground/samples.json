@@ -406,6 +406,7 @@
     "failedText": "The footer's links could not be loaded. Check your connection, then try again.",
     "retryLabel": "Try again",
     "agentKey": "status",
+    "agentKey@long": "status",
     "agentNote": "Your assistant added System status under Resources.",
     "proposedNote": "Your assistant suggests adding System status under Resources.",
     "acceptLabel": "Accept",
