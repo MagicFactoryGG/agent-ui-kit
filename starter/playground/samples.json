@@ -651,5 +651,147 @@
       "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1200' width='800' height='1200'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23cfe3d8'/%3E%3Cstop offset='1' stop-color='%238fb9a6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='1200' fill='url(%23s)'/%3E%3Cpath d='M120 520 l130 360 h-260 Z' fill='%235d8f78'/%3E%3Cpath d='M120 660 l170 380 h-340 Z' fill='%235d8f78'/%3E%3Cpath d='M330 460 l130 360 h-260 Z' fill='%234f8069'/%3E%3Cpath d='M330 600 l170 380 h-340 Z' fill='%234f8069'/%3E%3Cpath d='M560 540 l130 360 h-260 Z' fill='%235d8f78'/%3E%3Cpath d='M560 680 l170 380 h-340 Z' fill='%235d8f78'/%3E%3Cpath d='M700 480 l130 360 h-260 Z' fill='%234f8069'/%3E%3Cpath d='M700 620 l170 380 h-340 Z' fill='%234f8069'/%3E%3Cpath d='M40 700 l130 360 h-260 Z' fill='%232f5a49'/%3E%3Cpath d='M40 840 l170 380 h-340 Z' fill='%232f5a49'/%3E%3Cpath d='M250 660 l130 360 h-260 Z' fill='%232a5242'/%3E%3Cpath d='M250 800 l170 380 h-340 Z' fill='%232a5242'/%3E%3Cpath d='M470 720 l130 360 h-260 Z' fill='%232f5a49'/%3E%3Cpath d='M470 860 l170 380 h-340 Z' fill='%232f5a49'/%3E%3Cpath d='M680 650 l130 360 h-260 Z' fill='%232a5242'/%3E%3Cpath d='M680 790 l170 380 h-340 Z' fill='%232a5242'/%3E%3Crect y='1060' width='800' height='140' fill='%231f3d32'/%3E%3C/svg%3E",
       "caption": "Pines on the long walk up to the Moorish castle above Sintra, where the path climbs through the fog and the trees close over it for most of an hour"
     }
+  ],
+  "props:ListDetail": {
+    "title": "Studio",
+    "listTitle": "Projects",
+    "loadingText": "Loading projects…",
+    "detailLoadingText": "Loading this project…",
+    "emptyText": "No projects yet. Start one and it will be listed here.",
+    "createLabel": "New project",
+    "failedText": "Your projects did not load. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "backLabel": "Projects",
+    "pickText": "Choose a project to see its details.",
+    "factsTitle": "Details",
+    "factsEmptyText": "No details yet.",
+    "notesTitle": "Notes",
+    "activityTitle": "Activity",
+    "activityEmptyText": "No activity yet.",
+    "primaryLabel": "Edit project",
+    "secondaryLabel": "Share",
+    "proposedNote": "Your assistant suggests moving the launch to March 14.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Reject",
+    "proposedMark": "Your assistant suggests a change",
+    "changedNote": "Your assistant set the owner to Priya Nair.",
+    "changedMark": "Changed by your assistant",
+    "undoLabel": "Undo",
+    "chosenKey": "harbour",
+    "notes": "The spring campaign for the harbour cafés: posters, a short film for the ferry screens and a printed map. Print files go to the press on the first of the month.",
+    "chosenKey@long": "harbour",
+    "primaryLabel@long": "Edit project",
+    "secondaryLabel@long": "Share",
+    "backLabel@long": "Projects",
+    "acceptLabel@long": "Accept",
+    "rejectLabel@long": "Reject",
+    "undoLabel@long": "Undo",
+    "createLabel@long": "New project",
+    "retryLabel@long": "Try again",
+    "chosenKey@one": "harbour"
+  },
+  "ListDetailItem:many": [
+    {
+      "key": "atlas",
+      "title": "Atlas rebrand",
+      "detail": "Identity, signage and the new site",
+      "status": "In review",
+      "href": "/"
+    },
+    {
+      "key": "harbour",
+      "title": "Harbour cafés spring campaign",
+      "detail": "Posters, ferry film and a printed map",
+      "status": "In progress",
+      "href": "/"
+    },
+    {
+      "key": "north",
+      "title": "North Line timetable",
+      "detail": "Print and screen editions",
+      "status": "Scheduled",
+      "href": "/"
+    },
+    {
+      "key": "orchard",
+      "title": "Orchard annual report",
+      "detail": "Forty pages, two languages",
+      "status": "Draft",
+      "href": "/"
+    },
+    {
+      "key": "lumen",
+      "title": "Lumen app onboarding",
+      "detail": "Six screens and their illustrations",
+      "status": "Done",
+      "href": "/"
+    }
+  ],
+  "ListDetailItem:one": [
+    {
+      "key": "harbour",
+      "title": "Harbour cafés spring campaign",
+      "detail": "Posters, ferry film and a printed map",
+      "status": "In progress",
+      "href": "/"
+    }
+  ],
+  "ListDetailItem:long": [
+    {
+      "key": "harbour",
+      "title": "Harbour cafés spring campaign for the six cafés along the river, from Cais do Sodré to Belém",
+      "detail": "Posters for every café window, a ninety-second film for the ferry screens and a folded printed map of the walk between them",
+      "status": "In progress with the printer",
+      "href": "/"
+    },
+    {
+      "key": "atlas",
+      "title": "Atlas rebrand",
+      "detail": "Identity, signage, the new site and the guidelines that every agency working with Atlas will follow from next year",
+      "status": "In review",
+      "href": "/"
+    }
+  ],
+  "Fact:many": [
+    {
+      "key": "owner",
+      "label": "Owner",
+      "value": "Priya Nair"
+    },
+    {
+      "key": "client",
+      "label": "Client",
+      "value": "Harbour Cafés Co-op"
+    },
+    {
+      "key": "launch",
+      "label": "Launch",
+      "value": "March 7"
+    },
+    {
+      "key": "budget",
+      "label": "Budget",
+      "value": "€18,400"
+    }
+  ],
+  "Event:many": [
+    {
+      "key": "proof",
+      "who": "Sam Rivera",
+      "what": "Sent the poster proofs to the co-op",
+      "when": "Today, 10:12"
+    },
+    {
+      "key": "film",
+      "who": "Priya Nair",
+      "what": "Approved the ferry film's final cut",
+      "when": "Yesterday, 17:30"
+    },
+    {
+      "key": "kickoff",
+      "who": "Jonas Weber",
+      "what": "Opened the project",
+      "when": "Feb 2"
+    }
   ]
 }
