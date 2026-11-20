@@ -1,7 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf, isMarked from "@agent-ui-kit/agent"
-use Fact, Event, Step, Message, NavEntry, Record from "__SCOPE__/blocks"
+use Fact, Event, Step, Message, NavEntry, Record, Feature from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -78,6 +78,12 @@ fn queueRecords(): Record[] = [
 ]
 fn pickWord(on: bool): string = on ? "selected" : "unselected"
 fn pickAct(key: string, on: bool): Act = Act(tool="selectRecord", door="agent", key=key, title=recordTitle(key), value=pickWord(on), did=`Your assistant ${on ? "selected" : "cleared"} “${recordTitle(key)}”.`, asks=`Your assistant suggests ${on ? "selecting" : "clearing"} “${recordTitle(key)}”.`, will=`Your assistant will ${on ? "select" : "clear"} “${recordTitle(key)}” in 5 seconds.`)
+// FeatureGrid: a product page's features section, empty until its first feature is added. The section is one value
+// in the ledger: "empty", or "sync" once its first feature, Live sync, is in it. Adding it is the section's real act:
+// the empty tray's Add a feature for a person, addFeature for the agent, who then sees the feature it added ringed.
+fn firstFeatures(): Feature[] = [Feature(key="sync", title="Live sync", detail="Every change reaches each of your devices in a moment, even on a slow connection.")]
+fn featuresText(features: string): string = features == "sync" ? "sync\tLive sync" : ""
+fn addFeatureAct(): Act = Act(tool="addFeature", door="agent", key="features", title="Features", value="sync", did="Your assistant added Live sync to the features.", asks="Your assistant suggests adding Live sync to the features.", will="Your assistant will add Live sync to the features in 5 seconds.")
 
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
@@ -87,7 +93,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="continueOnboarding", title="Workspace setup", sentence="Finishes the setup step the person is on and moves on to the next.", floor="recorded", reach="self", secret=false),
   AgentTool(name="markMessage", title="Inbox", sentence="Marks a message in the inbox read or unread.", floor="recorded", reach="self", secret=false),
   AgentTool(name="addHome", title="Menu", sentence="Adds Home to the empty menu.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="selectRecord", title="Deploy queue", sentence="Selects a record in the deploy queue, or clears it.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="selectRecord", title="Deploy queue", sentence="Selects a record in the deploy queue, or clears it.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="addFeature", title="Features", sentence="Adds the first feature, Live sync, to the empty features section.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -97,5 +104,6 @@ fn startValues(): Value[] = [
   Value(key="onboarding", value="profile"),
   Value(key="mail-review", value="unread"), Value(key="mail-report", value="read"), Value(key="mail-lunch", value="unread"),
   Value(key="menu", value="empty"),
-  Value(key="audit", value="unselected"), Value(key="rotate", value="unselected"), Value(key="invoices", value="unselected")
+  Value(key="audit", value="unselected"), Value(key="rotate", value="unselected"), Value(key="invoices", value="unselected"),
+  Value(key="features", value="empty")
 ]

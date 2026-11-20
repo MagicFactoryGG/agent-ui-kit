@@ -76,6 +76,12 @@
             "title": "Selected"
           }
         }
+      },
+      "readFeatures": {
+        "title": "Read Features"
+      },
+      "addFeature": {
+        "title": "Add Feature"
       }
     }
   }
