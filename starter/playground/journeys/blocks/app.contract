@@ -55,6 +55,8 @@ component App
   tool readIncident reads "The incident on screen: its title, then its status (open or resolved), tab-separated." = readIncident
     returns incidentText
   tool setIncidentStatus writes idempotent closed "Mark the incident open or resolved. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readIncident." = setIncidentStatus
+    returns book.answer
+    fails when book.answer == "off"
   tool readFiles reads "The files area's state: empty, loading or failed." = readFiles
     returns valueOf(book, "files")
   tool loadFiles writes idempotent closed "Load the files area again, as its Try again does. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readFiles." = loadFiles
