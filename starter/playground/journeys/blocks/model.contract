@@ -1,7 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf, isMarked from "@agent-ui-kit/agent"
-use Fact, Event, Step, Message, HeroPoint from "__SCOPE__/blocks"
+use Fact, Event, Step, Message, NavEntry, Record, HeroPoint from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -30,6 +30,11 @@ fn incidentEvents(): Event[] = [
 fn statusAct(status: string): Act = Act(tool="setIncidentStatus", door="agent", key="incident", title="Incident status", value=status, did=`Your assistant marked the incident ${status}.`, asks=`Your assistant suggests marking the incident ${status}.`, will=`Your assistant will mark the incident ${status} in 5 seconds.`)
 // StatePanel: the files area, whose last load failed; its one act starts the load again (its value: loading).
 fn loadAct(tool: string): Act = Act(tool=tool, door="agent", key="files", title="Your files", value="loading", did="Your assistant is loading your files again.", asks="Your assistant suggests loading your files again.", will="Your assistant will load your files again in 5 seconds.")
+// SideNav: a new workspace's menu, empty until its first place is added; the menu is one value in the ledger:
+// "empty", or "home" once Home is in it.
+fn homeEntries(): NavEntry[] = [NavEntry(key="home", label="Home", href="", group="", badge=0, current=true)]
+fn menuText(menu: string): string = menu == "home" ? "home\tHome" : ""
+fn addHomeAct(): Act = Act(tool="addHome", door="agent", key="menu", title="Menu", value="home", did="Your assistant added Home to the menu.", asks="Your assistant suggests adding Home to the menu.", will="Your assistant will add Home to the menu in 5 seconds.")
 
 // OnboardingSteps: a workspace's setup; the value is the step the person is on ("done" past the last). Continue
 // moves it on one step, Back one step back; the agent continues past a step it names, so a call twice moves once.
@@ -63,6 +68,17 @@ fn mailLedgerKeys(): string[] = mailKeys().map(k => mailKey(k))
 fn mailMarkedKey(l: Ledger): string = mailKeys().filter(k => isMarked(l, mailKey(k))).slice(0, 1).join("")
 fn readAct(key: string, read: bool): Act = Act(tool="markMessage", door="agent", key=mailKey(key), title=mailSubject(key), value=readWord(read), did=`Your assistant marked ${mailFrom(key)}'s message ${readWord(read)}.`, asks=`Your assistant suggests marking ${mailFrom(key)}'s message ${readWord(read)}.`, will=`Your assistant will mark ${mailFrom(key)}'s message ${readWord(read)} in 5 seconds.`)
 
+// DataTable: the deploy queue; each record's selection (selected or not) is one value both doors set.
+fn recordKeys(): string[] = ["audit", "rotate", "invoices"]
+fn recordTitle(key: string): string = key == "audit" ? "Move the 2024 audit log to cold storage" : key == "rotate" ? "Rotate the payments API keys" : key == "invoices" ? "Resend the October invoices" : key
+fn queueRecords(): Record[] = [
+  Record(key="audit", title=recordTitle("audit"), status="In review", tone="progress", owner="Ana Sousa", updated="Today", href="#audit"),
+  Record(key="rotate", title=recordTitle("rotate"), status="Blocked", tone="attention", owner="Rui Costa", updated="Yesterday", href="#rotate"),
+  Record(key="invoices", title=recordTitle("invoices"), status="Done", tone="done", owner="Mei Lin", updated="Mon", href="#invoices")
+]
+fn pickWord(on: bool): string = on ? "selected" : "unselected"
+fn pickAct(key: string, on: bool): Act = Act(tool="selectRecord", door="agent", key=key, title=recordTitle(key), value=pickWord(on), did=`Your assistant ${on ? "selected" : "cleared"} “${recordTitle(key)}”.`, asks=`Your assistant suggests ${on ? "selecting" : "clearing"} “${recordTitle(key)}”.`, will=`Your assistant will ${on ? "select" : "clear"} “${recordTitle(key)}” in 5 seconds.`)
+
 // Hero: a planning product's landing page; its one act is the primary, Start free trial. The value is the
 // trial's state ("off", then "started"): the person's tap and the agent's startTrial set the same value, and the
 // agent's is recorded, shown on the hero with one Undo.
@@ -81,6 +97,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="loadFiles", title="Your files", sentence="Loads the files area again.", floor="recorded", reach="self", secret=false),
   AgentTool(name="continueOnboarding", title="Workspace setup", sentence="Finishes the setup step the person is on and moves on to the next.", floor="recorded", reach="self", secret=false),
   AgentTool(name="markMessage", title="Inbox", sentence="Marks a message in the inbox read or unread.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="addHome", title="Menu", sentence="Adds Home to the empty menu.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="selectRecord", title="Deploy queue", sentence="Selects a record in the deploy queue, or clears it.", floor="recorded", reach="self", secret=false),
   AgentTool(name="startTrial", title="Free trial", sentence="Starts the free trial, as the page's Start free trial does.", floor="recorded", reach="self", secret=false)
 ]
 
@@ -90,5 +108,7 @@ fn startValues(): Value[] = [
   Value(key="files", value="failed"),
   Value(key="onboarding", value="profile"),
   Value(key="mail-review", value="unread"), Value(key="mail-report", value="read"), Value(key="mail-lunch", value="unread"),
+  Value(key="menu", value="empty"),
+  Value(key="audit", value="unselected"), Value(key="rotate", value="unselected"), Value(key="invoices", value="unselected"),
   Value(key="trial", value="off")
 ]
