@@ -26,8 +26,9 @@
 //   line continued under the grid, so the mark and the sentence read as one unit (a voice has no screen; the
 //   sentence names the stat itself). Whatever waits on the person is answered in its two words right there
 //   (`yesLabel`/`noLabel`, Proposal's shape — accept or reject a proposal, keep or undo a change, now or
-//   stop a wait; the app passes the pair in force, as the ledger's AnswerWords do). Nothing is marked when
-//   no key matches.
+//   stop a wait; the app passes the pair in force, as the ledger's AnswerWords do), one group that keeps the
+//   sentence's line on a desktop and, under blocks.stat-note-min, wraps beneath it at its own left edge.
+//   Nothing is marked when no key matches.
 //
 // States:
 //   data   many|loading|failed
@@ -120,8 +121,9 @@ component StatTiles
           for s in stats key=s.key
             StatTile(label=s.label, value=s.value, change=s.change, trend=s.trend, marked=(agent != "none" and s.key == agentKey), waiting=(agent == "waiting"), testId=`${testId}-${s.key}`)
         if agent != "none" and agentNote != ""
-          row role="status" align-items="center" gap="theme.space.md" padding-left="theme.space.lg" box-shadow=(agent == "waiting" ? "inset 3px 0 0 theme.color.caution" : "inset 3px 0 0 theme.color.accent")
-            text agentNote testId=`${testId}-note` flex=1 min-width=0 font="theme.type.body" color="theme.color.ink"
+          row role="status" flex-wrap="wrap" align-items="center" gap="theme.space.md" padding-left="theme.space.lg" box-shadow=(agent == "waiting" ? "inset 3px 0 0 theme.color.caution" : "inset 3px 0 0 theme.color.accent")
+            text agentNote testId=`${testId}-note` flex=1 min-width="blocks.stat-note-min" font="theme.type.body" color="theme.color.ink"
             if yesLabel != ""
-              ActionButton(label=noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId=`${testId}-no`)
-              ActionButton(label=yesLabel, kind="primary", interaction="idle", outcome="none", press=yes, testId=`${testId}-yes`)
+              row gap="theme.space.sm" flex-shrink=0
+                ActionButton(label=noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId=`${testId}-no`)
+                ActionButton(label=yesLabel, kind="primary", interaction="idle", outcome="none", press=yes, testId=`${testId}-yes`)
