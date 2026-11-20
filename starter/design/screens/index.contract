@@ -1,5 +1,8 @@
 // Screens: whole layouts. Each takes data, states and the app's actions; every word is a prop. Add one file
 // per screen and name it here.
 use ItemList, Item from "./item-list.contract"
+use OnboardingScreen, OnboardingAnswer from "./onboarding.contract"
 use MediaViewer, Media from "./media-viewer.contract"
 use AppShell, ShellRow, ShellViewport from "./app-shell.contract"
+use MailScreen, MailFolder, MailLetter, MailViewport from "./mail.contract"
+use ListDetail, ListDetailItem, ListDetailViewport from "./list-detail.contract"

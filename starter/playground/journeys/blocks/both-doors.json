@@ -1,0 +1,505 @@
+[
+  {
+    "name": "SettingsGroup: the weekly digest: the switch and setSetting reach the same value; the agent's is recorded and marked",
+    "person": [
+      "type notify-switch-digest false"
+    ],
+    "agent": [
+      "call setSetting {\"setting\":\"digest\",\"on\":false}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.0.value": "off",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": [
+        "digest"
+      ]
+    },
+    "expectPerson": {
+      "book.values.0.value": "off",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "DetailPanel: the incident's status: Mark resolved and setIncidentStatus reach the same value; the agent's is recorded and marked",
+    "person": [
+      "tap incident-primary"
+    ],
+    "agent": [
+      "call setIncidentStatus {\"status\":\"resolved\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.3.value": "resolved",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "incident",
+      "book.marked": [
+        "incident"
+      ]
+    },
+    "expectPerson": {
+      "book.values.3.value": "resolved",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "StatePanel: the files failed to load: Try again and loadFiles reach the same loading state; the agent's is recorded and marked",
+    "person": [
+      "tap files-action"
+    ],
+    "agent": [
+      "call loadFiles {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.4.value": "loading",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.was": "failed",
+      "book.marked": [
+        "files"
+      ]
+    },
+    "expectPerson": {
+      "book.values.4.value": "loading",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "OnboardingSteps: the workspace setup: Continue and continueOnboarding move the person on to the same step; the agent's is recorded and marked",
+    "person": [
+      "tap onboarding-continue"
+    ],
+    "agent": [
+      "call continueOnboarding {\"step\":\"profile\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.5.value": "team",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "onboarding",
+      "book.changes.0.was": "profile",
+      "book.marked": [
+        "onboarding"
+      ],
+      "setupMarked": true,
+      "setupText": "team\tInvite your team"
+    },
+    "expectPerson": {
+      "book.values.5.value": "team",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "setupMarked": false
+    }
+  },
+  {
+    "name": "OnboardingSteps: a step the person is not on: continueOnboarding answers not-current and moves nothing, as no tap does",
+    "person": [],
+    "agent": [
+      "call continueOnboarding {\"step\":\"team\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "failed",
+        "not-current"
+      ]
+    ],
+    "expect": {
+      "book.values.5.value": "profile",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "MessageList: the chosen message: Mark as read and markMessage reach the same read state; the agent's is recorded and marked on its row",
+    "person": [
+      "resize 1280x900",
+      "tap mail-pane-open"
+    ],
+    "agent": [
+      "call markMessage {\"message\":\"review\",\"read\":true}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.6.key": "mail-review",
+      "book.values.6.value": "read",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "mail-review",
+      "book.changes.0.was": "unread",
+      "book.marked": [
+        "mail-review"
+      ],
+      "mailAgentKey": "review",
+      "mailChosenUnread": false
+    },
+    "expectPerson": {
+      "book.values.6.value": "read",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "mailAgentKey": "",
+      "mailChosenUnread": false
+    }
+  },
+  {
+    "name": "SideNav: the empty menu: Add Home and addHome reach the same menu; the agent's is recorded and marked",
+    "person": [
+      "tap nav-add"
+    ],
+    "agent": [
+      "call addHome {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.9.value": "home",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.was": "empty",
+      "book.marked": [
+        "menu"
+      ]
+    },
+    "expectPerson": {
+      "book.values.9.value": "home",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "DataTable: a record's selection: its checkbox and selectRecord reach the same value; the agent's is recorded and marked",
+    "person": [
+      "tap queue-check-rotate"
+    ],
+    "agent": [
+      "call selectRecord {\"record\":\"rotate\",\"selected\":true}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.11.value": "selected",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "rotate",
+      "book.changes.0.was": "unselected",
+      "book.marked": [
+        "rotate"
+      ]
+    },
+    "expectPerson": {
+      "book.values.11.value": "selected",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "DataTable: a record selected, then cleared: two checkbox taps and two selectRecord calls end at the same value",
+    "person": [
+      "tap queue-check-audit",
+      "tap queue-check-audit"
+    ],
+    "agent": [
+      "call selectRecord {\"record\":\"audit\",\"selected\":true}",
+      "call selectRecord {\"record\":\"audit\",\"selected\":false}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.10.value": "unselected",
+      "book.changes.length": 2,
+      "book.changes.0.was": "selected",
+      "book.changes.0.now": "unselected",
+      "book.marked": [
+        "audit"
+      ]
+    },
+    "expectPerson": {
+      "book.values.10.value": "unselected",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "FeatureGrid: the empty features section: Add a feature and addFeature reach the same first feature; the agent's is recorded and ringed",
+    "person": [
+      "tap features-add"
+    ],
+    "agent": [
+      "call addFeature {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.13.key": "features",
+      "book.values.13.value": "sync",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "features",
+      "book.changes.0.was": "empty",
+      "book.marked": [
+        "features"
+      ],
+      "featuresMarked": true
+    },
+    "expectPerson": {
+      "book.values.13.value": "sync",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "featuresMarked": false
+    }
+  },
+  {
+    "name": "Pricing: a plan chosen: the Team card's button and choosePlan reach the same plan; the agent's is recorded and marked on the card",
+    "person": [
+      "tap pricing-choose-team"
+    ],
+    "agent": [
+      "call choosePlan {\"plan\":\"team\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.14.key": "plan",
+      "book.values.14.value": "team",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "plan",
+      "book.changes.0.was": "none",
+      "book.marked": [
+        "plan"
+      ],
+      "planMarked": true
+    },
+    "expectPerson": {
+      "book.values.14.value": "team",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "planMarked": false
+    }
+  },
+  {
+    "name": "Pricing: one plan, then another: two buttons and two choosePlan calls end on the same plan",
+    "person": [
+      "tap pricing-choose-starter",
+      "tap pricing-choose-business"
+    ],
+    "agent": [
+      "call choosePlan {\"plan\":\"starter\"}",
+      "call choosePlan {\"plan\":\"business\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.14.value": "business",
+      "book.changes.length": 2,
+      "book.changes.0.was": "starter",
+      "book.changes.0.now": "business",
+      "book.marked": [
+        "plan"
+      ]
+    },
+    "expectPerson": {
+      "book.values.14.value": "business",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "Hero: the free trial: Start free trial and startTrial reach the same started trial; the agent's is recorded and marked on the hero",
+    "person": [
+      "tap trial-primary"
+    ],
+    "agent": [
+      "call startTrial {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.15.key": "trial",
+      "book.values.15.value": "started",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "trial",
+      "book.changes.0.was": "off",
+      "book.marked": [
+        "trial"
+      ],
+      "trialMarked": true,
+      "trialOn": true
+    },
+    "expectPerson": {
+      "book.values.15.value": "started",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "trialMarked": false,
+      "trialOn": true
+    }
+  },
+  {
+    "name": "Hero: the agent's start taken back: the hero's Undo returns the trial to off, as if no one had pressed",
+    "person": [],
+    "agent": [
+      "call startTrial {}",
+      "tap trial-undo"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.15.key": "trial",
+      "book.values.15.value": "off",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "trialMarked": false
+    }
+  },
+  {
+    "name": "SiteFooter: the footer with no links: Add links and addFooterLinks reach the same first column; the agent's is recorded and its link marked",
+    "person": [
+      "tap footer-add"
+    ],
+    "agent": [
+      "call addFooterLinks {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.16.key": "footer",
+      "book.values.16.value": "help",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "footer",
+      "book.changes.0.was": "empty",
+      "book.marked": [
+        "footer"
+      ],
+      "footerMarked": true
+    },
+    "expectPerson": {
+      "book.values.16.key": "footer",
+      "book.values.16.value": "help",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "footerMarked": false
+    }
+  }
+]
