@@ -4,5 +4,5 @@
   "private": true,
   "description": "Work in progress: new components and blocks start here, with their states declared. When final, they move to the design repo; nothing ships from here.",
   "exports": { ".": "./index.contract" },
-  "dependencies": { "__SCOPE__/theme": "file:__DESIGN__/theme", "__SCOPE__/components": "file:__DESIGN__/components" }
+  "peerDependencies": { "__SCOPE__/theme": "*", "__SCOPE__/components": "*" }
 }

@@ -4,5 +4,5 @@
   "private": true,
   "description": "Blocks: components arranged (a top bar, a section, a sheet). No words: every word is a prop.",
   "exports": { ".": "./index.contract" },
-  "dependencies": { "__SCOPE__/theme": "workspace:*", "__SCOPE__/components": "workspace:*" }
+  "peerDependencies": { "__SCOPE__/theme": "*", "__SCOPE__/components": "*" }
 }
