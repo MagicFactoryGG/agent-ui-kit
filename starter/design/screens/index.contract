@@ -1,3 +1,4 @@
 // Screens: whole layouts. Each takes data, states and the app's actions; every word is a prop. Add one file
 // per screen and name it here.
 use ItemList, Item from "./item-list.contract"
+use MediaViewer, Media from "./media-viewer.contract"
