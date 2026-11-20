@@ -102,4 +102,3 @@ theme
   blocks.faq-bone: length = 12px
   blocks.faq-bone-thin: length = 10px
   blocks.faq-line: length = 21px  // the body type's line (15px at 1.4): a ghost answer line holds it
-  blocks.faq-ask-min: length = 240px  // the ask's sentence keeps this much beside its answers, else they wrap under it
