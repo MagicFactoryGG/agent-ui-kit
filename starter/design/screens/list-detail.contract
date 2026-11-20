@@ -1,6 +1,6 @@
 // ListDetail: a list beside the detail of the chosen item. The bar names the screen. On a desktop the list keeps
 // about a third of the width (34%, held between screens.list-detail-list-min and -max) on its own scroll, its rows
-// set in from the column's edges: title, then its detail, the chosen row a fill band with the accent's short rail
+// set in from the column's edges on the surface ground: title, then its detail, the chosen row a fill band with the accent's short rail
 // at its start and `aria-current` (a fill alone never says it: a theme may give fill and page one colour). The one
 // meaningful line divides list from detail. The detail, on its own scroll, is the kit's DetailPanel (title and
 // status tag, the record's facts as label-value rows, its notes and activity, two actions), under the place where
@@ -245,7 +245,7 @@ component ListDetail
           ListDetailList(listTitle=listTitle, loadingText=loadingText, items=items, chosenKey=chosenKey, agentNote=mark, loading=loading, push=true, pulse=pulse)
       else
         row flex=1 min-height=0 align-items="stretch"
-          scroll id="list-detail-list" width="34%" min-width="screens.list-detail-list-min" max-width="screens.list-detail-list-max" flex-shrink=0 border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line"
+          scroll id="list-detail-list" width="34%" min-width="screens.list-detail-list-min" max-width="screens.list-detail-list-max" flex-shrink=0 background-color="theme.color.surface" border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line"
             ListDetailList(listTitle=listTitle, loadingText=loadingText, items=items, chosenKey=chosenKey, agentNote=mark, loading=loading, push=false, pulse=pulse)
           scroll id="list-detail-detail" flex=1 min-width=0
             column box-sizing="border-box" padding-left="theme.space.xl" padding-right="theme.space.xl" padding-top="theme.space.xl" padding-bottom="theme.space.xxl"
