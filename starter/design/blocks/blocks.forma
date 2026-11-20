@@ -8,7 +8,7 @@ theme
   blocks.stat-tile-height: length = 100px
   blocks.stat-tile-min: length = 160px
   blocks.stat-trend: length = 12px
-  blocks.stat-bar: length = 96px
+  blocks.stat-spin: length = 16px  // the platform activity mark beside the loading words, square as DetailPanel draws it
   blocks.stat-ghost-label: length = 96px
   blocks.stat-ghost-value: length = 128px
   blocks.stat-ghost-change: length = 72px

@@ -9,10 +9,11 @@
 // own habit — so a wide window keeps the group composed and an app's column caps the app's way. The group's
 // name, when the app gives one, speaks in the bar's own voice (the title type) above the cards.
 //
-// - data many|loading|failed. Loading keeps the group's shape: the platform's own activity bar and its words
-//   as one line flush with the row's own left edge, above ghost tiles of the resting shape drawn in the fill
-//   token and held to the resting row's own height (blocks.stat-tile-height, measured), so nothing shifts
-//   when the numbers land; hidden from a reader. Failed stands in the tiles' place as one banner of the
+// - data many|loading|failed. Loading keeps the group's shape: the platform's own activity mark (a square of
+//   blocks.stat-spin, as DetailPanel draws it, so it sits right beside its words) and the words as one line
+//   flush with the row's own left edge, above ghost tiles of the resting shape drawn in the fill token and
+//   held to the resting row's own height (blocks.stat-tile-height, measured), so nothing shifts when the
+//   numbers land; hidden from a reader. Failed stands in the tiles' place as one banner of the
 //   tiles' own shell, as wide as the row and as tall as one tile: the words in strong ink under the error's
 //   edge band (role="alert"; the red stays on the band, never on the words), the way on — `retryLabel`'s
 //   bordered button at the end, the banner's raised slab alone carrying the state, so no ghost lies about
@@ -108,7 +109,7 @@ component StatTiles
       else if data == "loading"
         column gap="theme.space.md"
           row role="status" align-items="center" gap="theme.space.sm"
-            progress aria-label=loadingText width="blocks.stat-bar" flex-shrink=0
+            progress aria-label=loadingText width="blocks.stat-spin" height="blocks.stat-spin" flex-shrink=0
             column flex=1 min-width=0
               Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-loading`)
           row flex-wrap="wrap" gap="theme.space.md" aria-hidden=true
