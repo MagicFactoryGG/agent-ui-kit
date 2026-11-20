@@ -3,9 +3,6 @@
 use ItemList, Item from "./item-list.contract"
 use OnboardingScreen, OnboardingAnswer from "./onboarding.contract"
 use MediaViewer, Media from "./media-viewer.contract"
-<<<<<<< HEAD
 use SettingsScreen, SettingsSection, SettingsScreenGroup from "./settings.contract"
-=======
 use MailScreen, MailFolder, MailLetter, MailViewport from "./mail.contract"
 use ListDetail, ListDetailItem, ListDetailViewport from "./list-detail.contract"
->>>>>>> origin/main

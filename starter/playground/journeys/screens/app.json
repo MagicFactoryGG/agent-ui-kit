@@ -9,7 +9,10 @@
       "readProjects": { "title": "Read Projects" },
       "openProject": { "title": "Open Project", "parameters": { "project": { "title": "Project" } } },
       "readSetup": { "title": "Read Setup" },
-      "fillAnswer": { "title": "Fill Answer", "parameters": { "answer": { "title": "Answer" }, "value": { "title": "Value" } } }
+      "fillAnswer": { "title": "Fill Answer", "parameters": { "answer": { "title": "Answer" }, "value": { "title": "Value" } } },
+      "readSettings": { "title": "Read Settings" },
+      "showSettingsSection": { "title": "Show Settings Section", "parameters": { "section": { "title": "Section" } } },
+      "setSetting": { "title": "Set Setting", "parameters": { "setting": { "title": "Setting" }, "on": { "title": "On" } } }
     }
   }
 }
