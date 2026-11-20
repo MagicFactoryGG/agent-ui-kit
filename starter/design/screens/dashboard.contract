@@ -121,12 +121,15 @@ component DashboardCard
       children
 
 // One number: what it counts, the number in the display step, then its change and what it is measured against.
+// Tiles start from a named width and share the row; a tile's least width is its number's own (a number has no
+// break inside it), held to the row's width, so a long number takes a row of its own instead of breaking its
+// decimals onto a second line. Only a number wider than the row breaks.
 component DashboardTile
   props
     stat: DashboardStat
     testId: string
   view
-    column role="listitem" testId=testId flex=1 min-width="screens.dashboard-tile-min" box-sizing="border-box" gap="theme.space.xs"
+    column role="listitem" testId=testId flex-grow=1 flex-shrink=1 flex-basis="screens.dashboard-tile-min" max-width="100%" box-sizing="border-box" gap="theme.space.xs"
       Words(text=stat.label, kind="caption", outcome="none", level=0, testId=`${testId}-label`)
       text stat.value testId=`${testId}-value` padding-top="theme.space.xs" padding-bottom="theme.space.xs" overflow-wrap="break-word" font="theme.type.display-compact" letter-spacing="theme.type.display-compact-tracking" color="theme.color.ink" font-variant-numeric="tabular-nums"
       row flex-wrap="wrap" column-gap="theme.space.xs" row-gap="theme.space.xs" align-items="flex-start"
@@ -140,7 +143,7 @@ component DashboardGhostTile
   props
     pulse: string
   view
-    column aria-hidden=true flex=1 min-width="screens.dashboard-tile-min" box-sizing="border-box" gap="theme.space.sm" animation=pulse
+    column aria-hidden=true flex-grow=1 flex-shrink=1 flex-basis="screens.dashboard-tile-min" max-width="100%" box-sizing="border-box" gap="theme.space.sm" animation=pulse
       box width="48%" height="screens.dashboard-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
       box width="72%" height="screens.dashboard-bone-value" background-color="theme.color.fill" border-radius="theme.radius.control"
       box width="56%" height="screens.dashboard-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
