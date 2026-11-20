@@ -95,6 +95,102 @@
     }
   },
   {
+    "name": "OnboardingSteps: the workspace setup: Continue and continueOnboarding move the person on to the same step; the agent's is recorded and marked",
+    "person": [
+      "tap onboarding-continue"
+    ],
+    "agent": [
+      "call continueOnboarding {\"step\":\"profile\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.5.value": "team",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "onboarding",
+      "book.changes.0.was": "profile",
+      "book.marked": [
+        "onboarding"
+      ],
+      "setupMarked": true,
+      "setupText": "team\tInvite your team"
+    },
+    "expectPerson": {
+      "book.values.5.value": "team",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "setupMarked": false
+    }
+  },
+  {
+    "name": "OnboardingSteps: a step the person is not on: continueOnboarding answers not-current and moves nothing, as no tap does",
+    "person": [],
+    "agent": [
+      "call continueOnboarding {\"step\":\"team\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "failed",
+        "not-current"
+      ]
+    ],
+    "expect": {
+      "book.values.5.value": "profile",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "MessageList: the chosen message: Mark as read and markMessage reach the same read state; the agent's is recorded and marked on its row",
+    "person": [
+      "resize 1280x900",
+      "tap mail-pane-open"
+    ],
+    "agent": [
+      "call markMessage {\"message\":\"review\",\"read\":true}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.6.key": "mail-review",
+      "book.values.6.value": "read",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "mail-review",
+      "book.changes.0.was": "unread",
+      "book.marked": [
+        "mail-review"
+      ],
+      "mailAgentKey": "review",
+      "mailChosenUnread": false
+    },
+    "expectPerson": {
+      "book.values.6.value": "read",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "mailAgentKey": "",
+      "mailChosenUnread": false
+    }
+  },
+  {
     "name": "SideNav: the empty menu: Add Home and addHome reach the same menu; the agent's is recorded and marked",
     "person": [
       "tap nav-add"
@@ -112,7 +208,7 @@
       ]
     ],
     "expect": {
-      "book.values.5.value": "home",
+      "book.values.9.value": "home",
       "book.changes.length": 1,
       "book.changes.0.mode": "recorded",
       "book.changes.0.was": "empty",
@@ -121,7 +217,7 @@
       ]
     },
     "expectPerson": {
-      "book.values.5.value": "home",
+      "book.values.9.value": "home",
       "book.changes.length": 0,
       "book.marked": []
     }
