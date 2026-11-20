@@ -13,6 +13,10 @@ UI comes from the design repo. Something new is made in the playground first.
   screen in `screens/`, each a playground app of its own (one app drawing every state of every piece outgrew the web
   bundle); the main app draws the components, each layer's `index.contract` pieces and `wip/`. `bun play.mjs web blocks`
   opens one; test one with `cd blocks && bun exact.mjs test web`.
+- **Every block and screen proves both doors** in `journeys/blocks` and `journeys/screens`: apps written by hand
+  (not generated) that place each piece in a small real use, with the agent's tools over the app's ledger. A piece
+  adds its use there and its cases to `both-doors.json`, named `"<Piece>: …"`; run them with
+  `bun <the kit>/tools/both-doors.mjs journeys/blocks web --only "<Piece>: "`. The guard holds them too.
 - **New things start in `wip/`.** Declare the piece's states as enum props named for their axis; the matrix
   (every state, every pair, the marked ones) is drawn from them. A piece with none is refused.
 - **The Theme is configuration:** edit `__DESIGN__/theme.json` and watch every host change. Move a token with

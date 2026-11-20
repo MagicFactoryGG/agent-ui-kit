@@ -1,0 +1,113 @@
+// Journeys: screens. Each screen in a small real use, so its two doors can be proved: a person's real input (a tap)
+// and an agent's tool reach the same value in the app's ledger (`book`, @agent-ui-kit/agent), and the agent's is
+// recorded and shown on the screen. `bun <kit>/tools/both-doors.mjs . web --only "MediaViewer: "` runs one
+// screen's cases from both-doors.json.
+//
+// A screen fills the window, so one shows at a time: `shown` names it, MediaViewer first. A screen adds: its
+// name to openScreen's enum (tools.contract), its values in model.contract (startValues, a row in agentTools with its
+// floor, its words), the person's door here (actions that call personSet), the agent's door in tools.contract (an
+// action that calls act) with a `tool` line below and a face in app.json, a branch in the view, and its cases,
+// named "<Screen>: …", each side starting with `call openScreen {"screen":"<Screen>"}` (the first needs none).
+// Keys in the ledger are unique in this app; a screen's own view state stays out of it.
+//
+// Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
+use Ledger, ledger, personSet, valueOf, isOn, isMarked, undoLatest from "@agent-ui-kit/agent"
+use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer from "__SCOPE__/screens"
+use Message from "__SCOPE__/blocks"
+use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys from "./model.contract"
+
+component App
+  members "./tools.contract"
+
+  state book: Ledger = ledger(startValues(), agentTools(), answerWords())
+  // Which screen fills the window (navigation, not data: no ledger, no record).
+  state shown = "MediaViewer"
+
+  // MediaViewer: an album; the picture shown is a value in the ledger, by key.
+  derive pictureKey = valueOf(book, "picture")
+  derive pictureIndex = albumKeys().indexOf(pictureKey)
+  derive albumText = album().map(m => `${m.key}\t${m.caption}${m.key == pictureKey ? "\tshown" : ""}`).join("\n")
+
+  // MailScreen: an inbox; each message's flag is a value in the ledger, so the rows, the open message's Flag and
+  // the agent's mark all read it.
+  derive mailMessages = mailBase().map(m => Message(m, flagged=isOn(book, flagKey(m.key))))
+  derive mailMarkedKey = mailKeys().filter(k => isMarked(book, flagKey(k))).slice(0, 1).join("")
+  derive mailText = mailMessages.map(m => `${m.key}\t${m.from}\t${m.subject}${m.flagged ? "\tflagged" : ""}${m.key == mailLetter().key ? "\topen" : ""}`).join("\n")
+
+  // The person's door: Previous, Next and a thumbnail all choose a picture by key.
+  action previousByPerson
+    book = personSet(book, "picture", stepKey(valueOf(book, "picture"), -1))
+  action nextByPerson
+    book = personSet(book, "picture", stepKey(valueOf(book, "picture"), 1))
+  action chooseByPerson(key: string)
+    book = personSet(book, "picture", key)
+  // The person's door on MailScreen: Flag on the open message turns its flag on or off.
+  action flagByPerson
+    book = personSet(book, flagKey(mailLetter().key), isOn(book, flagKey(mailLetter().key)) ? "off" : "on")
+  action undoByPerson
+    book = undoLatest(book)
+  // ListDetail: the project open beside the list is a value in the ledger, by key. On a phone the list or the
+  // detail fills the window (`opened`: navigation, not data, so no ledger and no record).
+  state opened = false
+  derive projectKey = valueOf(book, "project")
+  derive projectsText = projects().map(p => `${p.key}\t${p.title}${p.key == projectKey ? "\topen" : ""}`).join("\n")
+  // The person's door: a tap on a row opens its project by key; Back shows the list on a phone.
+  action openProjectByPerson(key: string)
+    book = personSet(book, "project", key)
+    opened = true
+  action backByPerson
+    opened = false
+
+  // OnboardingScreen: a workspace setup; the step the person is on and every answer are values in the ledger, so
+  // the fields, the step list and the agent's marks all read them. Its answers are this step's, filled from it.
+  derive setupStep = valueOf(book, "setup-step")
+  derive setupAt = setupStepKeys().indexOf(setupStep)
+  derive setupFields = setupAnswers().filter(a => setupStepOf(a.key) == setupStep).map(a => OnboardingAnswer(a, value=valueOf(book, setupKey(a.key)), byAgent=isMarked(book, setupKey(a.key))))
+  derive setupMarked = setupKeys().filter(k => isMarked(book, k)).length > 0
+  derive setupText = [`step\t${setupStep}`].concat(setupAnswers().map(a => `${a.key}\t${a.label}\t${valueOf(book, setupKey(a.key))}${isMarked(book, setupKey(a.key)) ? "\tfilled by you" : ""}`)).join("\n")
+  // The person's door: typing in a field writes its answer; Continue, Skip and Back move the step by key.
+  action answerByPerson(key: string, value: string)
+    book = personSet(book, setupKey(key), value)
+  action continueByPerson
+    book = personSet(book, "setup-step", setupStepFrom(valueOf(book, "setup-step"), 1))
+  action setupBackByPerson
+    book = personSet(book, "setup-step", setupStepFrom(valueOf(book, "setup-step"), -1))
+
+  // A retry and a proposal's answers: this use has none.
+  action ignore
+    book = book
+
+  // The agent's door. Answer words: saved, delayed, proposed, off, unknown-id.
+  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen or OnboardingScreen. Answers its name." = openScreen
+    returns shown
+  tool readAlbum reads "The album's pictures, one per line: id, caption, and shown on the one on screen, tab-separated." = readAlbum
+    returns albumText
+  tool showPicture writes idempotent closed "Show a picture of the album, by id from readAlbum. Answers saved or unknown-id." = showPicture
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off"
+  tool readMail reads "The inbox's messages, one per line: id, sender, subject, then flagged and open where they are, tab-separated." = readMail
+    returns mailText
+  tool flagMessage writes idempotent closed "Flag or unflag a message, by id from readMail. Answers saved or unknown-id." = flagMessage
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off"
+  tool readProjects reads "The projects, one per line: id, title, and open on the one shown beside the list, tab-separated." = readProjects
+    returns projectsText
+  tool openProject writes idempotent closed "Open a project beside the list, by id from readProjects. Answers saved or unknown-id." = openProject
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off"
+  tool readSetup reads "The workspace setup: the step the person is on (workspace, team or invite), then each answer, one per line: id, label, value, and filled by you where you wrote it, tab-separated." = readSetup
+    returns setupText
+  tool fillAnswer writes idempotent closed "Fill in an answer of the workspace setup, by id from readSetup, with the value to write. Answers saved or unknown-id." = fillAnswer
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off"
+
+  view
+    main testId="app" width="100%" height="100%"
+      if shown == "MediaViewer"
+        MediaViewer(title="Lisbon in spring", positionText=`${pictureIndex + 1} of ${albumKeys().length}`, previousLabel="Previous", nextLabel="Next", stripTitle="In this album", loadingText="", failedText="", retryLabel="", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, ["picture"]), undoLabel="Undo", currentKey=pictureKey, items=album(), data="many", agent=(isMarked(book, "picture") ? "changed" : "none"), previous=previousByPerson, next=nextByPerson, choose=chooseByPerson, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)
+      else if shown == "ListDetail"
+        ListDetail(title="Studio", listTitle="Projects", loadingText="", detailLoadingText="", emptyText="", createLabel="", failedText="", retryLabel="", backLabel="Projects", pickText="Choose a project to see its details.", factsTitle="Details", factsEmptyText="No details yet.", notesTitle="Notes", activityTitle="Activity", activityEmptyText="No activity yet.", primaryLabel="Edit project", secondaryLabel="Share", proposedNote="", acceptLabel="", rejectLabel="", proposedMark="", changedNote=latestAbout(book, ["project"]), changedMark="Opened by your assistant", undoLabel="Undo", chosenKey=projectKey, items=projects(), facts=projectFacts(projectKey), notes="", events=[], data="many", agent=(isMarked(book, "project") ? "changed" : "none"), pane=(opened ? "detail" : "list"), primaryPress=ignore, secondaryPress=ignore, back=backByPerson, choose=openProjectByPerson, create=ignore, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)
+      else if shown == "MailScreen"
+        MailScreen(title="Mail", mark="M", navLabel="Mailboxes", foldersTitle="Mailboxes", folderTitle="Inbox", accountName="Ada Lovelace", accountDetail="ada@studio.example", composeLabel="Compose", backLabel="Back to", unreadLabel="unread", orderLabel="Newest first", paneLabel="Open message", paneEmptyText="Choose a message to read it here.", paneQuietText="When a message arrives, it opens here.", emptyText="No messages in your inbox.", failedText="Your messages did not load.", retryLabel="Try again", toolbarLabel="Message actions", toLabel="To", replyLabel="Reply", replyAllLabel="Reply all", forwardLabel="Forward", flagLabel="Flag", agentNote="Flagged by your assistant", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, flagKeys()), undoLabel="Undo", waitingNote="", waitingLabel="", folders=mailFolders(), folderKey="inbox", messages=mailMessages, letter=mailLetter(), agentKey=mailMarkedKey, data="many", agent=(mailMarkedKey != "" ? "changed" : "none"), which="message", compose=ignore, retry=ignore, reply=ignore, replyAll=ignore, forward=ignore, flag=flagByPerson, showFolders=ignore, showList=ignore, accept=ignore, reject=ignore, undo=undoByPerson, review=ignore)
+      else if shown == "OnboardingScreen"
+        OnboardingScreen(productName="Northwind", exitLabel="Save and exit", steps=setupStepsAt(setupStep), answers=setupFields, lead="A few details to set your workspace up. You can change any of them later.", countLabel="Setup progress", backLabel="Back", continueLabel="Continue", skipLabel="Skip for now", retryLabel="", errorText="", loadingText="", failedText="", listTitle="Your setup", listNote="Your answers are saved as you go. Leave at any time and pick up where you stopped.", doneWord="done", currentWord="in progress", nextWord="to come", markNote="Filled in by your assistant", proposedNote="", acceptLabel="", rejectLabel="", waitingNote="", data="many", interaction="idle", outcome="none", agent=(setupMarked ? "changed" : "none"), exit=ignore, back=setupBackByPerson, advance=continueByPerson, skip=continueByPerson, retry=ignore, accept=ignore, reject=ignore, edit=answerByPerson)

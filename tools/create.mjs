@@ -6,7 +6,8 @@
 //                        [--presets <dir>] [--bundle-id <reverse.dns>] [--into]
 //
 // --design      the design repo: theme.json, theme/, components/, blocks/, screens/, frame/, tools/
-// --playground  the playground: an Exact app generated from the design repo, wip/, play.mjs
+// --playground  the playground: an Exact app generated from the design repo, wip/, play.mjs, and journeys/blocks
+//               and journeys/screens (each piece in a small real use, for its both-doors cases)
 // --theme       the brand's theme file (default: the starter's neutral one); checked: light and dark, 4.5:1
 // --presets     a folder of preset theme files (each app's look today, Harmonised, …), copied to presets/
 // --into        allow an existing design repo: add the starter's files, never overwrite one
@@ -91,7 +92,7 @@ function main() {
   const play = resolve(o.playground);
   const name = o.scope.slice(1);
   const relDesign = relative(play, design) || '.';
-  const fill = (t) => t.replaceAll('__SCOPE__', o.scope).replaceAll('__NAME__', name).replaceAll('__TITLE__', o.title).replaceAll('__DESIGN__', relDesign);
+  const fill = (t) => t.replaceAll('__SCOPE__', o.scope).replaceAll('__NAME__', name).replaceAll('__TITLE__', o.title).replaceAll('__DESIGN__', relDesign).replaceAll('__KIT__', relative(play, KIT) || '.');
 
   // 1. The design repo: the layers, the frame, the tools, the theme.
   mkdirSync(design, { recursive: true });

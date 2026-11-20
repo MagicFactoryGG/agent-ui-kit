@@ -711,6 +711,148 @@
       "caption": "Pines on the long walk up to the Moorish castle above Sintra, where the path climbs through the fog and the trees close over it for most of an hour"
     }
   ],
+  "props:ListDetail": {
+    "title": "Studio",
+    "listTitle": "Projects",
+    "loadingText": "Loading projects…",
+    "detailLoadingText": "Loading this project…",
+    "emptyText": "No projects yet. Start one and it will be listed here.",
+    "createLabel": "New project",
+    "failedText": "Your projects did not load. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "backLabel": "Projects",
+    "pickText": "Choose a project to see its details.",
+    "factsTitle": "Details",
+    "factsEmptyText": "No details yet.",
+    "notesTitle": "Notes",
+    "activityTitle": "Activity",
+    "activityEmptyText": "No activity yet.",
+    "primaryLabel": "Edit project",
+    "secondaryLabel": "Share",
+    "proposedNote": "Your assistant suggests moving the launch to March 14.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Reject",
+    "proposedMark": "Your assistant suggests a change",
+    "changedNote": "Your assistant set the owner to Priya Nair.",
+    "changedMark": "Changed by your assistant",
+    "undoLabel": "Undo",
+    "chosenKey": "harbour",
+    "notes": "The spring campaign for the harbour cafés: posters, a short film for the ferry screens and a printed map. Print files go to the press on the first of the month.",
+    "chosenKey@long": "harbour",
+    "primaryLabel@long": "Edit project",
+    "secondaryLabel@long": "Share",
+    "backLabel@long": "Projects",
+    "acceptLabel@long": "Accept",
+    "rejectLabel@long": "Reject",
+    "undoLabel@long": "Undo",
+    "createLabel@long": "New project",
+    "retryLabel@long": "Try again",
+    "chosenKey@one": "harbour"
+  },
+  "ListDetailItem:many": [
+    {
+      "key": "atlas",
+      "title": "Atlas rebrand",
+      "detail": "Identity, signage and the new site",
+      "status": "In review",
+      "href": "/"
+    },
+    {
+      "key": "harbour",
+      "title": "Harbour cafés spring campaign",
+      "detail": "Posters, ferry film and a printed map",
+      "status": "In progress",
+      "href": "/"
+    },
+    {
+      "key": "north",
+      "title": "North Line timetable",
+      "detail": "Print and screen editions",
+      "status": "Scheduled",
+      "href": "/"
+    },
+    {
+      "key": "orchard",
+      "title": "Orchard annual report",
+      "detail": "Forty pages, two languages",
+      "status": "Draft",
+      "href": "/"
+    },
+    {
+      "key": "lumen",
+      "title": "Lumen app onboarding",
+      "detail": "Six screens and their illustrations",
+      "status": "Done",
+      "href": "/"
+    }
+  ],
+  "ListDetailItem:one": [
+    {
+      "key": "harbour",
+      "title": "Harbour cafés spring campaign",
+      "detail": "Posters, ferry film and a printed map",
+      "status": "In progress",
+      "href": "/"
+    }
+  ],
+  "ListDetailItem:long": [
+    {
+      "key": "harbour",
+      "title": "Harbour cafés spring campaign for the six cafés along the river, from Cais do Sodré to Belém",
+      "detail": "Posters for every café window, a ninety-second film for the ferry screens and a folded printed map of the walk between them",
+      "status": "In progress with the printer",
+      "href": "/"
+    },
+    {
+      "key": "atlas",
+      "title": "Atlas rebrand",
+      "detail": "Identity, signage, the new site and the guidelines that every agency working with Atlas will follow from next year",
+      "status": "In review",
+      "href": "/"
+    }
+  ],
+  "Fact:many": [
+    {
+      "key": "owner",
+      "label": "Owner",
+      "value": "Priya Nair"
+    },
+    {
+      "key": "client",
+      "label": "Client",
+      "value": "Harbour Cafés Co-op"
+    },
+    {
+      "key": "launch",
+      "label": "Launch",
+      "value": "March 7"
+    },
+    {
+      "key": "budget",
+      "label": "Budget",
+      "value": "€18,400"
+    }
+  ],
+  "Event:many": [
+    {
+      "key": "proof",
+      "who": "Sam Rivera",
+      "what": "Sent the poster proofs to the co-op",
+      "when": "Today, 10:12"
+    },
+    {
+      "key": "film",
+      "who": "Priya Nair",
+      "what": "Approved the ferry film's final cut",
+      "when": "Yesterday, 17:30"
+    },
+    {
+      "key": "kickoff",
+      "who": "Jonas Weber",
+      "what": "Opened the project",
+      "when": "Feb 2"
+    }
+  ],
   "props:SiteFooter": {
     "productName": "Northwind",
     "productMark": "N",
@@ -1047,5 +1189,300 @@
       { "key": "digest", "kind": "switch", "label": "A very long label for a switch row, written the way a person might really write it, going past the width of a narrow phone", "detail": "A very long detail line under the switch, as a person might really write it, that wraps to keep the switch in reach", "value": "", "on": true },
       { "key": "sound", "kind": "value", "label": "A very long label for one setting, the way a person might really name it", "detail": "A very long detail line, as a person might really write it, that has to wrap instead of pushing the row apart", "value": "A very long chosen value", "on": false }
     ] }
+  ],
+  "props:MailScreen": {
+    "title": "Mail",
+    "mark": "M",
+    "navLabel": "Mailboxes",
+    "foldersTitle": "Mailboxes",
+    "folderTitle": "Inbox",
+    "accountName": "Ada Lovelace",
+    "accountDetail": "ada@studio.example",
+    "composeLabel": "Compose",
+    "backLabel": "Back to",
+    "unreadLabel": "unread",
+    "orderLabel": "Newest first",
+    "paneLabel": "Open message",
+    "paneEmptyText": "Choose a message to read it here.",
+    "paneQuietText": "When a message arrives, it opens here.",
+    "emptyText": "No messages in your inbox.",
+    "failedText": "Your messages did not load.",
+    "retryLabel": "Try again",
+    "toolbarLabel": "Reply actions",
+    "toLabel": "To",
+    "replyLabel": "Reply",
+    "replyAllLabel": "Reply all",
+    "forwardLabel": "Forward",
+    "flagLabel": "Flag",
+    "flagLabel@long": "Flag",
+    "agentNote": "Flagged by your assistant",
+    "proposedNote": "Your assistant suggests filing the ACME invoice in Receipts.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "changedNote": "Your assistant flagged the venue contract so the deposit is not missed.",
+    "undoLabel": "Undo",
+    "waitingLabel": "Read the draft",
+    "waitingLabel@long": "Read the draft",
+    "waitingNote": "Your assistant drafted a reply to Jonas and waits for you to read it before it is sent.",
+    "folderKey": "inbox",
+    "agentKey": "message-5",
+    "agentKey@long": "message-2",
+    "title@long": "Mail",
+    "mark@long": "M",
+    "composeLabel@long": "Compose",
+    "backLabel@long": "Back to",
+    "toLabel@long": "To",
+    "replyLabel@long": "Reply",
+    "replyAllLabel@long": "Reply all",
+    "forwardLabel@long": "Forward",
+    "acceptLabel@long": "Accept",
+    "rejectLabel@long": "Not now",
+    "undoLabel@long": "Undo",
+    "retryLabel@long": "Try again",
+    "unreadLabel@long": "unread",
+    "orderLabel@long": "Newest first",
+    "paneLabel@long": "Open message"
+  },
+  "MailFolder:many": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 2
+    },
+    {
+      "key": "flagged",
+      "label": "Flagged",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "drafts",
+      "label": "Drafts",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "archive",
+      "label": "Archive",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "receipts",
+      "label": "Receipts",
+      "href": "/",
+      "group": "Folders",
+      "count": 4
+    },
+    {
+      "key": "travel",
+      "label": "Travel",
+      "href": "/",
+      "group": "Folders",
+      "count": 0
+    }
+  ],
+  "MailFolder:empty": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "flagged",
+      "label": "Flagged",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "drafts",
+      "label": "Drafts",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "archive",
+      "label": "Archive",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "receipts",
+      "label": "Receipts",
+      "href": "/",
+      "group": "Folders",
+      "count": 4
+    },
+    {
+      "key": "travel",
+      "label": "Travel",
+      "href": "/",
+      "group": "Folders",
+      "count": 0
+    }
+  ],
+  "MailFolder:loading": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 2
+    },
+    {
+      "key": "flagged",
+      "label": "Flagged",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "drafts",
+      "label": "Drafts",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "archive",
+      "label": "Archive",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "receipts",
+      "label": "Receipts",
+      "href": "/",
+      "group": "Folders",
+      "count": 4
+    },
+    {
+      "key": "travel",
+      "label": "Travel",
+      "href": "/",
+      "group": "Folders",
+      "count": 0
+    }
+  ],
+  "MailFolder:failed": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 2
+    },
+    {
+      "key": "flagged",
+      "label": "Flagged",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "drafts",
+      "label": "Drafts",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "archive",
+      "label": "Archive",
+      "href": "/",
+      "group": "",
+      "count": 0
+    },
+    {
+      "key": "receipts",
+      "label": "Receipts",
+      "href": "/",
+      "group": "Folders",
+      "count": 4
+    },
+    {
+      "key": "travel",
+      "label": "Travel",
+      "href": "/",
+      "group": "Folders",
+      "count": 0
+    }
+  ],
+  "MailFolder:long": [
+    {
+      "key": "inbox",
+      "label": "Inbox",
+      "href": "/",
+      "group": "",
+      "count": 1
+    },
+    {
+      "key": "studio",
+      "label": "Studio renovation: contractors, permits and every quote we asked for this year",
+      "href": "/",
+      "group": "Folders shared with the whole studio team",
+      "count": 128
+    }
+  ],
+  "MailLetter:many": [
+    {
+      "key": "message-2",
+      "from": "Jonas Weber",
+      "address": "jonas.weber@studio.example",
+      "to": "Ada Lovelace, Priya Nair",
+      "when": "Today, 08:15",
+      "subject": "Q3 report is ready to file",
+      "body": "Hi Ada,\nThe numbers are reconciled and the summary page waits on your sign-off before Friday. Priya checked the travel lines twice; the only open item is the studio's rent, which moved to October.\nIf you are happy with it, reply and I will file it the same day.\nJonas"
+    }
+  ],
+  "MailLetter:long": [
+    {
+      "key": "message-1",
+      "from": "Constance Beauregard-Villeneuve at the regional licensing office",
+      "address": "constance.beauregard-villeneuve@licensing-office.regional-authority.example",
+      "to": "Ada Lovelace, Priya Nair, Jonas Weber, Maya Okafor, Sam Delacroix and the studio's shared inbox for licences",
+      "when": "Wed 14:05",
+      "subject": "A subject line that keeps going because the sender put the whole question in it and expected nobody to mind",
+      "body": "The body of a long message wraps in the pane and keeps its own paragraphs, however long a line runs, and a word without a break such as https://licensing-office.regional-authority.example/applications/2026/studio-renovation/attachments breaks where it must rather than push the page sideways.\nA second paragraph follows, so the reader sees that the letter keeps the sender's own line breaks."
+    }
   ]
 }

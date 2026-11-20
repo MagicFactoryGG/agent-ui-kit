@@ -1,0 +1,102 @@
+[
+  {
+    "name": "MediaViewer: Next and showPicture reach the same picture; the agent's is recorded and marked",
+    "person": ["tap media-viewer-next"],
+    "agent": ["call showPicture {\"picture\":\"tram\"}"],
+    "same": ["pictureIndex", "book.values"],
+    "calls": [["ok", "saved"]],
+    "expect": {
+      "pictureIndex": 1,
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": ["picture"]
+    },
+    "expectPerson": {
+      "pictureIndex": 1,
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "MailScreen: Flag and flagMessage flag the same message; the agent's is recorded and marked",
+    "person": ["call openScreen {\"screen\":\"MailScreen\"}", "tap mail-flag"],
+    "agent": ["call openScreen {\"screen\":\"MailScreen\"}", "call flagMessage {\"message\":\"m2\",\"flagged\":true}"],
+    "same": ["mailMessages", "book.values"],
+    "calls": [["ok", "MailScreen"], ["ok", "saved"]],
+    "expect": {
+      "mailMarkedKey": "m2",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": ["flag-m2"]
+    },
+    "expectPerson": {
+      "mailMarkedKey": "",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "ListDetail: a tap on a row and openProject open the same project; the agent's is recorded and marked",
+    "person": ["call openScreen {\"screen\":\"ListDetail\"}", "tap list-detail-row-north"],
+    "agent": ["call openScreen {\"screen\":\"ListDetail\"}", "call openProject {\"project\":\"north\"}"],
+    "same": ["projectKey", "opened", "book.values"],
+    "calls": [["ok", "ListDetail"], ["ok", "saved"]],
+    "expect": {
+      "projectKey": "north",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": ["project"]
+    },
+    "expectPerson": {
+      "projectKey": "north",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "ListDetail: Undo on the screen takes back the agent's openProject",
+    "person": ["call openScreen {\"screen\":\"ListDetail\"}"],
+    "agent": ["call openScreen {\"screen\":\"ListDetail\"}", "call openProject {\"project\":\"atlas\"}", "tap list-detail-undo"],
+    "same": ["projectKey", "book.values", "book.marked"],
+    "calls": [["ok", "ListDetail"], ["ok", "saved"]],
+    "expect": {
+      "projectKey": "harbour",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "OnboardingScreen: typing the workspace name and fillAnswer write the same answer; the agent's is recorded and marked",
+    "person": ["call openScreen {\"screen\":\"OnboardingScreen\"}", "type onboarding-workspace-input Harbour Studio"],
+    "agent": ["call openScreen {\"screen\":\"OnboardingScreen\"}", "call fillAnswer {\"answer\":\"workspace\",\"value\":\"Harbour Studio\"}"],
+    "same": ["setupStep", "book.values"],
+    "calls": [["ok", "OnboardingScreen"], ["ok", "saved"]],
+    "expect": {
+      "setupFields.0.value": "Harbour Studio",
+      "setupFields.0.byAgent": true,
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.marked": ["setup-workspace"]
+    },
+    "tree": { "onboarding-workspace-input": "Harbour Studio" },
+    "expectPerson": {
+      "setupFields.0.value": "Harbour Studio",
+      "setupFields.0.byAgent": false,
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "OnboardingScreen: Continue moves the step on, and the person's typing takes an answer the agent filled back",
+    "person": ["call openScreen {\"screen\":\"OnboardingScreen\"}", "tap onboarding-steps-continue", "type onboarding-size-input 12"],
+    "agent": ["call openScreen {\"screen\":\"OnboardingScreen\"}", "call fillAnswer {\"answer\":\"size\",\"value\":\"8\"}", "tap onboarding-steps-continue", "type onboarding-size-input 12"],
+    "same": ["setupStep", "setupFields", "book.values", "book.marked"],
+    "calls": [["ok", "OnboardingScreen"], ["ok", "saved"]],
+    "expect": {
+      "setupStep": "team",
+      "setupFields.0.value": "12",
+      "book.changes.length": 1,
+      "book.marked": []
+    }
+  }
+]

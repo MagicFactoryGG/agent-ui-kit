@@ -1,0 +1,143 @@
+// The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
+// app's view, never in a design package.
+use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf, isMarked from "@agent-ui-kit/agent"
+use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint, LinkGroup, FooterLink from "__SCOPE__/blocks"
+
+fn onOff(on: bool): string = on ? "on" : "off"
+fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
+// The newest change on any of the keys, said in one sentence; "" when there is none.
+fn latestAbout(l: Ledger, keys: string[]): string = l.changes.filter(c => keys.includes(c.key)).slice(0, 1).map(c => c.sentence).join("")
+
+// SettingsGroup: email notifications.
+fn notifyKeys(): string[] = ["digest", "failures", "marketing"]
+fn titleOf(key: string): string = key == "digest" ? "Weekly digest" : key == "failures" ? "Deploy failures" : key == "marketing" ? "Product news" : key
+fn detailOf(key: string): string = key == "digest" ? "A summary of your week, each Monday." : key == "failures" ? "An email when a deploy fails." : key == "marketing" ? "New features, now and then." : ""
+fn switchAct(tool: string, key: string, on: bool): Act = Act(tool=tool, door="agent", key=key, title=titleOf(key), value=onOff(on), did=`Your assistant turned ${titleOf(key)} ${onOff(on)}.`, asks=`Your assistant suggests turning ${titleOf(key)} ${onOff(on)}.`, will=`Your assistant will turn ${titleOf(key)} ${onOff(on)} in 5 seconds.`)
+
+// DetailPanel: one incident's record; its status (open or resolved) is the value both doors set.
+fn incidentTitle(): string = "Checkout returns 502 on retry"
+fn statusWord(status: string): string = status == "resolved" ? "Resolved" : "Open"
+fn incidentFacts(): Fact[] = [
+  Fact(key="service", label="Service", value="payments-api"),
+  Fact(key="owner", label="Owner", value="Rui Costa"),
+  Fact(key="opened", label="Opened", value="Today, 09:12"),
+  Fact(key="impact", label="Impact", value="About one in twenty checkouts fail when the card form is sent a second time.")
+]
+fn incidentEvents(): Event[] = [
+  Event(key="deploy", who="Ana Sousa", what="Rolled back the 09:05 deploy", when="09:40"),
+  Event(key="opened", who="Rui Costa", what="Opened the incident", when="09:12")
+]
+fn statusAct(status: string): Act = Act(tool="setIncidentStatus", door="agent", key="incident", title="Incident status", value=status, did=`Your assistant marked the incident ${status}.`, asks=`Your assistant suggests marking the incident ${status}.`, will=`Your assistant will mark the incident ${status} in 5 seconds.`)
+// StatePanel: the files area, whose last load failed; its one act starts the load again (its value: loading).
+fn loadAct(tool: string): Act = Act(tool=tool, door="agent", key="files", title="Your files", value="loading", did="Your assistant is loading your files again.", asks="Your assistant suggests loading your files again.", will="Your assistant will load your files again in 5 seconds.")
+// SideNav: a new workspace's menu, empty until its first place is added; the menu is one value in the ledger:
+// "empty", or "home" once Home is in it.
+fn homeEntries(): NavEntry[] = [NavEntry(key="home", label="Home", href="", group="", badge=0, current=true)]
+fn menuText(menu: string): string = menu == "home" ? "home\tHome" : ""
+fn addHomeAct(): Act = Act(tool="addHome", door="agent", key="menu", title="Menu", value="home", did="Your assistant added Home to the menu.", asks="Your assistant suggests adding Home to the menu.", will="Your assistant will add Home to the menu in 5 seconds.")
+
+// OnboardingSteps: a workspace's setup; the value is the step the person is on ("done" past the last). Continue
+// moves it on one step, Back one step back; the agent continues past a step it names, so a call twice moves once.
+fn setupKeys(): string[] = ["account", "profile", "team", "plan"]
+fn setupTitle(key: string): string = key == "account" ? "Create your account" : key == "profile" ? "About your work" : key == "team" ? "Invite your team" : key == "plan" ? "Choose a plan" : "Setup complete"
+fn setupDetail(key: string): string = key == "account" ? "Your name and a password." : key == "profile" ? "Your role and how big your team is, so the workspace starts with the right layout." : key == "team" ? "Add the people you work with; they get an invitation by email." : key == "plan" ? "Pick the plan that fits; you can change it at any time." : ""
+fn setupAt(step: string): number = step == "done" ? setupKeys().length : setupKeys().indexOf(step)
+fn setupNext(step: string): string = match setupKeys().at(setupAt(step) + 1) { case some(k) => k, case none => "done" }
+fn setupBack(step: string): string = setupAt(step) <= 0 ? "account" : match setupKeys().at(setupAt(step) - 1) { case some(k) => k, case none => "account" }
+fn setupSteps(step: string): Step[] = setupKeys().map((k, i) => Step(key=k, title=setupTitle(k), state=(i < setupAt(step) ? "done" : i == setupAt(step) ? "current" : "next")))
+fn continueAct(from: string): Act = Act(tool="continueOnboarding", door="agent", key="onboarding", title="Workspace setup", value=setupNext(from), did=`Your assistant finished ${setupTitle(from)} and moved you on.`, asks=`Your assistant suggests finishing ${setupTitle(from)} and moving on.`, will=`Your assistant will finish ${setupTitle(from)} and move you on in 5 seconds.`)
+// The agent continues only from the step the person is on; any other step answers not-current and moves nothing.
+fn continueFrom(l: Ledger, step: string): Ledger = valueOf(l, "onboarding") == step ? act(l, continueAct(step)) : Ledger(l, answer="not-current")
+// The newest change on a key, by id ("" when none): the note's Undo takes back that one.
+fn latestIdAbout(l: Ledger, key: string): string = l.changes.filter(c => c.key == key).slice(0, 1).map(c => c.id).join("")
+
+// MessageList: an inbox; each message's read state ("unread" or "read") is a value in the ledger, under
+// "mail-<key>". The chosen message is the reading pane's; its one button marks it read, or unread once read,
+// and the agent marks any message read or unread by its key, as a person triaging the inbox would.
+fn mailKeys(): string[] = ["review", "report", "lunch"]
+fn mailKey(key: string): string = `mail-${key}`
+fn mailFrom(key: string): string = key == "review" ? "Priya Nair" : key == "report" ? "Jonas Weber" : key == "lunch" ? "Maya Okafor" : ""
+fn mailSubject(key: string): string = key == "review" ? "Design review notes" : key == "report" ? "Q3 report is ready to file" : key == "lunch" ? "Lunch on Thursday?" : ""
+fn mailSnippet(key: string): string = key == "review" ? "Three small changes before we cut the release, all in the section you wrote last week." : key == "report" ? "The numbers are reconciled and the summary page waits on your sign-off before Friday." : key == "lunch" ? "There is a new place two streets down with a good menu and a table big enough for eight." : ""
+fn mailWhen(key: string): string = key == "review" ? "09:41" : key == "report" ? "08:15" : key == "lunch" ? "Wed 14:05" : ""
+fn readWord(read: bool): string = read ? "read" : "unread"
+fn mailMessages(l: Ledger): Message[] = mailKeys().map(k => Message(key=k, from=mailFrom(k), subject=mailSubject(k), snippet=mailSnippet(k), when=mailWhen(k), unread=(valueOf(l, mailKey(k)) == "unread"), flagged=false, href="/"))
+fn mailText(l: Ledger): string = mailKeys().map(k => `${k}\t${mailFrom(k)}\t${mailSubject(k)}\t${valueOf(l, mailKey(k))}`).join("\n")
+fn mailLedgerKeys(): string[] = mailKeys().map(k => mailKey(k))
+// The message the agent's mark is on, by key ("" when none): the person's own mark on it clears it.
+fn mailMarkedKey(l: Ledger): string = mailKeys().filter(k => isMarked(l, mailKey(k))).slice(0, 1).join("")
+fn readAct(key: string, read: bool): Act = Act(tool="markMessage", door="agent", key=mailKey(key), title=mailSubject(key), value=readWord(read), did=`Your assistant marked ${mailFrom(key)}'s message ${readWord(read)}.`, asks=`Your assistant suggests marking ${mailFrom(key)}'s message ${readWord(read)}.`, will=`Your assistant will mark ${mailFrom(key)}'s message ${readWord(read)} in 5 seconds.`)
+
+// DataTable: the deploy queue; each record's selection (selected or not) is one value both doors set.
+fn recordKeys(): string[] = ["audit", "rotate", "invoices"]
+fn recordTitle(key: string): string = key == "audit" ? "Move the 2024 audit log to cold storage" : key == "rotate" ? "Rotate the payments API keys" : key == "invoices" ? "Resend the October invoices" : key
+fn queueRecords(): Record[] = [
+  Record(key="audit", title=recordTitle("audit"), status="In review", tone="progress", owner="Ana Sousa", updated="Today", href="#audit"),
+  Record(key="rotate", title=recordTitle("rotate"), status="Blocked", tone="attention", owner="Rui Costa", updated="Yesterday", href="#rotate"),
+  Record(key="invoices", title=recordTitle("invoices"), status="Done", tone="done", owner="Mei Lin", updated="Mon", href="#invoices")
+]
+fn pickWord(on: bool): string = on ? "selected" : "unselected"
+fn pickAct(key: string, on: bool): Act = Act(tool="selectRecord", door="agent", key=key, title=recordTitle(key), value=pickWord(on), did=`Your assistant ${on ? "selected" : "cleared"} “${recordTitle(key)}”.`, asks=`Your assistant suggests ${on ? "selecting" : "clearing"} “${recordTitle(key)}”.`, will=`Your assistant will ${on ? "select" : "clear"} “${recordTitle(key)}” in 5 seconds.`)
+// FeatureGrid: a product page's features section, empty until its first feature is added. The section is one value
+// in the ledger: "empty", or "sync" once its first feature, Live sync, is in it. Adding it is the section's real act:
+// the empty tray's Add a feature for a person, addFeature for the agent, who then sees the feature it added ringed.
+fn firstFeatures(): Feature[] = [Feature(key="sync", title="Live sync", detail="Every change reaches each of your devices in a moment, even on a slow connection.")]
+fn featuresText(features: string): string = features == "sync" ? "sync\tLive sync" : ""
+fn addFeatureAct(): Act = Act(tool="addFeature", door="agent", key="features", title="Features", value="sync", did="Your assistant added Live sync to the features.", asks="Your assistant suggests adding Live sync to the features.", will="Your assistant will add Live sync to the features in 5 seconds.")
+// SiteFooter: a product site's closing band, with no links yet. Its links are one value in the ledger: "empty", or
+// "help" once its first column, Help with its Contact us link, is in it. Adding it is the footer's real act: the empty
+// band's Add links for a person, addFooterLinks for the agent, whose link then wears the accent dot.
+fn helpGroups(): LinkGroup[] = [LinkGroup(key="help", title="Help", links=[FooterLink(key="contact", label="Contact us", href="#contact")])]
+fn footerText(links: string): string = links == "help" ? "help\tHelp\tcontact\tContact us" : ""
+fn addFooterLinksAct(): Act = Act(tool="addFooterLinks", door="agent", key="footer", title="Footer links", value="help", did="Your assistant added Help, with Contact us, to the footer.", asks="Your assistant suggests adding Help, with Contact us, to the footer.", will="Your assistant will add Help, with Contact us, to the footer in 5 seconds.")
+
+// Pricing: a trial workspace's plans; the plan chosen ("none" until one is) is the value both doors set. A plan's
+// button chooses it, as the agent's choosePlan does; the chosen plan's button then says so.
+fn planKeys(): string[] = ["starter", "team", "business"]
+fn planName(key: string): string = key == "starter" ? "Starter" : key == "team" ? "Team" : key == "business" ? "Business" : "No plan"
+fn planList(chosen: string): Plan[] = [
+  Plan(key="starter", name=planName("starter"), price="$0", period="per month", detail="For one person trying things out.", points=["One project", "Community help", "7 days of history"], featured=false, action=(chosen == "starter" ? "Your plan" : "Choose Starter")),
+  Plan(key="team", name=planName("team"), price="$24", period="per seat a month", detail="For a team shipping every week.", points=["Unlimited projects", "Shared workspaces", "Email help within a day", "90 days of history"], featured=true, action=(chosen == "team" ? "Your plan" : "Choose Team")),
+  Plan(key="business", name=planName("business"), price="$59", period="per seat a month", detail="For companies with rules to follow.", points=["Everything in Team", "Single sign-on", "Audit log", "A named contact"], featured=false, action=(chosen == "business" ? "Your plan" : "Choose Business"))
+]
+fn planAct(key: string): Act = Act(tool="choosePlan", door="agent", key="plan", title="Plan", value=key, did=`Your assistant chose the ${planName(key)} plan.`, asks=`Your assistant suggests the ${planName(key)} plan.`, will=`Your assistant will choose the ${planName(key)} plan in 5 seconds.`)
+fn planText(chosen: string): string = `${chosen}\t${planName(chosen)}`
+// Hero: a planning product's landing page; its one act is the primary, Start free trial. The value is the
+// trial's state ("off", then "started"): the person's tap and the agent's startTrial set the same value, and the
+// agent's is recorded, shown on the hero with one Undo.
+fn trialStarted(l: Ledger): bool = valueOf(l, "trial") == "started"
+fn heroPoints(): HeroPoint[] = [
+  HeroPoint(key="calendars", title="Shared calendars", detail="Everyone's week on one page, with time off and focus blocks."),
+  HeroPoint(key="estimates", title="Honest estimates", detail="Plans that learn from how long work really took."),
+  HeroPoint(key="assistant", title="An assistant that asks first", detail="It suggests; you decide. Every change can be undone.")
+]
+fn trialAct(): Act = Act(tool="startTrial", door="agent", key="trial", title="Free trial", value="started", did="Your assistant started the free trial for your team.", asks="Your assistant suggests starting the free trial for your team.", will="Your assistant will start the free trial for your team in 5 seconds.")
+
+// The app's one tool list: each tool's floor (a change only this person sees is recorded).
+fn agentTools(): AgentTool[] = [
+  AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setIncidentStatus", title="Incident status", sentence="Marks the incident open or resolved.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="loadFiles", title="Your files", sentence="Loads the files area again.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="continueOnboarding", title="Workspace setup", sentence="Finishes the setup step the person is on and moves on to the next.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="markMessage", title="Inbox", sentence="Marks a message in the inbox read or unread.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="addHome", title="Menu", sentence="Adds Home to the empty menu.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="selectRecord", title="Deploy queue", sentence="Selects a record in the deploy queue, or clears it.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="addFeature", title="Features", sentence="Adds the first feature, Live sync, to the empty features section.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="choosePlan", title="Plan", sentence="Chooses the workspace's plan: starter, team or business.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="startTrial", title="Free trial", sentence="Starts the free trial, as the page's Start free trial does.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="addFooterLinks", title="Footer links", sentence="Adds the first column, Help with Contact us, to the footer that has no links.", floor="recorded", reach="self", secret=false)
+]
+
+fn startValues(): Value[] = [
+  Value(key="digest", value="on"), Value(key="failures", value="on"), Value(key="marketing", value="off"),
+  Value(key="incident", value="open"),
+  Value(key="files", value="failed"),
+  Value(key="onboarding", value="profile"),
+  Value(key="mail-review", value="unread"), Value(key="mail-report", value="read"), Value(key="mail-lunch", value="unread"),
+  Value(key="menu", value="empty"),
+  Value(key="audit", value="unselected"), Value(key="rotate", value="unselected"), Value(key="invoices", value="unselected"),
+  Value(key="features", value="empty"),
+  Value(key="plan", value="none"),
+  Value(key="trial", value="off"),
+  Value(key="footer", value="empty")
+]
