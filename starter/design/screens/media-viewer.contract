@@ -13,7 +13,8 @@
 // under the caption (one sentence, two answer words; Accept is the state's one fill, so Next steps back to plain);
 // changed marks the caption with the accent line at its start, says `changedNote` and offers Undo. The band is
 // drawn here, not the kit's Proposal: Proposal keeps its sentence and both answers on one line, which squeezes the
-// sentence to a third of a phone's width and breaks "Not now" in two; this one puts the answers under the sentence.
+// sentence to a third of a phone's width and breaks "Not now" in two; this one wraps the answers under the
+// sentence when the sentence would fall under its least width, and keeps one line on a desktop.
 // Props: the words (title, positionText, previousLabel, nextLabel, stripTitle, loadingText, failedText,
 // retryLabel, proposedNote, acceptLabel, rejectLabel, changedNote, undoLabel), the album (`items`, the
 // `currentKey` chosen), the states, and the app's actions (previous, next, choose(key), retry, accept, reject,
@@ -129,9 +130,9 @@ component MediaViewer
                     ActionButton(label=previousLabel, kind="plain", interaction="idle", outcome="none", press=previous, testId="media-viewer-previous")
                     ActionButton(label=nextLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=next, testId="media-viewer-next")
               if agent == "proposed"
-                column testId="media-viewer-proposal" role="status" gap="theme.space.md" padding="theme.space.lg" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" background-color="theme.color.surface"
-                  text proposedNote testId="media-viewer-sentence" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
-                  row flex-wrap="wrap" gap="theme.space.sm"
+                row testId="media-viewer-proposal" role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.md" padding="theme.space.lg" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" background-color="theme.color.surface"
+                  text proposedNote testId="media-viewer-sentence" flex=1 min-width="screens.media-caption-min" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+                  row flex-wrap="wrap" gap="theme.space.sm" flex-shrink=0
                     ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="media-viewer-no")
                     ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="media-viewer-yes")
             if album
