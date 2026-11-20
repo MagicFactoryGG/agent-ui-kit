@@ -79,7 +79,7 @@ theme
   screens.list-detail-note-min: length = 200px  // under this the changed sentence takes its own line and Undo wraps under it
   screens.list-detail-state-top: length = 56px
   screens.list-detail-line: length = 21px  // one body line (15px at 1.4): the changed note's dot centres on it
-  screens.dashboard-max: length = 1024px  // the content's width on a wide window, centred: StatTiles' own 960px cap (blocks.stat-max) plus the page's xl insets, so tiles and panels share their edges
+  screens.dashboard-max: length = 1008px  // the content's width on a wide window, centred: StatTiles' own 960px cap (blocks.stat-max) plus the page's two xl insets (24px each), so tiles and panels share their edges
   screens.dashboard-chart-min: length = 320px  // the chart and the list sit side by side once both least widths fit
   screens.dashboard-list-min: length = 280px
   screens.dashboard-head-min: length = 160px  // under this a card's title takes its own line and its end wraps under it
