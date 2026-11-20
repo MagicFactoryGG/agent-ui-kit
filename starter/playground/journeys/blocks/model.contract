@@ -1,0 +1,23 @@
+// The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
+// app's view, never in a design package.
+use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
+
+fn onOff(on: bool): string = on ? "on" : "off"
+fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
+// The newest change on any of the keys, said in one sentence; "" when there is none.
+fn latestAbout(l: Ledger, keys: string[]): string = l.changes.filter(c => keys.includes(c.key)).slice(0, 1).map(c => c.sentence).join("")
+
+// SettingsGroup: email notifications.
+fn notifyKeys(): string[] = ["digest", "failures", "marketing"]
+fn titleOf(key: string): string = key == "digest" ? "Weekly digest" : key == "failures" ? "Deploy failures" : key == "marketing" ? "Product news" : key
+fn detailOf(key: string): string = key == "digest" ? "A summary of your week, each Monday." : key == "failures" ? "An email when a deploy fails." : key == "marketing" ? "New features, now and then." : ""
+fn switchAct(tool: string, key: string, on: bool): Act = Act(tool=tool, door="agent", key=key, title=titleOf(key), value=onOff(on), did=`Your assistant turned ${titleOf(key)} ${onOff(on)}.`, asks=`Your assistant suggests turning ${titleOf(key)} ${onOff(on)}.`, will=`Your assistant will turn ${titleOf(key)} ${onOff(on)} in 5 seconds.`)
+
+// The app's one tool list: each tool's floor (a change only this person sees is recorded).
+fn agentTools(): AgentTool[] = [
+  AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false)
+]
+
+fn startValues(): Value[] = [
+  Value(key="digest", value="on"), Value(key="failures", value="on"), Value(key="marketing", value="off")
+]

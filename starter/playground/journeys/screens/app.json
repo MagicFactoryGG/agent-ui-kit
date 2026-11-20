@@ -1,0 +1,9 @@
+{
+  "intents": {
+    "tools": {
+      "openScreen": { "title": "Open Screen", "parameters": { "screen": { "title": "Screen" } } },
+      "readAlbum": { "title": "Read Album" },
+      "showPicture": { "title": "Show Picture", "parameters": { "picture": { "title": "Picture" } } }
+    }
+  }
+}

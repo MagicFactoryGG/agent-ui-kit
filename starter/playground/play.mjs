@@ -7,19 +7,22 @@
 //   bun play.mjs web        the web only
 //   bun play.mjs web <name> the web only, one section's app (samples.json "sections": blocks, screens)
 //   bun play.mjs ios        iOS once (a simulator, no window), beside a running `bun play.mjs`
-//   bun play.mjs gen        write the app once
+//   bun play.mjs gen        write the app once (and make journeys/blocks and journeys/screens runnable)
 //   bun play.mjs check      the app is what the design makes, and the guard passes
 //   bun play.mjs save <n>   keep theme.json's current values as presets/<n>.json in the design repo
 //   bun play.mjs stop       end what this playground started
 import { spawn, spawnSync } from 'node:child_process';
 import { copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, watch, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 
 const HERE = import.meta.dir;
 const DESIGN = resolve(HERE, '__DESIGN__');
 const TOOLS = join(DESIGN, 'tools');
 const PIDS = join(HERE, '.exact', 'play.pids');
+// This kit, for @agent-ui-kit/agent (the journeys apps' ledger), by path as its README says.
+const KIT = resolve(HERE, '__KIT__');
+const JOURNEYS = join(HERE, 'journeys');
 const run = (cmd, args, opts = {}) => spawnSync(cmd, args, { stdio: 'inherit', cwd: HERE, ...opts });
 
 // Live packages: each design package is a link to the design repo, so a save there is a save here.
@@ -53,39 +56,53 @@ function fonts(dir = HERE) {
 const sectionsOf = () => Object.keys(JSON.parse(readFileSync(join(HERE, 'samples.json'), 'utf8')).sections ?? {});
 const genArgs = (name, dir) => [join(TOOLS, 'matrix.mjs'), 'gen', DESIGN, dir, '--section', name, '--samples', join(HERE, 'samples.json'), '--wip', join(HERE, 'wip')];
 
-// A section's app: this playground's manifest, package and launcher, one folder down; made once, then kept.
-function sectionApp(name) {
-  const dir = join(HERE, name);
+// An app beside the playground's own, `dir` below it (a section, or a journeys app): this playground's manifest,
+// package and launcher, its links and fonts; made once, then kept. `extra` adds dependencies (by path from `dir`).
+function sideApp(dir, label, extra = {}) {
+  const up = relative(dir, HERE);
   mkdirSync(dir, { recursive: true });
-  if (!existsSync(join(dir, 'app.json'))) {
+  // A journeys app keeps its own app.json for its tools' faces; the rest comes from the playground's.
+  const own = existsSync(join(dir, 'app.json')) ? JSON.parse(readFileSync(join(dir, 'app.json'), 'utf8')) : null;
+  if (!own?.name) {
     const app = JSON.parse(readFileSync(join(HERE, 'app.json'), 'utf8'));
-    if (app.$schema && !/^[a-z]+:|^\//.test(app.$schema)) app.$schema = `../${app.$schema}`;
-    app.name = `${app.name}: ${name}`;
-    if (app.short_name) app.short_name = `${app.short_name} ${name}`;
-    if (app.id) app.id = `${app.id}.${name}`;
-    if (app.app?.id) app.app.id = `${app.app.id}.${name}`;
+    if (app.$schema && !/^[a-z]+:|^\//.test(app.$schema)) app.$schema = join(up, app.$schema);
+    app.name = `${app.name}: ${label}`;
+    if (app.short_name) app.short_name = `${app.short_name} ${label}`;
+    if (app.id) app.id = `${app.id}.${label}`;
+    if (app.app?.id) app.app.id = `${app.app.id}.${label}`;
     if (app.app?.name) app.app.name = app.name;
-    writeFileSync(join(dir, 'app.json'), `${JSON.stringify(app, null, 2)}\n`);
+    writeFileSync(join(dir, 'app.json'), `${JSON.stringify({ ...app, ...(own ?? {}) }, null, 2)}\n`);
   }
   if (!existsSync(join(dir, 'package.json'))) {
     const pkg = JSON.parse(readFileSync(join(HERE, 'package.json'), 'utf8'));
-    pkg.name = `${pkg.name}-${name}`;
+    pkg.name = `${pkg.name}-${label}`;
     pkg.scripts = {};
-    for (const [k, v] of Object.entries(pkg.dependencies ?? {})) if (String(v).startsWith('file:')) pkg.dependencies[k] = `file:${join('..', String(v).slice(5))}`;
+    for (const [k, v] of Object.entries(pkg.dependencies ?? {})) if (String(v).startsWith('file:')) pkg.dependencies[k] = `file:${join(up, String(v).slice(5))}`;
+    Object.assign(pkg.dependencies, extra);
     writeFileSync(join(dir, 'package.json'), `${JSON.stringify(pkg, null, 2)}\n`);
   }
-  // The launcher's default Exact path is relative to the app: one folder further up.
-  if (!existsSync(join(dir, 'exact.mjs'))) writeFileSync(join(dir, 'exact.mjs'), readFileSync(join(HERE, 'exact.mjs'), 'utf8').replace(/(const seed = "|process\.env\.EXACT2 \?\? ")(?!\/)([^"]+)"/, '$1../$2"'));
+  // The launcher's default Exact path is relative to the app: as many folders further up.
+  if (!existsSync(join(dir, 'exact.mjs'))) writeFileSync(join(dir, 'exact.mjs'), readFileSync(join(HERE, 'exact.mjs'), 'utf8').replace(/(const seed = "|process\.env\.EXACT2 \?\? ")(?!\/)([^"]+)"/, `$1${up}/$2"`));
   if (!existsSync(join(dir, '.gitignore')) && existsSync(join(HERE, '.gitignore'))) copyFileSync(join(HERE, '.gitignore'), join(dir, '.gitignore'));
   link(dir);
   fonts(dir);
   return dir;
 }
 
+// A section's app (<here>/<name>), drawing only its pieces.
+const sectionApp = (name) => sideApp(join(HERE, name), name);
+
+// journeys/<kind>s: the pieces in a small real use, with an agent's tools over the app's ledger, so each piece's
+// both-doors cases run (both-doors.json, named "<Piece>: …"; bun <kit>/tools/both-doors.mjs journeys/blocks web
+// --only "SettingsGroup: "). Written by hand, guarded like any app; @agent-ui-kit/agent comes from the kit by path.
+const journeysOf = () => (existsSync(JOURNEYS) ? readdirSync(JOURNEYS).filter((n) => existsSync(join(JOURNEYS, n, 'app.contract'))) : []);
+const journeysApp = (name) => sideApp(join(JOURNEYS, name), `journeys-${name}`, { '@agent-ui-kit/agent': `file:${relative(join(JOURNEYS, name), join(KIT, 'packages', 'agent'))}` });
+
 function gen() {
   if (run('bun', [join(TOOLS, 'theme.mjs'), 'build', join(DESIGN, 'theme.json'), join(DESIGN, 'theme')]).status !== 0) return false;
   fonts();
   if (run('bun', [join(TOOLS, 'matrix.mjs'), 'gen', DESIGN, HERE]).status !== 0) return false;
+  journeysOf().forEach(journeysApp);
   return sectionsOf().every((name) => run('bun', genArgs(name, sectionApp(name))).status === 0);
 }
 

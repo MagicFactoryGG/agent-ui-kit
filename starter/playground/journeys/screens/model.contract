@@ -1,0 +1,32 @@
+// The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
+// app's view, never in a design package.
+use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
+use Media from "__SCOPE__/screens"
+
+fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
+// The newest change on any of the keys, said in one sentence; "" when there is none.
+fn latestAbout(l: Ledger, keys: string[]): string = l.changes.filter(c => keys.includes(c.key)).slice(0, 1).map(c => c.sentence).join("")
+
+// MediaViewer: an album of four pictures (each a small drawn placeholder, data only).
+fn picture(fill: string): string = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Crect width='3' height='2' fill='${fill}'/%3E%3C/svg%3E`
+fn album(): Media[] = [
+  Media(key="harbour", src=picture("steelblue"), caption="Harbour lights at dusk"),
+  Media(key="tram", src=picture("goldenrod"), caption="Tram 28 on the hill"),
+  Media(key="tiles", src=picture("teal"), caption="Blue tiles on a doorway"),
+  Media(key="river", src=picture("slategray"), caption="The river at noon")
+]
+fn albumKeys(): string[] = album().map(m => m.key)
+fn captionOf(key: string): string = album().filter(m => m.key == key).map(m => m.caption).join("")
+// The key `by` steps from `key`, held at the album's ends.
+fn stepAt(key: string, by: number): number = max(0, min(albumKeys().length - 1, albumKeys().indexOf(key) + by))
+fn stepKey(key: string, by: number): string = albumKeys().slice(stepAt(key, by), stepAt(key, by) + 1).join("")
+fn pictureAct(key: string): Act = Act(tool="showPicture", door="agent", key="picture", title="Picture", value=key, did=`Your assistant showed ${captionOf(key)}.`, asks=`Your assistant suggests showing ${captionOf(key)}.`, will=`Your assistant will show ${captionOf(key)} in 5 seconds.`)
+
+// The app's one tool list: each tool's floor (a change only this person sees is recorded).
+fn agentTools(): AgentTool[] = [
+  AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false)
+]
+
+fn startValues(): Value[] = [
+  Value(key="picture", value="harbour")
+]
