@@ -123,7 +123,9 @@ component ListDetailList
 // and Undo), then the kit's DetailPanel for the chosen record, placed once (each placement compiles DetailPanel's
 // whole body again). With nothing chosen it says `pickText` quietly. While a proposal waits its Accept is the one
 // fill, so the record's primary action takes the panel's plain place (`secondary` chooses which press runs: Exact
-// passes an action by name, not by a ternary) and the secondary rests until the answer.
+// passes an action by name, not by a ternary) and the secondary rests until the answer. While the record loads
+// there is nothing to act on, so no fill either: the primary action waits in the plain place, disabled, holding
+// the header's height so nothing moves when the record arrives.
 component ListDetailPane
   props
     title: string
@@ -174,7 +176,7 @@ component ListDetailPane
             text changedNote testId="list-detail-changed-text" flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
           ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="list-detail-undo")
       if found or loading
-        DetailPanel(testId="list-detail-panel", title=title, statusLabel=status, status="none", primaryLabel=(asks ? "" : primaryLabel), primaryPress=primaryPress, secondaryLabel=(asks ? primaryLabel : secondaryLabel), secondaryPress=secondary, interaction=(loading ? "disabled" : "idle"), busyNote="", changedNote="", waitingNote="", retryLabel="", retryPress=primaryPress, factsTitle=factsTitle, facts=facts, factsEmptyText=factsEmptyText, notesTitle=notesTitle, notes=notes, activityTitle=activityTitle, events=events, activityEmptyText=activityEmptyText, loadingText=detailLoadingText, failedText="", data=(loading ? "loading" : long ? "long" : "one"), agent="none")
+        DetailPanel(testId="list-detail-panel", title=title, statusLabel=status, status="none", primaryLabel=(asks or loading ? "" : primaryLabel), primaryPress=primaryPress, secondaryLabel=(asks or loading ? primaryLabel : secondaryLabel), secondaryPress=secondary, interaction=(loading ? "disabled" : "idle"), busyNote="", changedNote="", waitingNote="", retryLabel="", retryPress=primaryPress, factsTitle=factsTitle, facts=facts, factsEmptyText=factsEmptyText, notesTitle=notesTitle, notes=notes, activityTitle=activityTitle, events=events, activityEmptyText=activityEmptyText, loadingText=detailLoadingText, failedText="", data=(loading ? "loading" : long ? "long" : "one"), agent="none")
       else
         text pickText testId="list-detail-pick" role="status" padding-top="theme.space.xxl" text-align="center" font="theme.type.body" color="theme.color.ink-muted"
 
