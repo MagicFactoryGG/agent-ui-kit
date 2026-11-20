@@ -1407,5 +1407,324 @@
       "subject": "A subject line that keeps going because the sender put the whole question in it and expected nobody to mind",
       "body": "The body of a long message wraps in the pane and keeps its own paragraphs, however long a line runs, and a word without a break such as https://licensing-office.regional-authority.example/applications/2026/studio-renovation/attachments breaks where it must rather than push the page sideways.\nA second paragraph follows, so the reader sees that the letter keeps the sender's own line breaks."
     }
+  ],
+
+  "NavEntry:empty": [
+    {
+      "key": "naventry-1",
+      "label": "Overview",
+      "href": "/",
+      "group": "Workspace",
+      "badge": 0,
+      "current": true
+    },
+    {
+      "key": "naventry-2",
+      "label": "Reports",
+      "href": "/reports",
+      "group": "Workspace",
+      "badge": 12,
+      "current": false
+    },
+    {
+      "key": "naventry-3",
+      "label": "Invoices",
+      "href": "/invoices",
+      "group": "Workspace",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-4",
+      "label": "Expenses",
+      "href": "/expenses",
+      "group": "Workspace",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-5",
+      "label": "Team",
+      "href": "/team",
+      "group": "People",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-6",
+      "label": "Guests",
+      "href": "/guests",
+      "group": "People",
+      "badge": 3,
+      "current": false
+    },
+    {
+      "key": "naventry-7",
+      "label": "Permissions",
+      "href": "/permissions",
+      "group": "People",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-8",
+      "label": "Billing",
+      "href": "/billing",
+      "group": "Admin",
+      "badge": 5,
+      "current": false
+    },
+    {
+      "key": "naventry-9",
+      "label": "Integrations",
+      "href": "/integrations",
+      "group": "Admin",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-10",
+      "label": "Settings",
+      "href": "/settings",
+      "group": "Admin",
+      "badge": 0,
+      "current": false
+    }
+  ],
+  "NavEntry:loading": [
+    {
+      "key": "naventry-1",
+      "label": "Overview",
+      "href": "/",
+      "group": "Workspace",
+      "badge": 0,
+      "current": true
+    },
+    {
+      "key": "naventry-2",
+      "label": "Reports",
+      "href": "/reports",
+      "group": "Workspace",
+      "badge": 12,
+      "current": false
+    },
+    {
+      "key": "naventry-3",
+      "label": "Invoices",
+      "href": "/invoices",
+      "group": "Workspace",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-4",
+      "label": "Expenses",
+      "href": "/expenses",
+      "group": "Workspace",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-5",
+      "label": "Team",
+      "href": "/team",
+      "group": "People",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-6",
+      "label": "Guests",
+      "href": "/guests",
+      "group": "People",
+      "badge": 3,
+      "current": false
+    },
+    {
+      "key": "naventry-7",
+      "label": "Permissions",
+      "href": "/permissions",
+      "group": "People",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-8",
+      "label": "Billing",
+      "href": "/billing",
+      "group": "Admin",
+      "badge": 5,
+      "current": false
+    },
+    {
+      "key": "naventry-9",
+      "label": "Integrations",
+      "href": "/integrations",
+      "group": "Admin",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-10",
+      "label": "Settings",
+      "href": "/settings",
+      "group": "Admin",
+      "badge": 0,
+      "current": false
+    }
+  ],
+  "NavEntry:failed": [
+    {
+      "key": "naventry-1",
+      "label": "Overview",
+      "href": "/",
+      "group": "Workspace",
+      "badge": 0,
+      "current": true
+    },
+    {
+      "key": "naventry-2",
+      "label": "Reports",
+      "href": "/reports",
+      "group": "Workspace",
+      "badge": 12,
+      "current": false
+    },
+    {
+      "key": "naventry-3",
+      "label": "Invoices",
+      "href": "/invoices",
+      "group": "Workspace",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-4",
+      "label": "Expenses",
+      "href": "/expenses",
+      "group": "Workspace",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-5",
+      "label": "Team",
+      "href": "/team",
+      "group": "People",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-6",
+      "label": "Guests",
+      "href": "/guests",
+      "group": "People",
+      "badge": 3,
+      "current": false
+    },
+    {
+      "key": "naventry-7",
+      "label": "Permissions",
+      "href": "/permissions",
+      "group": "People",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-8",
+      "label": "Billing",
+      "href": "/billing",
+      "group": "Admin",
+      "badge": 5,
+      "current": false
+    },
+    {
+      "key": "naventry-9",
+      "label": "Integrations",
+      "href": "/integrations",
+      "group": "Admin",
+      "badge": 0,
+      "current": false
+    },
+    {
+      "key": "naventry-10",
+      "label": "Settings",
+      "href": "/settings",
+      "group": "Admin",
+      "badge": 0,
+      "current": false
+    }
+  ],
+  "props:AppShell": {
+    "title": "Projects",
+    "searchLabel": "Search projects",
+    "searchText": "",
+    "actionLabel": "New project",
+    "menuLabel": "Open the menu",
+    "closeLabel": "Close the menu",
+    "productName": "Acme Console",
+    "productMark": "AC",
+    "navLabel": "Main menu",
+    "accountName": "Ada Lovelace",
+    "accountDetail": "Workspace admin",
+    "sectionTitle": "Active projects",
+    "footer": "Projects you have not opened for 90 days move to the archive.",
+    "emptyText": "No projects yet. A new project keeps its files, people and deadlines in one place.",
+    "loadingText": "Loading your projects…",
+    "failedText": "Your projects could not be loaded. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "proposedNote": "Your assistant suggests archiving Harbour signage, untouched since March.",
+    "acceptLabel": "Archive",
+    "rejectLabel": "Not now",
+    "changedNote": "Your assistant renamed Spring launch to Spring launch: retail.",
+    "markNote": "Renamed by your assistant",
+    "undoLabel": "Undo",
+    "agentKey": "spring"
+  },
+  "ShellRow:many": [
+    {
+      "key": "aurora",
+      "title": "Aurora desk lamp",
+      "detail": "Production · due Dec 4 · Maya Okafor",
+      "href": "/"
+    },
+    {
+      "key": "spring",
+      "title": "Spring launch: retail",
+      "detail": "Planning · 12 tasks open · Jonas Weber",
+      "href": "/"
+    },
+    {
+      "key": "audit",
+      "title": "2024 audit archive",
+      "detail": "Review · waiting on finance · Priya Nair",
+      "href": "/"
+    },
+    {
+      "key": "harbour",
+      "title": "Harbour signage",
+      "detail": "Paused since March · Sam Rivera",
+      "href": "/"
+    },
+    {
+      "key": "onboarding",
+      "title": "New hire onboarding",
+      "detail": "Ongoing · 3 people this month · Ada Lovelace",
+      "href": "/"
+    }
+  ],
+  "ShellRow:long": [
+    {
+      "key": "aurora",
+      "title": "Aurora desk lamp, the brass-and-linen edition for the Rotterdam showroom and its winter catalogue",
+      "detail": "Production · due Dec 4 · Maya Okafor, with the supplier's long note on the cloth-wrapped cord and the dimmer's range",
+      "href": "/"
+    },
+    {
+      "key": "spring",
+      "title": "Spring launch: retail, wholesale and the three pop-up stores along the harbour front",
+      "detail": "Planning · 12 tasks open · Jonas Weber",
+      "href": "/"
+    }
   ]
 }

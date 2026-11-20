@@ -1,8 +1,8 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer from "__SCOPE__/screens"
-use Fact, Message, Step from "__SCOPE__/blocks"
+use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, ShellRow from "__SCOPE__/screens"
+use Fact, Message, Step, NavEntry from "__SCOPE__/blocks"
 
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
 // The newest change on any of the keys, said in one sentence; "" when there is none.
@@ -81,16 +81,33 @@ fn setupKey(answer: string): string = `setup-${answer}`
 fn setupKeys(): string[] = setupAnswerKeys().map(k => setupKey(k))
 fn setupLabel(answer: string): string = setupAnswers().filter(a => a.key == answer).map(a => a.label).join("")
 fn answerAct(answer: string, value: string): Act = Act(tool="fillAnswer", door="agent", key=setupKey(answer), title=setupLabel(answer), value=value, did=`Your assistant filled in ${setupLabel(answer)}: ${value}.`, asks=`Your assistant suggests ${value} for ${setupLabel(answer)}.`, will=`Your assistant will fill in ${setupLabel(answer)} in 5 seconds.`)
+// AppShell: a console's projects under its search. The search's words are a value in the ledger, so the field,
+// the rows it keeps and the agent's mark all read it; the phone's menu is the person's view, not a value.
+fn shellPages(): ShellRow[] = [
+  ShellRow(key="aurora", title="Aurora desk lamp", detail="Production · due Dec 4 · Maya Okafor", href="/"),
+  ShellRow(key="spring", title="Spring launch: retail", detail="Planning · 12 tasks open · Jonas Weber", href="/"),
+  ShellRow(key="audit", title="2024 audit archive", detail="Review · waiting on finance · Priya Nair", href="/"),
+  ShellRow(key="harbour", title="Harbour signage", detail="Paused since March · Sam Rivera", href="/")
+]
+// The rows a search keeps: those whose title or detail hold its words, in any case.
+fn shellFound(query: string): ShellRow[] = shellPages().filter(r => `${r.title} ${r.detail}`.toLowerCase().includes(query.trim().toLowerCase()))
+fn shellEntries(): NavEntry[] = [
+  NavEntry(key="projects", label="Projects", href="/", group="Workspace", badge=4, current=true),
+  NavEntry(key="reports", label="Reports", href="/reports", group="Workspace", badge=0, current=false),
+  NavEntry(key="team", label="Team", href="/team", group="People", badge=0, current=false)
+]
+fn shellSearchAct(text: string): Act = Act(tool="searchProjects", door="agent", key="shell-search", title="Search", value=text, did=(text.trim() == "" ? "Your assistant cleared the search." : `Your assistant searched the projects for “${text.trim()}”.`), asks=`Your assistant suggests searching the projects for “${text.trim()}”.`, will=`Your assistant will search the projects for “${text.trim()}” in 5 seconds.`)
 
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false),
   AgentTool(name="openProject", title="Project", sentence="Opens a project beside the list.", floor="recorded", reach="self", secret=false),
   AgentTool(name="flagMessage", title="Flags", sentence="Flags or unflags a message.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="fillAnswer", title="Setup", sentence="Fills in an answer of the workspace setup.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="fillAnswer", title="Setup", sentence="Fills in an answer of the workspace setup.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="searchProjects", title="Search", sentence="Searches the projects.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="picture", value="harbour"),
   Value(key="project", value="harbour")
-].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value="")))
+].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")])
