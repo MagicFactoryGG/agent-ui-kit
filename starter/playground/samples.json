@@ -899,7 +899,6 @@
       "current": false
     }
   ],
-  "slot:AppShell": false,
   "props:AppShell": {
     "title": "Projects",
     "searchLabel": "Search projects",
@@ -913,7 +912,7 @@
     "accountName": "Ada Lovelace",
     "accountDetail": "Workspace admin",
     "sectionTitle": "Active projects",
-    "countText": "5 projects",
+    
     "footer": "Projects you have not opened for 90 days move to the archive.",
     "emptyText": "No projects yet. A new project keeps its files, people and deadlines in one place.",
     "loadingText": "Loading your projects…",

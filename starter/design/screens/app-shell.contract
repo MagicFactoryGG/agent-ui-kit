@@ -10,10 +10,17 @@
 // the shell reads the viewport's width (a size fact, not the host: `lower-library-platform` names displayMode,
 // delivery and surface) and chooses its layout from it.
 //
-// The page: a heading row (the section's title, its count) over the kit's Section, its rows the kit's LinkRows,
-// then the slot (the rest of the page the app adds under the list). The bar is drawn here and not the kit's
-// TopBar: TopBar's slot sits after its title, and the phone's menu button leads the bar, at the edge the sheet
-// opens from.
+// The page: the kit's Section, its rows the kit's LinkRows, centred at a reading measure (screens.shell-page-max)
+// in the room the rail leaves. It is not a slot, on purpose: the phone's sheet must take the page under it out of
+// reach (`inert`, or the covered controls are a screen reader's and Exact's check's), and Exact refuses a computed
+// `inert` or `aria-hidden` on any node above a library's slot (`lower-anatomy-slot`: the check cannot fold it). An
+// app with another page puts its own screen beside this one; the frame's parts (the bar, the rail, the sheet)
+// stay the same. The bar is drawn here and not the kit's TopBar: TopBar's slot sits after its title, and the
+// phone's menu button leads the bar, at the edge the sheet opens from. The sheet opens under the bar, so the
+// button that opened it, now a cross, closes it where the finger already is; the scrim beside it closes it too.
+//
+// The rail is the panel SideNav draws (its places' column, its account), then the rail's own surface to the
+// window's foot with the panel's edge line carried down, so the rail reads as one column however short the menu.
 //
 // States:
 //   data   many|empty|loading|failed|long — for the page (the rail keeps its places while the page loads):
@@ -109,7 +116,6 @@ component AppShell
     accountName: string
     accountDetail: string
     sectionTitle: string
-    countText: string
     footer: string
     rows: ShellRow[]
     emptyText: string
@@ -134,7 +140,6 @@ component AppShell
     accept: action
     reject: action
     undo: action
-  slot
   resource viewport = exactViewport() as shape ShellViewport
   derive wide = viewport.width >= shellWideFrom()
   derive sheet = menuOpen and not wide
@@ -146,7 +151,9 @@ component AppShell
     row testId="app-shell" position="absolute" inset=0 display="flex" align-items="stretch" background-color="theme.color.page" color="theme.color.ink"
       if wide
         scroll id="app-shell-rail" width="screens.shell-rail" flex-shrink=0 min-height=0 background-color="theme.color.surface"
-          ShellNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, accountName=accountName, accountDetail=accountDetail, retry=retry)
+          column min-height="100%"
+            ShellNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, accountName=accountName, accountDetail=accountDetail, retry=retry)
+            box flex=1 border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line" aria-hidden=true
       column flex=1 min-width=0 position="relative" display="flex" flex-direction="column"
         row role="banner" align-items="center" gap="theme.space.md" min-height="screens.shell-bar-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" background-color="theme.color.page"
           if not wide
@@ -165,38 +172,40 @@ component AppShell
           if wide
             input type="search" value=searchText input=search placeholder=searchLabel aria-label=searchLabel testId="app-shell-search" width="screens.shell-search" min-width=0 flex-shrink=1
           ActionButton(label=actionLabel, kind=(barFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=act, testId="app-shell-action")
-        if not wide
-          row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
-            input type="search" value=searchText input=search placeholder=searchLabel aria-label=searchLabel testId="app-shell-search" flex=1 min-width=0
-        scroll id="app-shell-page" flex=1 min-height=0
-          column width="100%" max-width="screens.shell-page-max" box-sizing="border-box" padding=(wide ? "theme.space.xl" : "theme.space.lg") gap="theme.space.lg"
-            if agent == "proposed" and shown
-              ShellBand(sentence=proposedNote, tone="proposed", testId="app-shell-proposal")
-                ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="app-shell-no")
-                ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="app-shell-yes")
-            if agent == "changed" and shown
-              ShellBand(sentence=changedNote, tone="changed", testId="app-shell-changed")
-                ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="app-shell-undo")
-            column gap="theme.space.sm"
-              Section(title=sectionTitle, footer=(shown ? footer : ""), emptyText=emptyText, loadingText=loadingText, failedText=failedText, data=(data == "long" ? "many" : data), testId="app-shell-section")
-                if shown
-                  column role="list" aria-label=sectionTitle
-                    for r, i in rows key=r.key
-                      column role="listitem" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
-                        LinkRow(href=r.href, title=r.title, detail=r.detail, agentNote=markNote, interaction="idle", agent=(agent == "changed" and r.key == agentKey ? "changed" : "none"), testId=`app-shell-row-${r.key}`)
-                else if data == "loading"
-                  column border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
-                    ShellGhost(wide=true)
-                    ShellGhost(wide=false)
-                    ShellGhost(wide=true)
-                else if data == "empty"
-                  row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.lg"
-                    ActionButton(label=actionLabel, kind="primary", interaction="idle", outcome="none", press=act, testId="app-shell-empty-action")
-                else
-                  row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.lg"
-                    ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId="app-shell-retry")
-            children
-        if sheet
-          button press=closeMenu testId="app-shell-scrim" aria-label=closeLabel position="absolute" left=0 right=0 bottom=0 top="screens.shell-bar-min" border-width=0 background-color="color-mix(in srgb, theme.color.page 72%, transparent)"
-          scroll id="app-shell-sheet" position="absolute" left=0 bottom=0 top="screens.shell-bar-min" width="screens.shell-sheet" max-width="calc(100% - theme.space.xxl)" background-color="theme.color.surface"
-            ShellNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, accountName=accountName, accountDetail=accountDetail, retry=retry)
+        column flex=1 min-height=0 position="relative" display="flex" flex-direction="column"
+          column flex=1 min-height=0 display="flex" flex-direction="column" inert=sheet
+            if not wide
+              row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+                input type="search" value=searchText input=search placeholder=searchLabel aria-label=searchLabel testId="app-shell-search" flex=1 min-width=0
+            scroll id="app-shell-page" flex=1 min-height=0
+              column width="100%" max-width="screens.shell-page-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(wide ? "theme.space.xl" : "theme.space.lg") gap="theme.space.lg"
+                if agent == "proposed" and shown
+                  ShellBand(sentence=proposedNote, tone="proposed", testId="app-shell-proposal")
+                    ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="app-shell-no")
+                    ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="app-shell-yes")
+                if agent == "changed" and shown
+                  ShellBand(sentence=changedNote, tone="changed", testId="app-shell-changed")
+                    ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="app-shell-undo")
+                column gap="theme.space.sm"
+                  Section(title=sectionTitle, footer=(shown ? footer : ""), emptyText=emptyText, loadingText=loadingText, failedText=failedText, data=(data == "long" ? "many" : data), testId="app-shell-section")
+                    if shown
+                      column role="list" aria-label=sectionTitle
+                        for r, i in rows key=r.key
+                          column role="listitem" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                            LinkRow(href=r.href, title=r.title, detail=r.detail, agentNote=markNote, interaction="idle", agent=(agent == "changed" and r.key == agentKey ? "changed" : "none"), testId=`app-shell-row-${r.key}`)
+                    else if data == "loading"
+                      column border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+                        ShellGhost(wide=true)
+                        ShellGhost(wide=false)
+                        ShellGhost(wide=true)
+                    else if data == "empty"
+                      row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.lg"
+                        ActionButton(label=actionLabel, kind="primary", interaction="idle", outcome="none", press=act, testId="app-shell-empty-action")
+                    else
+                      row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.lg"
+                        ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId="app-shell-retry")
+          if sheet
+            row position="absolute" inset=0 align-items="stretch"
+              scroll id="app-shell-sheet" width="screens.shell-sheet" flex-shrink=1 min-width=0 background-color="theme.color.surface"
+                ShellNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, accountName=accountName, accountDetail=accountDetail, retry=retry)
+              button press=closeMenu testId="app-shell-scrim" aria-label=closeLabel flex=1 min-width="theme.space.xxl" border-width=0 background-color="color-mix(in srgb, theme.color.page 72%, transparent)"
