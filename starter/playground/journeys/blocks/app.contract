@@ -216,6 +216,11 @@ component App
   tool openQuestion writes idempotent closed "Open a question on the help page to show the person its answer, or close it, as a press on the question does: returns, delivery, change or payment. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readFaq." = openQuestion
     returns book.answer
     fails when book.answer == "off"
+  tool readChart reads "The orders chart: its range (week or month) on the first line, then each bar, one per line: label, then orders, tab-separated." = readChart
+    returns chartText(chartRange)
+  tool setChartRange writes idempotent closed "Show the orders chart by week or by month, as its Weeks and Months switch does: week or month. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readChart." = setChartRange
+    returns book.answer
+    fails when book.answer == "off"
 
   view
     main testId="app" width="100%" height="100%"

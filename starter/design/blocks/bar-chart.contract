@@ -72,7 +72,7 @@ component BarChartFill
     thick: string
     rounded: enum<"top", "end">
   view
-    box flex-grow=grow flex-shrink=1 flex-basis=0 width=across height=thick max-width="blocks.bar-chart-column" min-width=(rounded == "end" ? "blocks.bar-chart-sliver" : "0px") min-height=(rounded == "top" ? "blocks.bar-chart-sliver" : "0px") background-color=(top ? "theme.color.accent" : "theme.color.ink-muted") opacity=(top ? 1 : 0.4) border-top-right-radius="blocks.bar-chart-cap" border-top-left-radius=(rounded == "top" ? "blocks.bar-chart-cap" : "0px") border-bottom-right-radius=(rounded == "end" ? "blocks.bar-chart-cap" : "0px") aria-hidden=true
+    box flex-grow=grow flex-shrink=1 flex-basis=0 width=across height=thick max-width=(rounded == "top" ? "blocks.bar-chart-column" : "none") min-width=(rounded == "end" ? "blocks.bar-chart-sliver" : "0px") min-height=(rounded == "top" ? "blocks.bar-chart-sliver" : "0px") background-color=(top ? "theme.color.accent" : "theme.color.ink-muted") opacity=(top ? 1 : 0.4) border-top-right-radius="blocks.bar-chart-cap" border-top-left-radius=(rounded == "top" ? "blocks.bar-chart-cap" : "0px") border-bottom-right-radius=(rounded == "end" ? "blocks.bar-chart-cap" : "0px") aria-hidden=true
 
 // A column of the wide chart: its value on the cap, its bar from the baseline. The air above the bar is the rest of
 // its share, so every column's bar is measured on the same height.
