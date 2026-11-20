@@ -59,21 +59,27 @@ component OnboardingGhostField
       box height="screens.onboarding-ghost-field" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="color-mix(in srgb, theme.color.ink-muted 30%, theme.color.raised)"
 
 // One step in the list beside the frame: a drawn tick when done, the accent ring when current, a quiet ring to
-// come; the current step's name in the label weight. `word` is said with the name (done, now, to come).
+// come; the current step's name in the label weight. A track joins each glyph to the next, as the frame's own bar
+// joins its dots: past a done step it takes the positive colour at the ring's weight, otherwise a hairline, so
+// the list reads as one path by weight as well as colour. `word` is said with the name (done, now, to come).
 component OnboardingStepRow
   props
     step: Step
     number: number
     word: string
+    last: bool
   view
-    row role="listitem" aria-label=`${step.title}, ${word}` testId=`onboarding-list-${step.key}` gap="theme.space.md" align-items="flex-start"
-      box width="screens.onboarding-glyph" height="screens.onboarding-glyph" box-sizing="border-box" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.pill" border-width=(step.state == "current" ? "screens.onboarding-ring" : "theme.line.width") border-style="solid" border-color=(step.state == "done" ? "theme.color.positive-text" : step.state == "current" ? "theme.color.accent" : "color-mix(in srgb, theme.color.ink-muted 45%, theme.color.page)") aria-hidden=true
-        if step.state == "done"
-          svg viewBox="0 0 12 12" width="screens.onboarding-tick" height="screens.onboarding-tick" fill="none" stroke="theme.color.positive-text" aria-hidden=true
-            path d="M2.5 6.5L5 9l4.5-5" stroke-width=2 stroke-linecap="round" stroke-linejoin="round"
-        else
-          text `${number}` font="theme.type.caption" color=(step.state == "current" ? "theme.color.accent" : "theme.color.ink-muted") font-variant-numeric="tabular-nums"
-      text step.title flex=1 min-width=0 padding-top="screens.onboarding-title-top" font=(step.state == "current" ? "theme.type.label" : "theme.type.body") color=(step.state == "current" ? "theme.color.ink" : "theme.color.ink-muted")
+    row role="listitem" aria-label=`${step.title}, ${word}` testId=`onboarding-list-${step.key}` gap="theme.space.md"
+      column align-items="center" flex-shrink=0 aria-hidden=true
+        box width="screens.onboarding-glyph" height="screens.onboarding-glyph" box-sizing="border-box" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.pill" border-width=(step.state == "current" ? "screens.onboarding-ring" : "theme.line.width") border-style="solid" border-color=(step.state == "done" ? "theme.color.positive-text" : step.state == "current" ? "theme.color.accent" : "color-mix(in srgb, theme.color.ink-muted 45%, theme.color.page)") background-color=(step.state == "current" ? "theme.color.page" : "transparent")
+          if step.state == "done"
+            svg viewBox="0 0 12 12" width="screens.onboarding-tick" height="screens.onboarding-tick" fill="none" stroke="theme.color.positive-text" aria-hidden=true
+              path d="M2.5 6.5L5 9l4.5-5" stroke-width=2 stroke-linecap="round" stroke-linejoin="round"
+          else
+            text `${number}` font="theme.type.caption" color=(step.state == "current" ? "theme.color.accent" : "theme.color.ink-muted") font-variant-numeric="tabular-nums"
+        if not last
+          box flex=1 min-height="theme.space.md" margin-top="theme.space.xs" margin-bottom="theme.space.xs" width=(step.state == "done" ? "screens.onboarding-ring" : "theme.line.width") border-radius="theme.radius.pill" background-color=(step.state == "done" ? "theme.color.positive" : "color-mix(in srgb, theme.color.ink-muted 45%, theme.color.page)")
+      text step.title flex=1 min-width=0 padding-top="screens.onboarding-title-top" padding-bottom=(last ? "0" : "theme.space.lg") font=(step.state == "current" ? "theme.type.label" : "theme.type.body") color=(step.state == "current" ? "theme.color.ink" : "theme.color.ink-muted")
 
 component OnboardingScreen
   props
@@ -152,8 +158,8 @@ component OnboardingScreen
                       OnboardingAnswerRow(answer=a, marked=(agent == "proposed" or agent == "changed"), markNote=markNote, refused=(outcome == "error"), busy=busy, edit=typed)
             column role="complementary" aria-label=listTitle testId="onboarding-list" flex="1 1 screens.onboarding-aside" min-width=0 max-width="screens.onboarding-main" padding-top="theme.space.xl" gap="theme.space.md"
               Words(text=listTitle, kind="heading", outcome="none", level=2, testId="onboarding-list-title")
-              column role="list" gap="theme.space.md"
+              column role="list"
                 for s, i in steps key=s.key
-                  OnboardingStepRow(step=s, number=(i + 1), word=(s.state == "done" ? doneWord : s.state == "current" ? currentWord : nextWord))
+                  OnboardingStepRow(step=s, number=(i + 1), word=(s.state == "done" ? doneWord : s.state == "current" ? currentWord : nextWord), last=(i + 1 == steps.length))
               if listNote != ""
                 Words(text=listNote, kind="caption", outcome="none", level=0, testId="onboarding-list-note")
