@@ -9,7 +9,9 @@
       "readProjects": { "title": "Read Projects" },
       "openProject": { "title": "Open Project", "parameters": { "project": { "title": "Project" } } },
       "readSetup": { "title": "Read Setup" },
-      "fillAnswer": { "title": "Fill Answer", "parameters": { "answer": { "title": "Answer" }, "value": { "title": "Value" } } }
+      "fillAnswer": { "title": "Fill Answer", "parameters": { "answer": { "title": "Answer" }, "value": { "title": "Value" } } },
+      "readPeriods": { "title": "Read Periods" },
+      "setPeriod": { "title": "Set Period", "parameters": { "period": { "title": "Period" } } }
     }
   }
 }

@@ -1407,5 +1407,107 @@
       "subject": "A subject line that keeps going because the sender put the whole question in it and expected nobody to mind",
       "body": "The body of a long message wraps in the pane and keeps its own paragraphs, however long a line runs, and a word without a break such as https://licensing-office.regional-authority.example/applications/2026/studio-renovation/attachments breaks where it must rather than push the page sideways.\nA second paragraph follows, so the reader sees that the letter keeps the sender's own line breaks."
     }
+  ],
+  "props:DashboardScreen": {
+    "title": "Overview",
+    "periodLabel": "Period",
+    "statsLabel": "This week in numbers",
+    "chartTitle": "Orders",
+    "chartNote": "Per day, this week",
+    "recentTitle": "Recent orders",
+    "recentEmptyText": "No orders yet this week.",
+    "allLabel": "View all",
+    "loadingText": "Loading this week’s numbers…",
+    "emptyTitle": "Nothing yet this week",
+    "emptyText": "Orders, visitors and revenue show here as they come in. Share your shop to bring in the first ones.",
+    "emptyLabel": "Share your shop",
+    "failedTitle": "The numbers did not load",
+    "failedText": "We could not reach the server. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "proposedNote": "Your assistant suggests showing the month, to compare with the spring sale.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "changedNote": "Your assistant switched the period to this month.",
+    "undoLabel": "Undo",
+    "periodKey": "week",
+    "periodKey@long": "week",
+    "allLabel@long": "View all",
+    "retryLabel@long": "Try again",
+    "acceptLabel@long": "Accept",
+    "rejectLabel@long": "Not now",
+    "undoLabel@long": "Undo",
+    "emptyLabel@long": "Share your shop"
+  },
+  "DashboardPeriod:many": [
+    {"key": "day", "label": "Today"},
+    {"key": "week", "label": "Week"},
+    {"key": "month", "label": "Month"},
+    {"key": "quarter", "label": "Quarter"}
+  ],
+  "DashboardPeriod:empty": [
+    {"key": "day", "label": "Today"},
+    {"key": "week", "label": "Week"},
+    {"key": "month", "label": "Month"},
+    {"key": "quarter", "label": "Quarter"}
+  ],
+  "DashboardPeriod:loading": [
+    {"key": "day", "label": "Today"},
+    {"key": "week", "label": "Week"},
+    {"key": "month", "label": "Month"},
+    {"key": "quarter", "label": "Quarter"}
+  ],
+  "DashboardPeriod:failed": [
+    {"key": "day", "label": "Today"},
+    {"key": "week", "label": "Week"},
+    {"key": "month", "label": "Month"},
+    {"key": "quarter", "label": "Quarter"}
+  ],
+  "DashboardPeriod:long": [
+    {"key": "day", "label": "Today"},
+    {"key": "week", "label": "Week"},
+    {"key": "month", "label": "Month"},
+    {"key": "quarter", "label": "Quarter"}
+  ],
+  "DashboardStat:many": [
+    {"key": "revenue", "label": "Revenue", "value": "€12,480", "change": "+12%", "note": "vs last week", "tone": "positive"},
+    {"key": "orders", "label": "Orders", "value": "318", "change": "+4%", "note": "vs last week", "tone": "positive"},
+    {"key": "visitors", "label": "Visitors", "value": "9,204", "change": "−3%", "note": "vs last week", "tone": "critical"},
+    {"key": "conversion", "label": "Conversion", "value": "3.4%", "change": "0%", "note": "no change", "tone": "none"}
+  ],
+  "DashboardStat:empty": [
+    {"key": "revenue", "label": "Revenue", "value": "€0", "change": "", "note": "No orders yet", "tone": "none"},
+    {"key": "orders", "label": "Orders", "value": "0", "change": "", "note": "No orders yet", "tone": "none"},
+    {"key": "visitors", "label": "Visitors", "value": "0", "change": "", "note": "No visits yet", "tone": "none"},
+    {"key": "conversion", "label": "Conversion", "value": "–", "change": "", "note": "Needs a visit", "tone": "none"}
+  ],
+  "DashboardStat:long": [
+    {"key": "revenue", "label": "Revenue after refunds, taxes and the payment provider’s fees", "value": "€1,284,309.75", "change": "+112.4%", "note": "against the same week of last year, before the price change", "tone": "positive"},
+    {"key": "orders", "label": "Orders placed through the shop and the marketplace", "value": "31,804", "change": "−18.2%", "note": "against last week", "tone": "critical"}
+  ],
+  "DashboardBar:many": [
+    {"key": "mon", "label": "Mon", "share": 51, "valueText": "38 orders", "current": false},
+    {"key": "tue", "label": "Tue", "share": 70, "valueText": "52 orders", "current": false},
+    {"key": "wed", "label": "Wed", "share": 61, "valueText": "45 orders", "current": false},
+    {"key": "thu", "label": "Thu", "share": 82, "valueText": "61 orders", "current": false},
+    {"key": "fri", "label": "Fri", "share": 100, "valueText": "74 orders", "current": true},
+    {"key": "sat", "label": "Sat", "share": 0, "valueText": "No orders yet", "current": false},
+    {"key": "sun", "label": "Sun", "share": 0, "valueText": "No orders yet", "current": false}
+  ],
+  "DashboardBar:long": [
+    {"key": "w1", "label": "First week of October", "share": 54, "valueText": "1,204 orders", "current": false},
+    {"key": "w2", "label": "Second week of October", "share": 74, "valueText": "1,630 orders", "current": false},
+    {"key": "w3", "label": "Third week of October", "share": 44, "valueText": "980 orders", "current": false},
+    {"key": "w4", "label": "Fourth week of October, the sale", "share": 100, "valueText": "2,214 orders in the fourth week of October, during the autumn sale", "current": true}
+  ],
+  "DashboardItem:many": [
+    {"key": "o1048", "title": "Order 1048 · Priya Nair", "detail": "2 items · 4 minutes ago", "trailing": "€84.00", "tone": "none"},
+    {"key": "o1047", "title": "Order 1047 · Jonas Weber", "detail": "1 item · 22 minutes ago", "trailing": "Paid", "tone": "success"},
+    {"key": "o1046", "title": "Order 1046 · Maya Okafor", "detail": "3 items · 1 hour ago", "trailing": "Refunded", "tone": "cancelled"},
+    {"key": "o1045", "title": "Order 1045 · Sam Delacroix", "detail": "1 item · 2 hours ago", "trailing": "Payment failed", "tone": "error"},
+    {"key": "o1044", "title": "Order 1044 · Ada Lovelace", "detail": "5 items · 3 hours ago", "trailing": "€212.50", "tone": "none"}
+  ],
+  "DashboardItem:long": [
+    {"key": "o2001", "title": "Order 2001 · Maximiliana Theodora Featherstonehaugh-Montgomery of the Northern Isles", "detail": "14 items, two of them on back order, sent in three parcels · 4 minutes ago", "trailing": "€1,284.00", "tone": "none"},
+    {"key": "o2000", "title": "Order 2000 · A gift for the whole studio team, wrapped and with a card", "detail": "1 item · yesterday", "trailing": "Waiting for the bank to confirm the payment", "tone": "blocked"}
   ]
 }

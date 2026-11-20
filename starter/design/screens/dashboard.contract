@@ -1,0 +1,311 @@
+// DashboardScreen: how things stand for one period, at a glance. The bar names the screen; the period (a week, a
+// month, a quarter: the app's) is a group of the kit's Segments, at the bar's end on a desktop and full width at the
+// top of the page on a phone, where a thumb reaches it. Under it the period's numbers as StatTiles on one surface
+// (label, the number in the display step, and its change, said in words with its sign so colour is never alone),
+// two to a row on a phone and four on a desktop; then two panels: the bar chart of the period, its current bar the
+// page's one filled focal element (the others the same accent, quiet), and the few most recent items as rows, not
+// cards (the kit's TextRow, a hairline between). The panels sit side by side on a desktop (the chart takes three
+// parts of five) and stack on a phone: a wrapping row whose items hold a named least width, so the layout changes
+// at narrow widths instead of squeezing. The content keeps a readable width (screens.dashboard-max), centred.
+// Grouping is by space and the surface: each card also wears the theme's line, so it holds on a theme whose page
+// and surface are one colour.
+//
+// States: `data` many, empty, loading, failed and long. Loading keeps the layout and says `loadingText` (role
+// status): the tiles, the chart's bars and the rows breathe as quiet stand-ins in their own places, so nothing moves
+// when the numbers arrive; the period stays a choice. Empty shows the tiles the app gives (honest zeros) and, in the
+// panels' place, the kit's StatePanel with `emptyText` and the way on (`emptyLabel`, the app's `start`). Failed
+// keeps the bar and the period, and puts the kit's StatePanel in the content's place (role alert) with
+// `retryLabel`. Long is many with words and numbers that run long: everything wraps on whole words, nothing is
+// cut. `agent` none, proposed and changed, on the period (the one value both doors set: a Segment's press and the
+// app's tool call the same `choose(key)`): proposed waits in a band at the top of the page, one sentence and two
+// answer words (Accept is the state's fill); changed says the agent's sentence in the same band, quietly, with
+// Undo, and the period group itself wears the accent's ring, so the mark is on the control it changed.
+//
+// Props: the words (title, periodLabel, statsLabel, chartTitle, chartNote, recentTitle, recentEmptyText,
+// allLabel, loadingText, emptyTitle, emptyText, emptyLabel, failedTitle, failedText, retryLabel, proposedNote,
+// acceptLabel, rejectLabel, changedNote, undoLabel), the data (`periods` and the chosen `periodKey`, `stats`,
+// `bars`, `items`), the states, and the app's actions (choose(key), showAll, start, retry, accept, reject, undo).
+// Every word is a prop.
+use Words, ActionButton, Segment, TextRow from "__SCOPE__/components"
+use TopBar, StatePanel from "__SCOPE__/blocks"
+
+// One choice of period: its key (the app chooses by key) and its word.
+shape DashboardPeriod
+  key: string
+  label: string
+
+// One number of the period: what it counts, the number as the app writes it, its change in words with its sign
+// ("+12%"), what the change is measured against ("vs last week"), and the change's tone: "positive", "critical"
+// or "none" (the app decides which way is good).
+shape DashboardStat
+  key: string
+  label: string
+  value: string
+  change: string
+  note: string
+  tone: string
+
+// One bar of the chart: its word under the axis, its height as a share of the highest bar (0 to 100, which the app
+// counts once: a row that walked every bar to find the highest would grow with the list), the number as the app
+// writes it, and whether it is the current one (today, this week), which the chart fills and names in its header.
+shape DashboardBar
+  key: string
+  label: string
+  share: number
+  valueText: string
+  current: bool
+
+// One recent item: what it is, its detail, a short trailing word or amount, and the trailing word's tone ("none",
+// "success", "error", "blocked" or "cancelled": the kit's outcome inks).
+shape DashboardItem
+  key: string
+  title: string
+  detail: string
+  trailing: string
+  tone: string
+
+// The window's width and the person's motion preference: what the screen reads to lay itself out.
+shape DashboardViewport
+  width: number
+  prefersReducedMotion: bool
+
+// Stand-ins breathe, so they read as on their way rather than as drawn shapes.
+keyframes dashboardBreathe
+  50% opacity=0.45
+
+// The period: the kit's Segments in one group, the chosen one raised. An agent's choice rings the group in the
+// accent: the mark sits on the control it changed.
+component DashboardPeriods
+  props
+    label: string
+    periods: DashboardPeriod[]
+    periodKey: string
+    marked: bool
+    pick: action
+  view
+    row role="group" aria-label=label testId="dashboard-periods" gap="theme.space.xs" padding="theme.space.xs" box-sizing="border-box" min-width=0 background-color="theme.color.fill" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color=(marked ? "theme.color.accent" : "theme.color.fill") box-shadow=(marked ? "0 0 0 1px theme.color.accent" : "none")
+      for p in periods key=p.key
+        Segment(label=p.label, on=(p.key == periodKey), interaction="idle", press=pick(p.key), testId=`dashboard-period-${p.key}`)
+
+// What an assistant asks or did, in one band: its glyph and sentence, then its answers (the slot), which wrap under
+// the sentence when the sentence would fall under its least width. The accent's edge is the kit's agent mark; the
+// words are ink on the surface, and the frame is the line token.
+component DashboardBand
+  props
+    tone: enum<"proposed", "changed">
+    sentence: string
+    testId: string
+  slot
+  view
+    row testId=testId role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.md" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-left-width="screens.dashboard-mark-line" border-left-color="theme.color.accent"
+      row flex=1 min-width="screens.dashboard-band-min" align-items="flex-start" gap="theme.space.sm"
+        svg viewBox="0 0 16 16" width="screens.dashboard-glyph" height="screens.dashboard-glyph" margin-top="screens.dashboard-glyph-top" fill="none" aria-hidden=true flex-shrink=0
+          if tone == "changed"
+            circle cx=8 cy=8 r=6.5 fill="theme.color.accent"
+            path d="M5 8.2l2 2 4-4.4" stroke="theme.color.accent-ink" stroke-width=1.6 stroke-linecap="round" stroke-linejoin="round"
+          else
+            path d="M8 1.5l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z" fill="theme.color.accent"
+        text sentence testId=`${testId}-sentence` flex=1 min-width=0 font="theme.type.body" color="theme.color.ink" overflow-wrap="break-word"
+      row flex-wrap="wrap" gap="theme.space.sm" flex-shrink=0
+        children
+
+// A card: the surface, the theme's line and the card's corner, so it shows on any theme.
+component DashboardCard
+  props
+    testId: string
+    grow: number
+    least: string
+  slot
+  view
+    column testId=testId flex-grow=grow flex-shrink=1 flex-basis="0" min-width=least box-sizing="border-box" gap="theme.space.lg" padding-top="theme.space.lg" padding-bottom="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+      children
+
+// One number: what it counts, the number in the display step, then its change and what it is measured against.
+component DashboardTile
+  props
+    stat: DashboardStat
+    testId: string
+  view
+    column role="listitem" testId=testId flex=1 min-width="screens.dashboard-tile-min" box-sizing="border-box" gap="theme.space.xs"
+      Words(text=stat.label, kind="caption", outcome="none", level=0, testId=`${testId}-label`)
+      text stat.value testId=`${testId}-value` overflow-wrap="break-word" font="theme.type.display-compact" letter-spacing="theme.type.display-compact-tracking" color="theme.color.ink" font-variant-numeric="tabular-nums"
+      row flex-wrap="wrap" column-gap="theme.space.xs" row-gap="0" align-items="baseline"
+        if stat.change != ""
+          text stat.change testId=`${testId}-change` overflow-wrap="break-word" font="theme.type.label" color=(stat.tone == "positive" ? "theme.color.positive-text" : stat.tone == "critical" ? "theme.color.critical-text" : "theme.color.ink-muted") font-variant-numeric="tabular-nums"
+        if stat.note != ""
+          text stat.note min-width=0 overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
+
+// A tile still coming: the real tile's three lines as quiet bars, at their own heights.
+component DashboardGhostTile
+  props
+    pulse: string
+  view
+    column aria-hidden=true flex=1 min-width="screens.dashboard-tile-min" box-sizing="border-box" gap="theme.space.sm" animation=pulse
+      box width="48%" height="screens.dashboard-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+      box width="72%" height="screens.dashboard-bone-value" background-color="theme.color.fill" border-radius="theme.radius.control"
+      box width="56%" height="screens.dashboard-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+
+// The chart's plot: one column per bar, each bar's height its share of the highest (flex parts of the plot's
+// height, so no length is computed), the current bar filled in the accent and the others the accent made quiet; the bars' words under the
+// axis line. While loading, the same plot holds quiet bars that breathe.
+component DashboardPlot
+  props
+    label: string
+    bars: DashboardBar[]
+    loading: bool
+    pulse: string
+  view
+    column gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg" flex=1 min-height=0
+      if loading
+        row aria-hidden=true height="screens.dashboard-plot" align-items="stretch" gap="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" animation=pulse
+          for g in [44, 68, 52, 84, 60, 74, 48] key=`${g}`
+            column flex=1 min-width=0 align-items="center"
+              box flex-grow=(100 - g)
+              box flex-grow=g width="100%" max-width="screens.dashboard-bar-max" background-color="theme.color.fill" border-top-left-radius="theme.radius.control" border-top-right-radius="theme.radius.control"
+      else
+        row role="list" aria-label=label testId="dashboard-plot" flex=1 min-height="screens.dashboard-plot" align-items="stretch" gap="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+          for b in bars key=b.key
+            column role="listitem" aria-label=`${b.label} ${b.valueText}` testId=`dashboard-bar-${b.key}` flex=1 min-width=0 align-items="center"
+              box flex-grow=(100 - b.share)
+              box flex-grow=b.share width="100%" min-height="screens.dashboard-bar-least" max-width="screens.dashboard-bar-max" background-color="theme.color.accent" opacity=(b.current ? 1 : 0.32) border-top-left-radius="theme.radius.control" border-top-right-radius="theme.radius.control"
+        row aria-hidden=true gap="theme.space.sm"
+          for b in bars key=b.key
+            text b.label flex=1 min-width=0 text-align="center" overflow-wrap="break-word" font="theme.type.caption" color=(b.current ? "theme.color.ink" : "theme.color.ink-muted")
+
+// A row still coming: the real row's insets, a bar where the title sits and a shorter one for its detail.
+component DashboardGhostRow
+  props
+    share: string
+    pulse: string
+  view
+    column aria-hidden=true justify-content="center" gap="theme.space.sm" min-height="screens.dashboard-ghost-row" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" animation=pulse
+      box width=share height="screens.dashboard-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+      box width="36%" height="screens.dashboard-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+
+// A card's head: its title (a heading) over a caption, and what sits at its end (the slot).
+component DashboardHead
+  props
+    title: string
+    note: string
+    testId: string
+  slot
+  view
+    row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.lg" row-gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg"
+      column flex=1 min-width="screens.dashboard-head-min" gap="theme.space.xs"
+        Words(text=title, kind="heading", outcome="none", level=2, testId=`${testId}-title`)
+        if note != ""
+          text note testId=`${testId}-note` overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
+      children
+
+component DashboardScreen
+  props
+    title: string
+    periodLabel: string
+    statsLabel: string
+    chartTitle: string
+    chartNote: string
+    recentTitle: string
+    recentEmptyText: string
+    allLabel: string
+    loadingText: string
+    emptyTitle: string
+    emptyText: string
+    emptyLabel: string
+    failedTitle: string
+    failedText: string
+    retryLabel: string
+    proposedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    changedNote: string
+    undoLabel: string
+    periodKey: string
+    periods: DashboardPeriod[]
+    stats: DashboardStat[]
+    bars: DashboardBar[]
+    items: DashboardItem[]
+    data: enum<"many", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed">
+    choose: action
+    showAll: action
+    start: action
+    retry: action
+    accept: action
+    reject: action
+    undo: action
+  resource viewport = exactViewport() as shape DashboardViewport
+  derive narrow = viewport.width < 760
+  derive pulse = viewport.prefersReducedMotion ? "none" : "dashboardBreathe 1.8s ease-in-out infinite"
+  derive loading = data == "loading"
+  derive current = first(bars.filter(b => b.current))
+  derive currentText = match current { case some(b) => b.valueText, case none => "" }
+  derive currentLabel = match current { case some(b) => b.label, case none => "" }
+  // A Segment chooses its period by key, through the app's `choose`: the same act an agent's tool calls.
+  action pick(key: string)
+    choose(key)
+  view
+    column testId="dashboard" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
+      if narrow
+        TopBar(title=title, agentNote="", agent="none")
+      else
+        TopBar(title=title, agentNote="", agent="none")
+          DashboardPeriods(label=periodLabel, periods=periods, periodKey=periodKey, marked=(agent == "changed"), pick=pick)
+      scroll id="dashboard-scroll" flex=1 min-height=0
+        column testId="dashboard-content" aria-busy=loading width="100%" max-width="screens.dashboard-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(narrow ? "theme.space.lg" : "theme.space.xl") gap=(narrow ? "theme.space.lg" : "theme.space.xl")
+          if narrow
+            DashboardPeriods(label=periodLabel, periods=periods, periodKey=periodKey, marked=(agent == "changed"), pick=pick)
+          if agent == "proposed"
+            DashboardBand(tone="proposed", sentence=proposedNote, testId="dashboard-proposal")
+              ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="dashboard-reject")
+              ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="dashboard-accept")
+          else if agent == "changed"
+            DashboardBand(tone="changed", sentence=changedNote, testId="dashboard-changed")
+              ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="dashboard-undo")
+          if loading
+            text loadingText testId="dashboard-loading" role="status" overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
+          if data == "failed"
+            StatePanel(title=failedTitle, message="", failedText=failedText, agentNote="", actionLabel="", retryLabel=retryLabel, data="failed", agent="none", size="full", press=retry, testId="dashboard-failed")
+          else
+            if loading or stats.length > 0
+              row role="list" aria-label=statsLabel testId="dashboard-stats" flex-wrap="wrap" column-gap="theme.space.xl" row-gap="theme.space.lg" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+                if loading
+                  DashboardGhostTile(pulse=pulse)
+                  DashboardGhostTile(pulse=pulse)
+                  DashboardGhostTile(pulse=pulse)
+                  DashboardGhostTile(pulse=pulse)
+                else
+                  for s in stats key=s.key
+                    DashboardTile(stat=s, testId=`dashboard-stat-${s.key}`)
+            if data == "empty"
+              StatePanel(title=emptyTitle, message=emptyText, failedText="", agentNote="", actionLabel=emptyLabel, retryLabel="", data="empty", agent="none", size="full", press=start, testId="dashboard-empty")
+            else
+              row flex-wrap="wrap" align-items="stretch" gap=(narrow ? "theme.space.lg" : "theme.space.xl")
+                DashboardCard(testId="dashboard-chart", grow=3, least="screens.dashboard-chart-min")
+                  DashboardHead(title=chartTitle, note=chartNote, testId="dashboard-chart")
+                    if not loading and currentText != ""
+                      column align-items="flex-end" gap="theme.space.xs" min-width=0
+                        text currentText testId="dashboard-chart-current" overflow-wrap="break-word" text-align="end" font="theme.type.title" color="theme.color.ink" font-variant-numeric="tabular-nums"
+                        text currentLabel overflow-wrap="break-word" text-align="end" font="theme.type.caption" color="theme.color.ink-muted"
+                  DashboardPlot(label=chartTitle, bars=bars, loading=loading, pulse=pulse)
+                DashboardCard(testId="dashboard-recent", grow=2, least="screens.dashboard-list-min")
+                  DashboardHead(title=recentTitle, note="", testId="dashboard-recent")
+                    if not loading and allLabel != ""
+                      button press=showAll testId="dashboard-all" display="flex" align-items="center" min-height="screens.dashboard-tap" padding-left="theme.space.sm" padding-right="theme.space.sm" border-width=0 border-radius="theme.radius.control" background-color="transparent" color="theme.color.accent"
+                        :hover
+                          background-color="theme.color.hover"
+                        :focus-visible
+                          box-shadow="0 0 0 2px theme.color.focus"
+                        text allLabel font="theme.type.label" color="theme.color.accent"
+                  if loading
+                    column
+                      DashboardGhostRow(share="68%", pulse=pulse)
+                      DashboardGhostRow(share="54%", pulse=pulse)
+                      DashboardGhostRow(share="62%", pulse=pulse)
+                      DashboardGhostRow(share="48%", pulse=pulse)
+                  else if items.length == 0
+                    text recentEmptyText testId="dashboard-recent-empty" role="status" padding-left="theme.space.lg" padding-right="theme.space.lg" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
+                  else
+                    column role="list" aria-label=recentTitle testId="dashboard-items"
+                      for item, i in items key=item.key
+                        column role="listitem" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                          TextRow(title=item.title, detail=item.detail, trailing=item.trailing, outcome=(item.tone == "success" ? "success" : item.tone == "error" ? "error" : item.tone == "blocked" ? "blocked" : item.tone == "cancelled" ? "cancelled" : "none"), testId=`dashboard-item-${item.key}`)

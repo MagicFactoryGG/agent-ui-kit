@@ -1,7 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer from "__SCOPE__/screens"
+use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, DashboardPeriod, DashboardStat, DashboardBar, DashboardItem from "__SCOPE__/screens"
 use Fact, Message, Step from "__SCOPE__/blocks"
 
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -82,15 +82,42 @@ fn setupKeys(): string[] = setupAnswerKeys().map(k => setupKey(k))
 fn setupLabel(answer: string): string = setupAnswers().filter(a => a.key == answer).map(a => a.label).join("")
 fn answerAct(answer: string, value: string): Act = Act(tool="fillAnswer", door="agent", key=setupKey(answer), title=setupLabel(answer), value=value, did=`Your assistant filled in ${setupLabel(answer)}: ${value}.`, asks=`Your assistant suggests ${value} for ${setupLabel(answer)}.`, will=`Your assistant will fill in ${setupLabel(answer)} in 5 seconds.`)
 
+// DashboardScreen: a shop's numbers for one period; the period shown is a value in the ledger, by key, so a
+// Segment's tap and the agent's setPeriod write the same value. Each period's numbers are data only.
+fn dashPeriods(): DashboardPeriod[] = [
+  DashboardPeriod(key="day", label="Today"),
+  DashboardPeriod(key="week", label="Week"),
+  DashboardPeriod(key="month", label="Month"),
+  DashboardPeriod(key="quarter", label="Quarter")
+]
+fn dashPeriodKeys(): string[] = dashPeriods().map(p => p.key)
+fn dashPeriodWord(key: string): string = key == "day" ? "today" : key == "week" ? "this week" : key == "month" ? "this month" : "this quarter"
+fn dashAgainst(key: string): string = key == "day" ? "vs yesterday" : key == "week" ? "vs last week" : key == "month" ? "vs last month" : "vs last quarter"
+fn dashStats(key: string): DashboardStat[] = [
+  DashboardStat(key="revenue", label="Revenue", value=(key == "day" ? "€1,920" : key == "week" ? "€12,480" : key == "month" ? "€48,315" : "€139,060"), change=(key == "quarter" ? "+21%" : "+12%"), note=dashAgainst(key), tone="positive"),
+  DashboardStat(key="orders", label="Orders", value=(key == "day" ? "74" : key == "week" ? "318" : key == "month" ? "1,204" : "3,571"), change="+4%", note=dashAgainst(key), tone="positive"),
+  DashboardStat(key="visitors", label="Visitors", value=(key == "day" ? "1,388" : key == "week" ? "9,204" : key == "month" ? "36,950" : "104,322"), change="−3%", note=dashAgainst(key), tone="critical"),
+  DashboardStat(key="conversion", label="Conversion", value="3.4%", change="0%", note="no change", tone="none")
+]
+fn dashBar(key: string, label: string, share: number, n: string, current: bool): DashboardBar = DashboardBar(key=key, label=label, share=share, valueText=`${n} orders`, current=current)
+fn dashBars(key: string): DashboardBar[] = key == "month" ? [dashBar("w1", "Week 1", 72, "270", false), dashBar("w2", "Week 2", 86, "322", false), dashBar("w3", "Week 3", 100, "376", true), dashBar("w4", "Week 4", 63, "236", false)] : key == "quarter" ? [dashBar("aug", "Aug", 78, "1,097", false), dashBar("sep", "Sep", 90, "1,270", false), dashBar("oct", "Oct", 100, "1,204", true)] : key == "day" ? [dashBar("m", "Morning", 46, "21", false), dashBar("a", "Afternoon", 100, "34", true), dashBar("e", "Evening", 56, "19", false)] : [dashBar("mon", "Mon", 51, "38", false), dashBar("tue", "Tue", 70, "52", false), dashBar("wed", "Wed", 61, "45", false), dashBar("thu", "Thu", 82, "61", false), dashBar("fri", "Fri", 100, "74", true), dashBar("sat", "Sat", 0, "0", false), dashBar("sun", "Sun", 0, "0", false)]
+fn dashItems(): DashboardItem[] = [
+  DashboardItem(key="o1048", title="Order 1048 · Priya Nair", detail="2 items · 4 minutes ago", trailing="€84.00", tone="none"),
+  DashboardItem(key="o1047", title="Order 1047 · Jonas Weber", detail="1 item · 22 minutes ago", trailing="Paid", tone="success"),
+  DashboardItem(key="o1046", title="Order 1046 · Maya Okafor", detail="3 items · 1 hour ago", trailing="Refunded", tone="cancelled")
+]
+fn periodAct(key: string): Act = Act(tool="setPeriod", door="agent", key="dash-period", title="Period", value=key, did=`Your assistant showed the numbers for ${dashPeriodWord(key)}.`, asks=`Your assistant suggests showing the numbers for ${dashPeriodWord(key)}.`, will=`Your assistant will show the numbers for ${dashPeriodWord(key)} in 5 seconds.`)
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false),
   AgentTool(name="openProject", title="Project", sentence="Opens a project beside the list.", floor="recorded", reach="self", secret=false),
   AgentTool(name="flagMessage", title="Flags", sentence="Flags or unflags a message.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="fillAnswer", title="Setup", sentence="Fills in an answer of the workspace setup.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="fillAnswer", title="Setup", sentence="Fills in an answer of the workspace setup.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setPeriod", title="Period", sentence="Shows the dashboard's numbers for another period.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="picture", value="harbour"),
   Value(key="project", value="harbour")
-].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value="")))
+].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace"), Value(key="dash-period", value="week")]).concat(setupKeys().map(k => Value(key=k, value="")))

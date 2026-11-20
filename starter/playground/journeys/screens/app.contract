@@ -12,9 +12,9 @@
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
 use Ledger, ledger, personSet, valueOf, isOn, isMarked, undoLatest from "@agent-ui-kit/agent"
-use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer from "__SCOPE__/screens"
+use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer, DashboardScreen from "__SCOPE__/screens"
 use Message from "__SCOPE__/blocks"
-use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys from "./model.contract"
+use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys, dashPeriods, dashStats, dashBars, dashItems from "./model.contract"
 
 component App
   members "./tools.contract"
@@ -73,12 +73,20 @@ component App
   action setupBackByPerson
     book = personSet(book, "setup-step", setupStepFrom(valueOf(book, "setup-step"), -1))
 
+  // DashboardScreen: a shop's numbers; the period shown is a value in the ledger, by key, so the Segments, the
+  // numbers and the agent's mark all read it.
+  derive dashPeriod = valueOf(book, "dash-period")
+  derive dashText = dashPeriods().map(p => `${p.key}\t${p.label}${p.key == dashPeriod ? "\tshown" : ""}`).join("\n")
+  // The person's door: a tap on a period's Segment shows it, by key.
+  action choosePeriodByPerson(key: string)
+    book = personSet(book, "dash-period", key)
+
   // A retry and a proposal's answers: this use has none.
   action ignore
     book = book
 
   // The agent's door. Answer words: saved, delayed, proposed, off, unknown-id.
-  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen or OnboardingScreen. Answers its name." = openScreen
+  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen, OnboardingScreen or DashboardScreen. Answers its name." = openScreen
     returns shown
   tool readAlbum reads "The album's pictures, one per line: id, caption, and shown on the one on screen, tab-separated." = readAlbum
     returns albumText
@@ -100,6 +108,11 @@ component App
   tool fillAnswer writes idempotent closed "Fill in an answer of the workspace setup, by id from readSetup, with the value to write. Answers saved or unknown-id." = fillAnswer
     returns book.answer
     fails when book.answer == "unknown-id" or book.answer == "off"
+  tool readPeriods reads "The dashboard's periods, one per line: id, label, and shown on the one on screen, tab-separated." = readPeriods
+    returns dashText
+  tool setPeriod writes idempotent closed "Show the dashboard's numbers for a period, by id from readPeriods. Answers saved or unknown-id." = setPeriod
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off"
 
   view
     main testId="app" width="100%" height="100%"
@@ -111,3 +124,5 @@ component App
         MailScreen(title="Mail", mark="M", navLabel="Mailboxes", foldersTitle="Mailboxes", folderTitle="Inbox", accountName="Ada Lovelace", accountDetail="ada@studio.example", composeLabel="Compose", backLabel="Back to", unreadLabel="unread", orderLabel="Newest first", paneLabel="Open message", paneEmptyText="Choose a message to read it here.", paneQuietText="When a message arrives, it opens here.", emptyText="No messages in your inbox.", failedText="Your messages did not load.", retryLabel="Try again", toolbarLabel="Message actions", toLabel="To", replyLabel="Reply", replyAllLabel="Reply all", forwardLabel="Forward", flagLabel="Flag", agentNote="Flagged by your assistant", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, flagKeys()), undoLabel="Undo", waitingNote="", waitingLabel="", folders=mailFolders(), folderKey="inbox", messages=mailMessages, letter=mailLetter(), agentKey=mailMarkedKey, data="many", agent=(mailMarkedKey != "" ? "changed" : "none"), which="message", compose=ignore, retry=ignore, reply=ignore, replyAll=ignore, forward=ignore, flag=flagByPerson, showFolders=ignore, showList=ignore, accept=ignore, reject=ignore, undo=undoByPerson, review=ignore)
       else if shown == "OnboardingScreen"
         OnboardingScreen(productName="Northwind", exitLabel="Save and exit", steps=setupStepsAt(setupStep), answers=setupFields, lead="A few details to set your workspace up. You can change any of them later.", countLabel="Setup progress", backLabel="Back", continueLabel="Continue", skipLabel="Skip for now", retryLabel="", errorText="", loadingText="", failedText="", listTitle="Your setup", listNote="Your answers are saved as you go. Leave at any time and pick up where you stopped.", doneWord="done", currentWord="in progress", nextWord="to come", markNote="Filled in by your assistant", proposedNote="", acceptLabel="", rejectLabel="", waitingNote="", data="many", interaction="idle", outcome="none", agent=(setupMarked ? "changed" : "none"), exit=ignore, back=setupBackByPerson, advance=continueByPerson, skip=continueByPerson, retry=ignore, accept=ignore, reject=ignore, edit=answerByPerson)
+      else if shown == "DashboardScreen"
+        DashboardScreen(title="Overview", periodLabel="Period", statsLabel="Your shop in numbers", chartTitle="Orders", chartNote="Over the period", recentTitle="Recent orders", recentEmptyText="No orders yet.", allLabel="View all", loadingText="", emptyTitle="", emptyText="", emptyLabel="", failedTitle="", failedText="", retryLabel="", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, ["dash-period"]), undoLabel="Undo", periodKey=dashPeriod, periods=dashPeriods(), stats=dashStats(dashPeriod), bars=dashBars(dashPeriod), items=dashItems(), data="many", agent=(isMarked(book, "dash-period") ? "changed" : "none"), choose=choosePeriodByPerson, showAll=ignore, start=ignore, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)
