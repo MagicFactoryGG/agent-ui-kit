@@ -9,8 +9,8 @@
 // Keys in the ledger are unique in this app; a block's own view state stays out of it.
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
-use Ledger, ledger, personSet, isOn, isMarked from "@agent-ui-kit/agent"
-use SettingsGroup, Setting from "__SCOPE__/blocks"
+use Ledger, ledger, personSet, isOn, isMarked, valueOf from "@agent-ui-kit/agent"
+use SettingsGroup, Setting, StatePanel from "__SCOPE__/blocks"
 use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, latestAbout from "./model.contract"
 
 component App
@@ -23,9 +23,17 @@ component App
   derive notifyMarked = notifyKeys().filter(k => isMarked(book, k)).length > 0
   derive notifyText = notifyKeys().map(k => `${k}\t${isOn(book, k) ? "on" : "off"}`).join("\n")
 
+  // StatePanel: the files area; its value is the area's data state (empty, loading or failed), given to the
+  // panel's `data` inline (an enum prop takes the literals there; a derive of them is a string).
+  derive filesState = valueOf(book, "files")
+  derive filesMarked = isMarked(book, "files")
+
   // The person's door: the switch says which row; the app flips its own value.
   action toggleByPerson(key: string)
     book = personSet(book, key, onOff(not isOn(book, key)))
+  // The panel's one action (Try again when failed, the way in when empty) starts the load again.
+  action loadByPerson
+    book = personSet(book, "files", "loading")
   // Rows of other kinds, a retry and a proposal's answers: this use has none.
   action ignoreKey(key: string)
     book = book
@@ -38,7 +46,13 @@ component App
   tool setSetting writes idempotent closed "Turn an email notification on or off: digest, failures or marketing. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readSettings." = setSetting
     returns book.answer
     fails when book.answer == "off"
+  tool readFiles reads "The files area's state: empty, loading or failed." = readFiles
+    returns valueOf(book, "files")
+  tool loadFiles writes idempotent closed "Load the files area again, as its Try again does. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readFiles." = loadFiles
+    returns book.answer
+    fails when book.answer == "off"
 
   view
     main testId="app" width="100%" height="100%"
       SettingsGroup(title="Email notifications", footer="Changes apply at once.", emptyText="", loadingText="", failedText="", failedDetail="", retryLabel="", proposalText="", proposalKey="", acceptLabel="", declineLabel="", changedText=latestAbout(book, notifyKeys()), waitingText="", outcomeText="", data="many", interaction="idle", outcome="none", agent=(notifyMarked ? "changed" : "none"), rows=notifyRows, toggle=toggleByPerson, choose=ignoreKey, open=ignoreKey, remove=ignoreKey, retry=ignore, accept=ignore, decline=ignore, testId="notify")
+      StatePanel(title="Your files", message="Everything you add to this project will appear here, ready to share.", failedText="We couldn't load your files. Check your connection, then try again.", agentNote=latestAbout(book, ["files"]), actionLabel="Add files", retryLabel="Try again", data=(filesState == "loading" ? "loading" : filesState == "empty" ? "empty" : "failed"), agent=(filesMarked ? "changed" : "none"), size="full", press=loadByPerson, testId="files")

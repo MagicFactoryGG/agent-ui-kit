@@ -13,11 +13,16 @@ fn titleOf(key: string): string = key == "digest" ? "Weekly digest" : key == "fa
 fn detailOf(key: string): string = key == "digest" ? "A summary of your week, each Monday." : key == "failures" ? "An email when a deploy fails." : key == "marketing" ? "New features, now and then." : ""
 fn switchAct(tool: string, key: string, on: bool): Act = Act(tool=tool, door="agent", key=key, title=titleOf(key), value=onOff(on), did=`Your assistant turned ${titleOf(key)} ${onOff(on)}.`, asks=`Your assistant suggests turning ${titleOf(key)} ${onOff(on)}.`, will=`Your assistant will turn ${titleOf(key)} ${onOff(on)} in 5 seconds.`)
 
+// StatePanel: the files area, whose last load failed; its one act starts the load again (its value: loading).
+fn loadAct(tool: string): Act = Act(tool=tool, door="agent", key="files", title="Your files", value="loading", did="Your assistant is loading your files again.", asks="Your assistant suggests loading your files again.", will="Your assistant will load your files again in 5 seconds.")
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
-  AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="loadFiles", title="Your files", sentence="Loads the files area again.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
-  Value(key="digest", value="on"), Value(key="failures", value="on"), Value(key="marketing", value="off")
+  Value(key="digest", value="on"), Value(key="failures", value="on"), Value(key="marketing", value="off"),
+  Value(key="files", value="failed")
 ]

@@ -2,7 +2,9 @@
   "intents": {
     "tools": {
       "readSettings": { "title": "Read Settings" },
-      "setSetting": { "title": "Set Setting", "parameters": { "setting": { "title": "Setting" }, "on": { "title": "On" } } }
+      "setSetting": { "title": "Set Setting", "parameters": { "setting": { "title": "Setting" }, "on": { "title": "On" } } },
+      "readFiles": { "title": "Read Files" },
+      "loadFiles": { "title": "Load Files" }
     }
   }
 }
