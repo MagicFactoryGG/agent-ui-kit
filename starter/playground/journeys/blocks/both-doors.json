@@ -501,5 +501,76 @@
       "book.marked": [],
       "footerMarked": false
     }
+  },
+  {
+    "name": "Faq: a question opened: its row and openQuestion reach the same open question; the agent's is recorded and marked on the row",
+    "person": [
+      "tap faq-q-delivery"
+    ],
+    "agent": [
+      "call openQuestion {\"question\":\"delivery\",\"open\":true}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.18.key": "faq-delivery",
+      "book.values.18.value": "open",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "faq-delivery",
+      "book.changes.0.was": "closed",
+      "book.marked": [
+        "faq-delivery"
+      ],
+      "faqAgentKey": "delivery",
+      "faqMarked": true
+    },
+    "expectPerson": {
+      "book.values.18.value": "open",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "faqAgentKey": "",
+      "faqMarked": false
+    }
+  },
+  {
+    "name": "Faq: the open question closed: a second press on its row and openQuestion with open false reach the same closed question",
+    "person": [
+      "tap faq-q-returns"
+    ],
+    "agent": [
+      "call openQuestion {\"question\":\"returns\",\"open\":false}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.17.key": "faq-returns",
+      "book.values.17.value": "closed",
+      "book.changes.length": 1,
+      "book.changes.0.was": "open",
+      "book.changes.0.now": "closed",
+      "book.marked": [
+        "faq-returns"
+      ]
+    },
+    "expectPerson": {
+      "book.values.17.value": "closed",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]

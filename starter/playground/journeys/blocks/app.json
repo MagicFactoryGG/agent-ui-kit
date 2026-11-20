@@ -105,6 +105,20 @@
       },
       "addFooterLinks": {
         "title": "Add Footer Links"
+      },
+      "readFaq": {
+        "title": "Read Faq"
+      },
+      "openQuestion": {
+        "title": "Open Question",
+        "parameters": {
+          "question": {
+            "title": "Question"
+          },
+          "open": {
+            "title": "Open"
+          }
+        }
       }
     }
   }
