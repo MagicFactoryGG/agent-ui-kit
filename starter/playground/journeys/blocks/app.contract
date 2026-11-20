@@ -10,8 +10,8 @@
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
 use Ledger, ledger, personSet, isOn, isMarked, valueOf from "@agent-ui-kit/agent"
-use SettingsGroup, Setting, DetailPanel, StatePanel from "__SCOPE__/blocks"
-use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, latestAbout, incidentTitle, statusWord, incidentFacts, incidentEvents from "./model.contract"
+use SettingsGroup, Setting, DetailPanel, StatePanel, SideNav from "__SCOPE__/blocks"
+use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, latestAbout, incidentTitle, statusWord, incidentFacts, incidentEvents, placeKeys, placeTitle, navEntries from "./model.contract"
 
 component App
   members "./tools.contract"
@@ -30,6 +30,10 @@ component App
   // panel's `data` inline (an enum prop takes the literals there; a derive of them is a string).
   derive filesState = valueOf(book, "files")
   derive filesMarked = isMarked(book, "files")
+  // SideNav: the console's menu; the place the person is on is one value in the ledger, by key.
+  derive place = valueOf(book, "place")
+  derive placeMarked = isMarked(book, "place")
+  derive placesText = placeKeys().map(k => `${k}\t${placeTitle(k)}${k == place ? "\tcurrent" : ""}`).join("\n")
 
   // The person's door: the switch says which row; the app flips its own value.
   action toggleByPerson(key: string)
@@ -40,6 +44,9 @@ component App
   // The panel's one action (Try again when failed, the way in when empty) starts the load again.
   action loadByPerson
     book = personSet(book, "files", "loading")
+  // A row of the menu says which place; the app makes it the current one.
+  action openPlaceByPerson(key: string)
+    book = personSet(book, "place", key)
   // Rows of other kinds, a retry and a proposal's answers: this use has none.
   action ignoreKey(key: string)
     book = book
@@ -63,8 +70,15 @@ component App
     returns book.answer
     fails when book.answer == "off"
 
+  tool readPlaces reads "The menu's places, one per line: id (overview, inbox, deploys or settings), then its name, then current on the place the person is on, tab-separated." = readPlaces
+    returns placesText
+  tool openPlace writes idempotent closed "Open a place in the menu: overview, inbox, deploys or settings, as a tap on its row does. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readPlaces." = openPlace
+    returns book.answer
+    fails when book.answer == "off"
+
   view
     main testId="app" width="100%" height="100%"
       SettingsGroup(title="Email notifications", footer="Changes apply at once.", emptyText="", loadingText="", failedText="", failedDetail="", retryLabel="", proposalText="", proposalKey="", acceptLabel="", declineLabel="", changedText=latestAbout(book, notifyKeys()), waitingText="", outcomeText="", data="many", interaction="idle", outcome="none", agent=(notifyMarked ? "changed" : "none"), rows=notifyRows, toggle=toggleByPerson, choose=ignoreKey, open=ignoreKey, remove=ignoreKey, retry=ignore, accept=ignore, decline=ignore, testId="notify")
       DetailPanel(title=incidentTitle(), statusLabel=statusWord(incidentStatus), status=(incidentStatus == "resolved" ? "success" : "none"), primaryLabel=(incidentStatus == "resolved" ? "Reopen" : "Mark resolved"), primaryPress=markIncidentByPerson, secondaryLabel="", secondaryPress=ignore, interaction="idle", busyNote="", changedNote=latestAbout(book, ["incident"]), waitingNote="", retryLabel="", retryPress=ignore, factsTitle="Details", facts=incidentFacts(), factsEmptyText="", notesTitle="", notes="", activityTitle="Activity", events=incidentEvents(), activityEmptyText="", loadingText="", failedText="", data="one", agent=(isMarked(book, "incident") ? "changed" : "none"), testId="incident")
       StatePanel(title="Your files", message="Everything you add to this project will appear here, ready to share.", failedText="We couldn't load your files. Check your connection, then try again.", agentNote=latestAbout(book, ["files"]), actionLabel="Add files", retryLabel="Try again", data=(filesState == "loading" ? "loading" : filesState == "empty" ? "empty" : "failed"), agent=(filesMarked ? "changed" : "none"), size="full", press=loadByPerson, testId="files")
+      SideNav(productName="Acme Console", productMark="AC", navLabel="Main menu", entries=navEntries(place), choose=openPlaceByPerson, data="many", emptyText="", emptyLabel="", empty=ignore, loadingText="", failedText="", retryLabel="", retry=ignore, accountName="Ada Lovelace", accountDetail="Workspace admin", agent=(placeMarked ? "changed" : "none"), agentKey=place, agentNote=latestAbout(book, ["place"]), testId="nav")

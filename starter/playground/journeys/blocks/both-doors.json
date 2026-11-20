@@ -93,5 +93,37 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "SideNav: a place in the menu: a tap on Deploys and openPlace open the same place; the agent's is recorded and marked",
+    "person": [
+      "tap nav-entry-deploys"
+    ],
+    "agent": [
+      "call openPlace {\"place\":\"deploys\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.5.value": "deploys",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "place",
+      "book.marked": [
+        "place"
+      ]
+    },
+    "expectPerson": {
+      "book.values.5.value": "deploys",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]

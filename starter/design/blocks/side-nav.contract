@@ -118,6 +118,9 @@
 //   look round asked for an outline CTA in empty, to keep the filled blue "reserved for selection"; the
 //   states never share a screen, and an empty menu's way on is the one thing to do — the kit's EntryChoice
 //   draws the recommended way filled, and empty follows it.)
+// - Choosing a place: each row is a link (its `href`, for the host's own routing) that also presses `choose`
+//   with its entry's key, so the app can set the current place itself — the person's door, the same value an
+//   agent's tool sets (the journeys' both-doors case).
 // - The landmark's name, `navLabel`, is what a reader hears; the words a person sees above the rows are the
 //   data's own group names.
 // - Long: everything the panel draws holds one line with an ellipsis, and every line that can be cut carries
@@ -173,9 +176,10 @@ component NavItem
     current: bool
     marked: bool
     note: string
+    press: action
     testId: string
   view
-    link href=href testId=testId aria-current=(current ? "page" : "false") position="relative" display="flex" flex-direction="row" align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" overflow="hidden" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(current ? "theme.color.fill" : "transparent")
+    link href=href press=press testId=testId aria-current=(current ? "page" : "false") position="relative" display="flex" flex-direction="row" align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" overflow="hidden" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(current ? "theme.color.fill" : "transparent")
       :hover
         background-color="theme.color.hover"
       :active
@@ -226,6 +230,7 @@ component SideNav
     productMark: string
     navLabel: string
     entries: NavEntry[]
+    choose: action
     data: enum<"many", "empty", "loading", "failed", "long", "one">
     emptyText: string
     emptyLabel: string
@@ -305,7 +310,7 @@ component SideNav
                     NavHeading(text=g, testId=`${testId}-group-${g}`)
                   column gap="theme.space.xs"
                     for e in entries.filter(e => e.group == g) key=e.key
-                      NavItem(label=e.label, href=e.href, badge=e.badge, current=e.current, marked=(agent == "changed" and e.key == agentKey), note=agentNote, testId=`${testId}-entry-${e.key}`)
+                      NavItem(label=e.label, href=e.href, badge=e.badge, current=e.current, marked=(agent == "changed" and e.key == agentKey), note=agentNote, press=choose(e.key), testId=`${testId}-entry-${e.key}`)
         if accountName != ""
           column min-height="0"
             row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"

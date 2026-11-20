@@ -1,7 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Fact, Event from "__SCOPE__/blocks"
+use Fact, Event, NavEntry from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -30,16 +30,25 @@ fn incidentEvents(): Event[] = [
 fn statusAct(status: string): Act = Act(tool="setIncidentStatus", door="agent", key="incident", title="Incident status", value=status, did=`Your assistant marked the incident ${status}.`, asks=`Your assistant suggests marking the incident ${status}.`, will=`Your assistant will mark the incident ${status} in 5 seconds.`)
 // StatePanel: the files area, whose last load failed; its one act starts the load again (its value: loading).
 fn loadAct(tool: string): Act = Act(tool=tool, door="agent", key="files", title="Your files", value="loading", did="Your assistant is loading your files again.", asks="Your assistant suggests loading your files again.", will="Your assistant will load your files again in 5 seconds.")
+// SideNav: a project console's menu; the place the person is on is one value in the ledger, by key.
+fn placeKeys(): string[] = ["overview", "inbox", "deploys", "settings"]
+fn placeTitle(key: string): string = key == "overview" ? "Overview" : key == "inbox" ? "Inbox" : key == "deploys" ? "Deploys" : key == "settings" ? "Settings" : key
+fn placeGroup(key: string): string = key == "settings" ? "Workspace" : "Project"
+fn placeBadge(key: string): number = key == "inbox" ? 3 : 0
+fn navEntries(current: string): NavEntry[] = placeKeys().map(k => NavEntry(key=k, label=placeTitle(k), href="", group=placeGroup(k), badge=placeBadge(k), current=(k == current)))
+fn placeAct(key: string): Act = Act(tool="openPlace", door="agent", key="place", title="Menu", value=key, did=`Your assistant opened ${placeTitle(key)}.`, asks=`Your assistant suggests opening ${placeTitle(key)}.`, will=`Your assistant will open ${placeTitle(key)} in 5 seconds.`)
 
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
   AgentTool(name="setIncidentStatus", title="Incident status", sentence="Marks the incident open or resolved.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="loadFiles", title="Your files", sentence="Loads the files area again.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="loadFiles", title="Your files", sentence="Loads the files area again.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="openPlace", title="Menu", sentence="Opens a place in the menu.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="digest", value="on"), Value(key="failures", value="on"), Value(key="marketing", value="off"),
   Value(key="incident", value="open"),
-  Value(key="files", value="failed")
+  Value(key="files", value="failed"),
+  Value(key="place", value="overview")
 ]
