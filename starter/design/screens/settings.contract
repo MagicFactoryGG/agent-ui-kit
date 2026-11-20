@@ -194,10 +194,10 @@ component SettingsScreen
                   SettingsGroup(title=g.title, footer=g.footer, emptyText=groupEmptyText, loadingText=loadingText, failedText=failedText, failedDetail="", retryLabel=retryLabel, proposalText=proposalText, proposalKey=agentKey, acceptLabel=acceptLabel, declineLabel=declineLabel, changedText=changedText, waitingText=waitingText, outcomeText="", data=(g.rows.length == 0 ? "empty" : "many"), interaction="idle", outcome="none", agent=(holdsRow(g, agentKey) ? agent : "none"), rows=g.rows, toggle=flip, choose=chooseRow, open=openRow, remove=removeRow, retry=retry, accept=accept, decline=decline, testId=`settings-${g.key}`)
                   if agent == "changed" and holdsRow(g, agentKey)
                     // The way back from what the agent changed, under the group's own words about it, on the card's
-                    // edge: an empty title column of SettingsGroup's own least width holds the card's place on a
+                    // edge: an empty title column of SettingsGroup's own least width and insets holds the card's place on a
                     // desktop and wraps away, zero tall, on a phone. Named by the change's sentence.
                     row flex-wrap="wrap" column-gap="theme.space.xl"
-                      box flex=1 min-width="screens.settings-aside" aria-hidden=true
+                      box flex=1 min-width="screens.settings-aside" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" aria-hidden=true
                       column flex=2 min-width="screens.settings-card-min" box-sizing="border-box"
                         // The inset is the wrapper's, not the flex item's: a basis-0 item's own padding takes part in
                         // sharing the width out, and the button had stood 11px off the card's edge.
