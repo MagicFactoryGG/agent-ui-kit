@@ -1821,7 +1821,8 @@
     "proposalText": "Your assistant suggests showing quarters, to compare with last year.",
     "acceptLabel": "Accept",
     "rejectLabel": "Not now",
-    "agentKey@long": "north"
+    "agentKey@long": "north",
+    "range@long": "month"
   },
   "BarPoint:many": [
     { "key": "jan", "label": "Jan", "value": "1,180", "share": 0.52 },

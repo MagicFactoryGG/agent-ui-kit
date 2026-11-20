@@ -23,7 +23,7 @@
 //   data   many (the bars), one (a single bar, its value said on its cap like any other), empty (the plot's place
 //          and its baseline stay, so the chart reads as this chart with nothing in it: `emptyText` over the axis
 //          under a quiet disc of three bars (the fill, as the kit's other empty states draw theirs) and the way on,
-//          `emptyLabel`, the state's one filled element), loading (the title, note and switch stay,
+//          `emptyLabel`, the state's one filled element, plain while a proposal waits so the answer is the one), loading (the title, note and switch stay,
 //          for they are known; `loadingText` is said as a status and ghost bars of the fill breathe in the bars'
 //          own place and height, so nothing moves when the figures arrive), failed (a critical disc, `failedText`
 //          in the ink — status ink is promised on the page and surface, and a disc carries the hue — and the retry,
@@ -254,7 +254,7 @@ component BarChart
               Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-empty-text`)
             if emptyLabel != ""
               column max-width="100%" margin-top="theme.space.xs"
-                ActionButton(label=emptyLabel, kind="primary", interaction="idle", outcome="none", press=add, testId=`${testId}-add`)
+                ActionButton(label=emptyLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=add, testId=`${testId}-add`)
           BarChartBaseline(across=true)
       else if wide
         column min-width=0
