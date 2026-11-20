@@ -152,3 +152,50 @@ component ScreenCell
   view
     column testId=testId color-scheme=(scheme == "dark" ? "dark" : "light") position="relative" width=480 max-width="100%" height=640 flex-shrink=1 box-sizing="border-box" overflow="hidden" background-color="theme.color.page" color="theme.color.ink" border-radius="frame.corner" border-width=1 border-style="solid" border-color="frame.line"
       children
+
+// The map page (tools/matrix.mjs, a playground's map.json): a group of the program's pieces, its heading and a line.
+component MapGroup
+  props
+    title: string
+    note: string
+  slot
+  view
+    column gap="frame.small" padding-top="frame.gap"
+      text title role="heading" aria-level=2 font="frame.type-head" color="frame.ink"
+      if note != ""
+        text note font="frame.type-small" color="frame.ink-muted"
+      column border-radius="frame.corner" border-width=1 border-style="solid" border-color="frame.line" background-color="frame.panel" overflow="hidden"
+        children
+
+// One piece of the program on the map: its name, its status in words (the tone colours it: done, moving, to do,
+// held), a line on what it is, and a way to its page: a page of this playground (open), another playground's
+// address (href), or none.
+component MapItem
+  props
+    title: string
+    status: string
+    tone: enum<"todo", "done", "moving", "held">
+    detail: string
+    way: enum<"none", "page", "link">
+    wayLabel: string
+    open: action
+    href: string
+    testId: string
+  view
+    row testId=testId flex-wrap="wrap" align-items="center" gap="frame.gap" padding="frame.gap" border-bottom-width=1 border-bottom-style="solid" border-bottom-color="frame.line"
+      column flex-grow=1 flex-basis="frame.cell-min" min-width=0 gap="frame.small"
+        row flex-wrap="wrap" align-items="center" gap="frame.gap"
+          text title font="frame.type-item" color="frame.ink"
+          text status font="frame.type-small" color=(tone == "done" ? "frame.done" : tone == "moving" ? "frame.moving" : tone == "held" ? "frame.held" : "frame.ink-muted") padding-left="frame.small" padding-right="frame.small" border-radius="frame.corner" border-width=1 border-style="solid" border-color=(tone == "done" ? "frame.done" : tone == "moving" ? "frame.moving" : tone == "held" ? "frame.held" : "frame.line")
+        if detail != ""
+          text detail font="frame.type-small" color="frame.ink-muted"
+      if way == "page"
+        button press=open testId=`${testId}-open` padding-left="frame.gap" padding-right="frame.gap" padding-top="frame.small" padding-bottom="frame.small" border-radius="frame.corner" border-width=1 border-style="solid" border-color="frame.line" background-color="frame.ground" color="frame.ink"
+          :hover
+            background-color="frame.on"
+          text wayLabel font="frame.type-small"
+      if way == "link"
+        link href=href testId=`${testId}-link` padding-left="frame.gap" padding-right="frame.gap" padding-top="frame.small" padding-bottom="frame.small" border-radius="frame.corner" border-width=1 border-style="solid" border-color="frame.line" background-color="frame.ground" color="frame.ink" text-decoration-line="none"
+          :hover
+            background-color="frame.on"
+          text wayLabel font="frame.type-small"
