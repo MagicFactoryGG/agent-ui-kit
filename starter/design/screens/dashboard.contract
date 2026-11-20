@@ -160,11 +160,13 @@ component DashboardPlot
   view
     column gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg" flex=1 min-height=0
       if loading
-        row aria-hidden=true height="screens.dashboard-plot" align-items="stretch" gap="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" animation=pulse
+        row aria-hidden=true flex=1 min-height="screens.dashboard-plot" align-items="stretch" gap="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" animation=pulse
           for g in [44, 68, 52, 84, 60, 74, 48] key=`${g}`
             column flex=1 min-width=0 align-items="center"
               box flex-grow=(100 - g)
               box flex-grow=g width="100%" max-width="screens.dashboard-bar-max" background-color="theme.color.fill" border-top-left-radius="theme.radius.control" border-top-right-radius="theme.radius.control"
+        // The axis words' own line, held while they load, so the plot sits where it will.
+        box aria-hidden=true height="screens.dashboard-axis-line"
       else
         row role="list" aria-label=label testId="dashboard-plot" flex=1 min-height="screens.dashboard-plot" align-items="stretch" gap="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
           for b in bars key=b.key
