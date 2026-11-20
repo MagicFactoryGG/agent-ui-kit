@@ -16,6 +16,7 @@ const gallery = "apps/agent-gallery";
 const steps = [
   ["words", ["bun", "tools/words.mjs"], ROOT],
   ["library-gate", ["bun", "tools/library-gate.mjs"], ROOT],
+  ["primitives", ["bun", "tools/primitives.mjs", "check", "starter/design"], ROOT],
   ["library-gate tests", ["bun", "exact.mjs", "test", host], resolve(ROOT, "apps/library-gate")],
   ["gallery tests", ["bun", "exact.mjs", "test", host], resolve(ROOT, gallery)],
   ["both-doors", ["bun", "tools/both-doors.mjs", gallery, host], ROOT],
@@ -26,7 +27,7 @@ const steps = [
   ["distiller", ["bun", "test"], resolve(ROOT, "tools/distiller")],
 ];
 
-const ONCE = new Set(["words", "library-gate", "library-gate tests", "gallery tests", "distiller"]);
+const ONCE = new Set(["words", "library-gate", "primitives", "library-gate tests", "gallery tests", "distiller"]);
 const run = host === "ios" ? steps.filter(([name]) => ONCE.has(name)) : steps;
 for (const [name] of steps.filter((s) => !run.includes(s))) console.log(`check: ${name}: not run on ios (one launch per case; run it on web and macos)`);
 let failed = 0;
