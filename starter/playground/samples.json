@@ -837,5 +837,80 @@
         }
       ]
     }
+  ],
+  "props:Faq": {
+    "eyebrow": "Help centre",
+    "title": "Questions, answered",
+    "lead": "Short answers about orders, delivery and your account. Open a question to read its answer.",
+    "contactTitle": "Still need a hand?",
+    "contactText": "Our team answers within one working day.",
+    "contactLabel": "Ask our team",
+    "emptyTitle": "No questions yet",
+    "emptyText": "When people ask about orders and delivery, the answers will gather here.",
+    "failedTitle": "The questions did not load",
+    "failedText": "Check your connection, then try again.",
+    "agentKey@long": "returns",
+    "loadingText": "Loading the questions",
+    "retryLabel": "Try again",
+    "agentKey": "returns",
+    "agentNote": "Your assistant rewrote this answer to match the new returns policy.",
+    "waitingNote": "Your assistant will publish its new answer once the returns policy goes live.",
+    "proposalText": "Your assistant suggests adding the 60-day window to the answer on returns.",
+    "acceptLabel": "Accept",
+    "declineLabel": "Reject"
+  },
+  "Question:many": [
+    {
+      "key": "returns",
+      "question": "How do I return something?",
+      "answer": "Start a return from your orders page within 30 days of delivery. Print the label we email you, pack the item in its original box and drop it at any parcel point. Your refund lands within five working days of our receiving it.",
+      "open": true
+    },
+    {
+      "key": "delivery",
+      "question": "When will my order arrive?",
+      "answer": "Most orders arrive in two to four working days. You get a tracking link by email as soon as the parcel leaves our depot.",
+      "open": false
+    },
+    {
+      "key": "change",
+      "question": "Can I change an order after placing it?",
+      "answer": "Yes, until it is packed. Open the order and choose Edit; once it shows Packed, it can only be returned.",
+      "open": false
+    },
+    {
+      "key": "payment",
+      "question": "Which ways can I pay?",
+      "answer": "Cards, bank transfer and pay-later. You are charged when the order ships, not when you place it.",
+      "open": false
+    },
+    {
+      "key": "account",
+      "question": "How do I close my account?",
+      "answer": "Go to Settings, then Account, then Close account. We keep your order history for seven years, as the law asks.",
+      "open": false
+    }
+  ],
+  "Question:one": [
+    {
+      "key": "returns",
+      "question": "How do I return something?",
+      "answer": "Start a return from your orders page within 30 days of delivery. Print the label we email you, pack the item in its original box and drop it at any parcel point. Your refund lands within five working days of our receiving it.",
+      "open": true
+    }
+  ],
+  "Question:long": [
+    {
+      "key": "returns",
+      "question": "How do I return something I bought as a gift for someone else, when the order was sent straight to their address and paid for with a card I have since cancelled?",
+      "answer": "Start the return from your own orders page, not the recipient's: the order belongs to the account that paid. We email you a label for the recipient's address, and because the original card is cancelled the refund comes back as store credit on your account, which you can move to a new card from Settings, then Payments, at any time within the next twelve months, without a fee.",
+      "open": true
+    },
+    {
+      "key": "international-shipping-and-customs-duties-explained",
+      "question": "Do you ship internationally, and who pays the customs duties and import taxes at the border?",
+      "answer": "We ship to most countries. Duties are shown at checkout and paid up front, so nothing is due at the door.",
+      "open": false
+    }
   ]
 }

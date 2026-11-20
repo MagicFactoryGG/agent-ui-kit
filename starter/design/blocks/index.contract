@@ -14,6 +14,7 @@ use SideNav, NavEntry from "./side-nav.contract"
 use MessageList, Message, ListViewport from "./message-list.contract"
 use Pricing, Plan from "./pricing.contract"
 use SiteFooter, LinkGroup, FooterLink from "./site-footer.contract"
+use Faq, Question, FaqViewport from "./faq.contract"
 
 // The bar at the top of a screen: the title, then the slot's actions. While an agent waits for the person,
 // `agentNote` says so under the title.
