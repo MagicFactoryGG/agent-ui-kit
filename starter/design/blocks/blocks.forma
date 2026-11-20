@@ -145,3 +145,16 @@ theme
   blocks.faq-bone: length = 12px
   blocks.faq-bone-thin: length = 10px
   blocks.faq-line: length = 21px  // the body type's line (15px at 1.4): a ghost answer line holds it
+  blocks.bar-chart-max: length = 880px  // the card's widest: six to eight columns at their own cap, centred
+  blocks.bar-chart-compact-max: length = 560px  // horizontal bars read best at a measure, not across a desktop
+  blocks.bar-chart-head-min: length = 200px  // the title's least width before the range switch wraps under it
+  blocks.bar-chart-plot: length = 200px  // the wide chart's plot height, from the baseline to the tallest cap
+  blocks.bar-chart-col-max: length = 112px  // a column's widest share of the card, so few columns stay a chart
+  blocks.bar-chart-column: length = 32px  // a column's bar, thin: the rest of its slot is air
+  blocks.bar-chart-row: length = 12px  // a horizontal bar's thickness
+  blocks.bar-chart-cap: length = 4px  // the bar's rounded data end; the baseline end stays square
+  blocks.bar-chart-sliver: length = 2px  // a zero still shows on the baseline
+  blocks.bar-chart-dot: length = 8px
+  blocks.bar-chart-glyph: length = 32px
+  blocks.bar-chart-bone: length = 10px  // a ghost label's height, the caption's x-height and air
+  blocks.bar-chart-measure: length = 420px  // a state's sentence, held to a short line
