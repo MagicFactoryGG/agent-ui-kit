@@ -16,5 +16,24 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "DetailPanel: the incident's status: Mark resolved and setIncidentStatus reach the same value; the agent's is recorded and marked",
+    "person": ["tap incident-primary"],
+    "agent": ["call setIncidentStatus {\"status\":\"resolved\"}"],
+    "same": ["book.values"],
+    "calls": [["ok", "saved"]],
+    "expect": {
+      "book.values.3.value": "resolved",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "incident",
+      "book.marked": ["incident"]
+    },
+    "expectPerson": {
+      "book.values.3.value": "resolved",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]
