@@ -10,8 +10,8 @@
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
 use Ledger, ledger, personSet, undo, isOn, isMarked, valueOf from "@agent-ui-kit/agent"
-use SettingsGroup, Setting, DetailPanel, StatePanel, OnboardingSteps, MessageList, SideNav, DataTable, Checked, Marks, FeatureGrid from "__SCOPE__/blocks"
-use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, latestAbout, incidentTitle, statusWord, incidentFacts, incidentEvents, setupTitle, setupDetail, setupNext, setupBack, setupSteps, latestIdAbout, mailKey, mailLedgerKeys, mailMessages, mailText, mailMarkedKey, homeEntries, menuText, recordKeys, queueRecords, pickWord, firstFeatures, featuresText from "./model.contract"
+use SettingsGroup, Setting, DetailPanel, StatePanel, OnboardingSteps, MessageList, SideNav, DataTable, Checked, Marks, FeatureGrid, Pricing from "__SCOPE__/blocks"
+use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, latestAbout, incidentTitle, statusWord, incidentFacts, incidentEvents, setupTitle, setupDetail, setupNext, setupBack, setupSteps, latestIdAbout, mailKey, mailLedgerKeys, mailMessages, mailText, mailMarkedKey, homeEntries, menuText, recordKeys, queueRecords, pickWord, firstFeatures, featuresText, planName, planList, planText from "./model.contract"
 
 component App
   members "./tools.contract"
@@ -51,6 +51,9 @@ component App
   // FeatureGrid: a product page's features, empty until Live sync is added; given to the piece's `data` inline.
   derive features = valueOf(book, "features")
   derive featuresMarked = isMarked(book, "features")
+  // Pricing: the workspace's plan, "none" until one is chosen; the chosen card carries the agent's mark.
+  derive plan = valueOf(book, "plan")
+  derive planMarked = isMarked(book, "plan")
 
   // The person's door: the switch says which row; the app flips its own value.
   action toggleByPerson(key: string)
@@ -86,6 +89,11 @@ component App
   // The empty features section's way on adds its first feature, Live sync.
   action addFeatureByPerson
     book = personSet(book, "features", "sync")
+  // A plan's button chooses it; the agent's note's Undo takes its choice back.
+  action choosePlanByPerson(key: string)
+    book = personSet(book, "plan", key)
+  action undoPlan
+    book = undo(book, latestIdAbout(book, "plan"))
   // Rows of other kinds, a retry and a proposal's answers: this use has none.
   action ignoreKey(key: string)
     book = book
@@ -133,6 +141,11 @@ component App
   tool addFeature writes idempotent closed "Add the first feature, Live sync, to the empty features section, as its Add a feature does. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readFeatures." = addFeature
     returns book.answer
     fails when book.answer == "off"
+  tool readPlan reads "The workspace's plan: its id (none, starter, team or business), then its name, tab-separated." = readPlan
+    returns planText(plan)
+  tool choosePlan writes idempotent closed "Choose the workspace's plan, as a plan's Choose button does: starter, team or business. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readPlan." = choosePlan
+    returns book.answer
+    fails when book.answer == "off"
 
   view
     main testId="app" width="100%" height="100%"
@@ -144,3 +157,4 @@ component App
       SideNav(productName="Acme Console", productMark="AC", navLabel="Main menu", entries=(menu == "home" ? homeEntries() : []), data=(menu == "home" ? "one" : "empty"), emptyText="This workspace's menu has no places yet.", emptyLabel="Add Home", empty=addHomeByPerson, loadingText="", failedText="", retryLabel="", retry=ignore, accountName="Ada Lovelace", accountDetail="Workspace admin", agent=(menuMarked ? "changed" : "none"), agentKey="home", agentNote=latestAbout(book, ["menu"]), testId="nav")
       DataTable(records=queueRecords(), checked=queueChecked, marks=queueMarks, titleLabel="Change", statusLabel="Status", ownerLabel="Owner", updatedLabel="Updated", selectLabel="Select", selectAllLabel="Select every change", emptyText="", loadingText="", failedText="", busyText="", agentNote=latestAbout(book, recordKeys()), retryLabel="", createLabel="", sort="updated", sortDir="descending", data="many", interaction="idle", agent=(queueMarks.keys.length > 0 ? "changed" : "none"), toggle=pickByPerson, toggleAll=pickAllByPerson, retry=ignore, create=ignore, testId="queue")
       FeatureGrid(eyebrow="Features", title="Everything your team needs", lead="The tools in your plan, in one place.", features=(features == "sync" ? firstFeatures() : []), actionLabel="", emptyText="This page lists no features yet. Add the first one to show what your product does.", addLabel="Add a feature", loadingText="", failedText="", retryLabel="", agentKey="sync", proposalText="", changedText=latestAbout(book, ["features"]), acceptLabel="", rejectLabel="", data=(features == "sync" ? "one" : "empty"), agent=(featuresMarked ? "changed" : "none"), testId="features", press=ignore, add=addFeatureByPerson, retry=ignore, accept=ignore, reject=ignore)
+      Pricing(title="Choose your plan", lead="Every plan starts with 14 days free. Change or cancel at any time.", plans=planList(plan), tagLabel="Most chosen", chosenKey=plan, loadingText="", emptyTitle="", emptyText="", contactLabel="", failedTitle="", failedText="", retryLabel="", outcomeText=`You're on the ${planName(plan)} plan.`, proposalText="", acceptLabel="", rejectLabel="", changedText=latestAbout(book, ["plan"]), undoLabel="Undo", waitingText="", data="many", interaction="idle", size="wide", outcome=(plan == "none" ? "none" : "success"), agent=(planMarked ? "changed" : "none"), choose=choosePlanByPerson, contact=ignore, retry=ignore, accept=ignore, reject=ignore, undo=undoPlan, testId="pricing")

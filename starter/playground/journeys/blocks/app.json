@@ -82,6 +82,17 @@
       },
       "addFeature": {
         "title": "Add Feature"
+      },
+      "readPlan": {
+        "title": "Read Plan"
+      },
+      "choosePlan": {
+        "title": "Choose Plan",
+        "parameters": {
+          "plan": {
+            "title": "Plan"
+          }
+        }
       }
     }
   }
