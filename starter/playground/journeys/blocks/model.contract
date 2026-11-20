@@ -1,7 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf, isMarked from "@agent-ui-kit/agent"
-use Fact, Event, Step, Message, NavEntry, Record from "__SCOPE__/blocks"
+use Fact, Event, Step, Message, NavEntry, Record, Plan from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -79,6 +79,18 @@ fn queueRecords(): Record[] = [
 fn pickWord(on: bool): string = on ? "selected" : "unselected"
 fn pickAct(key: string, on: bool): Act = Act(tool="selectRecord", door="agent", key=key, title=recordTitle(key), value=pickWord(on), did=`Your assistant ${on ? "selected" : "cleared"} “${recordTitle(key)}”.`, asks=`Your assistant suggests ${on ? "selecting" : "clearing"} “${recordTitle(key)}”.`, will=`Your assistant will ${on ? "select" : "clear"} “${recordTitle(key)}” in 5 seconds.`)
 
+// Pricing: a trial workspace's plans; the plan chosen ("none" until one is) is the value both doors set. A plan's
+// button chooses it, as the agent's choosePlan does; the chosen plan's button then says so.
+fn planKeys(): string[] = ["starter", "team", "business"]
+fn planName(key: string): string = key == "starter" ? "Starter" : key == "team" ? "Team" : key == "business" ? "Business" : "No plan"
+fn planList(chosen: string): Plan[] = [
+  Plan(key="starter", name=planName("starter"), price="$0", period="per month", detail="For one person trying things out.", points=["One project", "Community help", "7 days of history"], featured=false, action=(chosen == "starter" ? "Your plan" : "Choose Starter")),
+  Plan(key="team", name=planName("team"), price="$24", period="per seat a month", detail="For a team shipping every week.", points=["Unlimited projects", "Shared workspaces", "Email help within a day", "90 days of history"], featured=true, action=(chosen == "team" ? "Your plan" : "Choose Team")),
+  Plan(key="business", name=planName("business"), price="$59", period="per seat a month", detail="For companies with rules to follow.", points=["Everything in Team", "Single sign-on", "Audit log", "A named contact"], featured=false, action=(chosen == "business" ? "Your plan" : "Choose Business"))
+]
+fn planAct(key: string): Act = Act(tool="choosePlan", door="agent", key="plan", title="Plan", value=key, did=`Your assistant chose the ${planName(key)} plan.`, asks=`Your assistant suggests the ${planName(key)} plan.`, will=`Your assistant will choose the ${planName(key)} plan in 5 seconds.`)
+fn planText(chosen: string): string = `${chosen}\t${planName(chosen)}`
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
@@ -87,7 +99,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="continueOnboarding", title="Workspace setup", sentence="Finishes the setup step the person is on and moves on to the next.", floor="recorded", reach="self", secret=false),
   AgentTool(name="markMessage", title="Inbox", sentence="Marks a message in the inbox read or unread.", floor="recorded", reach="self", secret=false),
   AgentTool(name="addHome", title="Menu", sentence="Adds Home to the empty menu.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="selectRecord", title="Deploy queue", sentence="Selects a record in the deploy queue, or clears it.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="selectRecord", title="Deploy queue", sentence="Selects a record in the deploy queue, or clears it.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="choosePlan", title="Plan", sentence="Chooses the workspace's plan: starter, team or business.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -97,5 +110,6 @@ fn startValues(): Value[] = [
   Value(key="onboarding", value="profile"),
   Value(key="mail-review", value="unread"), Value(key="mail-report", value="read"), Value(key="mail-lunch", value="unread"),
   Value(key="menu", value="empty"),
-  Value(key="audit", value="unselected"), Value(key="rotate", value="unselected"), Value(key="invoices", value="unselected")
+  Value(key="audit", value="unselected"), Value(key="rotate", value="unselected"), Value(key="invoices", value="unselected"),
+  Value(key="plan", value="none")
 ]

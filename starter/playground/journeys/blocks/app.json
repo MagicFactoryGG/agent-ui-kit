@@ -76,6 +76,17 @@
             "title": "Selected"
           }
         }
+      },
+      "readPlan": {
+        "title": "Read Plan"
+      },
+      "choosePlan": {
+        "title": "Choose Plan",
+        "parameters": {
+          "plan": {
+            "title": "Plan"
+          }
+        }
       }
     }
   }

@@ -292,5 +292,79 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "Pricing: a plan chosen: the Team card's button and choosePlan reach the same plan; the agent's is recorded and marked on the card",
+    "person": [
+      "tap pricing-choose-team"
+    ],
+    "agent": [
+      "call choosePlan {\"plan\":\"team\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.13.key": "plan",
+      "book.values.13.value": "team",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "plan",
+      "book.changes.0.was": "none",
+      "book.marked": [
+        "plan"
+      ],
+      "planMarked": true
+    },
+    "expectPerson": {
+      "book.values.13.value": "team",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "planMarked": false
+    }
+  },
+  {
+    "name": "Pricing: one plan, then another: two buttons and two choosePlan calls end on the same plan",
+    "person": [
+      "tap pricing-choose-starter",
+      "tap pricing-choose-business"
+    ],
+    "agent": [
+      "call choosePlan {\"plan\":\"starter\"}",
+      "call choosePlan {\"plan\":\"business\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.13.value": "business",
+      "book.changes.length": 2,
+      "book.changes.0.was": "starter",
+      "book.changes.0.now": "business",
+      "book.marked": [
+        "plan"
+      ]
+    },
+    "expectPerson": {
+      "book.values.13.value": "business",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]
