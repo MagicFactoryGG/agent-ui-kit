@@ -651,5 +651,64 @@
       "notesMarked": false,
       "notesAllRead": true
     }
+  },
+  {
+    "name": "StatTiles: this week's numbers failed to read: Try again and loadStats reach the same numbers; the agent's is recorded and said under the row",
+    "person": [
+      "tap stats-retry"
+    ],
+    "agent": [
+      "call loadStats {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.23.key": "stats",
+      "book.values.23.value": "many",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.was": "failed",
+      "book.marked": [
+        "stats"
+      ],
+      "statsMarked": true
+    },
+    "expectPerson": {
+      "book.values.23.value": "many",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "statsMarked": false
+    }
+  },
+  {
+    "name": "StatTiles: the agent's read taken back: the note's Undo returns the numbers to failed, as if no one had read them",
+    "person": [],
+    "agent": [
+      "call loadStats {}",
+      "tap stats-undo"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.23.key": "stats",
+      "book.values.23.value": "failed",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "statsMarked": false
+    }
   }
 ]

@@ -7,6 +7,7 @@ use switchAct, statusAct, loadAct, continueFrom, readAct, addHomeAct, pickAct, a
 use switchAct, statusAct, loadAct, continueFrom, readAct, addHomeAct, pickAct, addFeatureAct, planAct, trialAct from "./model.contract"
 use faqAct from "./model.contract"
 use rangeAct, notesReadAct from "./model.contract"
+use loadStatsAct from "./model.contract"
 
 members App
   action readSettings
@@ -51,3 +52,6 @@ members App
   action readNotes
   action markNotesRead
     book = act(book, notesReadAct())
+  action readStats
+  action loadStats
+    book = act(book, loadStatsAct())

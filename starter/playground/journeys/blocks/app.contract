@@ -20,6 +20,8 @@ use Faq from "__SCOPE__/blocks"
 use faqKey, faqLedgerKeys, faqQuestions, faqText, faqMarkedKey from "./model.contract"
 use BarChart, NotificationList from "__SCOPE__/blocks"
 use chartRanges, chartNote, chartLabel, chartPoints, chartText, notesRead, inboxNotes, notesText from "./model.contract"
+use StatTiles from "__SCOPE__/blocks"
+use weekStats, statsText from "./model.contract"
 
 // The window's width, for the Hero's size (compact under 600 px): an app reads the viewport, a piece cannot.
 shape JourneyViewport
@@ -92,6 +94,10 @@ component App
   derive notesMarked = isMarked(book, "notes")
   derive notesAsks = waitingSentence(book, "notes")
   derive notesReadText = notesText(book)
+  // StatTiles: this week's numbers; the row's data state is one value in the ledger, "failed" until read again,
+  // then "many". The agent's read is said under the row (changed: what it did), with one Undo.
+  derive stats = valueOf(book, "stats")
+  derive statsMarked = isMarked(book, "stats")
 
   // The person's door: the switch says which row; the app flips its own value.
   action toggleByPerson(key: string)
@@ -168,6 +174,11 @@ component App
   // A note's own answers (Manage storage) lead elsewhere in a real app; this use has none.
   action ignoreAnswer(key: string, yes: bool)
     book = book
+  // The failed banner's Try again reads the numbers again; the note's Undo takes the agent's read back.
+  action loadStatsByPerson
+    book = personSet(book, "stats", "many")
+  action undoStats
+    book = undo(book, latestIdAbout(book, "stats"))
   // Rows of other kinds, a retry and a proposal's answers: this use has none.
   action ignoreKey(key: string)
     book = book
@@ -246,6 +257,12 @@ component App
     returns book.answer
     fails when book.answer == "off"
 
+  tool readStats reads "This week's numbers, one per line: id, label, value and change, tab-separated; or failed while they could not be read." = readStats
+    returns statsText(stats)
+  tool loadStats writes idempotent closed "Read this week's numbers again after a failed read, as their Try again does. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readStats." = loadStats
+    returns book.answer
+    fails when book.answer == "off"
+
   view
     main testId="app" width="100%" height="100%"
       SettingsGroup(title="Email notifications", footer="Changes apply at once.", emptyText="", loadingText="", failedText="", failedDetail="", retryLabel="", proposalText="", proposalKey="", acceptLabel="", declineLabel="", changedText=latestAbout(book, notifyKeys()), waitingText="", outcomeText="", data="many", interaction="idle", outcome="none", agent=(notifyMarked ? "changed" : "none"), rows=notifyRows, toggle=toggleByPerson, choose=ignoreKey, open=ignoreKey, remove=ignoreKey, retry=ignore, accept=ignore, decline=ignore, testId="notify")
@@ -262,3 +279,4 @@ component App
       Faq(eyebrow="Help centre", title="Questions, answered", lead="Short answers about orders, delivery and payment. Open a question to read its answer.", contactTitle="", contactText="", contactLabel="", emptyTitle="", emptyText="", failedTitle="", failedText="", loadingText="", retryLabel="", agentKey=faqAgentKey, agentNote=latestAbout(book, faqLedgerKeys()), waitingNote="", proposalText="", acceptLabel="", declineLabel="", data="many", agent=(faqMarked ? "changed" : "none"), questions=faqQuestions(book), toggle=toggleQuestionByPerson, retry=ignore, contact=ignore, accept=ignore, decline=ignore, testId="faq")
       BarChart(title="Orders", note=chartNote(chartRange), chartLabel=chartLabel(chartRange), points=chartPoints(chartRange), ranges=chartRanges(), range=chartRange, rangeLabel="Show orders by", emptyText="", emptyLabel="", loadingText="", failedText="", retryLabel="", agentKey="", agentNote=latestAbout(book, ["chart-range"]), undoLabel="Undo", proposalText="", acceptLabel="", rejectLabel="", data="many", agent=(chartMarked ? "changed" : "none"), size=(viewport.width < 600 ? "compact" : "wide"), choose=chooseRangeByPerson, add=ignore, retry=ignore, undo=undoRange, accept=ignore, reject=ignore, testId="orders")
       NotificationList(title="Notifications", summary=(notesAllRead ? "All read" : "2 new"), markAllLabel="Mark all read", markAll=markNotesByPerson, newTitle="New", earlierTitle="Earlier", notes=inboxNotes(notesAllRead), answer=ignoreAnswer, loadingText="", emptyTitle="", emptyText="", emptyActionLabel="", emptyPress=ignore, failedTitle="", failedText="", retryLabel="", retry=ignore, proposedNote=notesAsks, acceptLabel="Mark read", rejectLabel="Not now", accept=acceptNotes, reject=rejectNotes, changedNote=latestAbout(book, ["notes"]), undoLabel="Undo", undo=undoNotes, data="many", agent=(notesAsks != "" ? "proposed" : notesMarked ? "changed" : "none"), testId="notes")
+      StatTiles(title="This week", stats=(stats == "many" ? weekStats() : []), data=(stats == "many" ? "many" : "failed"), loadingText="", failedText="This week's numbers could not be read.", retryLabel="Try again", retry=loadStatsByPerson, agent=(statsMarked ? "changed" : "none"), agentKey="", agentNote="", yesLabel="", noLabel="", yes=ignore, no=ignore, changedNote=latestAbout(book, ["stats"]), undoLabel="Undo", undo=undoStats, testId="stats")

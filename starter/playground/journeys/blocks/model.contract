@@ -5,6 +5,7 @@ use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint, Link
 use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint from "__SCOPE__/blocks"
 use Question from "__SCOPE__/blocks"
 use BarPoint, BarRange, NotificationNote from "__SCOPE__/blocks"
+use Stat from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -161,6 +162,17 @@ fn inboxNotes(read: bool): NotificationNote[] = [
 ]
 fn notesText(l: Ledger): string = inboxNotes(notesRead(l)).map(n => `${n.key}\t${n.title}\t${n.unread ? "unread" : "read"}`).join("\n")
 fn notesReadAct(): Act = Act(tool="markNotesRead", door="agent", key="notes", title="Notifications", value="read", did="Your assistant marked 2 notifications read.", asks="Your assistant suggests marking 2 notifications read.", will="Your assistant will mark 2 notifications read in 5 seconds.")
+// StatTiles: a shop's numbers for this week, whose last read failed. The row's data state is the value both doors
+// set ("failed", then "many" once read again): the failed banner's Try again for a person, loadStats for the agent,
+// whose read is recorded and said under the row with one Undo.
+fn weekStats(): Stat[] = [
+  Stat(key="revenue", label="Revenue", value="$48,210", change="+12.4% on last week", trend="up"),
+  Stat(key="orders", label="Orders", value="1,864", change="+8.2% on last week", trend="up"),
+  Stat(key="aov", label="Average order", value="$25.86", change="-2.1% on last week", trend="down"),
+  Stat(key="returns", label="Returns", value="3.1%", change="No change", trend="flat")
+]
+fn statsText(state: string): string = state == "many" ? weekStats().map(s => `${s.key}\t${s.label}\t${s.value}\t${s.change}`).join("\n") : state
+fn loadStatsAct(): Act = Act(tool="loadStats", door="agent", key="stats", title="This week's numbers", value="many", did="Your assistant read this week's numbers again.", asks="Your assistant suggests reading this week's numbers again.", will="Your assistant will read this week's numbers again in 5 seconds.")
 
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
@@ -177,7 +189,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="addFooterLinks", title="Footer links", sentence="Adds the first column, Help with Contact us, to the footer that has no links.", floor="recorded", reach="self", secret=false),
   AgentTool(name="openQuestion", title="Help questions", sentence="Opens a question on the help page to show its answer, or closes it.", floor="recorded", reach="self", secret=false),
   AgentTool(name="setChartRange", title="Orders chart", sentence="Shows the orders chart by week or by month.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="markNotesRead", title="Notifications", sentence="Marks the new notifications read, as the list's Mark all read does.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="markNotesRead", title="Notifications", sentence="Marks the new notifications read, as the list's Mark all read does.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="loadStats", title="This week's numbers", sentence="Reads this week's numbers again after a failed read, as their Try again does.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -194,5 +207,6 @@ fn startValues(): Value[] = [
   Value(key="footer", value="empty"),
   Value(key="faq-returns", value="open"), Value(key="faq-delivery", value="closed"), Value(key="faq-change", value="closed"), Value(key="faq-payment", value="closed"),
   Value(key="chart-range", value="week"),
-  Value(key="notes", value="unread")
+  Value(key="notes", value="unread"),
+  Value(key="stats", value="failed")
 ]
