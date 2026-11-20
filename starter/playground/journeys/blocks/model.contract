@@ -1,7 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf, isMarked from "@agent-ui-kit/agent"
-use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan from "__SCOPE__/blocks"
+use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -96,6 +96,16 @@ fn planList(chosen: string): Plan[] = [
 ]
 fn planAct(key: string): Act = Act(tool="choosePlan", door="agent", key="plan", title="Plan", value=key, did=`Your assistant chose the ${planName(key)} plan.`, asks=`Your assistant suggests the ${planName(key)} plan.`, will=`Your assistant will choose the ${planName(key)} plan in 5 seconds.`)
 fn planText(chosen: string): string = `${chosen}\t${planName(chosen)}`
+// Hero: a planning product's landing page; its one act is the primary, Start free trial. The value is the
+// trial's state ("off", then "started"): the person's tap and the agent's startTrial set the same value, and the
+// agent's is recorded, shown on the hero with one Undo.
+fn trialStarted(l: Ledger): bool = valueOf(l, "trial") == "started"
+fn heroPoints(): HeroPoint[] = [
+  HeroPoint(key="calendars", title="Shared calendars", detail="Everyone's week on one page, with time off and focus blocks."),
+  HeroPoint(key="estimates", title="Honest estimates", detail="Plans that learn from how long work really took."),
+  HeroPoint(key="assistant", title="An assistant that asks first", detail="It suggests; you decide. Every change can be undone.")
+]
+fn trialAct(): Act = Act(tool="startTrial", door="agent", key="trial", title="Free trial", value="started", did="Your assistant started the free trial for your team.", asks="Your assistant suggests starting the free trial for your team.", will="Your assistant will start the free trial for your team in 5 seconds.")
 
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
@@ -107,7 +117,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="addHome", title="Menu", sentence="Adds Home to the empty menu.", floor="recorded", reach="self", secret=false),
   AgentTool(name="selectRecord", title="Deploy queue", sentence="Selects a record in the deploy queue, or clears it.", floor="recorded", reach="self", secret=false),
   AgentTool(name="addFeature", title="Features", sentence="Adds the first feature, Live sync, to the empty features section.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="choosePlan", title="Plan", sentence="Chooses the workspace's plan: starter, team or business.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="choosePlan", title="Plan", sentence="Chooses the workspace's plan: starter, team or business.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="startTrial", title="Free trial", sentence="Starts the free trial, as the page's Start free trial does.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -119,5 +130,6 @@ fn startValues(): Value[] = [
   Value(key="menu", value="empty"),
   Value(key="audit", value="unselected"), Value(key="rotate", value="unselected"), Value(key="invoices", value="unselected"),
   Value(key="features", value="empty"),
-  Value(key="plan", value="none")
+  Value(key="plan", value="none"),
+  Value(key="trial", value="off")
 ]

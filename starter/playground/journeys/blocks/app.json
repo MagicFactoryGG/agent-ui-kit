@@ -93,6 +93,12 @@
             "title": "Plan"
           }
         }
+      },
+      "readTrial": {
+        "title": "Read Trial"
+      },
+      "startTrial": {
+        "title": "Start Trial"
       }
     }
   }

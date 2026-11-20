@@ -12,6 +12,13 @@
 use Ledger, ledger, personSet, undo, isOn, isMarked, valueOf from "@agent-ui-kit/agent"
 use SettingsGroup, Setting, DetailPanel, StatePanel, OnboardingSteps, MessageList, SideNav, DataTable, Checked, Marks, FeatureGrid, Pricing from "__SCOPE__/blocks"
 use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, latestAbout, incidentTitle, statusWord, incidentFacts, incidentEvents, setupTitle, setupDetail, setupNext, setupBack, setupSteps, latestIdAbout, mailKey, mailLedgerKeys, mailMessages, mailText, mailMarkedKey, homeEntries, menuText, recordKeys, queueRecords, pickWord, firstFeatures, featuresText, planName, planList, planText from "./model.contract"
+use Ledger, ledger, personSet, undo, answerKey, waitingSentence, isOn, isMarked, valueOf from "@agent-ui-kit/agent"
+use SettingsGroup, Setting, DetailPanel, StatePanel, OnboardingSteps, MessageList, SideNav, DataTable, Checked, Marks, FeatureGrid, Hero from "__SCOPE__/blocks"
+use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, latestAbout, incidentTitle, statusWord, incidentFacts, incidentEvents, setupTitle, setupDetail, setupNext, setupBack, setupSteps, latestIdAbout, mailKey, mailLedgerKeys, mailMessages, mailText, mailMarkedKey, homeEntries, menuText, recordKeys, queueRecords, pickWord, firstFeatures, featuresText, trialStarted, heroPoints from "./model.contract"
+
+// The window's width, for the Hero's size (compact under 600 px): an app reads the viewport, a piece cannot.
+shape JourneyViewport
+  width: number
 
 component App
   members "./tools.contract"
@@ -54,6 +61,12 @@ component App
   // Pricing: the workspace's plan, "none" until one is chosen; the chosen card carries the agent's mark.
   derive plan = valueOf(book, "plan")
   derive planMarked = isMarked(book, "plan")
+  // Hero: the landing page's free trial; its value is "off" until it starts, then "started". An agent's start
+  // is marked on the hero (changed, with Undo); one held for the person's answer shows as its proposal.
+  resource viewport = exactViewport() as shape JourneyViewport
+  derive trialOn = trialStarted(book)
+  derive trialMarked = isMarked(book, "trial")
+  derive trialAsks = waitingSentence(book, "trial")
 
   // The person's door: the switch says which row; the app flips its own value.
   action toggleByPerson(key: string)
@@ -94,6 +107,16 @@ component App
     book = personSet(book, "plan", key)
   action undoPlan
     book = undo(book, latestIdAbout(book, "plan"))
+  // The hero's primary starts the trial (once started, it stays started); Undo takes the agent's start back,
+  // and a proposal's answers accept or reject the agent's held start.
+  action startTrialByPerson
+    book = personSet(book, "trial", "started")
+  action undoTrial
+    book = undo(book, latestIdAbout(book, "trial"))
+  action acceptTrial
+    book = answerKey(book, "trial", true, "person")
+  action rejectTrial
+    book = answerKey(book, "trial", false, "person")
   // Rows of other kinds, a retry and a proposal's answers: this use has none.
   action ignoreKey(key: string)
     book = book
@@ -146,6 +169,11 @@ component App
   tool choosePlan writes idempotent closed "Choose the workspace's plan, as a plan's Choose button does: starter, team or business. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readPlan." = choosePlan
     returns book.answer
     fails when book.answer == "off"
+  tool readTrial reads "The free trial on the landing page: off, or started." = readTrial
+    returns valueOf(book, "trial")
+  tool startTrial writes idempotent closed "Start the free trial, as the page's Start free trial does. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readTrial." = startTrial
+    returns book.answer
+    fails when book.answer == "off"
 
   view
     main testId="app" width="100%" height="100%"
@@ -158,3 +186,4 @@ component App
       DataTable(records=queueRecords(), checked=queueChecked, marks=queueMarks, titleLabel="Change", statusLabel="Status", ownerLabel="Owner", updatedLabel="Updated", selectLabel="Select", selectAllLabel="Select every change", emptyText="", loadingText="", failedText="", busyText="", agentNote=latestAbout(book, recordKeys()), retryLabel="", createLabel="", sort="updated", sortDir="descending", data="many", interaction="idle", agent=(queueMarks.keys.length > 0 ? "changed" : "none"), toggle=pickByPerson, toggleAll=pickAllByPerson, retry=ignore, create=ignore, testId="queue")
       FeatureGrid(eyebrow="Features", title="Everything your team needs", lead="The tools in your plan, in one place.", features=(features == "sync" ? firstFeatures() : []), actionLabel="", emptyText="This page lists no features yet. Add the first one to show what your product does.", addLabel="Add a feature", loadingText="", failedText="", retryLabel="", agentKey="sync", proposalText="", changedText=latestAbout(book, ["features"]), acceptLabel="", rejectLabel="", data=(features == "sync" ? "one" : "empty"), agent=(featuresMarked ? "changed" : "none"), testId="features", press=ignore, add=addFeatureByPerson, retry=ignore, accept=ignore, reject=ignore)
       Pricing(title="Choose your plan", lead="Every plan starts with 14 days free. Change or cancel at any time.", plans=planList(plan), tagLabel="Most chosen", chosenKey=plan, loadingText="", emptyTitle="", emptyText="", contactLabel="", failedTitle="", failedText="", retryLabel="", outcomeText=`You're on the ${planName(plan)} plan.`, proposalText="", acceptLabel="", rejectLabel="", changedText=latestAbout(book, ["plan"]), undoLabel="Undo", waitingText="", data="many", interaction="idle", size="wide", outcome=(plan == "none" ? "none" : "success"), agent=(planMarked ? "changed" : "none"), choose=choosePlanByPerson, contact=ignore, retry=ignore, accept=ignore, reject=ignore, undo=undoPlan, testId="pricing")
+      Hero(kicker="New in version 4", headline="Plan the week your whole team will keep", lead="Shared calendars, honest estimates and one list of what matters. Set it up in an afternoon and change it whenever plans do.", primaryLabel=(trialOn ? "Trial started" : "Start free trial"), secondaryLabel="See how it works", pictureLabel="A calm week, drawn", panelTitle="In every plan", items=heroPoints(), emptyText="", loadingText="", failedText="", retryLabel="", errorText="", proposedNote=trialAsks, acceptLabel="Accept", rejectLabel="Not now", changedNote=latestAbout(book, ["trial"]), undoLabel="Undo", data="many", interaction="idle", size=(viewport.width < 600 ? "compact" : "wide"), outcome="none", agent=(trialAsks != "" ? "proposed" : trialMarked ? "changed" : "none"), primary=startTrialByPerson, secondary=ignore, retry=ignore, accept=acceptTrial, reject=rejectTrial, undo=undoTrial, testId="trial")
