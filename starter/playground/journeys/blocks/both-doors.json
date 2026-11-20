@@ -572,5 +572,44 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "BarChart: the orders chart's range: the Months segment and setChartRange reach the same range; the agent's is recorded and marked on the chart",
+    "person": [
+      "tap orders-range-month"
+    ],
+    "agent": [
+      "call setChartRange {\"range\":\"month\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.21.key": "chart-range",
+      "book.values.21.value": "month",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "chart-range",
+      "book.changes.0.was": "week",
+      "book.marked": [
+        "chart-range"
+      ],
+      "chartRange": "month",
+      "chartMarked": true
+    },
+    "expectPerson": {
+      "book.values.21.key": "chart-range",
+      "book.values.21.value": "month",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "chartRange": "month",
+      "chartMarked": false
+    }
   }
 ]

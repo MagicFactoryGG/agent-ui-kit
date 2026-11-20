@@ -1,0 +1,267 @@
+// BarChart: one measure across a few named points, drawn with boxes (no chart library). One card on the surface,
+// with the theme's line, so it holds in a theme that gives page and surface one colour: the title (a heading, level
+// 2) and its note (what is counted, over what time) on the left, the range switch (`ranges`, the kit's Segments in a
+// group; none hides it) on the right, wrapping under the words on a narrow window. Under them, the bars. Every bar
+// carries its value (the app's own figure, `value`, already formatted, so units and words stay the app's) and its
+// label; its length is `share` (0..1, the app's ratio to the axis it chose, so the piece divides nothing). The
+// largest bar is the card's one filled focal, in the accent, its value and label in the ink; the others are a
+// muted fill (the muted ink, low), their words in the muted ink. Text never takes a bar's colour.
+//
+// Two layouts, one chart (`size`, which the app chooses from its window's width, as it does for Hero: a piece
+// cannot read its host):
+//   compact  horizontal bars, one row each: the label and its value on one line, the bar under them on the full
+//            track, the baseline a hairline down the bars' start. A phone's one column; long labels wrap.
+//   wide     columns on a baseline: each value on its column's cap, the labels under the baseline, the columns
+//            sharing the card's width up to blocks.bar-chart-col-max each, centred, the card held to
+//            blocks.bar-chart-max, so a desktop's width is used without stretching thin bars apart.
+// Bars are thin (blocks.bar-chart-column, blocks.bar-chart-row) with a small rounded data end and a square end on
+// the baseline; a zero still shows a sliver on it.
+//
+// States, declared once as axes:
+//   data   many (the bars), one (a single bar, its value said on its cap like any other), empty (the plot's place
+//          and its baseline stay, so the chart reads as this chart with nothing in it: `emptyText` over the axis
+//          and the way on, `emptyLabel`, the state's one filled element), loading (the title, note and switch stay,
+//          for they are known; `loadingText` is said as a status and ghost bars of the fill breathe in the bars'
+//          own place and height, so nothing moves when the figures arrive), failed (a critical disc, `failedText`
+//          in the ink — status ink is promised on the page and surface, and a disc carries the hue — and the retry,
+//          plain with the error ring, ActionButton's way to say an act's outcome; role alert), long (labels and
+//          values wrap inside their own column or row; nothing is cut).
+//   agent  none, proposed (an agent suggests a change: one sentence, `proposalText`, and two answer words,
+//          `rejectLabel` and `acceptLabel`, in a band under the header where it is seen first; the bar it is about,
+//          `agentKey`, wears the accent dot after its label), changed (an agent changed the chart, its range or a
+//          figure: a band of the accent's wash under the header says `agentNote` in the ink after the accent dot,
+//          with `undoLabel` beside it, and the bar `agentKey` names wears the same dot). The person's switch and
+//          the agent's tool reach the app's same action (one ledger, two doors).
+// Every word is the app's; every value a Theme token or a blocks.bar-chart-* size.
+use Words, ActionButton, Segment from "__SCOPE__/components"
+
+// One point of the chart: its key (an agent names it), its label, its value as the app writes it ("1,240",
+// "$3.2k") and its share of the axis, 0 to 1, which sets the bar's length.
+shape BarPoint
+  key: string
+  label: string
+  value: string
+  share: number
+
+// One choice of the range switch: its key and its label ("Weeks", "Months").
+shape BarRange
+  key: string
+  label: string
+
+// The ghost bars breathe, so loading reads as in progress, not as drawn shapes.
+keyframes bar-chart-breathe
+  50% opacity=0.55
+
+fn barChartShare(s: number): number = s < 0 ? 0 : s > 1 ? 1 : s
+// The key of the largest bar: the first of the largest, so a tie marks one bar.
+fn barChartTop(points: BarPoint[]): string = sortBy(points, p => barChartShare(p.share), "desc").slice(0, 1).map(p => p.key).join("")
+
+// The agent's dot: a small disc in the accent. The band says its sentence after one; the bar an agent's act is
+// about wears the same dot after its label, so the two read as one mark.
+component BarChartDot
+  view
+    svg viewBox="0 0 8 8" width="blocks.bar-chart-dot" height="blocks.bar-chart-dot" aria-hidden=true flex-shrink=0 position="relative"
+      circle cx=4 cy=4 r=4 fill="theme.color.accent"
+
+// One bar's fill: the accent for the largest, the muted ink kept low for the rest.
+component BarChartFill
+  props
+    top: bool
+    grow: number
+    across: string
+    thick: string
+    rounded: enum<"top", "end">
+  view
+    box flex-grow=grow flex-shrink=1 flex-basis=0 width=across height=thick max-width="blocks.bar-chart-column" min-width=(rounded == "end" ? "blocks.bar-chart-sliver" : "0px") min-height=(rounded == "top" ? "blocks.bar-chart-sliver" : "0px") background-color=(top ? "theme.color.accent" : "theme.color.ink-muted") opacity=(top ? 1 : 0.4) border-top-right-radius="blocks.bar-chart-cap" border-top-left-radius=(rounded == "top" ? "blocks.bar-chart-cap" : "0px") border-bottom-right-radius=(rounded == "end" ? "blocks.bar-chart-cap" : "0px") aria-hidden=true
+
+// A column of the wide chart: its value on the cap, its bar from the baseline. The air above the bar is the rest of
+// its share, so every column's bar is measured on the same height.
+component BarChartColumn
+  props
+    point: BarPoint
+    top: bool
+    testId: string
+  view
+    column role="listitem" testId=testId aria-label=`${point.label}: ${point.value}` flex=1 min-width=0 max-width="blocks.bar-chart-col-max" align-items="center"
+      box flex-grow=(1 - barChartShare(point.share)) flex-shrink=1 flex-basis=0 aria-hidden=true
+      text point.value testId=`${testId}-value` max-width="100%" margin-bottom="theme.space.xs" text-align="center" overflow-wrap="anywhere" font=(top ? "theme.type.heading" : "theme.type.caption") color=(top ? "theme.color.ink" : "theme.color.ink-muted")
+      BarChartFill(top=top, grow=barChartShare(point.share), across="100%", thick="auto", rounded="top")
+
+// A label under the baseline, under its own column; the agent's dot after it when its act is about this point.
+component BarChartLabel
+  props
+    point: BarPoint
+    top: bool
+    marked: bool
+    testId: string
+  view
+    row flex=1 min-width=0 max-width="blocks.bar-chart-col-max" justify-content="center" align-items="baseline" gap="theme.space.xs" aria-hidden=true
+      text point.label testId=testId min-width=0 text-align="center" overflow-wrap="anywhere" font="theme.type.caption" color=(top ? "theme.color.ink" : "theme.color.ink-muted")
+      if marked
+        BarChartDot()
+
+// A row of the compact chart: the label and its value on one line, the bar under them on the full track.
+component BarChartRow
+  props
+    point: BarPoint
+    top: bool
+    marked: bool
+    testId: string
+  view
+    column role="listitem" testId=testId aria-label=`${point.label}: ${point.value}` min-width=0 gap="theme.space.xs"
+      row align-items="baseline" gap="theme.space.sm" min-width=0
+        row flex=1 min-width=0 align-items="baseline" gap="theme.space.xs"
+          text point.label testId=`${testId}-label` min-width=0 overflow-wrap="anywhere" font="theme.type.caption" color=(top ? "theme.color.ink" : "theme.color.ink-muted")
+          if marked
+            BarChartDot()
+        text point.value testId=`${testId}-value` max-width="50%" text-align="end" overflow-wrap="anywhere" font=(top ? "theme.type.heading" : "theme.type.caption") color=(top ? "theme.color.ink" : "theme.color.ink-muted")
+      row min-width=0 aria-hidden=true
+        BarChartFill(top=top, grow=barChartShare(point.share), across="auto", thick="blocks.bar-chart-row", rounded="end")
+        box flex-grow=(1 - barChartShare(point.share)) flex-shrink=1 flex-basis=0
+
+// A ghost bar while the figures load, in a real bar's own place: a column of the wide chart or a row of the compact.
+component BarChartGhost
+  props
+    share: number
+    rounded: enum<"top", "end">
+  view
+    if rounded == "top"
+      column flex=1 min-width=0 max-width="blocks.bar-chart-col-max" align-items="center"
+        box flex-grow=(1 - share) flex-shrink=1 flex-basis=0
+        box flex-grow=(share) flex-shrink=1 flex-basis=0 width="100%" max-width="blocks.bar-chart-column" background-color="theme.color.fill" border-top-left-radius="blocks.bar-chart-cap" border-top-right-radius="blocks.bar-chart-cap"
+    else
+      column min-width=0 gap="theme.space.xs"
+        row
+          box flex="1 1 0" height="blocks.bar-chart-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+          box flex="2 1 0"
+        row
+          box flex-grow=(share) flex-shrink=1 flex-basis=0 height="blocks.bar-chart-row" background-color="theme.color.fill" border-top-right-radius="blocks.bar-chart-cap" border-bottom-right-radius="blocks.bar-chart-cap"
+          box flex-grow=(1 - share) flex-shrink=1 flex-basis=0
+
+// The axis line: across under the columns (wide), down the bars' start (compact). Recessive: the muted ink, low.
+component BarChartBaseline
+  props
+    across: bool
+  view
+    box aria-hidden=true flex-shrink=0 width=(across ? "auto" : "theme.line.width") height=(across ? "theme.line.width" : "auto") align-self="stretch" background-color="theme.color.ink-muted" opacity=0.5
+
+component BarChart
+  props
+    title: string
+    note: string
+    chartLabel: string
+    points: BarPoint[]
+    ranges: BarRange[]
+    range: string
+    rangeLabel: string
+    emptyText: string
+    emptyLabel: string
+    loadingText: string
+    failedText: string
+    retryLabel: string
+    agentKey: string
+    agentNote: string
+    undoLabel: string
+    proposalText: string
+    acceptLabel: string
+    rejectLabel: string
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed">
+    size: enum<"compact", "wide">
+    choose: action
+    add: action
+    retry: action
+    undo: action
+    accept: action
+    reject: action
+    testId: string
+  derive shown = (data == "many" or data == "one" or data == "long") and points.length > 0
+  derive bare = (data == "many" or data == "one" or data == "long") and points.length == 0
+  derive topKey = barChartTop(points)
+  derive wide = size == "wide"
+  view
+    column testId=testId width="100%" max-width="blocks.bar-chart-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(wide ? "theme.space.xl" : "theme.space.lg") gap="theme.space.xl" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" color="theme.color.ink"
+      row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.lg" row-gap="theme.space.md"
+        column flex=1 min-width="blocks.bar-chart-head-min" gap="theme.space.xs"
+          Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+          if note != ""
+            Words(text=note, kind="caption", outcome="none", level=0, testId=`${testId}-note`)
+        if ranges.length > 0
+          row role="group" aria-label=rangeLabel testId=`${testId}-ranges` gap="theme.space.xs" padding="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.control"
+            for r in ranges key=r.key
+              Segment(label=r.label, on=(r.key == range), interaction="idle", press=choose(r.key), testId=`${testId}-range-${r.key}`)
+      if agent == "proposed"
+        row testId=`${testId}-proposal` role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.md" padding="theme.space.md" padding-left="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent"
+          row flex=1 min-width="blocks.bar-chart-head-min" align-items="baseline" gap="theme.space.sm"
+            BarChartDot()
+            text proposalText testId=`${testId}-sentence` min-width=0 font="theme.type.body" color="theme.color.ink"
+          row gap="theme.space.sm" flex-wrap="wrap"
+            if rejectLabel != ""
+              ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+            if acceptLabel != ""
+              ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+      if agent == "changed"
+        row testId=`${testId}-changed` role="status" position="relative" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.sm" padding="theme.space.sm" padding-left="theme.space.md" border-radius="theme.radius.control"
+          box aria-hidden=true position="absolute" inset=0 background-color="theme.color.accent" opacity=0.1 border-radius="theme.radius.control"
+          row flex=1 min-width="blocks.bar-chart-head-min" position="relative" align-items="baseline" gap="theme.space.sm"
+            BarChartDot()
+            text agentNote testId=`${testId}-agent` min-width=0 font="theme.type.body" color="theme.color.ink"
+          if undoLabel != ""
+            column position="relative"
+              ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+      if data == "loading"
+        column testId=`${testId}-loading` role="status" aria-label=loadingText gap="theme.space.md"
+          Words(text=loadingText, kind="caption", outcome="none", level=0, testId=`${testId}-loading-text`)
+          if wide
+            column aria-hidden=true animation="bar-chart-breathe 1.8s ease-in-out infinite"
+              row height="blocks.bar-chart-plot" justify-content="center" column-gap="theme.space.sm"
+                BarChartGhost(share=0.55, rounded="top")
+                BarChartGhost(share=0.8, rounded="top")
+                BarChartGhost(share=0.4, rounded="top")
+                BarChartGhost(share=0.95, rounded="top")
+                BarChartGhost(share=0.65, rounded="top")
+                BarChartGhost(share=0.5, rounded="top")
+              BarChartBaseline(across=true)
+          else
+            row aria-hidden=true gap="theme.space.md" animation="bar-chart-breathe 1.8s ease-in-out infinite"
+              BarChartBaseline(across=false)
+              column flex=1 min-width=0 gap="theme.space.md"
+                BarChartGhost(share=0.7, rounded="end")
+                BarChartGhost(share=0.95, rounded="end")
+                BarChartGhost(share=0.5, rounded="end")
+                BarChartGhost(share=0.6, rounded="end")
+      else if data == "failed"
+        column testId=`${testId}-failed` role="alert" min-height=(wide ? "blocks.bar-chart-plot" : "0px") justify-content="center" align-items="center" text-align="center" gap="theme.space.md" padding="theme.space.lg"
+          svg viewBox="0 0 24 24" width="blocks.bar-chart-glyph" height="blocks.bar-chart-glyph" aria-hidden=true flex-shrink=0
+            circle cx=12 cy=12 r=11 fill="theme.color.critical"
+            line x1=12 y1=6.75 x2=12 y2=13 stroke="theme.color.critical-ink" stroke-width=2 stroke-linecap="round"
+            circle cx=12 cy=16.75 r=1.3 fill="theme.color.critical-ink"
+          column max-width="blocks.bar-chart-measure" width="100%" align-items="center"
+            Words(text=failedText, kind="body", outcome="none", level=0, testId=`${testId}-failed-text`)
+          if retryLabel != ""
+            column max-width="100%" margin-top="theme.space.xs"
+              ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
+      else if data == "empty" or bare
+        column testId=`${testId}-empty` role="status"
+          column min-height=(wide ? "blocks.bar-chart-plot" : "0px") justify-content="center" align-items="center" text-align="center" gap="theme.space.md" padding="theme.space.lg"
+            column max-width="blocks.bar-chart-measure" width="100%" align-items="center"
+              Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-empty-text`)
+            if emptyLabel != ""
+              column max-width="100%" margin-top="theme.space.xs"
+                ActionButton(label=emptyLabel, kind="primary", interaction="idle", outcome="none", press=add, testId=`${testId}-add`)
+          BarChartBaseline(across=true)
+      else if wide
+        column min-width=0
+          row role="list" aria-label=chartLabel testId=`${testId}-plot` height="blocks.bar-chart-plot" justify-content="center" column-gap="theme.space.sm"
+            for p in points key=p.key
+              BarChartColumn(point=p, top=(p.key == topKey), testId=`${testId}-bar-${p.key}`)
+          BarChartBaseline(across=true)
+          row justify-content="center" column-gap="theme.space.sm" padding-top="theme.space.sm"
+            for p in points key=p.key
+              BarChartLabel(point=p, top=(p.key == topKey), marked=(agent != "none" and p.key == agentKey), testId=`${testId}-label-${p.key}`)
+      else
+        row min-width=0 gap="theme.space.md"
+          BarChartBaseline(across=false)
+          column role="list" aria-label=chartLabel testId=`${testId}-plot` flex=1 min-width=0 gap="theme.space.md"
+            for p in points key=p.key
+              BarChartRow(point=p, top=(p.key == topKey), marked=(agent != "none" and p.key == agentKey), testId=`${testId}-bar-${p.key}`)

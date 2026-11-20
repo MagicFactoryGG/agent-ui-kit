@@ -1726,5 +1726,46 @@
       "detail": "Planning · 12 tasks open · Jonas Weber",
       "href": "/"
     }
-  ]
+  ],
+  "props:BarChart": {
+    "title": "Orders",
+    "note": "Orders placed each month, January to June",
+    "chartLabel": "Orders per month",
+    "range": "month",
+    "rangeLabel": "Range",
+    "emptyText": "No orders in this range yet. They appear here as soon as the first one is placed.",
+    "emptyLabel": "Share your shop",
+    "loadingText": "Loading orders…",
+    "failedText": "The orders did not load. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "agentKey": "mar",
+    "agentNote": "Your assistant switched the chart to months.",
+    "undoLabel": "Undo",
+    "proposalText": "Your assistant suggests showing quarters, to compare with last year.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "agentKey@long": "north"
+  },
+  "BarPoint:many": [
+    { "key": "jan", "label": "Jan", "value": "1,180", "share": 0.52 },
+    { "key": "feb", "label": "Feb", "value": "1,420", "share": 0.63 },
+    { "key": "mar", "label": "Mar", "value": "2,260", "share": 1 },
+    { "key": "apr", "label": "Apr", "value": "1,940", "share": 0.86 },
+    { "key": "may", "label": "May", "value": "1,610", "share": 0.71 },
+    { "key": "jun", "label": "Jun", "value": "1,350", "share": 0.6 }
+  ],
+  "BarPoint:one": [
+    { "key": "mar", "label": "March", "value": "2,260", "share": 1 }
+  ],
+  "BarPoint:long": [
+    { "key": "north", "label": "North and Central Europe, including the Nordic countries", "value": "12,480 orders", "share": 1 },
+    { "key": "south", "label": "South", "value": "8,920 orders", "share": 0.71 },
+    { "key": "west", "label": "Western Europe and the United Kingdom", "value": "4,105 orders", "share": 0.33 }
+  ],
+  "BarRange:many": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
+  "BarRange:one": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
+  "BarRange:empty": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
+  "BarRange:loading": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
+  "BarRange:failed": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
+  "BarRange:long": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }]
 }
