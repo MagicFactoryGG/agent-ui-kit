@@ -3,6 +3,9 @@
 // tool an agent can call too (packages/commands' rule): a person's press on a row and the agent's call run the same
 // act in the app, and what the agent ran is marked on its row and said once above the results, with Undo.
 //
+// - The panel is a named region, not a dialog: the app presents it (a sheet, a route with a modal presentation),
+//   which gives Escape, a kept focus and the platform's own sheet; `role="dialog"` on a column would only name one
+//   (Exact's lower-dialog-role).
 // - The app owns the query and the results: it filters (the person's typing is view state, an agent acts on
 //   commands by key, never on the query) and passes the commands that match, the highlighted key and `data`.
 // - Width: a phone takes the whole width and the results take the height left under the field (their own
@@ -101,7 +104,7 @@ component CommandMenu
   derive shows = data == "many" or data == "one" or data == "long"
   view
     row flex=1 width="100%" justify-content="center" align-items="stretch"
-      column testId=testId role="dialog" aria-label=title flex=1 min-width=0 max-width="blocks.command-menu-max" box-sizing="border-box" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.card" overflow="hidden"
+      column testId=testId role="region" aria-label=title flex=1 min-width=0 max-width="blocks.command-menu-max" box-sizing="border-box" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.card" overflow="hidden"
         column padding="theme.space.lg" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
           Field(id=`${testId}-search`, label=searchLabel, hint=hint, error="", outcome="none")
             input type="search" value=query input=search placeholder=placeholder aria-label=searchLabel testId=`${testId}-search` width="100%" min-width=0 min-height="blocks.command-menu-row" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" font="theme.type.body" color="theme.color.ink" background-color="theme.color.page" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.control"
