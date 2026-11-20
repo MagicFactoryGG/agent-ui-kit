@@ -1,12 +1,13 @@
 #!/usr/bin/env bun
 // The Distiller: one command for any brand. Reads the brand config, runs each step, writes the Theme, the
 // presets and the divergence report.
-//   bun distill.mjs <brand.json> <run-dir> [--skip-web] [--native <udid> <bundle-id> <id>] [--reference a,b] [--guide on|off]
+//   bun distill.mjs <brand.json> <run-dir> [--doors-only] [--skip-web] [--native <udid> <bundle-id> <id>] [--reference a,b] [--guide on|off]
 // Steps: doors → guide (official CSS) → web (headless, light and dark) → native source → native app (optional,
 // one launch, light and dark) → analyse → report. Each step writes into <run-dir>; a later run is a drift check.
 import { execFileSync } from "node:child_process";
 import { join, dirname } from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { assertOwnership } from "./lib/doors.mjs";
 import { loadConfig } from "./lib/config.mjs";
@@ -14,7 +15,15 @@ import { loadConfig } from "./lib/config.mjs";
 const here = dirname(fileURLToPath(import.meta.url));
 const [cfg, run, ...rest] = process.argv.slice(2);
 if (!cfg || !run) { console.error("usage: distill.mjs <brand.json> <run-dir> [--skip-web] [--native <udid> <bundle-id> <id>] [--reference a,b] [--guide on|off]"); process.exit(2); }
-console.log("doors:", JSON.stringify(await assertOwnership(loadConfig(cfg))));
+// The doors' result, kept in the run as its ownership record: what a Brand-layer registration (tools/brand.mjs register)
+// rests on. --doors-only stops after it.
+const config = loadConfig(cfg);
+const doors = await assertOwnership(config);
+console.log("doors:", JSON.stringify(doors));
+mkdirSync(run, { recursive: true });
+const record = { id: randomUUID(), at: new Date().toISOString(), config: cfg, party: { name: config.name ?? "", domains: config.ownership?.domains ?? [] }, doors };
+writeFileSync(join(run, "ownership.json"), `${JSON.stringify(record, null, 2)}\n`);
+if (rest.includes("--doors-only")) process.exit(0);
 const step = (file, ...args) => execFileSync("bun", [join(here, file), ...args], { stdio: "inherit" });
 step("collect-guide.mjs", cfg, run);
 if (!rest.includes("--skip-web")) step("collect-web.mjs", cfg, run);

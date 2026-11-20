@@ -1,0 +1,208 @@
+// FeatureGrid: a features section. An eyebrow (`eyebrow`, "" hides it: the section's kind in the small heading type,
+// so the type steps eyebrow, title, lead, feature title, detail), a heading, its lead and the way on (`actionLabel`, "" hides it) in one column held
+// to blocks.feature-grid-lead, then the features in a grid: three across on a desktop, two on a narrow window, one on a
+// phone (a grid of auto-filled tracks at a named least width, blocks.feature-grid-min, so the layout changes at narrow
+// widths instead of squeezing). Each feature is a row — a drawn mark in the accent on a low wash of the accent, then
+// its title (a heading, level 3) over its detail in the muted ink — so the mark leads the words at every width and a
+// phone's single column stays compact. The features are a list, open on the page and grouped by space alone: no card
+// around each one, for a border around every box is noise, and a fill alone may vanish in a theme that gives page
+// and surface one colour. The one filled element of a resting grid is the way on, under the words it follows. The
+// features stand a step further from the header (xl and lg) than the rows stand from each other (xxl less the
+// row's own air), so the header and the list read as two groups by space alone.
+//
+// States, declared once as axes:
+//   data   many (the grid), one (the one feature on its own line, held to the lead's measure, so a lone feature
+//          never reads as a grid with two cells missing), empty (a dashed tray in the grid's place — a line, not a
+//          fill, so it holds in any theme — on the surface, centred like StatePanel: a quiet disc with a plus, the app's `emptyText`
+//          and its way on, `addLabel`), loading (the heading stays, for the section's name is known; `loadingText` is
+//          said as a status over three ghost features that breathe, each the shape of a real one, and the way on's
+//          footprint is held, so nothing moves when the features arrive), failed (the same
+//          tray drawn in the critical line on the surface with a critical disc: the words take the ink, for status
+//          ink is promised on the page and surface only, and the retry is plain with the outcome's own ring —
+//          ActionButton's way to say an act's outcome; a red fill would say a destructive act), long (titles and
+//          details wrap inside their track; nothing is cut).
+//   agent  none, proposed (an agent suggests a change to the feature `agentKey` names: the kit's proposal look —
+//          one sentence, `proposalText`, and two answer words, `rejectLabel` and `acceptLabel` — sits under the
+//          heading where it is seen first, the feature it is about wears the accent ring on its mark, and the way on
+//          steps back to plain so the answer is the state's one filled element), changed (an agent changed that
+//          feature: a band of the accent's wash under the heading says `changedText` in the ink (on a tint the accent's
+//          contrast is another theme's to keep, the ink's is ours) after the accent dot, and the feature wears the ring on its mark and the same dot after its title, so a person sees what changed
+//          without watching). The person's answer and the agent's tool
+//          reach the app's same actions (one ledger, two doors); the app's Notice offers the undo.
+// Every word is the app's; every value a Theme token or a blocks.* size.
+use Words, ActionButton from "__SCOPE__/components"
+
+// One feature of the section: its key (an agent names it), its title and its detail (two lines, as a rule).
+shape Feature
+  key: string
+  title: string
+  detail: string
+
+// The ghost features breathe, so loading reads as in progress, not as drawn shapes.
+keyframes feature-grid-breathe
+  50% opacity=0.55
+
+// A feature's mark: one of six drawn glyphs in the accent, on a low wash of the accent, chosen by the feature's place
+// so neighbours differ. `ring` circles it in the accent when an agent proposed or made a change to this feature.
+component FeatureGridMark
+  props
+    n: number
+    ring: bool
+  view
+    box position="relative" width="blocks.feature-grid-mark" height="blocks.feature-grid-mark" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.control" box-shadow=(ring ? "0 0 0 2px theme.color.accent" : "none") aria-hidden=true
+      box position="absolute" inset=0 background-color="theme.color.accent" opacity=0.1 border-radius="theme.radius.control"
+      svg viewBox="0 0 20 20" width="blocks.feature-grid-glyph" height="blocks.feature-grid-glyph" fill="none" stroke="theme.color.accent" position="relative"
+        if n % 6 == 0
+          circle cx=10 cy=10 r=6.5 stroke-width=1.6
+          circle cx=10 cy=10 r=2.2 fill="theme.color.accent" stroke="none"
+        else if n % 6 == 1
+          rect x=3 y=3 width=9 height=9 rx=2 stroke-width=1.6
+          rect x=8 y=8 width=9 height=9 rx=2 stroke-width=1.6
+        else if n % 6 == 2
+          path d="M10 3.5L16.5 15.5H3.5Z" stroke-width=1.6 stroke-linejoin="round"
+        else if n % 6 == 3
+          path d="M4 5.5h12M4 10h8M4 14.5h10" stroke-width=1.6 stroke-linecap="round"
+        else if n % 6 == 4
+          path d="M10 2.5L17.5 10L10 17.5L2.5 10Z" stroke-width=1.6 stroke-linejoin="round"
+          circle cx=10 cy=10 r=1.8 fill="theme.color.accent" stroke="none"
+        else
+          path d="M3.5 13a6.5 6.5 0 0 1 13 0" stroke-width=1.6 stroke-linecap="round"
+          path d="M3.5 16h13" stroke-width=1.6 stroke-linecap="round"
+
+// One feature, the item the grid and the lone line both draw: its mark beside its words — a title (a heading the
+// list's items speak) over its detail in the muted ink — so the mark leads each row at every width and a phone's
+// column stays compact. `ring` circles the mark when an agent proposed or made a change to it.
+component FeatureGridItem
+  props
+    feature: Feature
+    n: number
+    ring: bool
+    note: bool
+    testId: string
+  view
+    row role="listitem" testId=testId min-width=0 align-items="flex-start" gap="theme.space.lg"
+      FeatureGridMark(n=n, ring=ring)
+      column flex=1 min-width=0 gap="theme.space.xs"
+        row align-items="baseline" gap="theme.space.sm" min-width=0
+          text feature.title testId=`${testId}-title` role="heading" aria-level=3 min-width=0 font="theme.type.label" color="theme.color.ink" overflow-wrap="anywhere"
+          if note
+            FeatureGridDot()
+        if feature.detail != ""
+          text feature.detail testId=`${testId}-detail` font="theme.type.body" color="theme.color.ink-muted" overflow-wrap="anywhere"
+
+// The agent's dot: a small disc in the accent. The changed band says its sentence after one; the feature an agent
+// changed wears the same dot after its title, so the two read as one mark — the sentence and the thing it is about.
+component FeatureGridDot
+  view
+    svg viewBox="0 0 8 8" width="blocks.feature-grid-dot" height="blocks.feature-grid-dot" aria-hidden=true flex-shrink=0 position="relative"
+      circle cx=4 cy=4 r=4 fill="theme.color.accent"
+
+// A bar of a ghost feature: `share` of its line against `rest`, at `height`.
+component FeatureGridGhostBar
+  props
+    share: string
+    rest: string
+    height: string
+  view
+    row
+      box flex=share height=height background-color="theme.color.fill" border-radius="theme.radius.pill"
+      box flex=rest
+
+// A ghost feature while the features load: the mark's own box beside a title bar and two detail lines, in the real
+// feature's own gaps, so the swap to the loaded grid moves nothing.
+component FeatureGridGhost
+  view
+    row align-items="flex-start" gap="theme.space.lg" aria-hidden=true animation="feature-grid-breathe 1.8s ease-in-out infinite"
+      box width="blocks.feature-grid-mark" height="blocks.feature-grid-mark" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.control"
+      column flex=1 min-width=0 gap="theme.space.sm" padding-top="theme.space.xs"
+        FeatureGridGhostBar(share="1 1 0", rest="1 1 0", height="blocks.feature-grid-ghost-title")
+        FeatureGridGhostBar(share="1 1 0", rest="0 0 0", height="blocks.feature-grid-ghost-line")
+        FeatureGridGhostBar(share="3 1 0", rest="1 1 0", height="blocks.feature-grid-ghost-line")
+
+component FeatureGrid
+  props
+    eyebrow: string
+    title: string
+    lead: string
+    features: Feature[]
+    actionLabel: string
+    emptyText: string
+    addLabel: string
+    loadingText: string
+    failedText: string
+    retryLabel: string
+    agentKey: string
+    proposalText: string
+    changedText: string
+    acceptLabel: string
+    rejectLabel: string
+    data: enum<"many", "one", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed">
+    testId: string
+    press: action
+    add: action
+    retry: action
+    accept: action
+    reject: action
+  derive shown = data == "many" or data == "one" or data == "long"
+  derive lone = shown and features.length == 1
+  derive bare = shown and features.length == 0
+  view
+    column testId=testId width="100%" max-width="blocks.feature-grid-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding="theme.space.lg" gap="theme.space.xl" color="theme.color.ink"
+      column max-width="blocks.feature-grid-lead" min-width=0 align-items="flex-start" gap="theme.space.sm"
+        if eyebrow != ""
+          Words(text=eyebrow, kind="heading", outcome="none", level=0, testId=`${testId}-eyebrow`)
+        Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+        if lead != ""
+          Words(text=lead, kind="body", outcome="cancelled", level=0, testId=`${testId}-lead`)
+        if shown and not bare and actionLabel != ""
+          column max-width="100%" margin-top="theme.space.sm"
+            ActionButton(label=actionLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
+        if data == "loading" and actionLabel != ""
+          box testId=`${testId}-held` aria-hidden=true margin-top="theme.space.sm" height="blocks.feature-grid-action-height" width="blocks.feature-grid-action-width" background-color="theme.color.fill" border-radius="theme.radius.control" animation="feature-grid-breathe 1.8s ease-in-out infinite"
+      if agent == "proposed"
+        row testId=`${testId}-proposal` role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.md" padding="theme.space.md" padding-left="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent"
+          text proposalText testId=`${testId}-sentence` flex="1 1 blocks.feature-grid-min" min-width=0 font="theme.type.body" color="theme.color.ink"
+          row gap="theme.space.sm" flex-wrap="wrap"
+            if rejectLabel != ""
+              ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+            if acceptLabel != ""
+              ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+      if agent == "changed"
+        row testId=`${testId}-changed` role="status"
+          row position="relative" max-width="blocks.feature-grid-lead" align-items="baseline" gap="theme.space.sm" min-width=0 padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-radius="theme.radius.control"
+            box aria-hidden=true position="absolute" inset=0 background-color="theme.color.accent" opacity=0.1 border-radius="theme.radius.control"
+            FeatureGridDot()
+            text changedText position="relative" min-width=0 font="theme.type.body" color="theme.color.ink"
+      if data == "loading"
+        column testId=`${testId}-loading` role="status" aria-label=loadingText margin-top="theme.space.lg" gap="theme.space.lg"
+          Words(text=loadingText, kind="caption", outcome="none", level=0, testId=`${testId}-loading-text`)
+          view display="grid" grid-template-columns="repeat(auto-fill, minmax(min(blocks.feature-grid-min, 100%), 1fr))" column-gap="theme.space.xxl" row-gap="theme.space.xxl"
+            FeatureGridGhost()
+            FeatureGridGhost()
+            FeatureGridGhost()
+      else if data == "failed" or data == "empty" or bare
+        column testId=`${testId}-${data == "failed" ? "failed" : "empty"}` role=(data == "failed" ? "alert" : "status") margin-top="theme.space.lg" align-items="center" text-align="center" gap="theme.space.md" padding="theme.space.xxl" border-radius="theme.radius.card" border-width="theme.line.width" border-style=(data == "failed" ? "solid" : "dashed") border-color=(data == "failed" ? "theme.color.critical" : "theme.color.line") background-color="theme.color.surface"
+          svg viewBox="0 0 24 24" width="blocks.feature-grid-mark" height="blocks.feature-grid-mark" aria-hidden=true flex-shrink=0
+            if data == "failed"
+              circle cx=12 cy=12 r=11 fill="theme.color.critical"
+              line x1=12 y1=6.75 x2=12 y2=13 stroke="theme.color.critical-ink" stroke-width=2 stroke-linecap="round"
+              circle cx=12 cy=16.75 r=1.3 fill="theme.color.critical-ink"
+            else
+              circle cx=12 cy=12 r=11 fill="theme.color.fill"
+              path d="M12 7.5v9M7.5 12h9" stroke="theme.color.ink-muted" stroke-width=1.6 stroke-linecap="round"
+          text (data == "failed" ? failedText : emptyText) testId=`${testId}-message` max-width="blocks.feature-grid-lead" font="theme.type.body" color="theme.color.ink"
+          if data == "failed" and retryLabel != ""
+            column max-width="100%" margin-top="theme.space.sm"
+              ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
+          else if data != "failed" and addLabel != ""
+            column max-width="100%" margin-top="theme.space.sm"
+              ActionButton(label=addLabel, kind="primary", interaction="idle", outcome="none", press=add, testId=`${testId}-add`)
+      else if lone
+        column role="list" testId=`${testId}-list` max-width="blocks.feature-grid-lead" margin-top="theme.space.lg"
+          for f in features key=f.key
+            FeatureGridItem(feature=f, n=0, ring=(agent != "none" and f.key == agentKey), note=(agent == "changed" and f.key == agentKey), testId=`${testId}-${f.key}`)
+      else
+        view role="list" testId=`${testId}-list` margin-top="theme.space.lg" display="grid" grid-template-columns="repeat(auto-fill, minmax(min(blocks.feature-grid-min, 100%), 1fr))" column-gap="theme.space.xxl" row-gap="theme.space.xxl"
+          for f, i in features key=f.key
+            FeatureGridItem(feature=f, n=i, ring=(agent != "none" and f.key == agentKey), note=(agent == "changed" and f.key == agentKey), testId=`${testId}-${f.key}`)

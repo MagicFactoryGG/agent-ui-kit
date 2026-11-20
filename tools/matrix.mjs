@@ -53,7 +53,7 @@ export function pieces(pkgDir) {
   const shapes = {};
   const out = [];
   for (const [file, text] of files) {
-    for (const m of text.matchAll(/^shape (\w+)\n((?: {2}\w+: .+\n?)+)/gm)) {
+    for (const m of text.matchAll(/^shape (\w+)\n((?: {2}(?:\w+: .+|\/\/.*)\n?)+)/gm)) {
       shapes[m[1]] = [...m[2].matchAll(/^ {2}(\w+): (.+)$/gm)].map((f) => ({ name: f[1], type: f[2].trim() }));
     }
     const lines = text.split('\n');
@@ -153,11 +153,17 @@ export function cellName(piece, cell) {
 // ---- writing the playground app
 
 const word = (name) => name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase());
-const quote = (s) => `"${String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+const quote = (s) => `"${String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`;
 const id = (s) => s.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase();
 
 // A prop's value in one cell: its state, else a sample by its name and type (long text when the data axis says so).
 function value(prop, cell, ctx) {
+  // samples.json may set a prop for one data state ("props:DetailPanel": {"interaction@failed": "disabled"}): a cell is
+  // what an app copies, so a state that implies another (actions off while a record failed to load) shows it. It
+  // replaces only a resting value: a cell that names the axis itself (busy, disabled) keeps its own.
+  const byState = cell.data === undefined ? undefined : ctx.given?.[`${prop.name}@${cell.data}`];
+  const resting = /^enum<\s*"([^"]+)"/.exec(prop.type)?.[1];
+  if (byState !== undefined && (!(prop.name in cell) || cell[prop.name] === resting)) return prop.type === 'bool' || prop.type === 'number' ? String(byState) : quote(byState);
   if (prop.name in cell) return prop.type === 'bool' ? String(cell[prop.name]) : quote(cell[prop.name]);
   // samples.json may give a piece's words ("props:ProfileSelector": {"label": "Profile", …}); data only.
   const given = ctx.given?.[prop.name];
@@ -178,10 +184,15 @@ function value(prop, cell, ctx) {
   if (t === 'bool') return 'false';
   // An action prop the piece calls with an argument (`choose(o.key)`) is bound to one that takes it.
   if (t === 'action') {
-    if (!new RegExp(`\\b${prop.name}\\(\\s*[^)\\s]`).test(ctx.body ?? '')) return 'noop';
+    // Called with an argument (`choose(o.key)`), or the handler of a field (`input=edit`, `change=pick`): one argument.
+    // As many arguments as the piece's first call passes (`drag(e.clientX, e.clientY)`: two).
+    const code = (ctx.body ?? '').split('\n').filter((l) => !l.trim().startsWith('//')).join('\n');
+    const field = new RegExp(`\\b(input|change)=${prop.name}\\b`).test(code);
+    const arity = Math.max(callArity(code, prop.name), field ? 1 : 0);
+    if (arity === 0) return 'noop';
     // One no-op per piece and prop: Exact infers an untyped parameter's type from its use (a key, a number).
     const name = `noop_${ctx.piece}_${prop.name}`;
-    ctx.needs.add(`action:${name}`);
+    ctx.needs.add(`action:${name}:${arity}`);
     return name;
   }
   const list = /^(\w+)\[\]$/.exec(t);
@@ -196,6 +207,28 @@ function value(prop, cell, ctx) {
   const e = enumValues(t);
   if (e) return quote(e[0]);
   return quote('');
+}
+
+// How many arguments the code's calls of `name(…)` pass: the most any call passes, counting only top-level commas.
+function callArity(code, name) {
+  let most = 0;
+  for (const m of code.matchAll(new RegExp(`(?<![\\w.])${name}\\(`, 'g'))) {
+    let depth = 0;
+    let args = 0;
+    let any = false;
+    for (let i = m.index + m[0].length; i < code.length; i++) {
+      const c = code[i];
+      if (c === '(' || c === '[') depth++;
+      else if (c === ')' || c === ']') {
+        if (depth === 0) break;
+        depth--;
+      } else if (c === ',' && depth === 0) args++;
+      else if (!/\s/.test(c)) any = true;
+      if (c !== ')' && c !== ']' && !/\s/.test(c)) any = true;
+    }
+    if (any) most = Math.max(most, args + 1);
+  }
+  return most;
 }
 
 function placement(piece, cell, testId, ctx, indent) {
@@ -254,9 +287,12 @@ export const answer: Answer = ((source: string, args: unknown[]) => {
 `;
 }
 
-export function generate(designDir, playDir) {
+// opts.section: one of samples.json's "sections" ({"<name>": {"files": [...]} or {"layers": [...], "except": [...]}}): a second playground app
+// (<playground>/<name>) that draws only the pieces of those files; the main playground leaves them out. A playground
+// that draws every app's screens outgrows one bundle. opts.samples and opts.wip name the main playground's.
+export function generate(designDir, playDir, opts = {}) {
   const layers = ['theme', 'components', 'blocks', 'screens'].map((l) => join(designDir, l)).filter((d) => existsSync(join(d, 'package.json')));
-  const wip = join(playDir, 'wip');
+  const wip = opts.wip ?? join(playDir, 'wip');
   const dirs = existsSync(join(wip, 'package.json')) ? [...layers, wip] : layers;
   const all = dirs.flatMap((d) => pieces(d));
   const bad = problems(all);
@@ -265,8 +301,15 @@ export function generate(designDir, playDir) {
   // The first preset is theme.json itself (what apps ship), so an edit there shows at once.
   const presets = { theme: theme, ...presetsOf(designDir) };
   const shapes = Object.assign({}, ...all.map((p) => p.shapes));
-  const sampleFile = join(playDir, 'samples.json');
+  const sampleFile = opts.samples ?? join(playDir, 'samples.json');
   const ctx = { needs: new Set(), shapes: Object.assign({}, ...all.map((p) => p.shapes)), props: existsSync(sampleFile) ? JSON.parse(readFileSync(sampleFile, 'utf8')) : {} };
+  const sections = ctx.props.sections ?? {};
+  const fileOf = (p) => p.at.split(':')[0].split('/').pop();
+  // A section names files ("files": ["ias.contract"]) or whole layers ("layers": ["blocks"], less "except": the
+  // layer's own shared pieces, such as its index.contract), so a piece added to a layer joins its section unnamed.
+  const inSection = (p, v) => (v.files ?? []).includes(fileOf(p)) || ((v.layers ?? []).includes(p.layer) && !(v.except ?? []).includes(fileOf(p)));
+  const sectionOf = (p) => Object.entries(sections).find(([, v]) => inSection(p, v))?.[0] ?? 'main';
+  const inPage = (p) => sectionOf(p) === (opts.section ?? 'main');
   const byPkg = new Map();
   for (const p of all) byPkg.set(p.pkg, [...(byPkg.get(p.pkg) ?? []), p]);
   const uses = [...byPkg].map(([pkg, list]) => {
@@ -279,6 +322,8 @@ export function generate(designDir, playDir) {
   const pages = [];
   const view = [];
   const nav = [];
+  let brandFile;
+  let brandSet = null;
   const marks = (p) => {
     const f = join(designDir, p.layer, 'states.json');
     const w = join(playDir, 'wip', 'states.json');
@@ -286,6 +331,48 @@ export function generate(designDir, playDir) {
     if (!existsSync(file)) return [];
     return JSON.parse(readFileSync(file, 'utf8'))[p.name] ?? [];
   };
+
+  // The map (opts.map, else <playground>/map.json, written by the playground before each build): the program's pieces
+  // in groups, each with its status and a way to its page: a page of this app, or (a piece another section draws)
+  // that section's address from the map's "links" ({"main": url, "<section>": url}). It is the home page.
+  const mapFile = opts.map ?? join(playDir, 'map.json');
+  const map = existsSync(mapFile) ? JSON.parse(readFileSync(mapFile, 'utf8')) : null;
+  if (map?.groups?.length) {
+    const here = new Set(['theme', ...([join(designDir, 'brand.json'), join(designDir, 'brand.draft.json')].some((f) => existsSync(f) && JSON.parse(readFileSync(f, 'utf8')).assets?.length) && !opts.section ? ['brand'] : []), ...(!opts.section ? ['arrange'] : [])]);
+    for (const p of all) if (inPage(p)) here.add(`${p.layer}-${p.name}`);
+    const homeOf = (key) => {
+      const p = all.find((x) => `${x.layer}-${x.name}` === key);
+      if (!p) return null;
+      return sectionOf(p);
+    };
+    pages.push('map');
+    nav.push(`            option ${quote(map.title ?? 'Map')} value="map"`);
+    view.push(`      if page == "map"`, `        Page(title=${quote(map.title ?? 'Map')}, note=${quote(map.note ?? '')})`);
+    map.groups.forEach((g, gi) => {
+      view.push(`          MapGroup(title=${quote(g.title)}, note=${quote(g.note ?? '')})`);
+      (g.items ?? []).forEach((it, ii) => {
+        const tone = ['todo', 'done', 'moving', 'held'].includes(it.tone) ? it.tone : 'todo';
+        let way = 'none';
+        let open = 'noop';
+        let href = '';
+        let label = '';
+        if (it.page && here.has(it.page)) {
+          way = 'page';
+          open = `show(${quote(it.page)})`;
+          label = it.wayLabel ?? 'Open';
+        } else if (it.page) {
+          const sec = homeOf(it.page);
+          const url = sec && map.links?.[sec];
+          if (url) {
+            way = 'link';
+            href = url;
+            label = `${it.wayLabel ?? 'Open'} (${sec === 'main' ? 'design system' : sec} playground: ${human(it.page.replace(/^[a-z]+-/, ''))})`;
+          }
+        }
+        view.push(`            MapItem(title=${quote(it.title)}, status=${quote(it.status ?? '')}, tone="${tone}", detail=${quote(it.detail ?? '')}, way="${way}", wayLabel=${quote(label)}, open=${open}, href=${quote(href)}, testId=${quote(`map-${gi + 1}-${ii + 1}`)})`);
+      });
+    });
+  }
 
   // Theme: every colour token on one line, light and dark.
   pages.push('theme');
@@ -296,6 +383,22 @@ export function generate(designDir, playDir) {
     for (const scheme of ['light', 'dark']) {
       view.push(`                TokenSwatch(scheme="${scheme}", testId=${quote(`theme-${name}-${scheme}`)})`, `                  Swatch(token=${quote(name)}, label="")`);
     }
+
+  }
+  // The Brand layer (tools/brand.mjs): each registered asset (or, before the first registration, the draft's), drawn
+  // by its own component's example, light and dark; the look check compares these cells with the references.
+  brandFile = [join(designDir, 'brand.json'), join(designDir, 'brand.draft.json')].find((f) => existsSync(f));
+  brandSet = brandFile ? JSON.parse(readFileSync(brandFile, 'utf8')) : null;
+  if (brandSet?.assets?.length && !opts.section) {
+    pages.push('brand');
+    nav.push(`            option "Brand" value="brand"`);
+    view.push(`      if page == "brand"`, `        Page(title="Brand", note=${quote(brandFile.endsWith('draft.json') ? `${brandSet.owner?.name ?? ''}: pending registration by the Distiller` : `${brandSet.owner?.name ?? ''}: registered (${brandSet.owner?.proof?.mode ?? ''} record ${brandSet.owner?.proof?.record ?? ''})`)})`);
+    for (const a of brandSet.assets) {
+      view.push(`          MatrixRow(label=${quote(a.id)}, testId=${quote(`brand-${a.id}`)})`);
+      for (const scheme of ['light', 'dark']) {
+        view.push(`            if find == "" or ${quote(`brand-${a.id}-${scheme}`)}.includes(find)`, `              MatrixCell(scheme="${scheme}", testId=${quote(`brand-${a.id}-${scheme}`)})`, `                ${a.example}`);
+      }
+    }
   }
 
   let total = 0;
@@ -304,8 +407,9 @@ export function generate(designDir, playDir) {
     if (!list.length) continue;
 
     for (const p of list) {
+      if (!inPage(p)) continue;
       const key = `${layer}-${p.name}`;
-      const cs = layer === 'screens' ? screenCells(p) : cells(p, marks(p));
+      const cs = layer === 'screens' ? screenCells(p, marks(p)) : cells(p, marks(p));
       total += cs.length;
       pages.push(key);
       nav.push(`            option ${quote(human(p.name))} value=${quote(key)}`);
@@ -324,25 +428,104 @@ export function generate(designDir, playDir) {
     }
   }
 
-  const argActions = [...ctx.needs].filter((n) => n.startsWith('action:')).sort().flatMap((n) => [`  action ${n.slice(7)}(v)`, '    find = find']);
+  // Arrange (agent-ui-kit ARRANGE): start from one of the screens package's layouts (a layout file's piece with a
+  // slot), fill its region from the components and blocks, reorder (drag, or Up and Down), pick each piece's state
+  // (its matrix cells), and see it drawn. The page's line (layout|Piece:cell,…) is what `play.mjs promote` turns into
+  // a new Block or Screen in the design repo. Arrangement is made here, never in an app.
+  const arrangedView = [];
+  const arrangedPer = [];
+  const layouts = all.filter((p) => p.layer === 'screens' && p.slot && /layouts\.contract$/.test(p.at.split(':')[0]));
+  const palette = all.filter((p) => ['components', 'blocks', 'wip'].includes(p.layer)).sort((a, b) => a.name.localeCompare(b.name));
+  const arrangeCells = new Map(palette.map((p) => [p.name, cells(p, marks(p)).map((c) => [cellName(p, c), c])]));
+  if (layouts.length && palette.length && !opts.section) {
+    pages.push('arrange');
+    nav.push(`            option "Arrange" value="arrange"`);
+    view.push(`      if page == "arrange"`, `        Page(title="Arrange", note="Start from a layout, fill it, reorder it, pick each piece's state. The line below is what play.mjs promote saves as a Block or Screen.")`);
+    view.push(`          NavField(label="Layout")`, `            select value=arrLayout change=arrPickLayout aria-label="Layout" testId="arrange-layout"`);
+    for (const l of layouts) view.push(`              option ${quote(human(l.name))} value=${quote(l.name)}`);
+    view.push(`          NavField(label="Add a piece")`, `            select value="" change=arrAdd aria-label="Add a piece" testId="arrange-add"`, `              option "Choose a piece" value="" disabled=true`);
+    for (const p of palette) view.push(`              option ${quote(`${human(p.name)} (${p.layer})`)} value=${quote(p.name)}`);
+    view.push(`          list id="arrange-items" appearance="none" virtualized=true reorderdrop=arrReorder max-height="frame.row-max" testId="arrange-items"`, `            for it in arrItems key=it.key`, `              column gap="frame.small" padding="frame.small" testId=\`arrange-\${it.key}\``, `                text it.piece font="frame.type-item" color="frame.ink"`, `                row gap="frame.small" flex-wrap="wrap" align-items="center"`);
+    for (const p of palette) {
+      view.push(`                  if it.piece == ${quote(p.name)}`, `                    select value=it.cell change=arrCell(it.key) aria-label="State" testId=\`arrange-\${it.key}-state\``);
+      for (const [n] of arrangeCells.get(p.name)) view.push(`                      option ${quote(n)} value=${quote(n)}`);
+    }
+    view.push(
+      `                  button press=arrUp(it.key) aria-label="Up" testId=\`arrange-\${it.key}-up\``, `                    text "Up"`,
+      `                  button press=arrDown(it.key) aria-label="Down" testId=\`arrange-\${it.key}-down\``, `                    text "Down"`,
+      `                  button press=arrRemove(it.key) aria-label="Remove" testId=\`arrange-\${it.key}-remove\``, `                    text "Remove"`,
+    );
+    view.push(`          text arrLine font="frame.type-small" color="frame.ink" overflow-wrap="anywhere" testId="arrange-line"`);
+    for (const l of layouts) {
+      const lc = screenCells(l, [])[0];
+      const [call] = placement(l, lc, 'arrange-preview-layout', ctx, '              ');
+      view.push(`          if arrLayout == ${quote(l.name)}`, `            ScreenCell(scheme=(scheme == "dark" ? "dark" : "light"), testId="arrange-preview")`, call, `                ArrangedPieces(items=arrItems, ARRANGED_NOOPS)`);
+    }
+    // Each piece in each of its states, drawn once: a small component per piece chooses the state (Arranged<Piece>),
+    // ArrangedPieces chooses the piece; one long chain was too slow for the checker.
+    for (const p of palette) {
+      const body = [];
+      // The resting state is drawn; the chosen state is recorded for promote and named beside the piece (drawing
+      // every state of every piece here doubled the playground's build).
+      const [, rest] = arrangeCells.get(p.name)[0];
+      body.push(...placement(p, rest, 'arrange-piece', ctx, '      '));
+      arrangedPer.push({ name: `Arranged${p.name}`, piece: p.name, body });
+    }
+  }
+
+  const argActions = [...ctx.needs].filter((n) => n.startsWith('action:')).sort().flatMap((n) => {
+    const [, name, arity] = n.split(':');
+    return [`  action ${name}(${Array.from({ length: Number(arity) || 1 }, (_, i) => `v${i}`).join(', ')})`, '    find = find'];
+  });
+  const allNoops = ['noop', ...[...ctx.needs].filter((n) => n.startsWith('action:')).map((n) => n.split(':')[1])];
+  const usesNoop = (lines, n) => lines.some((v) => v.includes(`=${n},`) || v.includes(`=${n})`));
+  for (const a of arrangedPer) a.noops = allNoops.filter((n) => usesNoop(a.body, n));
+  // Sample data stays in App (a resource under a for over data would be asked per row): it is passed down as props.
+  const resourceTypes = new Map([...ctx.needs].filter((n) => !n.startsWith('action:')).map((n) => {
+    const [shape, data, one] = n.split(':');
+    return one ? [`o_${shape}_${data}`, shape] : [`s_${shape}_${data}`, `${shape}[]`];
+  }));
+  for (const a of arrangedPer) a.res = [...resourceTypes.keys()].filter((r) => usesNoop(a.body, r));
+  const arrangedRes = [...new Set(arrangedPer.flatMap((a) => a.res))];
+  const arrangedNoops = allNoops.filter((n) => arrangedPer.some((a) => a.noops.includes(n)));
+  for (const a of arrangedPer) arrangedView.push(`        if it.piece == ${quote(a.piece)}`, `          ${a.name}(cell=it.cell${[...a.noops, ...a.res].map((n) => `, ${n}=${n}`).join('')})`);
   const resources = [...ctx.needs].filter((n) => !n.startsWith('action:')).sort().map((n) => {
     const [shape, data, one] = n.split(':');
     return one
       ? `  resource o_${shape}_${data} = one${shape}(${quote(data)}) as shape ${shape}`
       : `  resource s_${shape}_${data} = rows${shape}(${quote(data)}) as shape ${shape}[]`;
   });
+  for (let k = 0; k < view.length; k++) if (view[k].includes('ARRANGED_NOOPS')) view[k] = view[k].replace('ARRANGED_NOOPS', [...arrangedNoops, ...arrangedRes].map((n) => `${n}=${n}`).join(', '));
   const presetNames = Object.keys(presets);
+  const overlay = ctx.props?.overlay?.piece && ctx.props?.overlay?.package && !opts.section ? ctx.props.overlay : null;
   const app = [
     HEADER,
     `// ${all.length} pieces, ${total} cells, each light and dark. Pages: ${pages.length}.`,
-    `use Shell, NavList, Page, MatrixRow, MatrixCell, ScreenCell, ModeChoice, TokenRow, TokenSwatch, TokenGrid, NavField from "${packageOf(join(designDir, 'frame')).name}"`,
+    `use Shell, NavList, Page, MatrixRow, MatrixCell, ScreenCell, ModeChoice, TokenRow, TokenSwatch, TokenGrid, NavField${pages.includes("map") ? ", MapGroup, MapItem" : ""} from "${packageOf(join(designDir, 'frame')).name}"`,
     ...uses,
+    // samples.json "overlay": {"piece", "package"}: one piece of the playground's own (an agent dock, say) placed once
+    // over every page, as an app places it; it holds its own state.
+    ...(overlay ? [`use ${overlay.piece} from ${quote(overlay.package)}`] : []),
+    ...(brandSet?.assets?.length ? Object.entries(Object.groupBy(brandSet.assets, (a) => a.package)).map(([pkg, list]) => `use ${[...new Set(list.map((a) => a.component))].join(', ')} from ${quote(pkg)}`) : []),
     '',
+    ...(pages.includes('arrange') ? [
+      '// One piece on the Arrange page: its key, the piece and the cell (state) it shows.',
+      'shape ArrangeItem', '  key: string', '  piece: string', '  cell: string', '',
+      '// Moves the item with this key before the item with key `before` ("" moves it to the end).',
+      'fn arrMove(items: ArrangeItem[], key: string, before: string): ArrangeItem[] = arrPlace(items.filter(i => i.key != key), items.filter(i => i.key == key), before == "" ? items.filter(i => i.key != key).length : items.filter(i => i.key != key).map(i => i.key).indexOf(before))',
+      'fn arrPlace(rest: ArrangeItem[], moved: ArrangeItem[], at: number): ArrangeItem[] = rest.slice(0, at).concat(moved).concat(rest.slice(at))', '',
+    ] : []),
     'component App',
-    '  state page = "theme"',
+    `  state page = ${quote(pages[0] ?? 'theme')}`,
     `  state preset = ${quote(presetNames[0] ?? 'theme')}`,
     '  state scheme = "system"',
     '  state find = ""',
+    ...(pages.includes('arrange') ? [
+      `  state arrLayout = ${quote(layouts[0].name)}`, '  state arrItems: ArrangeItem[] = []', '  state arrSeq = 0',
+      '  derive arrLine = `${arrLayout}|${arrItems.map(i => `${i.piece}:${i.cell}`).join(",")}`',
+      '  tool readArrangement reads "The arrangement on the playground\'s Arrange page, as layout|Piece:cell,…: what play.mjs promote saves as a Block or Screen." = readArrangement',
+      '    returns arrLine',
+    ] : []),
     ...resources,
     '  action show(p: string)',
     '    page = p',
@@ -350,6 +533,20 @@ export function generate(designDir, playDir) {
     ...argActions,
     '  action setFind(v: string)',
     '    find = v',
+    ...(pages.includes('arrange') ? [
+      '  action readArrangement',
+      '  action arrPickLayout(v: string)', '    arrLayout = v',
+      '  action arrAdd(v: string)', '    arrSeq = arrSeq + 1',
+      ...['    if v == ""', '      arrSeq = arrSeq'],
+      ...palette.map((p) => `    if v == ${quote(p.name)}\n      arrItems = arrItems.concat([ArrangeItem(key=\`i\${arrSeq}\`, piece=v, cell=${quote(arrangeCells.get(p.name)[0][0])})])`).flatMap((x) => x.split('\n')),
+      '  action arrCell(key: string, v: string)', '    arrItems = arrItems.map(i => i.key == key ? ArrangeItem(key=i.key, piece=i.piece, cell=v) : i)',
+      '  action arrRemove(key: string)', '    arrItems = arrItems.filter(i => i.key != key)',
+      '  action arrReorder(key: string, before: option<string>)', '    arrItems = arrMove(arrItems, key, match before { case some(b) => b, case none => "" })',
+      '  action arrUp(key: string)', '    let at = arrItems.map(i => i.key).indexOf(key)',
+      '    if at > 0', '      arrItems = arrMove(arrItems, key, arrItems.map(i => i.key).slice(at - 1, at).join(""))',
+      '  action arrDown(key: string)', '    let at = arrItems.map(i => i.key).indexOf(key)',
+      '    if at >= 0 and at < arrItems.length - 1', '      arrItems = arrMove(arrItems, key, arrItems.map(i => i.key).slice(at + 2, at + 3).join(""))',
+    ] : []),
     ...(presetNames.length > 1 ? ['  action pickPreset(p: string)', '    preset = p', '    setMode("preset", p)'] : []),
     ...Object.entries(theme.options ?? {}).flatMap(([group, choices]) => {
       const v = slug(group).replace(/-/g, '_');
@@ -377,6 +574,33 @@ export function generate(designDir, playDir) {
     `        NavField(label="Look")`,
     `          ModeChoice(scheme=(scheme == "light" ? "light" : scheme == "dark" ? "dark" : "system"), lightLabel="Light", darkLabel="Dark", systemLabel="Auto", groupLabel="Look", light=light, dark=dark, system=system)`,
     ...view,
+    // Not on the Brand page: there each registered asset is compared with its reference, with nothing over it.
+    ...(overlay ? [`      if page != "brand"`, `        ${overlay.piece}()`] : []),
+    ...(arrangedView.length ? [
+      '',
+      '// The arranged pieces, each in its chosen state (the Arrange page), drawn once for every layout.',
+      'component ArrangedPieces',
+      '  props',
+      '    items: ArrangeItem[]',
+      // App's no-ops come in as action props: a child's own untyped no-op could not be inferred.
+      ...arrangedNoops.map((n) => `    ${n}: action`),
+      ...arrangedRes.map((r) => `    ${r}: ${resourceTypes.get(r)}`),
+      '  view',
+      '    column gap="frame.gap" testId="arranged-pieces"',
+      '      for it in items key=it.key',
+      ...arrangedView,
+      ...arrangedPer.flatMap((a) => [
+        '',
+        `component ${a.name}`,
+        '  props',
+        '    cell: string',
+        ...a.noops.map((n) => `    ${n}: action`),
+        ...a.res.map((r) => `    ${r}: ${resourceTypes.get(r)}`),
+        '  view',
+        '    column',
+        ...a.body,
+      ]),
+    ] : []),
     '',
   ].join('\n');
   const firstColour = Object.keys(theme.color)[0];
@@ -385,14 +609,18 @@ export function generate(designDir, playDir) {
     '',
     'test "the theme page shows a token in light and dark"',
     '  clock data',
+    '  type "page" "theme"',
+    '  clock data',
     `  expect tree has "theme-${firstColour}-light"`,
     `  expect tree has "theme-${firstColour}-dark"`,
     '',
     'test "every page opens"',
     '  clock data',
-    ...pages.filter((p) => p !== 'theme').flatMap((p) => [`  type "page" ${quote(p)}`, '  clock data', `  expect state page == ${quote(p)}`]),
+    ...pages.filter((p) => p !== pages[0]).flatMap((p) => [`  type "page" ${quote(p)}`, '  clock data', `  expect state page == ${quote(p)}`]),
     '',
     'test "find shows one state"',
+    '  clock data',
+    '  type "page" "theme"',
     '  clock data',
     `  type "find" ${quote(`theme-${Object.keys(theme.color).at(-1)}`)}`,
     '  clock settle',
@@ -402,18 +630,20 @@ export function generate(designDir, playDir) {
     ...Object.entries(theme.options ?? {}).flatMap(([group, choices]) => Object.keys(choices).length < 2 ? [] : ['', `test ${quote(`the ${group.toLowerCase()} choice changes it everywhere`)}`, '  clock data', `  type ${quote(`option-${slug(group)}`)} ${quote(slug(Object.keys(choices)[1]))}`, '  clock settle', `  expect state opt_${slug(group).replace(/-/g, '_')} == ${quote(slug(Object.keys(choices)[1]))}`]),
     '',
   ].join('\n');
-  const own = Object.fromEntries(Object.entries(existsSync(join(playDir, 'samples.json')) ? JSON.parse(readFileSync(join(playDir, 'samples.json'), 'utf8')) : {}).filter(([, v]) => Array.isArray(v)));
+  const own = Object.fromEntries(Object.entries(existsSync(sampleFile) ? JSON.parse(readFileSync(sampleFile, 'utf8')) : {}).filter(([, v]) => Array.isArray(v)));
   return { app, tests, ts: samples(shapes, own), forma: presetForma(theme, presets), pieces: all.length, cells: total, pages: pages.length };
 }
 
 // A screen's cells: each value of its data axis (screens take real-looking data from samples).
-function screenCells(p) {
+function screenCells(p, marked = []) {
   const { axes, variants } = states(p);
   const data = axes.find((a) => a.prop === 'data');
   const base = Object.fromEntries([...axes, ...variants].map((a) => [a.prop, a.values[0]]));
   const out = data ? data.values.map((v) => ({ ...base, data: v })) : [base];
   // Each other value of a screen's own enums and bools (a button's status, a scheme), alone.
   for (const a of [...axes.filter((x) => x.prop !== 'data'), ...variants]) for (const v of a.values.slice(1)) out.push({ ...base, [a.prop]: v });
+  // And each combination the designer marks in the package's states.json (a screen's states often go together).
+  for (const m of marked) out.push({ ...base, ...m });
   return out;
 }
 
@@ -489,13 +719,35 @@ export function presetForma(theme, presets) {
   return `${lines.join('\n')}\n`;
 }
 
+// A package's .forma names each length once. Pieces built apart each add their own lengths to the one file, and a
+// second `blocks.glyph` at another value silently wins over the first. Say which name, where, and which pieces use it.
+function formaDuplicates(dirs) {
+  const out = [];
+  for (const d of dirs) {
+    for (const f of readdirSync(d).filter((x) => x.endsWith('.forma'))) {
+      const lines = readFileSync(join(d, f), 'utf8').split('\n');
+      const seen = new Map();
+      lines.forEach((l, i) => {
+        const m = /^\s+([a-z][\w-]*\.[\w-]+)\s*:/.exec(l);
+        if (m) seen.set(m[1], [...(seen.get(m[1]) ?? []), i + 1]);
+      });
+      for (const [name, at] of seen) {
+        if (at.length < 2) continue;
+        const users = readdirSync(d).filter((x) => x.endsWith('.contract') && readFileSync(join(d, x), 'utf8').includes(`"${name}"`));
+        out.push(`${f}: ${name} is declared ${at.length} times (lines ${at.join(', ')}); used by ${users.join(', ') || 'no piece'}: give each piece its own name (${name.split('.')[0]}.<piece>-…)`);
+      }
+    }
+  }
+  return out;
+}
+
 function main(argv) {
-  const [verb, a, b] = argv;
+  const [verb, a, b, ...rest] = argv;
   if (verb === 'check' || verb === 'list') {
     const dirs = ['components', 'blocks', 'screens'].map((l) => join(resolve(a), l)).filter((d) => existsSync(join(d, 'package.json')));
     if (b && existsSync(join(b, 'package.json'))) dirs.push(resolve(b));
     const all = dirs.flatMap((d) => pieces(d));
-    const bad = problems(all);
+    const bad = [...problems(all), ...formaDuplicates(dirs)];
     if (verb === 'list') for (const p of all.filter((x) => MATRIXED.includes(x.layer))) console.log(`${p.name}: ${cells(p).map((c) => cellName(p, c)).join(' | ')}`);
     if (bad.length) {
       console.error(`${RULE}: ${bad.length} problem${bad.length === 1 ? '' : 's'}.`);
@@ -507,7 +759,9 @@ function main(argv) {
     return 0;
   }
   if (verb === 'gen' && a && b) {
-    const out = generate(resolve(a), resolve(b));
+    const flag = (k) => (rest.includes(k) ? resolve(rest[rest.indexOf(k) + 1]) : undefined);
+    const section = rest.includes('--section') ? rest[rest.indexOf('--section') + 1] : undefined;
+    const out = generate(resolve(a), resolve(b), { section, samples: flag('--samples'), wip: flag('--wip'), map: flag('--map') });
     if (out.bad) {
       console.error(`${RULE}: ${out.bad.length} problem${out.bad.length === 1 ? '' : 's'}.`);
       for (const x of out.bad) console.error(`  ${x}`);

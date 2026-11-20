@@ -38,7 +38,7 @@ authentication provider decide that ([proposed is not a security boundary](docs/
 
 ## Run it
 
-You need a checkout of Exact at commit `51002ee77` (the version this repository is tested against),
+You need a checkout of Exact at commit `7307c932b` (the version this repository is tested against),
 Bun 1.4.2 and the Rust toolchain on `PATH`, and Xcode for macOS and the iOS Simulator. Point the apps at
 your Exact checkout with `EXACT`. Each app's `exact.mjs`, `AGENTS.md` and `CLAUDE.md` were written by
 Exact's `exact new`, and the Exact path they name is a default that `EXACT` replaces:

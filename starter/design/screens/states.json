@@ -1,0 +1,8 @@
+{
+  "ListDetail": [
+    { "pane": "detail", "agent": "proposed" },
+    { "pane": "detail", "agent": "changed" },
+    { "pane": "detail", "data": "loading" },
+    { "pane": "detail", "data": "long" }
+  ]
+}

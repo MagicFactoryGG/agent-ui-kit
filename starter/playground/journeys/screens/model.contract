@@ -1,0 +1,113 @@
+// The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
+// app's view, never in a design package.
+use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
+use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, ShellRow from "__SCOPE__/screens"
+use Fact, Message, Step, NavEntry from "__SCOPE__/blocks"
+
+fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
+// The newest change on any of the keys, said in one sentence; "" when there is none.
+fn latestAbout(l: Ledger, keys: string[]): string = l.changes.filter(c => keys.includes(c.key)).slice(0, 1).map(c => c.sentence).join("")
+
+// MediaViewer: an album of four pictures (each a small drawn placeholder, data only).
+fn picture(fill: string): string = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Crect width='3' height='2' fill='${fill}'/%3E%3C/svg%3E`
+fn album(): Media[] = [
+  Media(key="harbour", src=picture("steelblue"), caption="Harbour lights at dusk"),
+  Media(key="tram", src=picture("goldenrod"), caption="Tram 28 on the hill"),
+  Media(key="tiles", src=picture("teal"), caption="Blue tiles on a doorway"),
+  Media(key="river", src=picture("slategray"), caption="The river at noon")
+]
+fn albumKeys(): string[] = album().map(m => m.key)
+fn captionOf(key: string): string = album().filter(m => m.key == key).map(m => m.caption).join("")
+// The key `by` steps from `key`, held at the album's ends.
+fn stepAt(key: string, by: number): number = max(0, min(albumKeys().length - 1, albumKeys().indexOf(key) + by))
+fn stepKey(key: string, by: number): string = albumKeys().slice(stepAt(key, by), stepAt(key, by) + 1).join("")
+fn pictureAct(key: string): Act = Act(tool="showPicture", door="agent", key="picture", title="Picture", value=key, did=`Your assistant showed ${captionOf(key)}.`, asks=`Your assistant suggests showing ${captionOf(key)}.`, will=`Your assistant will show ${captionOf(key)} in 5 seconds.`)
+
+// MailScreen: a small inbox. Each message's flag is a value in the ledger (`flag-<key>`, on or off); the open
+// message is m2 (which message is open is the person's view, not a value).
+fn mailBase(): Message[] = [
+  Message(key="m1", from="Priya Nair", subject="Design review notes", snippet="Three small changes before we cut the release.", when="09:41", unread=true, flagged=false, href="/"),
+  Message(key="m2", from="Jonas Weber", subject="Q3 report is ready to file", snippet="The numbers are reconciled and wait on your sign-off.", when="08:15", unread=false, flagged=false, href="/"),
+  Message(key="m3", from="Maya Okafor", subject="Lunch on Thursday?", snippet="A new place two streets down, with a table for eight.", when="Wed 14:05", unread=true, flagged=false, href="/"),
+  Message(key="m4", from="Sam Delacroix", subject="Fwd: the venue contract", snippet="Flagging this one before the deposit is due.", when="Mon 16:20", unread=false, flagged=false, href="/")
+]
+fn mailKeys(): string[] = mailBase().map(m => m.key)
+fn flagKey(key: string): string = `flag-${key}`
+fn flagKeys(): string[] = mailKeys().map(k => flagKey(k))
+fn mailSubject(key: string): string = mailBase().filter(m => m.key == key).map(m => m.subject).join("")
+fn mailFolders(): MailFolder[] = [
+  MailFolder(key="inbox", label="Inbox", href="/", group="", count=2),
+  MailFolder(key="flagged", label="Flagged", href="/", group="", count=0),
+  MailFolder(key="sent", label="Sent", href="/", group="", count=0),
+  MailFolder(key="receipts", label="Receipts", href="/", group="Folders", count=0)
+]
+fn mailLetter(): MailLetter = MailLetter(key="m2", from="Jonas Weber", address="jonas.weber@studio.example", to="Ada Lovelace", when="Today, 08:15", subject="Q3 report is ready to file", body="Hi Ada,\nThe numbers are reconciled and the summary page waits on your sign-off before Friday.\nJonas")
+fn flagAct(key: string, on: bool): Act = Act(tool="flagMessage", door="agent", key=flagKey(key), title="Flag", value=(on ? "on" : "off"), did=`Your assistant ${on ? "flagged" : "unflagged"} ${mailSubject(key)}.`, asks=`Your assistant suggests ${on ? "flagging" : "unflagging"} ${mailSubject(key)}.`, will=`Your assistant will ${on ? "flag" : "unflag"} ${mailSubject(key)} in 5 seconds.`)
+
+// ListDetail: three projects; the one open is a value in the ledger, by key. Each project's facts are data only.
+fn projects(): ListDetailItem[] = [
+  ListDetailItem(key="atlas", title="Atlas rebrand", detail="Identity, signage and the new site", status="In review", href=""),
+  ListDetailItem(key="harbour", title="Harbour cafés spring campaign", detail="Posters, ferry film and a printed map", status="In progress", href=""),
+  ListDetailItem(key="north", title="North Line timetable", detail="Print and screen editions", status="Scheduled", href="")
+]
+fn projectKeys(): string[] = projects().map(p => p.key)
+fn projectTitle(key: string): string = projects().filter(p => p.key == key).map(p => p.title).join("")
+fn projectFacts(key: string): Fact[] = key == "atlas" ? [Fact(key="owner", label="Owner", value="Maya Okafor"), Fact(key="launch", label="Launch", value="April 2")] : key == "north" ? [Fact(key="owner", label="Owner", value="Jonas Weber"), Fact(key="launch", label="Launch", value="May 18")] : [Fact(key="owner", label="Owner", value="Priya Nair"), Fact(key="launch", label="Launch", value="March 7")]
+fn projectAct(key: string): Act = Act(tool="openProject", door="agent", key="project", title="Project", value=key, did=`Your assistant opened ${projectTitle(key)}.`, asks=`Your assistant suggests opening ${projectTitle(key)}.`, will=`Your assistant will open ${projectTitle(key)} in 5 seconds.`)
+
+// OnboardingScreen: a three-step workspace setup. The step the person is on is a value in the ledger
+// (`setup-step`, by key), and so is each answer (`setup-<key>`), so the person's typing and the agent's fillAnswer
+// write the same value; an answer the agent wrote stays marked on its field until the person types over it.
+fn setupSteps(): Step[] = [
+  Step(key="workspace", title="Name your workspace", state="next"),
+  Step(key="team", title="Size your team", state="next"),
+  Step(key="invite", title="Invite people", state="next")
+]
+fn setupStepKeys(): string[] = setupSteps().map(s => s.key)
+fn setupStepsAt(at: string): Step[] = setupSteps().map((s, i) => Step(s, state=(i < setupStepKeys().indexOf(at) ? "done" : i == setupStepKeys().indexOf(at) ? "current" : "next")))
+// The step key `by` steps from `at`, held at the setup's ends.
+fn setupStepAt(at: string, by: number): number = max(0, min(setupStepKeys().length - 1, setupStepKeys().indexOf(at) + by))
+fn setupStepFrom(at: string, by: number): string = setupStepKeys().slice(setupStepAt(at, by), setupStepAt(at, by) + 1).join("")
+// Each step's answers, empty: the ledger holds their values.
+fn setupAnswers(): OnboardingAnswer[] = [
+  OnboardingAnswer(key="workspace", label="Workspace name", hint="People see this when you invite them.", value="", placeholder="Your team or company", error="", byAgent=false),
+  OnboardingAnswer(key="role", label="Your role", hint="It sets the layout you start with.", value="", placeholder="What you do", error="", byAgent=false),
+  OnboardingAnswer(key="size", label="Team size", hint="A rough number is fine.", value="", placeholder="For example, 12", error="", byAgent=false),
+  OnboardingAnswer(key="invite", label="Invite by email", hint="Separate addresses with commas.", value="", placeholder="name@example.com", error="", byAgent=false)
+]
+fn setupAnswerKeys(): string[] = setupAnswers().map(a => a.key)
+fn setupStepOf(answer: string): string = answer == "workspace" or answer == "role" ? "workspace" : answer == "size" ? "team" : "invite"
+fn setupKey(answer: string): string = `setup-${answer}`
+fn setupKeys(): string[] = setupAnswerKeys().map(k => setupKey(k))
+fn setupLabel(answer: string): string = setupAnswers().filter(a => a.key == answer).map(a => a.label).join("")
+fn answerAct(answer: string, value: string): Act = Act(tool="fillAnswer", door="agent", key=setupKey(answer), title=setupLabel(answer), value=value, did=`Your assistant filled in ${setupLabel(answer)}: ${value}.`, asks=`Your assistant suggests ${value} for ${setupLabel(answer)}.`, will=`Your assistant will fill in ${setupLabel(answer)} in 5 seconds.`)
+// AppShell: a console's projects under its search. The search's words are a value in the ledger, so the field,
+// the rows it keeps and the agent's mark all read it; the phone's menu is the person's view, not a value.
+fn shellPages(): ShellRow[] = [
+  ShellRow(key="aurora", title="Aurora desk lamp", detail="Production · due Dec 4 · Maya Okafor", href="/"),
+  ShellRow(key="spring", title="Spring launch: retail", detail="Planning · 12 tasks open · Jonas Weber", href="/"),
+  ShellRow(key="audit", title="2024 audit archive", detail="Review · waiting on finance · Priya Nair", href="/"),
+  ShellRow(key="harbour", title="Harbour signage", detail="Paused since March · Sam Rivera", href="/")
+]
+// The rows a search keeps: those whose title or detail hold its words, in any case.
+fn shellFound(query: string): ShellRow[] = shellPages().filter(r => `${r.title} ${r.detail}`.toLowerCase().includes(query.trim().toLowerCase()))
+fn shellEntries(): NavEntry[] = [
+  NavEntry(key="projects", label="Projects", href="/", group="Workspace", badge=4, current=true),
+  NavEntry(key="reports", label="Reports", href="/reports", group="Workspace", badge=0, current=false),
+  NavEntry(key="team", label="Team", href="/team", group="People", badge=0, current=false)
+]
+fn shellSearchAct(text: string): Act = Act(tool="searchProjects", door="agent", key="shell-search", title="Search", value=text, did=(text.trim() == "" ? "Your assistant cleared the search." : `Your assistant searched the projects for “${text.trim()}”.`), asks=`Your assistant suggests searching the projects for “${text.trim()}”.`, will=`Your assistant will search the projects for “${text.trim()}” in 5 seconds.`)
+
+// The app's one tool list: each tool's floor (a change only this person sees is recorded).
+fn agentTools(): AgentTool[] = [
+  AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="openProject", title="Project", sentence="Opens a project beside the list.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="flagMessage", title="Flags", sentence="Flags or unflags a message.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="fillAnswer", title="Setup", sentence="Fills in an answer of the workspace setup.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="searchProjects", title="Search", sentence="Searches the projects.", floor="recorded", reach="self", secret=false)
+]
+
+fn startValues(): Value[] = [
+  Value(key="picture", value="harbour"),
+  Value(key="project", value="harbour")
+].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")])

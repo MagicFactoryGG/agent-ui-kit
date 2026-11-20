@@ -1,0 +1,22 @@
+{
+  "DetailPanel": [
+    {
+      "data": "loading",
+      "interaction": "disabled"
+    },
+    {
+      "data": "failed",
+      "interaction": "disabled"
+    }
+  ],
+  "StatePanel": [
+    {
+      "data": "failed",
+      "size": "compact"
+    },
+    {
+      "data": "loading",
+      "size": "compact"
+    }
+  ]
+}

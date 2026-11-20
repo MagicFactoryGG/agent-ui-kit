@@ -1,0 +1,117 @@
+// One block for a whole area's empty, loading and failed states: a calm centred panel, its card, shape and type
+// all Theme tokens (no image file). Every state's drawn shape is one disc — the grammar the failed alert already
+// had: a fill disc under the empty tray, a fill disc under the loading arc in the accent, the one active colour,
+// a critical disc for the alert form — so the three read as one family, and each state holds one filled focal:
+// empty's action, loading's arc, the failed alert itself (disc, card line and the retry's critical ring together).
+// The panel's words all sit on one measure, blocks.measure, centred — title, state line, agent note, and the
+// bones below — so every element shares one column, and a message wraps at the same width the skeleton stands in
+// for. Each element holds one job, said once: the disc is the data state's own glyph; the bones are the content
+// the line stands for; the mark is who acted. The title is the area's own name, the same size, place and ink in
+// every state — the one thing on the panel that is not loading (the data is pending; the name is known), so the
+// panel reads as the same panel loading, not a skeleton of a card, and role=status speaks the name in every
+// state. The state line is body
+// size in the muted ink in every state that shows one, empty and failed alike — the panel's state hue is said
+// enough times already (the disc, the card's line, the retry's ring), so the copy itself carries no colour;
+// Section's own error ink belongs to a row that has no other signal. role=alert speaks the failed line. Loading
+// stands the content in three
+// bones in the state line's own place — the line's own gap above them, sm between them so a bone and its gap are
+// one body line's own box — all one width on the one measure, symmetric with the panel's axis, so the skeleton is anchored where its sentence would sit; the action's own
+// footprint is held below it, one bone in the action's own height and corner, a placeholder not a promise
+// (nothing is pressable, the box is aria-hidden), so the card does not reflow when the state turns. The card is
+// Section's own card — surface ground, the theme's 1px line, the card's corner; the failed card wears the state's
+// own line in the critical hue, Proposal's own convention for a stateful card. The one action is the way in every
+// state that shows it, wearing its state: empty's own way on, `actionLabel`, the primary fill; failed's own way
+// back, `retryLabel`, the plain fill with the outcome's own ring in the critical hue — ActionButton's own
+// affordance for an act's outcome, the recovery control the error card calls for, distinct from the resting way
+// on (a red fill would say a destructive act; retry is not one). `agent` "changed" marks a load an agent
+// started — its tool calls the same action the button does, one ledger, two doors — and `agentNote` is
+// the mark's one sentence, drawn after the words it marks, LinkRow and ValueRow's own order for an agent's
+// note, in a band of its own: a status badge, not the group's last line, held at the action's own gap above
+// and below (the resting state's cluster break, 24 at full, 12 at compact), so its air is symmetric and it
+// never crowds the words above it or the action below. The mark itself: the accent ink and a small
+// accent disc on a low wash of the accent itself — a blue-tinted pill on the light card, a blue-dark one on the
+// dark, the Notice's own way with an area's sentence and this panel's own disc grammar in miniature — the wash
+// is the pill's own separation in both schemes and the dot is the mark's edge, riding the sentence's own
+// baseline so it reads as written with its words, no border to read as a control — a mark a person notices,
+// never mistaken for the action or for a link. `size` "full" claims the width it is given up to
+// blocks.panel-max — the area's own surface at a phone, a capped card on a wide window — and the words sit on
+// blocks.measure, a generous column that leaves the card breathing room at both sides; "compact" insets to a
+// narrower card for a side panel or a card's body. The three bones are one small local component: markup drawn
+// twice or more is drawn once.
+// While an agent handles the area (agent "changed") the action stays available, for a person is never locked out
+// by an agent, and steps back to the plain style, so the agent's line is the focal point.
+use Words, ActionButton from "__SCOPE__/components"
+
+// One skeleton line of the loading state: a bar of the fill colour at `share` of the measure.
+component Bone
+  props
+    share: string
+  view
+    box height="blocks.bone" width=share background-color="theme.color.fill" border-radius="theme.radius.pill"
+
+// The agent's mark: a small accent disc and one sentence at body size on a low wash of the accent, the Notice's
+// own way with an area's words — a status badge a person notices (the kit's first question), never mistaken for
+// the action or for a link. The wash is a drawn box behind the words, the kit's own way out of a theme with no
+// wash token: the accent at low opacity, a light tint like the kit's change mark (never a grey block), so the pill's ground reads
+// against the card in dark as clearly as in light — with no border (a border read as the chip's control). The dot
+// rides the sentence's own baseline
+// (align-items="baseline"), so its centre sits at the letters' cap-height centre, not the line box's — the mark
+// reads as written with its words. The band it sits in (the air above and below it) is the placer's, not the
+// pill's: StatePanel holds it at the action's own gap.
+component Mark
+  props
+    note: string
+    testId: string
+  view
+    row testId=testId position="relative" align-items="baseline" gap="theme.space.xs" border-radius="theme.radius.pill" padding-left="theme.space.sm" padding-right="theme.space.sm" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
+      box aria-hidden=true position="absolute" inset=0 background-color="theme.color.accent" opacity=0.08 border-radius="theme.radius.pill"
+      svg viewBox="0 0 8 8" width="blocks.note-dot" height="blocks.note-dot" aria-hidden=true flex-shrink=0 position="relative"
+        circle cx=4 cy=4 r=4 fill="theme.color.accent"
+      text note position="relative" font="theme.type.body" color="theme.color.accent"
+
+component StatePanel
+  props
+    title: string
+    message: string
+    failedText: string
+    agentNote: string
+    actionLabel: string
+    retryLabel: string
+    data: enum<"empty", "loading", "failed">
+    agent: enum<"none", "changed">
+    size: enum<"full", "compact">
+    press: action
+    testId: string
+  view
+    column testId=testId role=(data == "failed" ? "alert" : data == "loading" ? "status" : "none") width="100%" max-width=(size == "full" ? "blocks.panel-max" : "blocks.panel-compact") margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(size == "full" ? "theme.space.xxl" : "theme.space.lg") align-items="center" text-align="center" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(data == "failed" ? "theme.color.critical" : "theme.color.line")
+      svg viewBox="0 0 24 24" width=(size == "full" ? "blocks.shape-full" : "blocks.shape-compact") height=(size == "full" ? "blocks.shape-full" : "blocks.shape-compact") aria-hidden=true flex-shrink=0 margin-bottom=(size == "full" ? "theme.space.lg" : "theme.space.md")
+        if data == "failed"
+          circle cx=12 cy=12 r=11 fill="theme.color.critical"
+          line x1=12 y1=6.75 x2=12 y2=13 stroke="theme.color.critical-ink" stroke-width=2 stroke-linecap="round"
+          circle cx=12 cy=16.75 r=1.3 fill="theme.color.critical-ink"
+        else if data == "loading"
+          circle cx=12 cy=12 r=11 fill="theme.color.fill"
+          circle cx=12 cy=12 r=8 fill="none" stroke="theme.color.accent" stroke-width=2.5 stroke-linecap="round" stroke-dasharray="38 12" transform="rotate(-90 12 12)"
+        else
+          circle cx=12 cy=12 r=11 fill="theme.color.fill"
+          rect x=7.5 y=7.5 width=9 height=9 rx=2.1 fill="none" stroke="theme.color.ink-muted" stroke-width=1.5
+          path d="M7.5 12.6h2.55l1.05 1.65h1.8L13.95 12.6h2.55" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+      column width="100%" max-width="blocks.measure" align-items="center" gap="theme.space.sm"
+        Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+        if data != "loading" and (data == "failed" ? failedText : message) != ""
+          column width="100%" align-items="center" margin-top="theme.space.sm"
+            Words(text=(data == "failed" ? failedText : message), kind="body", outcome="cancelled", level=0, testId=`${testId}-message`)
+        if data == "loading"
+          column testId=`${testId}-loading` width="100%" align-items="center" gap="theme.space.sm" margin-top="theme.space.sm"
+            Bone(share="100%")
+            Bone(share="100%")
+            Bone(share="100%")
+      if agent == "changed"
+        column margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md") align-items="center" testId=`${testId}-agent-band`
+          Mark(note=agentNote, testId=`${testId}-agent`)
+      if data == "loading"
+        column width="100%" max-width="blocks.measure" margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md") align-items="center" testId=`${testId}-held`
+          box aria-hidden=true height="blocks.action-min" width="blocks.bone-action" background-color="theme.color.fill" border-radius="theme.radius.control"
+      if data != "loading" and (data == "failed" ? retryLabel : actionLabel) != ""
+        column margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md")
+          ActionButton(label=(data == "failed" ? retryLabel : actionLabel), kind=(data == "failed" or agent == "changed" ? "plain" : "primary"), interaction="idle", outcome=(data == "failed" ? "error" : "none"), press=press, testId=`${testId}-action`)

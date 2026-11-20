@@ -1,0 +1,318 @@
+// SideNav: an app's side navigation, drawn as its own panel. Width, with no breakpoint (Exact has no media
+// query): the panel and an empty, zero-tall spacer share a wrapping row — the panel's basis blocks.nav-min, the
+// spacer's blocks.nav-page-min (the least room a page beside the rail needs) and a thousandfold grow. Where both
+// fit (a desktop, a tablet) the spacer takes the rest and the panel stands as a rail of its basis; where they do
+// not (a phone, or a shell's own sidebar column) the spacer wraps away and the panel fills the whole width, a
+// full-width list; narrower than its basis it shrinks (min-width 0) and the rows' own truncation holds.
+//
+// Height: the panel is exactly as tall as what it holds — the brand, the app's slot, the places, the
+// account, one stack, no reserved room. A shell that gives the panel a definite height is met half way: the
+// places' own column grows (flex=1, its own scroll room) and the account pins to the pane's bottom, the way a
+// real sidebar's account sits; alone in a window the same column closes to its content and the account sits
+// right under whatever the panel holds, its hairline closing the panel. The places area once
+// reserved a fixed floor (the resting sample's own height, measured) to hold every state's geometry constant;
+// three look rounds killed it — the floor was tuned to one sample and left its own slack everywhere else (87px
+// of dead air inside the resting panel, ~600px above the account in empty and failed, both dinged as dead space
+// *inside* the nav), while the space below a short panel is the preview's, not the block's (the look's own rule:
+// "the empty space below it is the preview, not the block; do not judge it"). The envelope is what it holds;
+// the states are honest about being shorter than a full menu, and the panel closes with a full hairline frame,
+// so it reads as one finished panel and never as a surface cut off against the page — the frame also carries the
+// theme-safe rule (a theme may give page and surface one colour, so a panel never relies on its fill alone to
+// show its edges).
+//
+// One gutter holds everything: the panel pads by theme.space.sm and every word inside pads its start by
+// theme.space.md, so the brand's mark, a group's heading, each place's label, a state's words and the account
+// all start on one edge; the state cards' corners sit on that same edge (their columns pad the same md), so a
+// state never reads as a different component from the list that surrounds it, while a row's fill (the current
+// place's, a hover's) spans the panel's own content width — the content grid. The hairlines
+// that close the brand and sit above the account stay on that grid too: full-bleed ones were asked for ("keep
+// the header divider full-bleed inside the panel") and tried twice — a negative token margin is refused as a
+// literal (`lower-library-literal`), and calc(0px - theme.space.sm), which the compiler admits (probed), is
+// read by the layout check as the hairline running 8px past its parent's side: an overflow finding on every
+// state. The panel's own frame does the full-bleed work; the bands close on the content grid, and this note
+// keeps the next reader from trying a third route into the padding. Grouping is by space — a heading, then its
+// rows, theme.space.xs between every one of them; the air between groups, theme.space.lg, the only larger gap —
+// not by frames; the line token draws the panel's own frame and those two hairlines, and nothing else.
+//
+// - The header is its own band, closed by a hairline: the product's mark and name (each optional by being
+//   empty, the name the panel's largest words), and under them, on its own line, the slot (the app's
+//   control: a search field, a workspace picker), the way the kit's TopBar holds its slot in its banner. The
+//   slot's column takes the header's own gutters (theme.space.md each side) and grows to whatever height the
+//   app's content needs: no fixed height, no scroll, no clip, no frame or ground of its own — the field draws
+//   its own frame. (Rounds 21-31 drew a framed bay of a fixed height under the hairline; the coordinator's r2
+//   look found it cut the long state's slot mid-sentence. r32 unframed it but left it under the hairline,
+//   where, bare, the app's words floated between the brand's line and the first group's heading and read as
+//   a stray label; inside the band they belong to the header, and the places start clean under the line.)
+// - The places: NavEntry rows grouped by `group` in first-seen order ("" no heading); a group's own name is its
+//   heading, an eyebrow — the caption type, muted, uppercase with a little letter-spacing, on a row the height
+//   of every section label (theme.space.xl, so the sections read as names of rooms, not as rows, and the ghost
+//   that stands in for a heading while the menu loads takes exactly its row). The current place is the panel's
+//   one filled thing, and selection is one device in the accent's ink: a flush hair at the row's start (drawn
+//   over the fill and clipped by the row's corner, so the label keeps the gutter every other word starts on),
+//   the label's heavier type, the fill, aria-current="page" — the agent's mark stays its own drawing, a rounded
+//   edge set in from the row, with its note. A badge counts, one treatment in both schemes and on every row
+//   (the current one too): an outline chip, a hairline in theme.color.ink-muted and the count itself in
+//   theme.color.ink — a count is worth reading at a glance, so its number is not dimmed (a look round read
+//   the muted count as "disabled/outline chips"; the hairline is what survives every ground: light #63636b
+//   on white ~5.9:1, dark #a1a1aa on surface ~7:1, and both hold on the current row's fill, where a filled
+//   pill vanished in dark); but it is metadata, so it never competes with the accent — ink, not the accent's
+//   blue; a row with no count keeps the count's room, so every label holds its line on the same edge, and a
+//   truncating label always keeps the row's own theme.space.lg and a label's sm before the chip (measured
+//   24px now at rest and in the long cell: three look rounds claimed a collision at 16; the row's gap held
+//   at every width, and the extra sm makes the guarantee visible to the eye as well as the ruler).
+// - An agent that added or reordered an entry (agent "changed"): the entry `agentKey` names gets an accent edge
+//   at its start and `agentNote`'s words under its label (the kit's LinkRow language).
+// - The states' words speak where the rows speak — no heading of their own, so a state never reads as a copy
+//   change — and each state stands in the list's own geometry: the brand, the slot, the room, the account,
+//   in one stack, the card at the first section label's own place (one round asked for it at the rows'
+//   y, a section-label's room lower; the 48px void that left read as "two boxes feel unrelated and leaves
+//   the sidebar looking broken" — the label's place is where the states have read best, and this note
+//   holds it there). The state cards sit on the rows' own width — the same span a row's fill takes — with
+//   their words on the label gutter, so a state reads as the list's own content (an inset card had read
+//   as "a different component family"), and the failed message keeps its whole one-line width
+//   beside the mark. A card keeps the panel's own breath below it (an extra theme.space.lg) so its frame
+//   never doubles up against the account's hairline: two same-width rules a bare rhythm apart read as one
+//   mistaken line (a look round read them as "the two rules double up").
+// - Loading says its line once — muted words on the rows' own gutter, at a row's own height
+//   (blocks.nav-row-min, so the line before the ghosts keeps the list's rhythm; a look round read a
+//   caption-height line "floating between the slot card and skeletons without a defined row rhythm"),
+//   the small drawn cue anchored at the row's far end, on the edge the badges hold (role=status) — above
+//   the shape coming: three sections as the resting list has, each a short bar for the group's own label on a section-label row (a thin, three-quarters-tall
+//   chip, plain as an eyebrow, not a second word bar), then word-wide label bars for its rows, and where the
+//   row will carry a count, the badge's own ghost — a filled capsule the badge's own size, at the badge's own
+//   place — mirroring the resting sample, badge for badge, on the rows' own pitch (blocks.nav-row-min and the
+//   xs gap, the resting rhythm exactly), so what arrives does not jump and the ghosts read as labels coming,
+//   not as rules across the rail. The cue has tried both nearer seats and lost each: before the words it
+//   pushed them off the gutter (measured 24px deep; "a different indent than the rows"), hugging their end it
+//   read as "floating mid-gap" in the empty row — the far end is the row's own anchor, where every badge
+//   sits. The badge ghost has also tried both skins: a filled pill read as "orphan pills", an outline chip
+//   as "toggle switches"; the mirror of the resting badge — filled, its size, its place — is the one that
+//   keeps the load map 1:1, and this note holds it there. The line the loading state speaks sits at the
+//   heading's own register — the caption type, the muted ink (a look round read a body-size line at the
+//   first label's place as a "false label" doubled against the cue; the words are meta and now say so),
+//   and one cue carries the motion.
+// - Failed speaks the kit's outcome language, theme-safe: the words and the drawn mark in the error's ink on
+//   the surface token (status words never sit on a tinted fill — another party's theme may not hold 4.5:1
+//   there), side by side on one row — the mark at the message's start, the way the kit's own rows carry
+//   their marks, so the card reads as one alert line and never as a ragged row with a lone glyph above its
+//   words (a look round read the mark above as "a ragged extra row"; the older widow it was raised for does
+//   not return: the resting message holds one line beside the mark, measured) — and the card's frame in
+//   the line token, so the voice (the mark, the words) and the frame never read as one red weight (a look
+//   round read a critical hairline around critical words as one hue shouting twice). `retryLabel`'s button
+//   sits below the message, drawn plain with the error's own ring (the kit's ActionButton carries an
+//   outcome's colour on a plain button's border) and stretched to the card's own width — the card holds one
+//   thing to do and its way on fills the card's content, standing as composed rather than tucked into a
+//   corner of trailing space (a look round read a content-sized button there as accidental) — one hue for
+//   the whole card, no blue competing with the error's voice, and the primary fill stays reserved for
+//   forward acts (four rounds have circled this button — one dinged a plain retry as "lacking
+//   prominence", the next dinged a primary one for "the same visual weight as the empty state's" way on,
+//   the ring held since, and the fourth has asked for "a quieter secondary-outline retry" again; the
+//   error's ring is prominent and of the error, and this note holds it there). Empty is its neutral twin:
+//   the line's own hair, muted words, and
+//   `emptyLabel`'s button drawn primary at the card's width when the app gives one — there the way on is
+//   forward, and it is the state's one filled thing. Both state actions share one pattern, full-width at
+//   the card's content — the panel's own band language, every row a full span — because the pair of cards
+//   is what the eye compares (a look round read the mismatched widths — a full 'Try again' beside a tucked
+//   'Add a place' — as "state actions don't share a pattern"; another had read the full blue CTA as heavy;
+//   one filled focal per state holds either way, and the shared band is the pattern this note holds). (A
+//   look round asked for an outline CTA in empty, to keep the filled blue "reserved for selection"; the
+//   states never share a screen, and an empty menu's way on is the one thing to do — the kit's EntryChoice
+//   draws the recommended way filled, and empty follows it.)
+// - The landmark's name, `navLabel`, is what a reader hears; the words a person sees above the rows are the
+//   data's own group names.
+// - Long: everything the panel draws holds one line with an ellipsis, and every line that can be cut carries
+//   the whole of itself as its `title` (the kit's affordance for a cut line — a reader hovers the row, the
+//   name, a group's label or the account's byline and the full words appear); the account's name and role
+//   both cut at the same right edge — one column bounds both, no second max-width (a look round read two
+//   lines cut at different x as "uneven character counts… looks broken"; the shared edge is the honest cut);
+//   the slot's content is the app's: it wraps whole at its own height, and a package cannot clamp what it
+//   does not draw.
+//
+// States:
+//   data   many|empty|loading|failed|long|one
+//   agent  none|changed
+use Words, ActionButton from "__SCOPE__/components"
+
+// One place in the navigation: `group` names the section it sits in ("" for none), `badge` counts what it holds
+// (0 hides the chip), `current` marks the place the person is on.
+shape NavEntry
+  key: string
+  label: string
+  href: string
+  group: string
+  badge: number
+  current: bool
+
+// A group's heading, at the rows' own inset: the places' sections, and the only section words the panel shows.
+// An eyebrow — the caption type, muted, uppercase with a breath of letter-spacing — on a row the height of
+// every section label, with its own breath below (theme.space.sm, mirrored by the ghost that stands in while
+// the menu loads, so what arrives does not jump): a look round read the label-to-row pitch as tighter than
+// the rows' own and the groups as "continuous lists"; the breath belongs to the label, the rhythm to the rows.
+component NavHeading
+  props
+    text: string
+    testId: string
+  view
+    row min-height="theme.space.xl" padding-bottom="theme.space.sm" align-items="center" padding-left="theme.space.md" padding-right="theme.space.md"
+      text text title=text testId=testId font="theme.type.caption" color="theme.color.ink-muted" text-transform="uppercase" letter-spacing="0.08em" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+
+// One place: its label on one line (an ellipsis then a whole gap before its count; a row with no count keeps
+// the count's room, so every label in the panel holds its line on the same edge), the current place's fill
+// and weight, an agent's edge and note. The label's `title` carries the whole of it for a line the panel cuts.
+// One edge per row: where an agent acted on the current place, the edge is the agent's (rounded, set in from
+// top and bottom) and the selection keeps its fill, accent ink, weight and aria-current — drawn together, the
+// flush hair swallowed the agent's edge and the change went unseen (the "one, changed" cell, by eye).
+// The gap before a count is the row's own theme.space.lg plus a label's sm: look rounds have read the
+// ellipsis as touching the chip three times; measured, 16px held at every width — the extra sm makes the
+// guarantee visible to the eye as well as to the ruler.
+component NavItem
+  props
+    label: string
+    href: string
+    badge: number
+    current: bool
+    marked: bool
+    note: string
+    testId: string
+  view
+    link href=href testId=testId aria-current=(current ? "page" : "false") position="relative" display="flex" flex-direction="row" align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" overflow="hidden" border-radius="theme.radius.control" color="theme.color.ink" text-decoration-line="none" background-color=(current ? "theme.color.fill" : "transparent")
+      :hover
+        background-color="theme.color.hover"
+      :active
+        background-color="theme.color.fill"
+      :focus-visible
+        box-shadow="inset 0 0 0 2px theme.color.focus"
+      if current and marked == false
+        box position="absolute" left=0 top=0 bottom=0 width="blocks.nav-mark-line" background-color="theme.color.accent" aria-hidden=true
+      if marked
+        box position="absolute" left=0 top="theme.space.sm" bottom="theme.space.sm" width="blocks.nav-mark-line" background-color="theme.color.accent" border-radius="theme.radius.pill" aria-hidden=true
+      column flex=1 min-width=0 padding-right=(badge > 0 ? "theme.space.sm" : "blocks.nav-count-space")
+        text label title=label font=(current ? "theme.type.label" : "theme.type.body") color=(current ? "theme.color.accent" : "theme.color.ink") white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+        if marked
+          text note title=note testId=`${testId}-mark` font="theme.type.caption" color="theme.color.accent" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+      if badge > 0
+        row testId=`${testId}-badge` flex-shrink=0 min-width="blocks.nav-badge-min" box-sizing="border-box" justify-content="center" align-items="center" padding-left="theme.space.sm" padding-right="theme.space.sm" border-width="theme.line.width" border-style="solid" border-color="theme.color.ink-muted" border-radius="theme.radius.pill"
+          text `${badge}` font="theme.type.caption" color="theme.color.ink" font-variant-numeric="tabular-nums" white-space="nowrap"
+
+// A group's own label, still coming: a short, thin chip at the heading's inset, on a row the height and
+// shape of a section label — three-quarters the height of a place's word bar and two-thirds its width,
+// so it reads as an eyebrow coming, never as a row — so the section that arrives takes the place its
+// ghost held, close to its rows the way a real heading sits.
+component NavHeadGhost
+  view
+    row min-height="theme.space.xl" padding-bottom="theme.space.sm" align-items="center" padding-left="theme.space.md" padding-right="theme.space.md" aria-hidden=true
+      box width="blocks.nav-ghost-head" height="theme.space.md" background-color="theme.color.ink-muted" opacity=0.5 border-radius="theme.radius.pill"
+
+// A place still coming: the row's own height and insets, a bar the width of a word where the label will be and,
+// where the row will carry a count, the badge's own ghost at the row's far end — a filled capsule the badge's
+// own size, at the badge's own place — so what arrives does not jump. The ghosts are the muted ink at
+// 50%, the kit's own dimmed value, not the fill token: the fill's dark value is invisible at these sizes
+// on a dark surface (four look rounds read the structure as "arbitrary widths", "random stubs", "omits
+// section headers", a map that did not mirror — they could not see it, at 0.3 and at 0.4 alike), and one
+// muted token at one opacity reads in both schemes; a ghost is exactly what the kit holds opacity for.
+component NavGhost
+  props
+    badge: bool
+  view
+    row align-items="center" gap="theme.space.lg" min-height="blocks.nav-row-min" box-sizing="border-box" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.xs" padding-bottom="theme.space.xs" aria-hidden=true
+      box width="blocks.nav-ghost-word" height="theme.space.lg" background-color="theme.color.ink-muted" opacity=0.5 border-radius="theme.radius.pill"
+      if badge
+        column flex=1
+        box width="blocks.nav-ghost-badge" height="theme.space.lg" flex-shrink=0 background-color="theme.color.ink-muted" opacity=0.5 border-radius="theme.radius.pill"
+
+component SideNav
+  props
+    productName: string
+    productMark: string
+    navLabel: string
+    entries: NavEntry[]
+    data: enum<"many", "empty", "loading", "failed", "long", "one">
+    emptyText: string
+    emptyLabel: string
+    empty: action
+    loadingText: string
+    failedText: string
+    retryLabel: string
+    retry: action
+    accountName: string
+    accountDetail: string
+    agent: enum<"none", "changed">
+    agentKey: string
+    agentNote: string
+    testId: string
+  slot
+  derive names = entries.map(e => e.group)
+  derive groups = names.filter((g, i) => names.indexOf(g) == i)
+  view
+    row flex-wrap="wrap" align-items="stretch"
+      column testId=testId role="navigation" aria-label=navLabel flex-grow=1 flex-shrink=1 flex-basis="blocks.nav-min" min-width=0 box-sizing="border-box" gap="theme.space.lg" padding="theme.space.sm" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+        column padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+          row align-items="center" gap="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.sm" padding-bottom="theme.space.sm"
+            if productMark != ""
+              column width="blocks.nav-mark" height="blocks.nav-mark" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.control" justify-content="center" overflow="hidden" aria-hidden=true
+                text productMark.trim().slice(0, 2) font="theme.type.heading" color="theme.color.ink" text-align="center" white-space="nowrap"
+            if productName != ""
+              text productName testId=`${testId}-name` title=productName flex=1 min-width=0 font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+          column min-width=0 padding-left="theme.space.md" padding-right="theme.space.md"
+            children
+        column flex=1 min-width=0 min-height=0 overflow="auto"
+          if data == "failed"
+            row role="alert" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.control" margin-bottom="theme.space.lg"
+                column flex=1 min-width=0 gap="theme.space.sm" padding="theme.space.md"
+                  row align-items="flex-start" gap="theme.space.sm"
+                    svg viewBox="0 0 24 24" width="blocks.nav-glyph" height="blocks.nav-glyph" fill="none" stroke="theme.color.critical-text" aria-hidden=true flex-shrink=0 margin-top="theme.space.xs"
+                      path d="M12 3.5 L21 19 h-18 z" stroke-width=1.75 stroke-linejoin="round"
+                      path d="M12 9.5 v4.5" stroke-width=1.75 stroke-linecap="round"
+                      path d="M12 16.6 v0.2" stroke-width=1.75 stroke-linecap="round"
+                    column flex=1 min-width=0
+                      Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
+                  ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
+          else if data == "loading"
+            column gap="theme.space.lg"
+              row role="status" align-items="center" gap="theme.space.sm" min-height="blocks.nav-row-min" padding-left="theme.space.md" padding-right="theme.space.md"
+                column min-width=0
+                  Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+                column flex=1
+                svg viewBox="0 0 24 24" width="blocks.nav-cue" height="blocks.nav-cue" fill="none" aria-hidden=true flex-shrink=0
+                  path d="M12 3.5 A8.5 8.5 0 1 1 3.5 12" stroke="theme.color.ink-muted" stroke-width=2.5 stroke-linecap="round"
+              column aria-hidden=true gap="theme.space.xs"
+                NavHeadGhost()
+                NavGhost(badge=false)
+                NavGhost(badge=true)
+                NavGhost(badge=false)
+                NavGhost(badge=false)
+              column aria-hidden=true gap="theme.space.xs"
+                NavHeadGhost()
+                NavGhost(badge=false)
+                NavGhost(badge=true)
+                NavGhost(badge=false)
+              column aria-hidden=true gap="theme.space.xs"
+                NavHeadGhost()
+                NavGhost(badge=true)
+                NavGhost(badge=false)
+                NavGhost(badge=false)
+          else if data == "empty"
+            row role="status" background-color="theme.color.surface" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-radius="theme.radius.control" margin-bottom="theme.space.lg"
+              column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
+                Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
+                if emptyLabel != ""
+                  ActionButton(label=emptyLabel, kind="primary", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
+          else
+            column gap="theme.space.lg"
+              for g in groups key=g
+                column gap="theme.space.xs"
+                  if g != ""
+                    NavHeading(text=g, testId=`${testId}-group-${g}`)
+                  column gap="theme.space.xs"
+                    for e in entries.filter(e => e.group == g) key=e.key
+                      NavItem(label=e.label, href=e.href, badge=e.badge, current=e.current, marked=(agent == "changed" and e.key == agentKey), note=agentNote, testId=`${testId}-entry-${e.key}`)
+        if accountName != ""
+          column min-height="0"
+            row testId=`${testId}-account` align-items="center" gap="theme.space.md" padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.xs" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+              column width="theme.space.xxl" height="theme.space.xxl" flex-shrink=0 background-color="theme.color.fill" border-radius="theme.radius.pill" align-items="center" justify-content="center" overflow="hidden" aria-hidden=true
+                text accountName.trim().slice(0, 1) font="theme.type.label" color="theme.color.ink"
+              column flex=1 min-width=0
+                text accountName title=accountName font="theme.type.label" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+                if accountDetail != ""
+                  text accountDetail title=accountDetail font="theme.type.caption" color="theme.color.ink-muted" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+      box flex-grow=1000 flex-shrink=1 flex-basis="blocks.nav-page-min" height=0 aria-hidden=true
