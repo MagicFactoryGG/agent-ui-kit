@@ -42,6 +42,20 @@
             "title": "Step"
           }
         }
+      },
+      "readMail": {
+        "title": "Read Mail"
+      },
+      "markMessage": {
+        "title": "Mark Message",
+        "parameters": {
+          "message": {
+            "title": "Message"
+          },
+          "read": {
+            "title": "Read"
+          }
+        }
       }
     }
   }

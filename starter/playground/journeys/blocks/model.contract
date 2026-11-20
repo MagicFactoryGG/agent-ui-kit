@@ -1,7 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
-use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf from "@agent-ui-kit/agent"
-use Fact, Event, Step from "__SCOPE__/blocks"
+use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf, isMarked from "@agent-ui-kit/agent"
+use Fact, Event, Step, Message from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -46,17 +46,36 @@ fn continueFrom(l: Ledger, step: string): Ledger = valueOf(l, "onboarding") == s
 // The newest change on a key, by id ("" when none): the note's Undo takes back that one.
 fn latestIdAbout(l: Ledger, key: string): string = l.changes.filter(c => c.key == key).slice(0, 1).map(c => c.id).join("")
 
+// MessageList: an inbox; each message's read state ("unread" or "read") is a value in the ledger, under
+// "mail-<key>". The chosen message is the reading pane's; its one button marks it read, or unread once read,
+// and the agent marks any message read or unread by its key, as a person triaging the inbox would.
+fn mailKeys(): string[] = ["review", "report", "lunch"]
+fn mailKey(key: string): string = `mail-${key}`
+fn mailFrom(key: string): string = key == "review" ? "Priya Nair" : key == "report" ? "Jonas Weber" : key == "lunch" ? "Maya Okafor" : ""
+fn mailSubject(key: string): string = key == "review" ? "Design review notes" : key == "report" ? "Q3 report is ready to file" : key == "lunch" ? "Lunch on Thursday?" : ""
+fn mailSnippet(key: string): string = key == "review" ? "Three small changes before we cut the release, all in the section you wrote last week." : key == "report" ? "The numbers are reconciled and the summary page waits on your sign-off before Friday." : key == "lunch" ? "There is a new place two streets down with a good menu and a table big enough for eight." : ""
+fn mailWhen(key: string): string = key == "review" ? "09:41" : key == "report" ? "08:15" : key == "lunch" ? "Wed 14:05" : ""
+fn readWord(read: bool): string = read ? "read" : "unread"
+fn mailMessages(l: Ledger): Message[] = mailKeys().map(k => Message(key=k, from=mailFrom(k), subject=mailSubject(k), snippet=mailSnippet(k), when=mailWhen(k), unread=(valueOf(l, mailKey(k)) == "unread"), flagged=false, href="/"))
+fn mailText(l: Ledger): string = mailKeys().map(k => `${k}\t${mailFrom(k)}\t${mailSubject(k)}\t${valueOf(l, mailKey(k))}`).join("\n")
+fn mailLedgerKeys(): string[] = mailKeys().map(k => mailKey(k))
+// The message the agent's mark is on, by key ("" when none): the person's own mark on it clears it.
+fn mailMarkedKey(l: Ledger): string = mailKeys().filter(k => isMarked(l, mailKey(k))).slice(0, 1).join("")
+fn readAct(key: string, read: bool): Act = Act(tool="markMessage", door="agent", key=mailKey(key), title=mailSubject(key), value=readWord(read), did=`Your assistant marked ${mailFrom(key)}'s message ${readWord(read)}.`, asks=`Your assistant suggests marking ${mailFrom(key)}'s message ${readWord(read)}.`, will=`Your assistant will mark ${mailFrom(key)}'s message ${readWord(read)} in 5 seconds.`)
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
   AgentTool(name="setIncidentStatus", title="Incident status", sentence="Marks the incident open or resolved.", floor="recorded", reach="self", secret=false),
   AgentTool(name="loadFiles", title="Your files", sentence="Loads the files area again.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="continueOnboarding", title="Workspace setup", sentence="Finishes the setup step the person is on and moves on to the next.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="continueOnboarding", title="Workspace setup", sentence="Finishes the setup step the person is on and moves on to the next.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="markMessage", title="Inbox", sentence="Marks a message in the inbox read or unread.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="digest", value="on"), Value(key="failures", value="on"), Value(key="marketing", value="off"),
   Value(key="incident", value="open"),
   Value(key="files", value="failed"),
-  Value(key="onboarding", value="profile")
+  Value(key="onboarding", value="profile"),
+  Value(key="mail-review", value="unread"), Value(key="mail-report", value="read"), Value(key="mail-lunch", value="unread")
 ]
