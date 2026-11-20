@@ -258,7 +258,7 @@
     "continueLabel": "Continue",
     "skipLabel": "Skip for now",
     "retryLabel": "Try again",
-    "errorText": "That didn't save. Check the answers marked below and try again.",
+    "errorText": "That didn't save. One answer needs a change before you continue.",
     "loadingText": "Loading your details…",
     "failedText": "Your details for this step could not be loaded. Try again, or skip it and come back later.",
     "listTitle": "Your setup",

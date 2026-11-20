@@ -67,7 +67,7 @@ component OnboardingStepRow
     word: string
   view
     row role="listitem" aria-label=`${step.title}, ${word}` testId=`onboarding-list-${step.key}` gap="theme.space.md" align-items="flex-start"
-      box width="screens.onboarding-glyph" height="screens.onboarding-glyph" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.pill" border-width=(step.state == "current" ? "screens.onboarding-ring" : "theme.line.width") border-style="solid" border-color=(step.state == "done" ? "theme.color.positive-text" : step.state == "current" ? "theme.color.accent" : "color-mix(in srgb, theme.color.ink-muted 45%, theme.color.page)") aria-hidden=true
+      box width="screens.onboarding-glyph" height="screens.onboarding-glyph" box-sizing="border-box" flex-shrink=0 display="flex" align-items="center" justify-content="center" border-radius="theme.radius.pill" border-width=(step.state == "current" ? "screens.onboarding-ring" : "theme.line.width") border-style="solid" border-color=(step.state == "done" ? "theme.color.positive-text" : step.state == "current" ? "theme.color.accent" : "color-mix(in srgb, theme.color.ink-muted 45%, theme.color.page)") aria-hidden=true
         if step.state == "done"
           svg viewBox="0 0 12 12" width="screens.onboarding-tick" height="screens.onboarding-tick" fill="none" stroke="theme.color.positive-text" aria-hidden=true
             path d="M2.5 6.5L5 9l4.5-5" stroke-width=2 stroke-linecap="round" stroke-linejoin="round"
@@ -128,7 +128,7 @@ component OnboardingScreen
       TopBar(title=productName, agentNote=waitingNote, agent=(agent == "waiting" ? "waiting" : "none"))
         ActionButton(label=exitLabel, kind="plain", interaction="idle", outcome="none", press=exit, testId="onboarding-exit")
       scroll id="onboarding-scroll" flex=1 min-height=0
-        column role="main" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.xxl" padding-bottom="theme.space.xxl"
+        column role="main" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.xl" padding-bottom="theme.space.xxl"
           row width="100%" max-width="screens.onboarding-max" margin-left="auto" margin-right="auto" flex-wrap="wrap" column-gap="theme.space.xxl" row-gap="theme.space.xl" justify-content="center" align-items="flex-start"
             column flex="1 1 screens.onboarding-main" min-width=0 max-width="screens.onboarding-main"
               OnboardingSteps(steps=steps, lead=lead, countLabel=countLabel, backLabel=backLabel, continueLabel=(data == "failed" ? retryLabel : continueLabel), skipLabel=skipLabel, errorText=errorText, emptyText="", completeText="", loadingText="", failedText="", retryLabel="", agentNote=proposedNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, data="many", interaction=(busy or data == "loading" ? "busy" : "idle"), outcome=(outcome == "error" and loaded ? "error" : "none"), agent=(agent == "proposed" and loaded ? "proposed" : "none"), testId="onboarding-steps", back=back, advance=wayOn, skip=skip, retry=retry, accept=accept, reject=reject)
