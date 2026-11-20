@@ -167,9 +167,11 @@ component SiteFooter
           // The columns (or the state that stands in their place), and the agent's band above them.
           column testId=`${testId}-nav` role="navigation" aria-label=navLabel flex=4 min-width="blocks.footer-col-min" box-sizing="border-box" gap="theme.space.xl"
             if agent == "proposed"
-              column testId=`${testId}-proposal` role="status" gap="theme.space.md" padding="theme.space.lg" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" background-color="theme.color.page"
-                text proposedNote testId=`${testId}-agent` overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
-                row flex-wrap="wrap" gap="theme.space.sm"
+              // One wrapping row: the answers end the sentence's line on a desktop and stand under it on a phone (the
+              // sentence's least width is a column's), so the band is as tall as what it says, never an empty box.
+              row testId=`${testId}-proposal` role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.md" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" background-color="theme.color.page"
+                text proposedNote testId=`${testId}-agent` flex=1 min-width="blocks.footer-col-min" overflow-wrap="break-word" text-wrap="balance" font="theme.type.body" color="theme.color.ink"
+                row min-width=0 max-width="100%" flex-wrap="wrap" gap="theme.space.sm"
                   ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
                   ActionButton(label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
             if agent == "changed"
