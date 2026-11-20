@@ -1,5 +1,6 @@
 {
-  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only; a prop for one data state as \"<prop>@<data>\" (\"interaction@failed\": \"disabled\").",
+  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only; a prop for one data state as \"<prop>@<data>\" (\"interaction@failed\": \"disabled\"). \"sections\": a second playground app per group (<playground>/<name>; bun play.mjs web <name>): every block, every screen. The main app draws the components, each layer's index.contract pieces and wip/. One app drawing every state of every piece outgrew the web bundle.",
+  "sections": { "blocks": { "layers": ["blocks"], "except": ["index.contract"] }, "screens": { "layers": ["screens"], "except": ["index.contract"] } },
   "props:DetailPanel": {
     "title": "Aurora Desk Lamp",
     "statusLabel": "In production",
