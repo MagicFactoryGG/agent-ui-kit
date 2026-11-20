@@ -3,7 +3,7 @@ forma screens
 
 theme
   screens.column-max: length = 720px
-  screens.media-max: length = 1040px
+  screens.media-max: length = 880px  // the stage then holds a 3:2 picture at its full height on a desktop
   screens.media-stage-max: length = 560px  // the stage's height on a desktop: the picture, its caption and the strip fit one window
   screens.media-caption-min: length = 240px  // under this the caption takes its own line and Previous and Next wrap under it
   screens.media-thumb: length = 64px
@@ -13,3 +13,5 @@ theme
   screens.media-note-max: length = 420px
   screens.media-bone-caption: length = 240px
   screens.media-bone-line: length = 12px
+  screens.media-action-min: length = 44px  // ActionButton's least height (components.row-min): the caption centres on Previous and Next
+  screens.media-wait-glyph: length = 48px
