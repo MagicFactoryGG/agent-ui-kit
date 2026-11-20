@@ -32,6 +32,37 @@
       "loadFiles": {
         "title": "Load Files"
       },
+      "readOnboarding": {
+        "title": "Read Onboarding"
+      },
+      "continueOnboarding": {
+        "title": "Continue Onboarding",
+        "parameters": {
+          "step": {
+            "title": "Step"
+          }
+        }
+      },
+      "readMail": {
+        "title": "Read Mail"
+      },
+      "markMessage": {
+        "title": "Mark Message",
+        "parameters": {
+          "message": {
+            "title": "Message"
+          },
+          "read": {
+            "title": "Read"
+          }
+        }
+      },
+      "readMenu": {
+        "title": "Read Menu"
+      },
+      "addHome": {
+        "title": "Add Home"
+      },
       "readQueue": {
         "title": "Read Queue"
       },
