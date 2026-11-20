@@ -4,5 +4,11 @@
     { "pane": "detail", "agent": "changed" },
     { "pane": "detail", "data": "loading" },
     { "pane": "detail", "data": "long" }
+  ],
+  "EntryScreen": [
+    { "step": "authenticate", "interaction": "busy" },
+    { "step": "authenticate", "outcome": "error" },
+    { "step": "authenticate", "outcome": "blocked" },
+    { "step": "authenticate", "agent": "waiting" }
   ]
 }

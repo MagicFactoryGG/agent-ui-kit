@@ -33,7 +33,7 @@ component EntryTick
       path d="M2.5 6.5L5 9l4.5-5" stroke-width=1.75 stroke-linecap="round" stroke-linejoin="round"
 
 // One part of the track: a bar (the accent once reached), then its number or a tick, and its name; the step the
-// person is on takes the label weight in ink, the others the caption in muted ink.
+// person is on in ink, the others in muted ink, all in one type style so the two parts keep one line.
 component EntryStepMark
   props
     name: string
@@ -47,8 +47,8 @@ component EntryStepMark
         if state == "done"
           EntryTick(size="small")
         else
-          text `${number}` font="theme.type.caption" color=(state == "current" ? "theme.color.accent" : "theme.color.ink-muted") font-variant-numeric="tabular-nums"
-        text name flex=1 min-width=0 font=(state == "current" ? "theme.type.label" : "theme.type.caption") color=(state == "current" ? "theme.color.ink" : "theme.color.ink-muted")
+          text `${number}` font="theme.type.label" color=(state == "current" ? "theme.color.accent" : "theme.color.ink-muted") font-variant-numeric="tabular-nums"
+        text name flex=1 min-width=0 font="theme.type.label" color=(state == "current" ? "theme.color.ink" : "theme.color.ink-muted")
 
 // The step's heading: its title in display type (the page's focal words) and one line under it.
 component EntryHeading
@@ -58,7 +58,7 @@ component EntryHeading
     testId: string
   view
     column gap="theme.space.sm"
-      text title testId=`${testId}-title` role="heading" aria-level=2 font="theme.type.display-compact" letter-spacing="theme.type.display-compact-tracking" color="theme.color.ink"
+      text title testId=`${testId}-title` role="heading" aria-level=2 padding-top="theme.space.xs" padding-bottom="theme.space.xs" text-wrap="balance" overflow-wrap="break-word" font="theme.type.display-compact" letter-spacing="theme.type.display-compact-tracking" color="theme.color.ink"
       if lead != ""
         text lead testId=`${testId}-lead` font="theme.type.body" color="theme.color.ink-muted"
 
@@ -132,12 +132,19 @@ component EntryScreen
                   children
               if step == "terms"
                 column gap="theme.space.md"
-                  row flex-wrap="wrap" gap="theme.space.md"
+                  // wrap-reverse: where the two do not fit one line (a phone), Accept takes the top line, nearest
+                  // the frame, and Decline goes under it.
+                  row flex-wrap="wrap-reverse" gap="theme.space.md"
                     if declineLabel != ""
                       column flex=1 min-width="screens.entry-action-min"
                         ActionButton(label=declineLabel, kind="plain", interaction=(busy ? "disabled" : "idle"), outcome="none", press=decline, testId="entry-decline")
                     column flex=1 min-width="screens.entry-action-min"
                       ActionButton(label=acceptLabel, kind="primary", interaction=(busy ? "busy" : "idle"), outcome=outcome, press=accept, testId="entry-accept")
                   if outcome != "none"
-                    column role="alert"
-                      Words(text=outcomeText, kind="body", outcome=outcome, level=0, testId="entry-terms-outcome")
+                    row role="alert" gap="theme.space.sm" align-items="flex-start"
+                      svg viewBox="0 0 16 16" width="screens.entry-glyph" height="screens.entry-glyph" margin-top="screens.entry-glyph-top" fill="none" stroke=(outcome == "error" ? "theme.color.critical" : "theme.color.caution") aria-hidden=true flex-shrink=0
+                        path d="M8 2.5L14.5 13.5H1.5Z" stroke-width=1.5 stroke-linejoin="round"
+                        path d="M8 6.5v3.2" stroke-width=1.5 stroke-linecap="round"
+                        path d="M8 11.4v0.01" stroke-width=1.5 stroke-linecap="round"
+                      column flex=1 min-width=0
+                        Words(text=outcomeText, kind="body", outcome=outcome, level=0, testId="entry-terms-outcome")
