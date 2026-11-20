@@ -15,3 +15,17 @@ theme
   screens.media-bone-line: length = 12px
   screens.media-action-min: length = 44px  // ActionButton's least height (components.row-min): the caption centres on Previous and Next
   screens.media-wait-glyph: length = 48px
+  screens.shell-rail: length = 272px  // the desktop's rail: the SideNav's places and counts at one line, the page keeps the rest
+  screens.shell-sheet: length = 304px  // the phone's sheet (never wider than the window less theme.space.xxl)
+  screens.shell-page-max: length = 880px  // the page's measure on a desktop: rows that stay readable, centred in the room the rail leaves
+  screens.shell-bar-min: length = 60px  // the bar's height: a 44px control and theme.space.sm above and below
+  screens.shell-search: length = 280px
+  screens.shell-tap: length = 44px  // the menu button: the least target a finger gets
+  screens.shell-glyph: length = 20px
+  screens.shell-band-min: length = 240px  // under this the band's answers wrap under its sentence
+  screens.shell-mark-line: length = 3px
+  screens.shell-row-min: length = 64px  // a LinkRow with its detail: its least height, held while the rows load
+  screens.shell-ghost-line: length = 10px
+  screens.shell-ghost-title: length = 220px
+  screens.shell-ghost-short: length = 160px
+  screens.shell-ghost-detail: length = 120px

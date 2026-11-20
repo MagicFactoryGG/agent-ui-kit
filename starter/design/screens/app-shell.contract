@@ -1,0 +1,188 @@
+// AppShell: the frame of an app. A desktop (a window at least fn shellWideFrom() wide) shows the kit's SideNav as
+// a rail of a fixed width (screens.shell-rail) down the window's start, beside a column with the bar (the page's
+// title, the search field, the page's one action) over the page, which scrolls on its own. A phone gives the
+// bar a menu button at its start instead and hides the rail; `menuOpen` (the app's, so an agent's tool and the
+// person's tap reach the same state) opens the SideNav as a sheet over the page, under the bar, with a scrim the
+// person taps to close it; the menu button turns into its close while the sheet is open.
+//
+// Width, by Exact's own answer: `responsive-columns` says "else read exactViewport's width". A wrapping row can
+// put the rail above the page on a phone, never hide it and give the bar a button it did not have before, so
+// the shell reads the viewport's width (a size fact, not the host: `lower-library-platform` names displayMode,
+// delivery and surface) and chooses its layout from it.
+//
+// The page: a heading row (the section's title, its count) over the kit's Section, its rows the kit's LinkRows,
+// then the slot (the rest of the page the app adds under the list). The bar is drawn here and not the kit's
+// TopBar: TopBar's slot sits after its title, and the phone's menu button leads the bar, at the edge the sheet
+// opens from.
+//
+// States:
+//   data   many|empty|loading|failed|long — for the page (the rail keeps its places while the page loads):
+//          empty says `emptyText` in the Section and offers the page's own action as its way on (the state's one
+//          fill: the bar's action steps back to plain); loading says `loadingText` (role status) over ghost
+//          rows the shape of the rows to come; failed says `failedText` in the error's ink on the surface
+//          (role alert) with `retryLabel`, the state's one fill; long is many with words that run long and wrap.
+//   agent  none|proposed|changed — an assistant's act on the page, through the other door: proposed waits in
+//          an accent-edged band over the list (one sentence, two answer words; Accept is the one fill);
+//          changed marks the row `agentKey` names (LinkRow's accent edge and `markNote`) and says
+//          `changedNote` in a band over the list with Undo.
+//   menuOpen  false|true — the phone's sheet (a desktop's rail is always there).
+use Swatch from "__SCOPE__/theme"
+use Words, ActionButton, LinkRow from "__SCOPE__/components"
+use Section, SideNav, NavEntry from "__SCOPE__/blocks"
+
+// One row of the page: its key, what it says, and where it opens (the app builds `href` from its routes).
+shape ShellRow
+  key: string
+  title: string
+  detail: string
+  href: string
+
+// The one viewport fact the shell reads.
+shape ShellViewport
+  width: number
+
+// The least window width that holds the rail beside a page (screens.shell-rail and a page of its least width).
+fn shellWideFrom(): number = 768
+
+// A band over the list that says what an assistant did or asks: its sentence, then its answers (the slot), which
+// wrap under the sentence when the sentence would fall under its least width. Proposed edges it in the accent;
+// changed draws the accent's line at its start, as a marked row does.
+component ShellBand
+  props
+    sentence: string
+    tone: enum<"proposed", "changed">
+    testId: string
+  slot
+  view
+    row testId=testId role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.md" padding="theme.space.lg" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(tone == "proposed" ? "theme.color.accent" : "theme.color.line") border-left-width=(tone == "changed" ? "screens.shell-mark-line" : "theme.line.width") border-left-color="theme.color.accent"
+      text sentence testId=`${testId}-sentence` flex=1 min-width="screens.shell-band-min" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+      row flex-wrap="wrap" gap="theme.space.sm" flex-shrink=0
+        children
+
+// A row still coming: the row's own height and insets, a word-wide bar for its title and a shorter one for its
+// detail, so what arrives does not jump.
+component ShellGhost
+  props
+    wide: bool
+  view
+    column gap="theme.space.sm" justify-content="center" min-height="screens.shell-row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" aria-hidden=true
+      box width=(wide ? "screens.shell-ghost-title" : "screens.shell-ghost-short") max-width="100%" height="screens.shell-ghost-line" background-color="theme.color.ink-muted" opacity=0.3 border-radius="theme.radius.pill"
+      box width="screens.shell-ghost-detail" max-width="100%" height="screens.shell-ghost-line" background-color="theme.color.ink-muted" opacity=0.18 border-radius="theme.radius.pill"
+
+// The menu button's two drawings: three lines while closed, a cross while open.
+component ShellMenuGlyph
+  props
+    open: bool
+  view
+    svg viewBox="0 0 20 20" width="screens.shell-glyph" height="screens.shell-glyph" fill="none" stroke="theme.color.ink" aria-hidden=true flex-shrink=0
+      if open
+        path d="M5 5l10 10M15 5L5 15" stroke-width=1.75 stroke-linecap="round"
+      else
+        path d="M3.5 6h13M3.5 10h13M3.5 14h13" stroke-width=1.75 stroke-linecap="round"
+
+component AppShell
+  props
+    title: string
+    searchLabel: string
+    searchText: string
+    actionLabel: string
+    menuLabel: string
+    closeLabel: string
+    productName: string
+    productMark: string
+    navLabel: string
+    entries: NavEntry[]
+    accountName: string
+    accountDetail: string
+    sectionTitle: string
+    countText: string
+    footer: string
+    rows: ShellRow[]
+    emptyText: string
+    loadingText: string
+    failedText: string
+    retryLabel: string
+    proposedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    changedNote: string
+    markNote: string
+    undoLabel: string
+    agentKey: string
+    menuOpen: bool
+    data: enum<"many", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed">
+    search: action
+    act: action
+    openMenu: action
+    closeMenu: action
+    retry: action
+    accept: action
+    reject: action
+    undo: action
+  slot
+  resource viewport = exactViewport() as shape ShellViewport
+  derive wide = viewport.width >= shellWideFrom()
+  derive sheet = menuOpen and not wide
+  derive shown = data == "many" or data == "long"
+  // One fill per state: the bar's action, unless the page's own way on (empty's, failed's Try again) or an
+  // assistant's Accept is the state's focal act.
+  derive barFocal = (data == "many" or data == "long" or data == "loading") and agent != "proposed"
+  view
+    row testId="app-shell" position="absolute" inset=0 display="flex" align-items="stretch" background-color="theme.color.page" color="theme.color.ink"
+      if wide
+        scroll id="app-shell-rail" width="screens.shell-rail" flex-shrink=0 min-height=0 background-color="theme.color.surface"
+          SideNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, data="many", emptyText="", emptyLabel="", empty=retry, loadingText="", failedText="", retryLabel="", retry=retry, accountName=accountName, accountDetail=accountDetail, agent="none", agentKey="", agentNote="", testId="app-shell-nav")
+      column flex=1 min-width=0 position="relative" display="flex" flex-direction="column"
+        row role="banner" align-items="center" gap="theme.space.md" min-height="screens.shell-bar-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" background-color="theme.color.page"
+          if not wide
+            if sheet
+              button press=closeMenu testId="app-shell-menu" aria-label=closeLabel aria-expanded=true flex-shrink=0 width="screens.shell-tap" height="screens.shell-tap" display="flex" align-items="center" justify-content="center" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" background-color="theme.color.fill"
+                ShellMenuGlyph(open=true)
+            else
+              button press=openMenu testId="app-shell-menu" aria-label=menuLabel aria-expanded=false flex-shrink=0 width="screens.shell-tap" height="screens.shell-tap" display="flex" align-items="center" justify-content="center" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" background-color="theme.color.surface"
+                :hover
+                  background-color="theme.color.hover"
+                :focus-visible
+                  box-shadow="0 0 0 2px theme.color.focus"
+                ShellMenuGlyph(open=false)
+          column flex=1 min-width=0
+            Words(text=title, kind="title", outcome="none", level=1, testId="app-shell-title")
+          if wide
+            input type="search" value=searchText input=search placeholder=searchLabel aria-label=searchLabel testId="app-shell-search" width="screens.shell-search" min-width=0 flex-shrink=1
+          ActionButton(label=actionLabel, kind=(barFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=act, testId="app-shell-action")
+        if not wide
+          row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
+            input type="search" value=searchText input=search placeholder=searchLabel aria-label=searchLabel testId="app-shell-search" flex=1 min-width=0
+        scroll id="app-shell-page" flex=1 min-height=0
+          column width="100%" max-width="screens.shell-page-max" box-sizing="border-box" padding=(wide ? "theme.space.xl" : "theme.space.lg") gap="theme.space.lg"
+            if agent == "proposed" and shown
+              ShellBand(sentence=proposedNote, tone="proposed", testId="app-shell-proposal")
+                ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="app-shell-no")
+                ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="app-shell-yes")
+            if agent == "changed" and shown
+              ShellBand(sentence=changedNote, tone="changed", testId="app-shell-changed")
+                ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="app-shell-undo")
+            column gap="theme.space.sm"
+              Section(title=sectionTitle, footer=(shown ? footer : ""), emptyText=emptyText, loadingText=loadingText, failedText=failedText, data=(data == "long" ? "many" : data), testId="app-shell-section")
+                if shown
+                  column role="list" aria-label=sectionTitle
+                    for r, i in rows key=r.key
+                      column role="listitem" border-top-width=(i > 0 ? "theme.line.width" : "0") border-top-style="solid" border-top-color="theme.color.line"
+                        LinkRow(href=r.href, title=r.title, detail=r.detail, agentNote=markNote, interaction="idle", agent=(agent == "changed" and r.key == agentKey ? "changed" : "none"), testId=`app-shell-row-${r.key}`)
+                else if data == "loading"
+                  column border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+                    ShellGhost(wide=true)
+                    ShellGhost(wide=false)
+                    ShellGhost(wide=true)
+                else if data == "empty"
+                  row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.lg"
+                    ActionButton(label=actionLabel, kind="primary", interaction="idle", outcome="none", press=act, testId="app-shell-empty-action")
+                else
+                  row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.lg"
+                    ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId="app-shell-retry")
+            children
+        if sheet
+          button press=closeMenu testId="app-shell-scrim" aria-label=closeLabel position="absolute" left=0 right=0 bottom=0 top="screens.shell-bar-min" border-width=0 background-color="color-mix(in srgb, theme.color.page 72%, transparent)"
+          scroll id="app-shell-sheet" position="absolute" left=0 bottom=0 top="screens.shell-bar-min" width="screens.shell-sheet" max-width="calc(100% - theme.space.xxl)" background-color="theme.color.surface"
+            SideNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, data="many", emptyText="", emptyLabel="", empty=retry, loadingText="", failedText="", retryLabel="", retry=retry, accountName=accountName, accountDetail=accountDetail, agent="none", agentKey="", agentNote="", testId="app-shell-nav")
