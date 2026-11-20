@@ -329,6 +329,49 @@ export function generate(designDir, playDir, opts = {}) {
     return JSON.parse(readFileSync(file, 'utf8'))[p.name] ?? [];
   };
 
+  // The map (opts.map, else <playground>/map.json, written by the playground before each build): the program's pieces
+  // in groups, each with its status and a way to its page: a page of this app, or (a piece another section draws)
+  // that section's address from the map's "links" ({"main": url, "<section>": url}). It is the home page.
+  const mapFile = opts.map ?? join(playDir, 'map.json');
+  const map = existsSync(mapFile) ? JSON.parse(readFileSync(mapFile, 'utf8')) : null;
+  if (map?.groups?.length) {
+    const here = new Set(['theme', ...([join(designDir, 'brand.json'), join(designDir, 'brand.draft.json')].some((f) => existsSync(f) && JSON.parse(readFileSync(f, 'utf8')).assets?.length) && !opts.section ? ['brand'] : []), ...(!opts.section ? ['arrange'] : [])]);
+    for (const p of all) if (inPage(p)) here.add(`${p.layer}-${p.name}`);
+    const homeOf = (key) => {
+      const p = all.find((x) => `${x.layer}-${x.name}` === key);
+      if (!p) return null;
+      const sec = Object.entries(sections).find(([, v]) => (v.files ?? []).includes(fileOf(p)))?.[0] ?? 'main';
+      return sec;
+    };
+    pages.push('map');
+    nav.push(`            option ${quote(map.title ?? 'Map')} value="map"`);
+    view.push(`      if page == "map"`, `        Page(title=${quote(map.title ?? 'Map')}, note=${quote(map.note ?? '')})`);
+    map.groups.forEach((g, gi) => {
+      view.push(`          MapGroup(title=${quote(g.title)}, note=${quote(g.note ?? '')})`);
+      (g.items ?? []).forEach((it, ii) => {
+        const tone = ['todo', 'done', 'moving', 'held'].includes(it.tone) ? it.tone : 'todo';
+        let way = 'none';
+        let open = 'noop';
+        let href = '';
+        let label = '';
+        if (it.page && here.has(it.page)) {
+          way = 'page';
+          open = `show(${quote(it.page)})`;
+          label = it.wayLabel ?? 'Open';
+        } else if (it.page) {
+          const sec = homeOf(it.page);
+          const url = sec && map.links?.[sec];
+          if (url) {
+            way = 'link';
+            href = url;
+            label = `${it.wayLabel ?? 'Open'} (${sec === 'main' ? 'design system' : sec} playground: ${human(it.page.replace(/^[a-z]+-/, ''))})`;
+          }
+        }
+        view.push(`            MapItem(title=${quote(it.title)}, status=${quote(it.status ?? '')}, tone="${tone}", detail=${quote(it.detail ?? '')}, way="${way}", wayLabel=${quote(label)}, open=${open}, href=${quote(href)}, testId=${quote(`map-${gi + 1}-${ii + 1}`)})`);
+      });
+    });
+  }
+
   // Theme: every colour token on one line, light and dark.
   pages.push('theme');
   nav.push(`            option ${quote(theme.name)} value="theme"`);
@@ -456,7 +499,7 @@ export function generate(designDir, playDir, opts = {}) {
   const app = [
     HEADER,
     `// ${all.length} pieces, ${total} cells, each light and dark. Pages: ${pages.length}.`,
-    `use Shell, NavList, Page, MatrixRow, MatrixCell, ScreenCell, ModeChoice, TokenRow, TokenSwatch, TokenGrid, NavField from "${packageOf(join(designDir, 'frame')).name}"`,
+    `use Shell, NavList, Page, MatrixRow, MatrixCell, ScreenCell, ModeChoice, TokenRow, TokenSwatch, TokenGrid, NavField${pages.includes("map") ? ", MapGroup, MapItem" : ""} from "${packageOf(join(designDir, 'frame')).name}"`,
     ...uses,
     // samples.json "overlay": {"piece", "package"}: one piece of the playground's own (an agent dock, say) placed once
     // over every page, as an app places it; it holds its own state.
@@ -471,7 +514,7 @@ export function generate(designDir, playDir, opts = {}) {
       'fn arrPlace(rest: ArrangeItem[], moved: ArrangeItem[], at: number): ArrangeItem[] = rest.slice(0, at).concat(moved).concat(rest.slice(at))', '',
     ] : []),
     'component App',
-    '  state page = "theme"',
+    `  state page = ${quote(pages[0] ?? 'theme')}`,
     `  state preset = ${quote(presetNames[0] ?? 'theme')}`,
     '  state scheme = "system"',
     '  state find = ""',
@@ -564,14 +607,18 @@ export function generate(designDir, playDir, opts = {}) {
     '',
     'test "the theme page shows a token in light and dark"',
     '  clock data',
+    '  type "page" "theme"',
+    '  clock data',
     `  expect tree has "theme-${firstColour}-light"`,
     `  expect tree has "theme-${firstColour}-dark"`,
     '',
     'test "every page opens"',
     '  clock data',
-    ...pages.filter((p) => p !== 'theme').flatMap((p) => [`  type "page" ${quote(p)}`, '  clock data', `  expect state page == ${quote(p)}`]),
+    ...pages.filter((p) => p !== pages[0]).flatMap((p) => [`  type "page" ${quote(p)}`, '  clock data', `  expect state page == ${quote(p)}`]),
     '',
     'test "find shows one state"',
+    '  clock data',
+    '  type "page" "theme"',
     '  clock data',
     `  type "find" ${quote(`theme-${Object.keys(theme.color).at(-1)}`)}`,
     '  clock settle',
@@ -712,7 +759,7 @@ function main(argv) {
   if (verb === 'gen' && a && b) {
     const flag = (k) => (rest.includes(k) ? resolve(rest[rest.indexOf(k) + 1]) : undefined);
     const section = rest.includes('--section') ? rest[rest.indexOf('--section') + 1] : undefined;
-    const out = generate(resolve(a), resolve(b), { section, samples: flag('--samples'), wip: flag('--wip') });
+    const out = generate(resolve(a), resolve(b), { section, samples: flag('--samples'), wip: flag('--wip'), map: flag('--map') });
     if (out.bad) {
       console.error(`${RULE}: ${out.bad.length} problem${out.bad.length === 1 ? '' : 's'}.`);
       for (const x of out.bad) console.error(`  ${x}`);
