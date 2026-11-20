@@ -221,5 +221,41 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "FeatureGrid: the empty features section: Add a feature and addFeature reach the same first feature; the agent's is recorded and ringed",
+    "person": [
+      "tap features-add"
+    ],
+    "agent": [
+      "call addFeature {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.10.key": "features",
+      "book.values.10.value": "sync",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "features",
+      "book.changes.0.was": "empty",
+      "book.marked": [
+        "features"
+      ],
+      "featuresMarked": true
+    },
+    "expectPerson": {
+      "book.values.10.value": "sync",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "featuresMarked": false
+    }
   }
 ]
