@@ -53,7 +53,7 @@ export function pieces(pkgDir) {
   const shapes = {};
   const out = [];
   for (const [file, text] of files) {
-    for (const m of text.matchAll(/^shape (\w+)\n((?: {2}\w+: .+\n?)+)/gm)) {
+    for (const m of text.matchAll(/^shape (\w+)\n((?: {2}(?:\w+: .+|\/\/.*)\n?)+)/gm)) {
       shapes[m[1]] = [...m[2].matchAll(/^ {2}(\w+): (.+)$/gm)].map((f) => ({ name: f[1], type: f[2].trim() }));
     }
     const lines = text.split('\n');
@@ -287,7 +287,7 @@ export const answer: Answer = ((source: string, args: unknown[]) => {
 `;
 }
 
-// opts.section: one of samples.json's "sections" ({"<name>": {"files": ["ias.contract", …]}}): a second playground app
+// opts.section: one of samples.json's "sections" ({"<name>": {"files": [...]} or {"layers": [...], "except": [...]}}): a second playground app
 // (<playground>/<name>) that draws only the pieces of those files; the main playground leaves them out. A playground
 // that draws every app's screens outgrows one bundle. opts.samples and opts.wip name the main playground's.
 export function generate(designDir, playDir, opts = {}) {
@@ -305,8 +305,11 @@ export function generate(designDir, playDir, opts = {}) {
   const ctx = { needs: new Set(), shapes: Object.assign({}, ...all.map((p) => p.shapes)), props: existsSync(sampleFile) ? JSON.parse(readFileSync(sampleFile, 'utf8')) : {} };
   const sections = ctx.props.sections ?? {};
   const fileOf = (p) => p.at.split(':')[0].split('/').pop();
-  const sectionFiles = new Set(Object.values(sections).flatMap((x) => x.files ?? []));
-  const inPage = (p) => (opts.section ? (sections[opts.section]?.files ?? []).includes(fileOf(p)) : !sectionFiles.has(fileOf(p)));
+  // A section names files ("files": ["ias.contract"]) or whole layers ("layers": ["blocks"], less "except": the
+  // layer's own shared pieces, such as its index.contract), so a piece added to a layer joins its section unnamed.
+  const inSection = (p, v) => (v.files ?? []).includes(fileOf(p)) || ((v.layers ?? []).includes(p.layer) && !(v.except ?? []).includes(fileOf(p)));
+  const sectionOf = (p) => Object.entries(sections).find(([, v]) => inSection(p, v))?.[0] ?? 'main';
+  const inPage = (p) => sectionOf(p) === (opts.section ?? 'main');
   const byPkg = new Map();
   for (const p of all) byPkg.set(p.pkg, [...(byPkg.get(p.pkg) ?? []), p]);
   const uses = [...byPkg].map(([pkg, list]) => {
@@ -340,8 +343,7 @@ export function generate(designDir, playDir, opts = {}) {
     const homeOf = (key) => {
       const p = all.find((x) => `${x.layer}-${x.name}` === key);
       if (!p) return null;
-      const sec = Object.entries(sections).find(([, v]) => (v.files ?? []).includes(fileOf(p)))?.[0] ?? 'main';
-      return sec;
+      return sectionOf(p);
     };
     pages.push('map');
     nav.push(`            option ${quote(map.title ?? 'Map')} value="map"`);

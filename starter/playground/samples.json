@@ -1,5 +1,6 @@
 {
-  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only; a prop for one data state as \"<prop>@<data>\" (\"interaction@failed\": \"disabled\").",
+  "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only; a prop for one data state as \"<prop>@<data>\" (\"interaction@failed\": \"disabled\"). \"sections\": a second playground app per group (<playground>/<name>; bun play.mjs web <name>): every block, every screen. The main app draws the components, each layer's index.contract pieces and wip/. One app drawing every state of every piece outgrew the web bundle.",
+  "sections": { "blocks": { "layers": ["blocks"], "except": ["index.contract"] }, "screens": { "layers": ["screens"], "except": ["index.contract"] } },
   "props:DetailPanel": {
     "title": "Aurora Desk Lamp",
     "statusLabel": "In production",
@@ -690,6 +691,266 @@
       "key": "forest",
       "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1200' width='800' height='1200'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23cfe3d8'/%3E%3Cstop offset='1' stop-color='%238fb9a6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='1200' fill='url(%23s)'/%3E%3Cpath d='M120 520 l130 360 h-260 Z' fill='%235d8f78'/%3E%3Cpath d='M120 660 l170 380 h-340 Z' fill='%235d8f78'/%3E%3Cpath d='M330 460 l130 360 h-260 Z' fill='%234f8069'/%3E%3Cpath d='M330 600 l170 380 h-340 Z' fill='%234f8069'/%3E%3Cpath d='M560 540 l130 360 h-260 Z' fill='%235d8f78'/%3E%3Cpath d='M560 680 l170 380 h-340 Z' fill='%235d8f78'/%3E%3Cpath d='M700 480 l130 360 h-260 Z' fill='%234f8069'/%3E%3Cpath d='M700 620 l170 380 h-340 Z' fill='%234f8069'/%3E%3Cpath d='M40 700 l130 360 h-260 Z' fill='%232f5a49'/%3E%3Cpath d='M40 840 l170 380 h-340 Z' fill='%232f5a49'/%3E%3Cpath d='M250 660 l130 360 h-260 Z' fill='%232a5242'/%3E%3Cpath d='M250 800 l170 380 h-340 Z' fill='%232a5242'/%3E%3Cpath d='M470 720 l130 360 h-260 Z' fill='%232f5a49'/%3E%3Cpath d='M470 860 l170 380 h-340 Z' fill='%232f5a49'/%3E%3Cpath d='M680 650 l130 360 h-260 Z' fill='%232a5242'/%3E%3Cpath d='M680 790 l170 380 h-340 Z' fill='%232a5242'/%3E%3Crect y='1060' width='800' height='140' fill='%231f3d32'/%3E%3C/svg%3E",
       "caption": "Pines on the long walk up to the Moorish castle above Sintra, where the path climbs through the fog and the trees close over it for most of an hour"
+    }
+  ],
+  "props:SiteFooter": {
+    "productName": "Northwind",
+    "productMark": "N",
+    "tagline": "Plans, people and the week ahead, kept in one calm place.",
+    "navLabel": "Site links",
+    "legal": "© 2026 Northwind Labs, Inc. All rights reserved. Registered in Amsterdam, KvK 81234567.",
+    "emptyText": "No links have been added to this footer yet.",
+    "emptyLabel": "Add a link",
+    "loadingText": "Loading the site's links…",
+    "failedText": "The footer's links could not be loaded. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "agentKey": "status",
+    "agentKey@long": "status",
+    "agentNote": "Your assistant added System status under Resources.",
+    "proposedNote": "Your assistant suggests adding Security under Legal.",
+    "proposedGroup": "legal",
+    "proposedGroup@long": "company",
+    "proposedLabel": "Security",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "undoLabel": "Undo"
+  },
+  "LinkGroup:many": [
+    {
+      "key": "product",
+      "title": "Product",
+      "links": [
+        {
+          "key": "features",
+          "label": "Features",
+          "href": "/features"
+        },
+        {
+          "key": "pricing",
+          "label": "Pricing",
+          "href": "/pricing"
+        },
+        {
+          "key": "changelog",
+          "label": "Changelog",
+          "href": "/changelog"
+        },
+        {
+          "key": "integrations",
+          "label": "Integrations",
+          "href": "/integrations"
+        }
+      ]
+    },
+    {
+      "key": "resources",
+      "title": "Resources",
+      "links": [
+        {
+          "key": "guides",
+          "label": "Guides",
+          "href": "/guides"
+        },
+        {
+          "key": "api",
+          "label": "API reference",
+          "href": "/api"
+        },
+        {
+          "key": "status",
+          "label": "System status",
+          "href": "/status"
+        }
+      ]
+    },
+    {
+      "key": "company",
+      "title": "Company",
+      "links": [
+        {
+          "key": "about",
+          "label": "About us",
+          "href": "/about"
+        },
+        {
+          "key": "careers",
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "key": "press",
+          "label": "Press kit",
+          "href": "/press"
+        },
+        {
+          "key": "contact",
+          "label": "Contact",
+          "href": "/contact"
+        }
+      ]
+    },
+    {
+      "key": "legal",
+      "title": "Legal",
+      "links": [
+        {
+          "key": "privacy",
+          "label": "Privacy",
+          "href": "/privacy"
+        },
+        {
+          "key": "terms",
+          "label": "Terms of service",
+          "href": "/terms"
+        },
+        {
+          "key": "cookies",
+          "label": "Cookie settings",
+          "href": "/cookies"
+        }
+      ]
+    }
+  ],
+  "LinkGroup:one": [
+    {
+      "key": "product",
+      "title": "Product",
+      "links": [
+        {
+          "key": "features",
+          "label": "Features",
+          "href": "/features"
+        },
+        {
+          "key": "pricing",
+          "label": "Pricing",
+          "href": "/pricing"
+        },
+        {
+          "key": "changelog",
+          "label": "Changelog",
+          "href": "/changelog"
+        },
+        {
+          "key": "integrations",
+          "label": "Integrations",
+          "href": "/integrations"
+        }
+      ]
+    }
+  ],
+  "LinkGroup:long": [
+    {
+      "key": "resources",
+      "title": "Resources for teams that plan across many time zones and offices",
+      "links": [
+        {
+          "key": "guides",
+          "label": "Guides for setting up shared calendars across every office and every team you work with",
+          "href": "/guides"
+        },
+        {
+          "key": "status",
+          "label": "System status",
+          "href": "/status"
+        },
+        {
+          "key": "api",
+          "label": "API reference",
+          "href": "/api"
+        }
+      ]
+    },
+    {
+      "key": "company",
+      "title": "Company",
+      "links": [
+        {
+          "key": "about",
+          "label": "About us and the people who build Northwind from three countries",
+          "href": "/about"
+        },
+        {
+          "key": "careers",
+          "label": "Careers",
+          "href": "/careers"
+        }
+      ]
+    }
+  ],
+  "props:Faq": {
+    "eyebrow": "Help centre",
+    "title": "Questions, answered",
+    "lead": "Short answers about orders, delivery and your account. Open a question to read its answer.",
+    "contactTitle": "Still need a hand?",
+    "contactText": "Our team answers within one working day.",
+    "contactLabel": "Ask our team",
+    "emptyTitle": "No questions yet",
+    "emptyText": "When people ask about orders and delivery, the answers will gather here.",
+    "failedTitle": "The questions did not load",
+    "failedText": "Check your connection, then try again.",
+    "agentKey@long": "returns",
+    "loadingText": "Loading the questions",
+    "retryLabel": "Try again",
+    "agentKey": "returns",
+    "agentNote": "Your assistant rewrote this answer to match the new returns policy.",
+    "waitingNote": "Your assistant will publish its new answer once the returns policy goes live.",
+    "proposalText": "Your assistant suggests adding the 60-day window to the answer on returns.",
+    "acceptLabel": "Accept",
+    "declineLabel": "Reject"
+  },
+  "Question:many": [
+    {
+      "key": "returns",
+      "question": "How do I return something?",
+      "answer": "Start a return from your orders page within 30 days of delivery. Print the label we email you, pack the item in its original box and drop it at any parcel point. Your refund lands within five working days of our receiving it.",
+      "open": true
+    },
+    {
+      "key": "delivery",
+      "question": "When will my order arrive?",
+      "answer": "Most orders arrive in two to four working days. You get a tracking link by email as soon as the parcel leaves our depot.",
+      "open": false
+    },
+    {
+      "key": "change",
+      "question": "Can I change an order after placing it?",
+      "answer": "Yes, until it is packed. Open the order and choose Edit; once it shows Packed, it can only be returned.",
+      "open": false
+    },
+    {
+      "key": "payment",
+      "question": "Which ways can I pay?",
+      "answer": "Cards, bank transfer and pay-later. You are charged when the order ships, not when you place it.",
+      "open": false
+    },
+    {
+      "key": "account",
+      "question": "How do I close my account?",
+      "answer": "Go to Settings, then Account, then Close account. We keep your order history for seven years, as the law asks.",
+      "open": false
+    }
+  ],
+  "Question:one": [
+    {
+      "key": "returns",
+      "question": "How do I return something?",
+      "answer": "Start a return from your orders page within 30 days of delivery. Print the label we email you, pack the item in its original box and drop it at any parcel point. Your refund lands within five working days of our receiving it.",
+      "open": true
+    }
+  ],
+  "Question:long": [
+    {
+      "key": "returns",
+      "question": "How do I return something I bought as a gift for someone else, when the order was sent straight to their address and paid for with a card I have since cancelled?",
+      "answer": "Start the return from your own orders page, not the recipient's: the order belongs to the account that paid. We email you a label for the recipient's address, and because the original card is cancelled the refund comes back as store credit on your account, which you can move to a new card from Settings, then Payments, at any time within the next twelve months, without a fee.",
+      "open": true
+    },
+    {
+      "key": "international-shipping-and-customs-duties-explained",
+      "question": "Do you ship internationally, and who pays the customs duties and import taxes at the border?",
+      "answer": "We ship to most countries. Duties are shown at checkout and paid up front, so nothing is due at the door.",
+      "open": false
     }
   ]
 }

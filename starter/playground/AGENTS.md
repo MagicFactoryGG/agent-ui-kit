@@ -9,6 +9,10 @@ UI comes from the design repo. Something new is made in the playground first.
   adds iOS once; `bun play.mjs stop` ends them. Stop it when you are not looking.
 - **The app is generated.** `app.contract`, `app.ts`, `app.forma` and `app.test.contract` are written by `play.mjs` from the design
   repo (`__DESIGN__`) and `wip/`; never edit them. `bun play.mjs check` fails on a hand edit.
+- **Blocks and screens have their own apps.** `samples.json` "sections" puts every block in `blocks/` and every
+  screen in `screens/`, each a playground app of its own (one app drawing every state of every piece outgrew the web
+  bundle); the main app draws the components, each layer's `index.contract` pieces and `wip/`. `bun play.mjs web blocks`
+  opens one; test one with `cd blocks && bun exact.mjs test web`.
 - **New things start in `wip/`.** Declare the piece's states as enum props named for their axis; the matrix
   (every state, every pair, the marked ones) is drawn from them. A piece with none is refused.
 - **The Theme is configuration:** edit `__DESIGN__/theme.json` and watch every host change. Move a token with
