@@ -32,8 +32,7 @@ theme
   screens.shell-page-max: length = 880px  // the page's measure on a desktop: rows that stay readable, centred in the room the rail leaves
   screens.shell-bar-min: length = 60px  // the bar's height: a 44px control and theme.space.sm above and below
   screens.shell-search: length = 280px
-  screens.shell-title-min: length = 160px  // under this the bar's action wraps to its own line, so the title never squeezes
-  screens.shell-action-max: length = 240px  // a long action label wraps inside this, never across the bar
+  screens.shell-title-min: length = 160px  // the title's basis in the bar: words that fit beside it share its line, a longer action takes its own line and a long title wraps
   screens.shell-tap: length = 44px  // the menu button: the least target a finger gets
   screens.shell-glyph: length = 20px
   screens.shell-band-min: length = 240px  // under this the band's answers wrap under its sentence

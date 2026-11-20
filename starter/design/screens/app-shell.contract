@@ -21,6 +21,12 @@
 //
 // The rail is the panel SideNav draws (its places' column, its account), then the rail's own surface to the
 // window's foot with the panel's edge line carried down, so the rail reads as one column however short the menu.
+// The surface below starts one line width up, over the panel's closing hairline, so no seam crosses the rail
+// half way down the window (SideNav closes itself with a full frame for a page where it stands alone).
+//
+// The bar wraps: the title's basis is screens.shell-title-min and it grows, so a short title, the search and a
+// short action share one line; a long action takes a line of its own at the bar's width and a long title wraps
+// whole (never an ellipsis: why.md's long text holds). The menu button keeps to the bar's top edge.
 //
 // States:
 //   data   many|empty|loading|failed|long — for the page (the rail keeps its places while the page loads):
@@ -157,27 +163,27 @@ component AppShell
         scroll id="app-shell-rail" width="screens.shell-rail" flex-shrink=0 min-height=0 background-color="theme.color.surface"
           column min-height="100%"
             ShellNav(productName=productName, productMark=productMark, navLabel=navLabel, entries=entries, accountName=accountName, accountDetail=accountDetail, retry=retry)
-            box flex=1 border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line" aria-hidden=true
+            box flex=1 margin-top="calc(theme.line.width * -1)" background-color="theme.color.surface" border-right-width="theme.line.width" border-right-style="solid" border-right-color="theme.color.line" aria-hidden=true
       column flex=1 min-width=0 position="relative" display="flex" flex-direction="column"
         row role="banner" min-height="screens.shell-bar-min" box-sizing="border-box" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" background-color="theme.color.page"
           row flex=1 min-width=0 max-width="screens.shell-page-max" margin-left="auto" margin-right="auto" box-sizing="border-box" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.sm" padding-left=(wide ? "theme.space.xl" : "theme.space.lg") padding-right=(wide ? "theme.space.xl" : "theme.space.lg") padding-top="theme.space.sm" padding-bottom="theme.space.sm"
             if not wide
               if sheet
-                button press=closeMenu testId="app-shell-menu" aria-label=closeLabel aria-expanded=true flex-shrink=0 width="screens.shell-tap" height="screens.shell-tap" display="flex" align-items="center" justify-content="center" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" background-color="theme.color.fill"
+                button press=closeMenu testId="app-shell-menu" aria-label=closeLabel aria-expanded=true align-self="flex-start" flex-shrink=0 width="screens.shell-tap" height="screens.shell-tap" display="flex" align-items="center" justify-content="center" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" background-color="theme.color.fill"
                   ShellMenuGlyph(open=true)
               else
-                button press=openMenu testId="app-shell-menu" aria-label=menuLabel aria-expanded=false flex-shrink=0 width="screens.shell-tap" height="screens.shell-tap" display="flex" align-items="center" justify-content="center" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" background-color="theme.color.surface"
+                button press=openMenu testId="app-shell-menu" aria-label=menuLabel aria-expanded=false align-self="flex-start" flex-shrink=0 width="screens.shell-tap" height="screens.shell-tap" display="flex" align-items="center" justify-content="center" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" background-color="theme.color.surface"
                   :hover
                     background-color="theme.color.hover"
                   :focus-visible
                     box-shadow="0 0 0 2px theme.color.focus"
                   ShellMenuGlyph(open=false)
-            column flex=1 min-width="screens.shell-title-min"
-              text title testId="app-shell-title" title=title role="heading" aria-level=1 font="theme.type.title" color="theme.color.ink" white-space="nowrap" overflow="hidden" text-overflow="ellipsis"
+            column flex-grow=1 flex-shrink=1 flex-basis="screens.shell-title-min" min-width=0
+              text title testId="app-shell-title" role="heading" aria-level=1 font="theme.type.title" color="theme.color.ink" overflow-wrap="break-word"
             if wide
               input type="search" value=searchText input=search placeholder=searchLabel aria-label=searchLabel testId="app-shell-search" width="screens.shell-search" min-width=0 flex-shrink=1
             if data != "empty"
-              column max-width="screens.shell-action-max" min-width=0
+              column min-width=0
                 ActionButton(label=actionLabel, kind=(barFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=act, testId="app-shell-action")
         column flex=1 min-height=0 position="relative" display="flex" flex-direction="column"
           column flex=1 min-height=0 display="flex" flex-direction="column" inert=sheet
