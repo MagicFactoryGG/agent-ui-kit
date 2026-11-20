@@ -306,8 +306,9 @@ export function generate(designDir, playDir, opts = {}) {
   const sections = ctx.props.sections ?? {};
   const fileOf = (p) => p.at.split(':')[0].split('/').pop();
   // A section names files ("files": ["ias.contract"]) or whole layers ("layers": ["blocks"], less "except": the
-  // layer's own shared pieces, such as its index.contract), so a piece added to a layer joins its section unnamed.
-  const inSection = (p, v) => (v.files ?? []).includes(fileOf(p)) || ((v.layers ?? []).includes(p.layer) && !(v.except ?? []).includes(fileOf(p)));
+  // layer's own shared pieces, such as its index.contract), so a piece added to a layer joins its section unnamed;
+  // "match" (a pattern on the file name) splits a layer across sections ("^[a-f]"), as one app per layer outgrows a bundle too.
+  const inSection = (p, v) => (v.files ?? []).includes(fileOf(p)) || ((v.layers ?? []).includes(p.layer) && !(v.except ?? []).includes(fileOf(p)) && (!v.match || new RegExp(v.match).test(fileOf(p))));
   const sectionOf = (p) => Object.entries(sections).find(([, v]) => inSection(p, v))?.[0] ?? 'main';
   const inPage = (p) => sectionOf(p) === (opts.section ?? 'main');
   const byPkg = new Map();
