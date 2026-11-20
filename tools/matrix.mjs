@@ -53,7 +53,7 @@ export function pieces(pkgDir) {
   const shapes = {};
   const out = [];
   for (const [file, text] of files) {
-    for (const m of text.matchAll(/^shape (\w+)\n((?: {2}\w+: .+\n?)+)/gm)) {
+    for (const m of text.matchAll(/^shape (\w+)\n((?: {2}(?:\w+: .+|\/\/.*)\n?)+)/gm)) {
       shapes[m[1]] = [...m[2].matchAll(/^ {2}(\w+): (.+)$/gm)].map((f) => ({ name: f[1], type: f[2].trim() }));
     }
     const lines = text.split('\n');
