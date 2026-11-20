@@ -79,3 +79,11 @@ theme
   screens.list-detail-note-min: length = 200px  // under this the changed sentence takes its own line and Undo wraps under it
   screens.list-detail-state-top: length = 56px
   screens.list-detail-line: length = 21px  // one body line (15px at 1.4): the changed note's dot centres on it
+  screens.entry-max: length = 640px  // the column on a desktop: the terms frame at a reading width, EntryChoice and the way back on its edges
+  screens.entry-frame-min: length = 320px  // the terms frame's least height: on a short window the page scrolls, the frame keeps this
+  screens.entry-action-min: length = 160px  // each of Decline and Accept keeps this; two fit a phone's column side by side
+  screens.entry-track: length = 4px  // a part of the step track
+  screens.entry-tick: length = 12px  // the tick in the track, on a caption line
+  screens.entry-glyph: length = 16px  // the clock of the agent's note, the tick beside the accepted note
+  screens.entry-glyph-top: length = 2px  // a 16px glyph centred on the body type's first line (21px)
+  screens.entry-mark-line: length = 3px  // the agent note's start edge: the kit's agent mark (components.mark-line)

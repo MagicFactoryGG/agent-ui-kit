@@ -138,6 +138,15 @@ fn settingLabel(key: string): string = settingsSwitches().filter(r => r.key == k
 fn settingSectionOf(key: string): string = settingsSectionKeys().filter(s => settingsGroupsOf(s).filter(g => g.rows.filter(r => r.key == key).length > 0).length > 0).join("")
 fn settingAct(key: string, on: bool): Act = Act(tool="setSetting", door="agent", key=settingKey(key), title=settingLabel(key), value=(on ? "on" : "off"), did=`Your assistant turned ${settingLabel(key)} ${on ? "on" : "off"}.`, asks=`Your assistant suggests turning ${settingLabel(key)} ${on ? "on" : "off"}.`, will=`Your assistant will turn ${settingLabel(key)} ${on ? "on" : "off"} in 5 seconds.`)
 
+// EntryScreen: the way in, terms before authentication. The step is a value in the ledger (`entry-step`: terms or
+// authenticate), so the person's Accept and Back and the agent's openEntry move the same value. Opening the entry
+// brings the person to the terms; accepting them and signing in stay the person's own acts, so their tools are
+// off (refused by the ledger, answering "off") and only the person's door moves the step on.
+fn entryKeys(): string[] = ["entry-step"]
+fn entryOpenAct(): Act = Act(tool="openEntry", door="agent", key="entry-step", title="Entry", value="terms", did="Your assistant opened the way in, at the terms.", asks="Your assistant suggests opening the way in, at the terms.", will="Your assistant will open the way in, at the terms, in 5 seconds.")
+fn entryAcceptAct(): Act = Act(tool="acceptTerms", door="agent", key="entry-step", title="Terms", value="authenticate", did="Your assistant accepted the terms.", asks="Your assistant suggests accepting the terms.", will="Your assistant will accept the terms in 5 seconds.")
+fn entrySignInAct(): Act = Act(tool="signIn", door="agent", key="entry-signed", title="Sign in", value="yes", did="Your assistant signed you in.", asks="Your assistant suggests signing you in.", will="Your assistant will sign you in in 5 seconds.")
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false),
@@ -145,10 +154,14 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="flagMessage", title="Flags", sentence="Flags or unflags a message.", floor="recorded", reach="self", secret=false),
   AgentTool(name="fillAnswer", title="Setup", sentence="Fills in an answer of the workspace setup.", floor="recorded", reach="self", secret=false),
   AgentTool(name="searchProjects", title="Search", sentence="Searches the projects.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="setSetting", title="Settings", sentence="Turns a setting on or off.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="setSetting", title="Settings", sentence="Turns a setting on or off.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="openEntry", title="Entry", sentence="Opens the way in at its terms.", floor="recorded", reach="self", secret=false),
+  // The person's own acts: off, so the ledger refuses them from the agent's door whatever mode a person chooses.
+  AgentTool(name="acceptTerms", title="Terms", sentence="Accepts the terms for the person. Never allowed.", floor="off", reach="self", secret=false),
+  AgentTool(name="signIn", title="Sign in", sentence="Signs the person in. Never allowed.", floor="off", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="picture", value="harbour"),
   Value(key="project", value="harbour")
-].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on"))))
+].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on")))).concat([Value(key="entry-step", value="terms"), Value(key="entry-signed", value="no")])
