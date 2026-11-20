@@ -73,13 +73,13 @@ component ShellBand
       row flex-wrap="wrap" gap="theme.space.sm" flex-shrink=0
         children
 
-// A row still coming: the row's own height and insets, a word-wide bar for its title and a shorter one for its
-// detail, so what arrives does not jump.
+// A row still coming: the row's own height and insets (LinkRow's start edge, kept for its agent mark, included),
+// a word-wide bar for its title and a shorter one for its detail, so what arrives does not jump.
 component ShellGhost
   props
     wide: bool
   view
-    column gap="theme.space.sm" justify-content="center" min-height="screens.shell-row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" aria-hidden=true
+    column gap="theme.space.sm" justify-content="center" min-height="screens.shell-row-min" box-sizing="border-box" border-left-width="screens.shell-mark-line" border-left-style="solid" border-left-color="transparent" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" aria-hidden=true
       box width=(wide ? "screens.shell-ghost-title" : "screens.shell-ghost-short") max-width="100%" height="screens.shell-ghost-line" background-color="theme.color.ink-muted" opacity=0.3 border-radius="theme.radius.pill"
       box width="screens.shell-ghost-detail" max-width="100%" height="screens.shell-ghost-line" background-color="theme.color.ink-muted" opacity=0.18 border-radius="theme.radius.pill"
 
