@@ -3,8 +3,8 @@ forma screens
 
 theme
   screens.column-max: length = 720px
-  screens.media-max: length = 880px  // the stage then holds a 3:2 picture at its full height on a desktop
-  screens.media-stage-max: length = 560px  // the stage's height on a desktop: the picture, its caption and the strip fit one window
+  screens.media-max: length = 812px  // the stage (780 wide inside lg padding) is then exactly 3:2 at its full height
+  screens.media-stage-max: length = 520px  // the stage's height on a desktop: the picture, caption, a proposal and the strip fit a 900px window
   screens.media-caption-min: length = 240px  // under this the caption takes its own line and Previous and Next wrap under it
   screens.media-thumb: length = 64px
   screens.media-ring: length = 2px
