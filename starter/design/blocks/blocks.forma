@@ -101,4 +101,3 @@ theme
   blocks.faq-mark: length = 3px
   blocks.faq-bone: length = 12px
   blocks.faq-bone-thin: length = 10px
-  blocks.faq-ask-min: length = 200px
