@@ -233,6 +233,64 @@
     "acceptLabel": "Keep it",
     "rejectLabel": "Clear it"
   },
+  "Step:loading": [
+    { "key": "account", "title": "Create your account", "state": "done" },
+    { "key": "profile", "title": "About your work", "state": "current" },
+    { "key": "team", "title": "Invite your team", "state": "next" },
+    { "key": "plan", "title": "Choose a plan", "state": "next" }
+  ],
+  "Step:failed": [
+    { "key": "account", "title": "Create your account", "state": "done" },
+    { "key": "profile", "title": "About your work", "state": "current" },
+    { "key": "team", "title": "Invite your team", "state": "next" },
+    { "key": "plan", "title": "Choose a plan", "state": "next" }
+  ],
+  "OnboardingAnswer:many": [
+    { "key": "workspace", "label": "Workspace name", "hint": "People see this when you invite them.", "value": "Northwind Studio", "placeholder": "Your team or company", "error": "", "byAgent": true },
+    { "key": "role", "label": "Your role", "hint": "It sets the layout you start with.", "value": "Product designer", "placeholder": "What you do", "error": "", "byAgent": true },
+    { "key": "size", "label": "Team size", "hint": "A rough number is fine.", "value": "", "placeholder": "For example, 12", "error": "Enter how many people will use the workspace.", "byAgent": false }
+  ],
+  "OnboardingAnswer:long": [
+    { "key": "workspace", "label": "The name of the workspace, as your colleagues and every guest you invite will see it", "hint": "People see this on every invitation, in the address of each shared page and at the top of the weekly summary.", "value": "Northwind Studio for Sustainable Product Design and Research, Rotterdam Office", "placeholder": "Your team or company", "error": "", "byAgent": true },
+    { "key": "size", "label": "How many people will use the workspace in the first three months", "hint": "A rough number is fine.", "value": "", "placeholder": "For example, 12", "error": "Enter how many people will use the workspace, as a number, so the plan can be sized for your team before the trial ends.", "byAgent": false }
+  ],
+  "props:OnboardingScreen": {
+    "productName": "Northwind",
+    "exitLabel": "Save and exit",
+    "lead": "A few details to set your workspace up. You can change any of them later.",
+    "countLabel": "Setup progress",
+    "backLabel": "Back",
+    "continueLabel": "Continue",
+    "skipLabel": "Skip for now",
+    "retryLabel": "Try again",
+    "errorText": "That didn't save. One answer needs a change before you continue.",
+    "loadingText": "Loading your details…",
+    "failedText": "Your details for this step could not be loaded. Try again, or skip it and come back later.",
+    "listTitle": "Your setup",
+    "listNote": "Your answers are saved as you go. Leave at any time and pick up where you stopped.",
+    "doneWord": "done",
+    "currentWord": "in progress",
+    "nextWord": "to come",
+    "markNote": "Filled in by your assistant",
+    "proposedNote": "Your assistant filled this step in from your account details.",
+    "acceptLabel": "Keep it",
+    "rejectLabel": "Clear it",
+    "waitingNote": "Your assistant is waiting for you to finish this step.",
+    "productName@long": "Northwind Studio Workspace for Product Teams",
+    "exitLabel@long": "Save and exit",
+    "countLabel@long": "Setup progress",
+    "backLabel@long": "Back",
+    "continueLabel@long": "Continue",
+    "skipLabel@long": "Skip for now",
+    "retryLabel@long": "Try again",
+    "acceptLabel@long": "Keep it",
+    "rejectLabel@long": "Clear it",
+    "listTitle@long": "Your setup",
+    "markNote@long": "Filled in by your assistant from the details on your account profile",
+    "doneWord@long": "done",
+    "currentWord@long": "in progress",
+    "nextWord@long": "to come"
+  },
   "props:Hero": {
     "kicker": "New in version 4",
     "headline": "Plan the week your whole team will keep",
