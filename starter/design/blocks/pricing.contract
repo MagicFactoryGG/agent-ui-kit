@@ -135,6 +135,8 @@ component Pricing
     waitingText: string
     data: enum<"many", "one", "empty", "loading", "failed", "long">
     interaction: enum<"idle", "busy">
+    // The app sets it from exactViewport()'s width (compact under about 600 px): a piece cannot measure the window.
+    size: enum<"wide", "compact">
     outcome: enum<"none", "success", "error">
     agent: enum<"none", "proposed", "changed", "waiting">
     choose: action
@@ -189,7 +191,7 @@ component Pricing
                   if p.featured and tagLabel != ""
                     PlanTag(text=tagLabel)
                 row flex-wrap="wrap" align-items="baseline" column-gap="theme.space.xs" row-gap="theme.space.xs"
-                  text p.price testId=`${testId}-price-${p.key}` min-width=0 font="theme.type.title" color="theme.color.ink" font-variant-numeric="tabular-nums"
+                  text p.price testId=`${testId}-price-${p.key}` min-width=0 padding-top="theme.space.xs" padding-bottom="theme.space.xs" font=(size == "compact" ? "theme.type.display-compact" : "theme.type.display") letter-spacing=(size == "compact" ? "theme.type.display-compact-tracking" : "theme.type.display-tracking") color="theme.color.ink" font-variant-numeric="tabular-nums"
                   if p.period != ""
                     text p.period min-width=0 font="theme.type.caption" color="theme.color.ink-muted"
                 if p.detail != ""

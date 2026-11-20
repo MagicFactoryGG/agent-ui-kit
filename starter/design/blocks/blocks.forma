@@ -69,7 +69,6 @@ theme
   blocks.hero-gap: length = 56px
   blocks.hero-copy-min: length = 320px
   blocks.hero-panel-min: length = 300px
-  blocks.hero-display: length = 44px  // the headline: the theme's title style (weight, line, family) at a display size
   blocks.hero-lead: length = 18px  // the lead: the theme's body style a step up, between body and title
   blocks.hero-art: length = 168px
   blocks.hero-tick: length = 24px
