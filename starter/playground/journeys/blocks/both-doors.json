@@ -189,5 +189,67 @@
       "mailAgentKey": "",
       "mailChosenUnread": false
     }
+  },
+  {
+    "name": "Hero: the free trial: Start free trial and startTrial reach the same started trial; the agent's is recorded and marked on the hero",
+    "person": [
+      "tap trial-primary"
+    ],
+    "agent": [
+      "call startTrial {}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.9.key": "trial",
+      "book.values.9.value": "started",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "trial",
+      "book.changes.0.was": "off",
+      "book.marked": [
+        "trial"
+      ],
+      "trialMarked": true,
+      "trialOn": true
+    },
+    "expectPerson": {
+      "book.values.9.value": "started",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "trialMarked": false,
+      "trialOn": true
+    }
+  },
+  {
+    "name": "Hero: the agent's start taken back: the hero's Undo returns the trial to off, as if no one had pressed",
+    "person": [],
+    "agent": [
+      "call startTrial {}",
+      "tap trial-undo"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.values.9.key": "trial",
+      "book.values.9.value": "off",
+      "book.changes.length": 0,
+      "book.marked": [],
+      "trialMarked": false
+    }
   }
 ]
