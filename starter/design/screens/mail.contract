@@ -14,6 +14,9 @@
 //   MessageList draws its reading pane itself on any window wider than a phone, so the screen uses that pane as its
 //   third and does not draw a second copy of the message beside it: the open message's body is passed in as its
 //   row's preview (`snippet`), so the pane reads it whole while the row still shows its first line.
+// - Between a phone and a desktop (from fn mailTwoFrom(), 900px, to the desktop's width: a laptop, a tablet held
+//   sideways) the list and its reading pane sit side by side in MessageList's own card, with the open message's
+//   actions in the card's header row, as on a desktop; the folders sit behind Back, as on a phone, under the TopBar.
 // - A phone shows one pane at a time, the one `which` names: the folders (SideNav, full width), the list
 //   (MessageList, which draws the list alone on a phone) or the open message (drawn here: the subject, the sender
 //   with their address, the recipients, the body and the reply actions), each under the kit's TopBar (the
@@ -70,6 +73,10 @@ shape MailViewport
 // message's actions (Flag drawn alone) inside the card's header over the reading pane's half: below it the half is
 // narrower than the four actions and they would wrap out of the header.
 fn mailWideFrom(): number = 1100
+
+// The least window width that holds a list beside its reading pane (the folders' rail stays behind Back): a laptop
+// or a tablet held sideways (1024px) reads its mail two panes at once, as it did before the rail took its place.
+fn mailTwoFrom(): number = 900
 
 // The least window width whose reading half holds Flag with its word beside the replies.
 fn mailRoomyFrom(): number = 1200
@@ -309,6 +316,8 @@ component MailScreen
     review: action
   resource viewport = exactViewport() as shape MailViewport
   derive wide = viewport.width >= mailWideFrom()
+  // Between a phone and a desktop: the list and its reading pane side by side, the folders behind Back.
+  derive two = not wide and viewport.width >= mailTwoFrom()
   derive shown = data == "many" or data == "long"
   derive open = shown and messages.filter(m => m.key == letter.key).length > 0
   // The pane a phone shows: the one `which` names, but the list's own state while there is no message to open.
@@ -345,8 +354,8 @@ component MailScreen
         TopBar(title=title, agentNote="", agent="none")
           ActionButton(opens="", label=composeLabel, kind=(composeFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=compose, testId="mail-compose")
         scroll id="mail-scroll" flex=1 min-height=0
-          column role="main" width="100%" max-width="screens.mail-pane-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.xl" gap="theme.space.md"
-            if pane == "list"
+          column role="main" width="100%" max-width=(two ? "screens.mail-card-max" : "screens.mail-pane-max") margin-left="auto" margin-right="auto" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.xl" gap="theme.space.md"
+            if pane == "list" or (two and pane == "message")
               MailBack(label=backLabel, target=foldersTitle, press=showFolders, testId="mail-back")
             else if pane == "message"
               MailBack(label=backLabel, target=folderTitle, press=showList, testId="mail-back")
@@ -355,6 +364,13 @@ component MailScreen
             if pane == "folders"
               column padding-top="theme.space.sm"
                 SideNav(productName=foldersTitle, productMark="", navLabel=navLabel, entries=entries, data="many", emptyText="", emptyLabel="", empty=compose, loadingText="", failedText="", retryLabel="", retry=retry, accountName=accountName, accountDetail=accountDetail, agent="none", agentKey="", agentNote="", testId="mail-folders")
+            else if two
+              column position="relative" width="100%" min-width=0
+                MessageList(title="", unreadLabel=unreadLabel, emptyText=emptyText, failedText=failedText, composeLabel=composeLabel, retryLabel=retryLabel, orderLabel=orderLabel, paneLabel=paneLabel, paneEmptyText=paneEmptyText, paneQuietText=paneQuietText, openLabel="", agentNote=agentNote, chosenKey=(open ? letter.key : ""), agentKey=agentKey, data=data, agent=(agent == "changed" and agentListed ? "changed" : "none"), messages=listed, compose=compose, retry=retry, openMessage=reply, testId="mail-list")
+                MailHead(title=folderTitle, badge=(unread > 0 ? `${unread} ${unreadLabel}` : ""))
+                  if open
+                    row role="group" aria-label=toolbarLabel testId="mail-toolbar" flex-shrink=0 pointer-events="auto"
+                      MailReplies(replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, flagLabel=flagLabel, flagged=openFlagged, showFlag=true, focal=false, compactFlag=true, reply=reply, replyAll=replyAll, forward=forward, flag=flag)
             else if pane == "message"
               MailLetterCard(letter=letter, toLabel=toLabel, replyLabel=replyLabel, replyAllLabel=replyAllLabel, forwardLabel=forwardLabel, flagLabel=flagLabel, flagged=openFlagged, reply=reply, replyAll=replyAll, forward=forward, flag=flag)
             else
