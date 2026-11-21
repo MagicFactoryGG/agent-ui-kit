@@ -142,6 +142,17 @@
       },
       "loadStats": {
         "title": "Load Stats"
+      },
+      "readSort": {
+        "title": "Read Sort"
+      },
+      "setSort": {
+        "title": "Set Sort",
+        "parameters": {
+          "sort": {
+            "title": "Sort"
+          }
+        }
       }
     }
   }

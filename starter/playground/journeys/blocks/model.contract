@@ -2,6 +2,7 @@
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf, isMarked from "@agent-ui-kit/agent"
 use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint, LinkGroup, FooterLink from "__SCOPE__/blocks"
+use MenuItem from "__SCOPE__/components"
 use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint from "__SCOPE__/blocks"
 use Question from "__SCOPE__/blocks"
 use BarPoint, BarRange, NotificationNote from "__SCOPE__/blocks"
@@ -106,6 +107,16 @@ fn planList(chosen: string): Plan[] = [
 ]
 fn planAct(key: string): Act = Act(tool="choosePlan", door="agent", key="plan", title="Plan", value=key, did=`Your assistant chose the ${planName(key)} plan.`, asks=`Your assistant suggests the ${planName(key)} plan.`, will=`Your assistant will choose the ${planName(key)} plan in 5 seconds.`)
 fn planText(chosen: string): string = `${chosen}\t${planName(chosen)}`
+// Menu: a list's order, chosen from the design's Menu ("newest" until another is chosen). An item chooses
+// it, as the agent's setSort does; the chosen item is checked.
+fn sortName(key: string): string = key == "oldest" ? "Oldest first" : key == "name" ? "By name" : "Newest first"
+fn sortItems(chosen: string): MenuItem[] = [
+  MenuItem(key="newest", heading="Order", label=sortName("newest"), detail="", kind="choice", on=(chosen == "newest"), enabled=true),
+  MenuItem(key="oldest", heading="", label=sortName("oldest"), detail="", kind="choice", on=(chosen == "oldest"), enabled=true),
+  MenuItem(key="name", heading="", label=sortName("name"), detail="A to Z", kind="choice", on=(chosen == "name"), enabled=true)
+]
+fn sortAct(key: string): Act = Act(tool="setSort", door="agent", key="sort", title="Order", value=key, did=`Your assistant put the list ${sortName(key).toLowerCase()}.`, asks=`Your assistant suggests putting the list ${sortName(key).toLowerCase()}.`, will=`Your assistant will put the list ${sortName(key).toLowerCase()} in 5 seconds.`)
+fn sortText(chosen: string): string = `${chosen}\t${sortName(chosen)}`
 // Hero: a planning product's landing page; its one act is the primary, Start free trial. The value is the
 // trial's state ("off", then "started"): the person's tap and the agent's startTrial set the same value, and the
 // agent's is recorded, shown on the hero with one Undo.
@@ -190,7 +201,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="openQuestion", title="Help questions", sentence="Opens a question on the help page to show its answer, or closes it.", floor="recorded", reach="self", secret=false),
   AgentTool(name="setChartRange", title="Orders chart", sentence="Shows the orders chart by week or by month.", floor="recorded", reach="self", secret=false),
   AgentTool(name="markNotesRead", title="Notifications", sentence="Marks the new notifications read, as the list's Mark all read does.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="loadStats", title="This week's numbers", sentence="Reads this week's numbers again after a failed read, as their Try again does.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="loadStats", title="This week's numbers", sentence="Reads this week's numbers again after a failed read, as their Try again does.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setSort", title="Order", sentence="Puts the list in an order: newest, oldest or name.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -208,5 +220,6 @@ fn startValues(): Value[] = [
   Value(key="faq-returns", value="open"), Value(key="faq-delivery", value="closed"), Value(key="faq-change", value="closed"), Value(key="faq-payment", value="closed"),
   Value(key="chart-range", value="week"),
   Value(key="notes", value="unread"),
-  Value(key="stats", value="failed")
+  Value(key="stats", value="failed"),
+  Value(key="sort", value="newest")
 ]

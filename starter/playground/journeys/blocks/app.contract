@@ -22,6 +22,8 @@ use BarChart, NotificationList from "__SCOPE__/blocks"
 use chartRanges, chartNote, chartLabel, chartPoints, chartText, notesRead, inboxNotes, notesText from "./model.contract"
 use StatTiles from "__SCOPE__/blocks"
 use weekStats, statsText from "./model.contract"
+use Menu from "__SCOPE__/components"
+use sortItems, sortText from "./model.contract"
 
 // The window's width, for the Hero's size (compact under 600 px): an app reads the viewport, a piece cannot.
 shape JourneyViewport
@@ -69,6 +71,8 @@ component App
   derive featuresMarked = isMarked(book, "features")
   // Pricing: the workspace's plan, "none" until one is chosen; the chosen card carries the agent's mark.
   derive plan = valueOf(book, "plan")
+  // Menu: the list's order, "newest" until another is chosen.
+  derive sort = valueOf(book, "sort")
   derive planMarked = isMarked(book, "plan")
   // Hero: the landing page's free trial; its value is "off" until it starts, then "started". An agent's start
   // is marked on the hero (changed, with Undo); one held for the person's answer shows as its proposal.
@@ -134,6 +138,9 @@ component App
   action addFeatureByPerson
     book = personSet(book, "features", "sync")
   // A plan's button chooses it; the agent's note's Undo takes its choice back.
+  // An item of the order's Menu chooses it.
+  action chooseSortByPerson(key: string)
+    book = personSet(book, "sort", key)
   action choosePlanByPerson(key: string)
     book = personSet(book, "plan", key)
   action undoPlan
@@ -261,6 +268,10 @@ component App
     returns statsText(stats)
   tool loadStats writes idempotent closed "Read this week's numbers again after a failed read, as their Try again does. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readStats." = loadStats
     returns book.answer
+  tool readSort reads "The list's order: its id (newest, oldest or name), then its name, tab-separated." = readSort
+    returns sortText(sort)
+  tool setSort writes idempotent closed "Put the list in an order, as an item of the Order menu does: newest, oldest or name. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readSort." = setSort
+    returns book.answer
     fails when book.answer == "off"
 
   view
@@ -280,3 +291,5 @@ component App
       BarChart(title="Orders", note=chartNote(chartRange), chartLabel=chartLabel(chartRange), points=chartPoints(chartRange), ranges=chartRanges(), range=chartRange, rangeLabel="Show orders by", emptyText="", emptyLabel="", loadingText="", failedText="", retryLabel="", agentKey="", agentNote=latestAbout(book, ["chart-range"]), undoLabel="Undo", proposalText="", acceptLabel="", rejectLabel="", data="many", agent=(chartMarked ? "changed" : "none"), size=(viewport.width < 600 ? "compact" : "wide"), choose=chooseRangeByPerson, add=ignore, retry=ignore, undo=undoRange, accept=ignore, reject=ignore, testId="orders")
       NotificationList(title="Notifications", summary=(notesAllRead ? "All read" : "2 new"), markAllLabel="Mark all read", markAll=markNotesByPerson, newTitle="New", earlierTitle="Earlier", notes=inboxNotes(notesAllRead), answer=ignoreAnswer, loadingText="", emptyTitle="", emptyText="", emptyActionLabel="", emptyPress=ignore, failedTitle="", failedText="", retryLabel="", retry=ignore, proposedNote=notesAsks, acceptLabel="Mark read", rejectLabel="Not now", accept=acceptNotes, reject=rejectNotes, changedNote=latestAbout(book, ["notes"]), undoLabel="Undo", undo=undoNotes, data="many", agent=(notesAsks != "" ? "proposed" : notesMarked ? "changed" : "none"), testId="notes")
       StatTiles(title="This week", stats=(stats == "many" ? weekStats() : []), data=(stats == "many" ? "many" : "failed"), loadingText="", failedText="This week's numbers could not be read.", retryLabel="Try again", retry=loadStatsByPerson, agent=(statsMarked ? "changed" : "none"), agentKey="", agentNote="", yesLabel="", noLabel="", yes=ignore, no=ignore, changedNote=latestAbout(book, ["stats"]), undoLabel="Undo", undo=undoStats, testId="stats")
+      // Menu, in place: the list's order (its popup form is the same container, opened by a button's popovertarget)
+      Menu(menuId="sort-menu", label="Order", items=sortItems(sort), presentation="inline", interaction="idle", choose=chooseSortByPerson, testId="sort-menu")

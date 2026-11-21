@@ -1,0 +1,71 @@
+// Menu: a list of acts or choices, in place or opening over the page from a button. The popup is Exact's own menu
+// (`popover="auto"`): Escape and a click outside close it, the focus goes back to the button that opened it, it stays
+// beside that button (`position-area`, flipping to fit) and no taller than the space there (it scrolls inside), and
+// Up, Down, Home and End move among its items (Exact's role keys for `role="menu"`; a UIMenu on iOS). The menu adds a
+// letter jumping to the next item that starts with it. It opens from a button with `popovertarget=menuId`. Words are
+// the app's.
+
+// One item: an act (kind "act"), one of a few (kind "choice", `on` when it is the chosen one) or a switch (kind
+// "toggle", `on` when it is on). `detail` is a second line under the label ("" for none). `heading` starts a section:
+// its words are shown once above this item ("" for none).
+shape MenuItem
+  key: string
+  heading: string
+  label: string
+  detail: string
+  kind: enum<"act", "choice", "toggle">
+  on: bool
+  enabled: bool
+
+// presentation: "inline" draws the list in place (a settings list); "popup" opens it over the page from its button.
+component Menu
+  props
+    menuId: string
+    label: string
+    items: MenuItem[]
+    presentation: enum<"inline", "popup">
+    interaction: enum<"idle", "disabled">
+    choose: action
+    testId: string
+  // The focused item's key: where a letter moves from.
+  state cur = ""
+  action picked(key: string)
+    choose(key)
+  action focused(key: string)
+    cur = key
+  action go(key: string)
+    if key != ""
+      cur = key
+      focus(`${menuId}-item-${key}`)
+  // On the focused item: a letter goes to the next enabled item that starts with it.
+  action keyed(name: string)
+    let pos = items.filter(x => x.enabled).map(x => x.key).indexOf(cur)
+    if name.length == 1
+      go(menuFirst(items.filter(x => x.enabled).slice(pos + 1).concat(items.filter(x => x.enabled).slice(0, pos + 1)).filter(x => x.label.toLowerCase().startsWith(name.toLowerCase()))))
+  // One container for both presentations, in Exact's menu shape: sections (`role="group"`, titled by their heading),
+  // each item its words and one image, the checkmark (Exact's own symbol, shown when chosen or on).
+  view
+    column id=menuId popover=(presentation == "popup" ? some("auto") : none) position-area="bottom span-right" position-try-fallbacks="flip-block, flip-inline, flip-block flip-inline" role="menu" aria-label=label testId=testId min-width="components.menu-min" max-width="components.menu-max" max-height=(presentation == "popup" ? "100%" : "none") overflow-y=(presentation == "popup" ? "auto" : "visible") padding="theme.space.xs" box-sizing="border-box" background-color="theme.color.raised" color="theme.color.ink" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" opacity=(interaction == "disabled" ? 0.5 : 1)
+      for g in menuStarts(items) key=g.key
+        column role="group" aria-labelledby=`${menuId}-heading-${g.key}` gap=0
+          // always drawn, so aria-labelledby names a drawn id; empty and without padding when the section has no heading
+          text g.heading id=`${menuId}-heading-${g.key}` font="theme.type.caption" color="theme.color.ink-muted" padding-left="theme.space.sm" padding-top=(g.heading != "" ? "theme.space.sm" : "0px") padding-bottom=(g.heading != "" ? "theme.space.xs" : "0px")
+          for it in menuGroup(items, g.key) key=it.key
+            button id=`${menuId}-item-${it.key}` testId=`${testId}-${it.key}` role=(it.kind == "choice" ? "menuitemradio" : it.kind == "toggle" ? "menuitemcheckbox" : "menuitem") aria-checked=(it.kind != "act" and it.on) disabled=(interaction == "disabled" or not it.enabled) press=picked(it.key) popovertarget=menuId popovertargetaction="hide" focus=focused(it.key) key=keyed display="flex" align-items="center" gap="theme.space.sm" width="100%" min-height="components.row-min" padding-left="theme.space.sm" padding-right="theme.space.md" box-sizing="border-box" border-width=0 border-radius="theme.radius.control" background-color="transparent" color="theme.color.ink" text-align="start" opacity=(it.enabled ? 1 : 0.5)
+              :hover
+                background-color="theme.color.hover"
+              :focus-visible
+                background-color="theme.color.hover"
+              image "symbol:checkmark" width="components.menu-check" height="components.menu-check" flex-shrink=0 color="theme.color.ink" opacity=(it.kind != "act" and it.on ? 1 : 0) aria-hidden=true
+              column gap=0 min-width=0
+                text it.label font="theme.type.body" color="theme.color.ink"
+                if it.detail != ""
+                  text it.detail font="theme.type.caption" color="theme.color.ink-muted"
+
+// The first item's key ("" for none).
+fn menuFirst(items: MenuItem[]): string = match items.at(0) { case some(it) => it.key, case none => "" }
+// The items that start a section: the first, and each with a heading. A section is its start and the items after it
+// up to the next heading.
+fn menuStarts(items: MenuItem[]): MenuItem[] = items.slice(0, 1).concat(items.slice(1).filter(x => x.heading != ""))
+fn menuGroup(items: MenuItem[], key: string): MenuItem[] = menuUpTo(items.slice(items.map(x => x.key).indexOf(key)))
+fn menuUpTo(rest: MenuItem[]): MenuItem[] = rest.slice(0, rest.slice(1).map(x => x.heading != "").indexOf(true) < 0 ? rest.length : rest.slice(1).map(x => x.heading != "").indexOf(true) + 1)

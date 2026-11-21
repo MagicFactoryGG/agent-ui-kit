@@ -710,5 +710,30 @@
       "book.marked": [],
       "statsMarked": false
     }
+  },
+  {
+    "name": "Menu: an order chosen: the Oldest first item and setSort reach the same order; the agent's is recorded",
+    "person": [
+      "tap sort-menu-oldest"
+    ],
+    "agent": [
+      "call setSort {\"sort\":\"oldest\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded"
+    },
+    "expectPerson": {
+      "book.changes.length": 0
+    }
   }
 ]

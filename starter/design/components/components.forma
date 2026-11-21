@@ -8,3 +8,7 @@ theme
   components.chevron: length = 12px
   components.picture: length = 96px
   components.mark-line: length = 3px
+  // Menu: its narrowest and widest, and the checkmark beside a chosen item.
+  components.menu-min: length = 200px
+  components.menu-max: length = 320px
+  components.menu-check: length = 16px
