@@ -2198,6 +2198,32 @@
       "tone": "blocked"
     }
   ],
+  "props:CommandMenu": {
+    "title": "Commands",
+    "note": "Find any action by name. Command-K or Control-K opens this menu.",
+    "openLabel": "Open commands",
+    "search": "Search commands",
+    "query": "",
+    "query@empty": "refund",
+    "emptyText": "No command matches “refund”.",
+    "clearLabel": "Clear search",
+    "loadingText": "Loading commands…",
+    "resultText": "This month's 24 invoices are ready to download as a CSV file.",
+    "agentKey": "export",
+    "agentMark": "Run by your assistant",
+    "proposedNote": "Your assistant suggests running Export invoices.",
+    "changedNote": "Your assistant ran Export invoices.",
+    "acceptLabel": "Run",
+    "rejectLabel": "Not now",
+    "undoLabel": "Undo"
+  },
+  "MenuCommand:many": [
+    { "key": "new-invoice", "group": "Create", "label": "New invoice", "hint": "A draft for one customer", "shortcut": "⌘N" },
+    { "key": "new-customer", "group": "Create", "label": "New customer", "hint": "", "shortcut": "⇧⌘N" },
+    { "key": "export", "group": "Invoices", "label": "Export invoices", "hint": "This month's, as a CSV file", "shortcut": "⌘E" },
+    { "key": "archive", "group": "Invoices", "label": "Archive paid invoices", "hint": "They stay searchable", "shortcut": "" },
+    { "key": "settings", "group": "Go to", "label": "Billing settings", "hint": "Tax, currency and reminders", "shortcut": "⌘," }
+  ],
   "props:ActivityTimeline": {
     "title": "Activity",
     "summary": "6 events this week, 3 by your assistant",
