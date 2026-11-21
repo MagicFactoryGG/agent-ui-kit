@@ -92,3 +92,14 @@ theme
   screens.entry-mark-line: length = 3px  // the agent note's start edge: the kit's agent mark (components.mark-line)
   screens.entry-dot: length = 8px  // the busy cue's pulsing dot, on a caption line
   screens.entry-note-min: length = 200px  // the accepted note keeps this; narrower, the way back wraps under it
+  screens.dashboard-max: length = 1008px  // the content's width on a wide window, centred: StatTiles' own 960px cap (blocks.stat-max) plus the page's two xl insets (24px each), so tiles and panels share their edges
+  screens.dashboard-chart-min: length = 320px  // the chart and the list sit side by side once both least widths fit
+  screens.dashboard-list-min: length = 280px
+  screens.dashboard-head-min: length = 160px  // under this a card's title takes its own line and its end wraps under it
+  screens.dashboard-item-min: length = 200px  // a recent row's title keeps this much; a longer trailing word wraps under it
+  screens.dashboard-bone: length = 10px
+  screens.dashboard-ghost-row: length = 64px  // a real row's height: md paddings, a body line, xs, a caption line
+  screens.dashboard-band-min: length = 240px  // under this a band's sentence takes its own line and the answers wrap under it
+  screens.dashboard-mark-line: length = 3px  // the band's start edge: the kit's agent mark (components.mark-line)
+  screens.dashboard-glyph: length = 16px
+  screens.dashboard-glyph-top: length = 2px  // a 16px glyph centred on the body type's first line (21px)

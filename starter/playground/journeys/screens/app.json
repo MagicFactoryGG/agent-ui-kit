@@ -103,6 +103,17 @@
       },
       "signIn": {
         "title": "Sign In"
+      },
+      "readPeriods": {
+        "title": "Read Periods"
+      },
+      "setPeriod": {
+        "title": "Set Period",
+        "parameters": {
+          "period": {
+            "title": "Period"
+          }
+        }
       }
     }
   }
