@@ -139,6 +139,23 @@
             "title": "Text"
           }
         }
+      },
+      "readSearch": {
+        "title": "Read Search"
+      },
+      "runSearch": {
+        "title": "Run Search",
+        "parameters": {
+          "text": {
+            "title": "Text"
+          },
+          "kind": {
+            "title": "Kind"
+          },
+          "date": {
+            "title": "Date"
+          }
+        }
       }
     }
   }

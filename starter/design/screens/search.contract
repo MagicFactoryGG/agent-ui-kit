@@ -1,0 +1,288 @@
+// SearchScreen: search results as a whole screen. The bar names it (TopBar). Under it, by width:
+//
+// - A desktop (a window at least fn searchWideFrom() wide): the filters in a side panel at the start (each a titled
+//   group of the kit's Segments, one choice a line), and the main column beside it: the query (the kit's Field
+//   around the platform's own search field), the assistant's band when there is one, the count, then the results.
+//   The whole is held to screens.search-max and centred, so the rows read at a measure, not across a wide window.
+// - A phone: one column, the query first, then each filter as a group of Segments on one line, the count, the
+//   results.
+//
+// The results are rows on one card, a hairline between them (a list is rows, not cards). A row is a link to the
+// result: its title, when it changed at the end of its first line; a short excerpt in which the matched words are
+// set in a heavier weight and the ink (type, never colour alone: a screen reader and a monochrome screen keep them);
+// then where it lives, its kind in the kit's Tag and its place beside it. The count says how many matched, as a
+// status, so it is heard as it changes. It is the one place a person reads what was found.
+//
+// States, declared once:
+//   data   many | empty | loading | failed | long. Loading keeps the query in its field and the filters as chosen,
+//          says `loadingText` as a status beside a pulsing dot in the count's place, and breathes rows in the real
+//          rows' shape. Empty is the kit's StatePanel in the list's place: `emptyTitle`, `emptyText` (nothing
+//          matched) and its one way on, `clearFiltersLabel` when a filter narrows the search (it puts every
+//          filter back to its first choice), else `clearSearchLabel` (it empties the query). Failed is the
+//          kit's StatePanel too: `failedTitle`, `failedText` and `retryLabel`, the way on; the query and the filters
+//          stay, so the person can change them instead. Long: every word at length (titles, excerpts and places
+//          wrap; the count and the query hold).
+//   agent  none | proposed | changed: an assistant's search, through the other door. Changed: the assistant ran a
+//          search for the person; the band under the query says `changedNote` (the ledger's did) beside the kit's
+//          agent mark, with `undoLabel`, and the query carries `markNote` under its field, the accent's dot beside
+//          it: the mark on the control it changed. Proposed: the assistant suggests a search; the band says
+//          `proposedNote` (the ledger's asks) with `rejectLabel` and `acceptLabel` (filled: the state's one fill),
+//          and nothing changes until the person accepts.
+// One fill per state: the chosen Segments are raised on their group's fill (the place the search stands); a filled
+// button only where there is one thing to do (empty's way on, a proposal's Accept).
+//
+// Both doors: the person's typing (`find`, each change) and a Segment's press (`chooseKind`, `chooseDate`, by key)
+// are the same search an agent's tool runs; the app keeps the query and the filters as one value in its ledger, so
+// either door reaches the same results, and the agent's is recorded and marked. The screen is also where a command
+// menu's "Search for …" lands: the app's CommandMenu (the kit's block) runs a command that opens this screen with
+// its query; the screen draws no menu of its own.
+//
+// The band is drawn here, not the kit's Proposal: Proposal keeps its sentence and its answers on one line, which at a
+// phone's width squeezes a two-word answer onto two lines; here the answers wrap under the sentence instead.
+// Every word is the app's; every value a Theme token or a screens.search-* size.
+use Words, ActionButton, Field, Segment, Tag from "__SCOPE__/components"
+use TopBar, StatePanel from "__SCOPE__/blocks"
+
+// One choice of a filter: its key (the tool's argument too), the filter it belongs to (the kind of result, or when
+// it last changed) and its name. The first of a filter's choices is the one that narrows nothing ("All", "Any time").
+shape SearchFilter
+  key: string
+  group: enum<"kind", "date">
+  label: string
+
+// One result: its key, its title, its excerpt in runs (the even runs as written, the odd ones the words that
+// matched: ["Lights along the ", "harbour", " wall"]), where it lives (`place`, "Projects · Harbour signage"), its
+// kind as a short word ("Page"), when it last changed ("Mar 4"), and where it opens.
+shape SearchResult
+  key: string
+  title: string
+  excerpt: string[]
+  place: string
+  kind: string
+  when: string
+  href: string
+
+// The one viewport fact the screen reads.
+shape SearchViewport
+  width: number
+
+// The least window width that holds the filters' panel beside a main column at its least (screens.search-aside,
+// the xxl between them, screens.search-main and the page's xl insets).
+fn searchWideFrom(): number = 900
+
+// A filter's first choice: the one that narrows nothing.
+fn searchFirst(xs: SearchFilter[]): string = match xs.at(0) { case some(x) => x.key, case none => "" }
+
+// The ghost rows breathe and the loading dot pulses, so waiting reads as under way, never as a dimmed control.
+keyframes searchBreathe
+  50% opacity=0.5
+keyframes searchPulse
+  50% opacity=0.25
+
+// One filter: its name over its choices, the kit's Segments in one group on the group's fill, the chosen one raised.
+// `stacked` puts one choice a line (the desktop's side panel); otherwise they share a line and wrap if they must.
+component SearchFilterGroup
+  props
+    label: string
+    choices: SearchFilter[]
+    chosen: string
+    stacked: bool
+    choose: action
+    testId: string
+  view
+    column flex=(stacked ? "none" : "1") min-width=(stacked ? "0" : "screens.search-filter-min") box-sizing="border-box" gap="theme.space.sm"
+      column padding-left=(stacked ? "theme.space.sm" : "0")
+        Words(text=label, kind="heading", outcome="none", level=0, testId=`${testId}-label`)
+      row role="group" aria-label=label testId=testId flex-direction=(stacked ? "column" : "row") flex-wrap="wrap" gap="theme.space.xs" padding="theme.space.xs" box-sizing="border-box" min-width=0 background-color="theme.color.fill" border-radius="theme.radius.control"
+        for c in choices key=c.key
+          Segment(label=c.label, on=(c.key == chosen), interaction="idle", press=choose(c.key), testId=`${testId}-${c.key}`)
+
+// A bar of a ghost row: the fill at a named length, never wider than its row.
+component SearchBone
+  props
+    width: string
+    height: string
+  view
+    box width=width max-width="100%" height=height flex-shrink=1 border-radius="theme.radius.pill" background-color="theme.color.fill" aria-hidden=true
+
+// A result still coming, in a real row's shape: its title and when, two lines of excerpt, its kind and place.
+component SearchGhostRow
+  props
+    first: bool
+  view
+    column aria-hidden=true gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-top-width=(first ? "0" : "theme.line.width") border-top-style="solid" border-top-color="theme.color.line" animation="searchBreathe 1.6s ease-in-out infinite"
+      row align-items="center" gap="theme.space.md" min-height="screens.search-title-line"
+        SearchBone(width="screens.search-bone-title", height="screens.search-bone-thick")
+        row flex=1 min-width=0
+        SearchBone(width="screens.search-bone-when", height="screens.search-bone")
+      column gap="theme.space.sm"
+        SearchBone(width="100%", height="screens.search-bone")
+        SearchBone(width="screens.search-bone-line", height="screens.search-bone")
+      SearchBone(width="screens.search-bone-place", height="screens.search-bone")
+
+// One result as a row that opens it. The title (label type) and when it changed share the first line; a long title
+// wraps beside it, and only under screens.search-title-min does when take its own line. The excerpt is one paragraph of runs: the matched words heavier and in the ink,
+// the rest in the muted ink. Last, its kind (the kit's Tag) and its place.
+component SearchRow
+  props
+    result: SearchResult
+    first: bool
+    testId: string
+  view
+    link href=result.href testId=testId role="listitem" display="flex" flex-direction="column" gap="theme.space.sm" min-width=0 padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" color="theme.color.ink" text-decoration-line="none" border-top-width=(first ? "0" : "theme.line.width") border-top-style="solid" border-top-color="theme.color.line"
+      :hover
+        background-color="theme.color.hover"
+      :active
+        background-color="theme.color.fill"
+      :focus-visible
+        box-shadow="inset 0 0 0 2px theme.color.focus"
+      row flex-wrap="wrap" align-items="baseline" column-gap="theme.space.md" row-gap="theme.space.xs"
+        text result.title testId=`${testId}-title` flex=1 min-width="screens.search-title-min" overflow-wrap="anywhere" font="theme.type.label" color="theme.color.ink"
+        if result.when != ""
+          text result.when testId=`${testId}-when` margin-left="auto" flex-shrink=0 font="theme.type.caption" font-variant-numeric="tabular-nums" color="theme.color.ink-muted" white-space="nowrap"
+      if result.excerpt.length > 0
+        text testId=`${testId}-excerpt` overflow-wrap="anywhere" color="theme.color.ink-muted"
+          for run, i in result.excerpt key=i
+            text run font="theme.type.body" font-weight=(i % 2 == 1 ? 600 : 400) color=(i % 2 == 1 ? "theme.color.ink" : "theme.color.ink-muted")
+      row flex-wrap="wrap" align-items="center" column-gap="theme.space.sm" row-gap="theme.space.xs" min-width=0
+        if result.kind != ""
+          Tag(text=result.kind, outcome="none")
+        text result.place testId=`${testId}-place` flex=1 min-width=0 overflow-wrap="anywhere" font="theme.type.caption" color="theme.color.ink-muted"
+
+// What an assistant asks or did about the search, in one band: its glyph and sentence, then its answers (the slot),
+// which wrap under the sentence when the sentence would fall under its least width. The accent's edge is the kit's
+// agent mark (as LinkRow draws it); the words are ink on the surface, and the frame is the line token, so the band
+// shows on a theme whose page and surface are one colour.
+component SearchBand
+  props
+    tone: enum<"proposed", "changed">
+    sentence: string
+    testId: string
+  slot
+  view
+    row testId=testId role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.md" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(tone == "proposed" ? "theme.color.accent" : "theme.color.line") border-left-width="screens.search-mark-line" border-left-color="theme.color.accent"
+      row flex=1 min-width="screens.search-band-min" align-items="flex-start" gap="theme.space.sm"
+        svg viewBox="0 0 16 16" width="screens.search-glyph" height="screens.search-glyph" margin-top="screens.search-glyph-top" fill="none" aria-hidden=true flex-shrink=0
+          if tone == "changed"
+            circle cx=8 cy=8 r=6.5 fill="theme.color.accent"
+            path d="M5 8.2l2 2 4-4.4" stroke="theme.color.accent-ink" stroke-width=1.6 stroke-linecap="round" stroke-linejoin="round"
+          else
+            path d="M8 1.5l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z" fill="theme.color.accent"
+        text sentence testId=`${testId}-sentence` flex=1 min-width=0 overflow-wrap="anywhere" font="theme.type.body" color="theme.color.ink"
+      row flex-wrap="wrap" gap="theme.space.sm" margin-left="auto"
+        children
+
+component SearchScreen
+  props
+    title: string
+    queryLabel: string
+    queryHint: string
+    placeholder: string
+    query: string
+    filtersLabel: string
+    kindLabel: string
+    dateLabel: string
+    filters: SearchFilter[]
+    kindKey: string
+    dateKey: string
+    countText: string
+    resultsLabel: string
+    results: SearchResult[]
+    loadingText: string
+    emptyTitle: string
+    emptyText: string
+    clearFiltersLabel: string
+    clearSearchLabel: string
+    failedTitle: string
+    failedText: string
+    retryLabel: string
+    markNote: string
+    proposedNote: string
+    changedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    undoLabel: string
+    data: enum<"many", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed">
+    find: action
+    chooseKind: action
+    chooseDate: action
+    clearFilters: action
+    clearSearch: action
+    retry: action
+    accept: action
+    reject: action
+    undo: action
+  resource viewport = exactViewport() as shape SearchViewport
+  derive wide = viewport.width >= searchWideFrom()
+  derive shown = data == "many" or data == "long"
+  derive kinds = filters.filter(f => f.group == "kind")
+  derive dates = filters.filter(f => f.group == "date")
+  // A filter narrows the search while either stands off its first choice: then the empty state's way on clears them.
+  derive filtered = kindKey != searchFirst(kinds) or dateKey != searchFirst(dates)
+  // The doors, passed on: the field with what the person typed, a Segment with its choice's key.
+  action typed(text: string)
+    find(text)
+  action pickKind(key: string)
+    chooseKind(key)
+  action pickDate(key: string)
+    chooseDate(key)
+  // The empty state's one way on: the filters back to their first choices, or, with none narrowing, the query cleared.
+  action emptyWayOn
+    if filtered
+      clearFilters()
+    else
+      clearSearch()
+  view
+    column testId="search" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
+      TopBar(title=title, agentNote="", agent="none")
+      scroll id="search-scroll" flex=1 min-height=0
+        row role="main" width="100%" max-width="screens.search-max" margin-left="auto" margin-right="auto" box-sizing="border-box" align-items="flex-start" gap="theme.space.xxl" padding-left=(wide ? "theme.space.xl" : "theme.space.lg") padding-right=(wide ? "theme.space.xl" : "theme.space.lg") padding-top="theme.space.xl" padding-bottom="theme.space.xxl"
+          // The side panel: the filters, one choice a line.
+          if wide
+            column role="group" aria-label=filtersLabel testId="search-filters" width="screens.search-aside" flex-shrink=0 gap="theme.space.xl"
+              SearchFilterGroup(label=kindLabel, choices=kinds, chosen=kindKey, stacked=true, choose=pickKind, testId="search-kind")
+              SearchFilterGroup(label=dateLabel, choices=dates, chosen=dateKey, stacked=true, choose=pickDate, testId="search-date")
+          column flex=1 min-width=0 gap="theme.space.lg"
+            // The query: the kit's Field around the platform's search field. An assistant's search marks it.
+            column gap="theme.space.sm"
+              Field(id="search-query", label=queryLabel, hint=queryHint, error="", outcome="none")
+                input type="search" value=query input=typed placeholder=placeholder aria-label=queryLabel autocomplete="off" testId="search-query" min-width=0 font="theme.type.body"
+              if agent == "changed"
+                row testId="search-mark" align-items="center" gap="theme.space.sm"
+                  box width="screens.search-dot" height="screens.search-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color="theme.color.accent" aria-hidden=true
+                  text markNote testId="search-mark-text" flex=1 min-width=0 font="theme.type.caption" color="theme.color.accent"
+            if agent == "proposed"
+              SearchBand(tone="proposed", sentence=proposedNote, testId="search-proposal")
+                ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="search-reject")
+                ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="search-accept")
+            else if agent == "changed"
+              SearchBand(tone="changed", sentence=changedNote, testId="search-changed")
+                ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="search-undo")
+            // A phone's filters: each group on one line, under the query.
+            if not wide
+              row role="group" aria-label=filtersLabel testId="search-filters" flex-wrap="wrap" column-gap="theme.space.lg" row-gap="theme.space.md"
+                SearchFilterGroup(label=kindLabel, choices=kinds, chosen=kindKey, stacked=false, choose=pickKind, testId="search-kind")
+                SearchFilterGroup(label=dateLabel, choices=dates, chosen=dateKey, stacked=false, choose=pickDate, testId="search-date")
+            // The count, or what is awaited, said as a status.
+            if data == "loading"
+              row testId="search-loading" role="status" align-items="center" gap="theme.space.sm" min-height="screens.search-count-min"
+                box width="screens.search-dot" height="screens.search-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color="theme.color.accent" aria-hidden=true animation="searchPulse 1.2s ease-in-out infinite"
+                text loadingText testId="search-loading-text" flex=1 min-width=0 overflow-wrap="anywhere" font="theme.type.label" color="theme.color.ink-muted"
+            else if shown
+              row role="status" align-items="center" min-height="screens.search-count-min"
+                text countText testId="search-count" role="heading" aria-level=2 flex=1 min-width=0 overflow-wrap="anywhere" font="theme.type.label" color="theme.color.ink"
+            // The results, the ghost rows, or the state's panel in the list's place.
+            if data == "loading"
+              column testId="search-ghosts" aria-busy=true background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+                SearchGhostRow(first=true)
+                SearchGhostRow(first=false)
+                SearchGhostRow(first=false)
+            else if data == "empty"
+              StatePanel(title=emptyTitle, message=emptyText, failedText="", agentNote="", actionLabel=(filtered ? clearFiltersLabel : clearSearchLabel), retryLabel="", data="empty", agent="none", size="full", press=emptyWayOn, testId="search-empty")
+            else if data == "failed"
+              StatePanel(title=failedTitle, message="", failedText=failedText, agentNote="", actionLabel="", retryLabel=retryLabel, data="failed", agent="none", size="full", press=retry, testId="search-failed")
+            else
+              column role="list" aria-label=resultsLabel testId="search-results" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+                for r, i in results key=r.key
+                  SearchRow(result=r, first=(i == 0), testId=`search-result-${r.key}`)
