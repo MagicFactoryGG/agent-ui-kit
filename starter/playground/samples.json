@@ -2223,5 +2223,106 @@
     { "key": "export", "group": "Invoices", "label": "Export invoices", "hint": "This month's, as a CSV file", "shortcut": "⌘E" },
     { "key": "archive", "group": "Invoices", "label": "Archive paid invoices", "hint": "They stay searchable", "shortcut": "" },
     { "key": "settings", "group": "Go to", "label": "Billing settings", "hint": "Tax, currency and reminders", "shortcut": "⌘," }
+  ],
+  "props:ActivityTimeline": {
+    "title": "Activity",
+    "summary": "6 events this week, 3 by your assistant",
+    "filterLabel": "Show events by",
+    "everyoneLabel": "Everyone",
+    "youLabel": "You",
+    "agentLabel": "Your assistant",
+    "filter": "everyone",
+    "filterNote": "",
+    "loadingText": "Reading this week's activity…",
+    "emptyTitle": "Nothing has happened here yet",
+    "emptyText": "What you and your assistant change in this workspace will appear here, newest first, with who did it.",
+    "filteredText": "No events by this filter this week. Everyone's events are one tap away.",
+    "showAllLabel": "Show everyone",
+    "failedTitle": "The activity could not be read",
+    "failedText": "Check your connection, then try again. Nothing that happened is lost.",
+    "retryLabel": "Try again",
+    "agentKey": "review",
+    "agentKey@long": "export",
+    "proposedNote": "Your assistant suggests this because it overlaps the supplier call. Nothing changes until you accept.",
+    "changedNote": "Your assistant did this a moment ago. Undo puts the review back at 11:00.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Reject",
+    "undoLabel": "Undo"
+  },
+  "TimelineEvent:many": [
+    {
+      "key": "review",
+      "day": "Today",
+      "time": "09:41",
+      "actor": "Your assistant",
+      "title": "Thursday's design review, moved to 15:00",
+      "detail": "It overlapped the supplier call Priya booked.",
+      "by": "agent"
+    },
+    {
+      "key": "plan",
+      "day": "Today",
+      "time": "09:12",
+      "actor": "You",
+      "title": "Changed the plan to Team",
+      "detail": "Billing moves to 5 seats from the next invoice.",
+      "by": "person"
+    },
+    {
+      "key": "archive",
+      "day": "Yesterday",
+      "time": "18:05",
+      "actor": "Your assistant",
+      "title": "Archived 12 old threads",
+      "detail": "Threads with no reply in 90 days. They stay in Archive for 30 days.",
+      "by": "agent"
+    },
+    {
+      "key": "invite",
+      "day": "Yesterday",
+      "time": "14:30",
+      "actor": "You",
+      "title": "Invited Mei Lin to the workspace",
+      "detail": "",
+      "by": "person"
+    },
+    {
+      "key": "rename",
+      "day": "Mon 17 Nov",
+      "time": "11:05",
+      "actor": "You",
+      "title": "Renamed the project to Atlas",
+      "detail": "Links to the old name still open it.",
+      "by": "person"
+    },
+    {
+      "key": "export",
+      "day": "Mon 17 Nov",
+      "time": "08:20",
+      "actor": "Your assistant",
+      "title": "Exported October's invoices",
+      "detail": "18 invoices, sent to the finance folder.",
+      "by": "agent"
+    }
+  ],
+  "TimelineEvent:long": [
+    {
+      "key": "export",
+      "day": "Wednesday 19 November 2026, the last working day before the quarterly close",
+      "time": "11:59 PM",
+      "actor": "Your assistant, acting for Priya Nair while she is away",
+      "title": "Exported every invoice, credit note and receipt from the last financial year to the finance team's shared folder",
+      "detail": "Northwind_Traders_2025_full_ledger_export_with_attachments_and_audit_trail.zip holds 1,284 documents and is kept for the next seven days, then removed.",
+      "by": "agent"
+    },
+    {
+      "key": "rename",
+      "day": "Wednesday 19 November 2026, the last working day before the quarterly close",
+      "time": "10:02 AM",
+      "actor": "You",
+      "title": "Renamed the project from “Atlas customer onboarding and migration programme” to “Atlas”",
+      "detail": "Every link to the old name still opens the project, and the people who follow it were told once by email.",
+      "by": "person"
+    }
   ]
 }

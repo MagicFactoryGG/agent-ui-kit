@@ -24,6 +24,8 @@ use StatTiles from "__SCOPE__/blocks"
 use weekStats, statsText from "./model.contract"
 use Menu, ActionButton from "__SCOPE__/components"
 use sortShown, sortText from "./model.contract"
+use ActivityTimeline from "__SCOPE__/blocks"
+use activityEvents, activityText from "./model.contract"
 use CommandMenu from "__SCOPE__/blocks"
 use commandsShown, commandResult, commandText from "./model.contract"
 
@@ -104,6 +106,14 @@ component App
   // then "many". The agent's read is said under the row (changed: what it did), with one Undo.
   derive stats = valueOf(book, "stats")
   derive statsMarked = isMarked(book, "stats")
+  // ActivityTimeline: the workspace's activity; its filter is one value in the ledger (everyone, person or agent),
+  // and the assistant's archive of yesterday another ("archived", or "kept" once undone). The open Undo is on the
+  // archive while it stands, then on the assistant's own undo while that is marked.
+  derive activityFilter = valueOf(book, "activity-filter")
+  derive activityFilterMarked = isMarked(book, "activity-filter")
+  derive threads = valueOf(book, "threads")
+  derive threadsMarked = isMarked(book, "threads")
+  derive activityUndoKey = threads == "archived" ? "archive" : threadsMarked ? "restore" : ""
   // CommandMenu: the last command run, "none" until one is; the agent's run is marked on its command, with Undo.
   derive lastCommand = valueOf(book, "command")
   derive commandMarked = isMarked(book, "command")
@@ -206,6 +216,15 @@ component App
     book = personSet(book, "stats", "many")
   action undoStats
     book = undo(book, latestIdAbout(book, "stats"))
+  // The timeline's segments show the events by who did them; the event's Undo takes back the assistant's archive,
+  // or its own undo of it.
+  action chooseActivityByPerson(key: string)
+    book = personSet(book, "activity-filter", key)
+  action undoActivityByPerson
+    if threads == "archived"
+      book = personSet(book, "threads", "kept")
+    else
+      book = undo(book, latestIdAbout(book, "threads"))
   // Rows of other kinds, a retry and a proposal's answers: this use has none.
   action ignoreKey(key: string)
     book = book
@@ -297,6 +316,14 @@ component App
   tool runCommand writes idempotent closed "Run one of the workspace's commands, as choosing it in the Commands menu does: new-invoice, new-customer, export, archive or settings. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readCommands." = runCommand
     returns book.answer
     fails when book.answer == "off"
+  tool readActivity reads "The activity: the filter (everyone, person or agent) on the first line, then each event shown to everyone, newest first, one per line: id, day, time, who (person or agent), then what happened, tab-separated." = readActivity
+    returns activityText(book)
+  tool setActivityFilter writes idempotent closed "Show the activity of everyone, only the person's own events, or only the assistant's, as the timeline's Everyone, You and Your assistant do: everyone, person or agent. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readActivity." = setActivityFilter
+    returns book.answer
+    fails when book.answer == "off"
+  tool undoActivity writes idempotent closed "Undo an event the assistant did, as the event's Undo does: archive puts the 12 threads it archived back in the inbox. Answers saved, not-archived when they are back already, or delayed, proposed or off when the person raised its mode. Check with readActivity." = undoActivity
+    returns book.answer
+    fails when book.answer == "off"
 
   view
     main testId="app" width="100%" height="100%"
@@ -315,6 +342,7 @@ component App
       BarChart(title="Orders", note=chartNote(chartRange), chartLabel=chartLabel(chartRange), points=chartPoints(chartRange), ranges=chartRanges(), range=chartRange, rangeLabel="Show orders by", emptyText="", emptyLabel="", loadingText="", failedText="", retryLabel="", agentKey="", agentNote=latestAbout(book, ["chart-range"]), undoLabel="Undo", proposalText="", acceptLabel="", rejectLabel="", data="many", agent=(chartMarked ? "changed" : "none"), size=(viewport.width < 600 ? "compact" : "wide"), choose=chooseRangeByPerson, add=ignore, retry=ignore, undo=undoRange, accept=ignore, reject=ignore, testId="orders")
       NotificationList(title="Notifications", summary=(notesAllRead ? "All read" : "2 new"), markAllLabel="Mark all read", markAll=markNotesByPerson, newTitle="New", earlierTitle="Earlier", notes=inboxNotes(notesAllRead), answer=ignoreAnswer, loadingText="", emptyTitle="", emptyText="", emptyActionLabel="", emptyPress=ignore, failedTitle="", failedText="", retryLabel="", retry=ignore, proposedNote=notesAsks, acceptLabel="Mark read", rejectLabel="Not now", accept=acceptNotes, reject=rejectNotes, changedNote=latestAbout(book, ["notes"]), undoLabel="Undo", undo=undoNotes, data="many", agent=(notesAsks != "" ? "proposed" : notesMarked ? "changed" : "none"), testId="notes")
       StatTiles(title="This week", stats=(stats == "many" ? weekStats() : []), data=(stats == "many" ? "many" : "failed"), loadingText="", failedText="This week's numbers could not be read.", retryLabel="Try again", retry=loadStatsByPerson, agent=(statsMarked ? "changed" : "none"), agentKey="", agentNote="", yesLabel="", noLabel="", yes=ignore, no=ignore, changedNote=latestAbout(book, ["stats"]), undoLabel="Undo", undo=undoStats, testId="stats")
+      ActivityTimeline(title="Activity", summary="5 events this week", filterLabel="Show events by", everyoneLabel="Everyone", youLabel="You", agentLabel="Your assistant", filter=activityFilter, filterNote=(activityFilterMarked ? latestAbout(book, ["activity-filter"]) : ""), events=activityEvents(book), loadingText="", emptyTitle="", emptyText="Nothing has happened here yet.", filteredText="No events by this filter this week.", showAllLabel="Show everyone", failedTitle="", failedText="", retryLabel="", agentKey=activityUndoKey, proposedNote="", changedNote=(threadsMarked ? latestAbout(book, ["threads"]) : ""), acceptLabel="", rejectLabel="", undoLabel="Undo", data="many", agent=(activityUndoKey != "" ? "changed" : "none"), choose=chooseActivityByPerson, retry=ignore, accept=ignore, reject=ignore, undo=undoActivityByPerson, testId="activity")
       // Menu as a popup, opened by the Order button (ActionButton's `opens`), with a search above its items
       ActionButton(opens="sort-menu", label="Order", kind="plain", interaction="idle", outcome="none", press=sortOpened, testId="sort-open")
       Menu(menuId="sort-menu", label="Order", items=sortShown(sort, sortQuery), presentation="popup", interaction="idle", choose=chooseSortByPerson, search="Find an order", query=sortQuery, find=findSort, testId="sort-menu")

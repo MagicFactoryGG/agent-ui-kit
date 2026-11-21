@@ -164,6 +164,25 @@
             "title": "Command"
           }
         }
+      },
+      "readActivity": {
+        "title": "Read Activity"
+      },
+      "setActivityFilter": {
+        "title": "Set Activity Filter",
+        "parameters": {
+          "filter": {
+            "title": "Filter"
+          }
+        }
+      },
+      "undoActivity": {
+        "title": "Undo Activity",
+        "parameters": {
+          "event": {
+            "title": "Event"
+          }
+        }
       }
     }
   }
