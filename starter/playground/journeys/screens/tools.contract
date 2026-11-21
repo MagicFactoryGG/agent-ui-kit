@@ -3,10 +3,10 @@
 // which door called it. A tool's action calls functions only, never another action with arguments (the kit's
 // docs/recipes/exact-workarounds.md, 3).
 use Ledger, act from "@agent-ui-kit/agent"
-use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys, answerAct, setupAnswerKeys, shellSearchAct, settingAct, settingsSwitchKeys, entryOpenAct, entryAcceptAct, entryAuthenticateAct, periodAct, dashPeriodKeys from "./model.contract"
+use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys, answerAct, setupAnswerKeys, shellSearchAct, settingAct, settingsSwitchKeys, entryOpenAct, entryAcceptAct, entryAuthenticateAct, periodAct, dashPeriodKeys, profileAct, profileDetailKeys, profileProblem from "./model.contract"
 
 members App
-  action openScreen(screen: enum<"MediaViewer", "ListDetail", "MailScreen", "OnboardingScreen", "AppShell", "SettingsScreen", "EntryScreen", "DashboardScreen">)
+  action openScreen(screen: enum<"MediaViewer", "ListDetail", "MailScreen", "OnboardingScreen", "AppShell", "SettingsScreen", "EntryScreen", "DashboardScreen", "ProfileScreen">)
     shown = screen
   action readAlbum
   action showPicture(picture: string)
@@ -43,3 +43,7 @@ members App
   action readPeriods
   action setPeriod(period: string)
     book = dashPeriodKeys().includes(period) ? act(book, periodAct(period)) : Ledger(book, answer="unknown-id")
+  action readProfile
+  // A detail the person would be refused is refused to the agent with the same word; a good one waits for the person.
+  action changeDetail(detail: string, value: string)
+    book = not profileDetailKeys().includes(detail) ? Ledger(book, answer="unknown-id") : profileProblem(detail, value) != "" ? Ledger(book, answer=profileProblem(detail, value)) : act(book, profileAct(detail, value.trim()))

@@ -1,7 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, ShellRow, SettingsSection, SettingsScreenGroup, DashboardPeriod, DashboardItem from "__SCOPE__/screens"
+use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, ShellRow, SettingsSection, SettingsScreenGroup, DashboardPeriod, DashboardItem, ProfileDetail, ProfileSetting from "__SCOPE__/screens"
 use Fact, Message, Step, NavEntry, Setting, Stat, BarPoint from "__SCOPE__/blocks"
 
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -172,6 +172,33 @@ fn dashItems(): DashboardItem[] = [
 ]
 fn periodAct(key: string): Act = Act(tool="setPeriod", door="agent", key="dash-period", title="Period", value=key, did=`Your assistant showed the numbers for ${dashPeriodWord(key)}.`, asks=`Your assistant suggests showing the numbers for ${dashPeriodWord(key)}.`, will=`Your assistant will show the numbers for ${dashPeriodWord(key)} in 5 seconds.`)
 
+// ProfileScreen: the person's own details. Each is a value in the ledger (`profile-<key>`), so the row, the person's
+// Save and the agent's changeDetail all read and write it. Changing a detail reaches others (the name people see, the
+// address we write to), so the tool's floor is proposed: nothing changes until the person accepts on the screen. One
+// fn says what is wrong with a value (a word, "" when it is good) and one turns the word into the person's sentence,
+// so the field's error and the tool's refusal never disagree. Ending the session and authenticating are the person's
+// own acts: there is no tool for either.
+fn profileBase(): ProfileDetail[] = [
+  ProfileDetail(key="name", label="Name", value="", hint="People in your workspace see this name.", kind="text", options=[]),
+  ProfileDetail(key="email", label="Email", value="", hint="We write to this address.", kind="email", options=[]),
+  ProfileDetail(key="phone", label="Phone", value="", hint="With the country code, as in +44 20 7946 0958.", kind="tel", options=[]),
+  ProfileDetail(key="language", label="Language", value="", hint="For the app's words and the mail we send you.", kind="choice", options=profileLanguages())
+]
+fn profilePicture(): string = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect width='1' height='1' fill='lightsteelblue'/%3E%3Ccircle cx='0.5' cy='0.41' r='0.18' fill='ghostwhite'/%3E%3Cpath d='M0.15 1c0.04-0.2 0.18-0.3 0.35-0.3s0.31 0.1 0.35 0.3z' fill='ghostwhite'/%3E%3C/svg%3E"
+fn profileLanguages(): string[] = ["English (UK)", "English (US)", "Deutsch", "Español", "Français", "Português"]
+fn profileDetailKeys(): string[] = profileBase().map(d => d.key)
+fn profileKey(key: string): string = `profile-${key}`
+fn profileKeys(): string[] = profileDetailKeys().map(k => profileKey(k))
+fn profileNoun(key: string): string = key == "name" ? "name" : key == "email" ? "email address" : key == "phone" ? "phone number" : "language"
+fn profileProblem(key: string, value: string): string = value.trim() == "" ? "empty" : key == "email" and not value.includes("@") ? "not-an-address" : key == "phone" and not value.trim().startsWith("+") ? "no-country-code" : key == "language" and not profileLanguages().includes(value) ? "unknown-language" : ""
+fn profileMessage(word: string): string = word == "empty" ? "This cannot be empty. Your last saved value is unchanged." : word == "not-an-address" ? "That is not an address we can write to: it needs an @." : word == "no-country-code" ? "Start with the country code, as in +44 20 7946 0958." : word == "unknown-language" ? "Choose one of the languages on the list." : ""
+fn profileAct(key: string, value: string): Act = Act(tool="changeDetail", door="agent", key=profileKey(key), title=profileNoun(key), value=value, did=`Your assistant changed your ${profileNoun(key)} to ${value}.`, asks=`Your assistant suggests ${value} as your ${profileNoun(key)}.`, will=`Your assistant will change your ${profileNoun(key)} to ${value} in 5 seconds.`)
+fn profileSettings(): ProfileSetting[] = [
+  ProfileSetting(key="digest", kind="switch", label="Weekly digest", detail="A summary of your week, each Monday.", value="", on=true),
+  ProfileSetting(key="time", kind="value", label="Time zone", detail="", value="London", on=false),
+  ProfileSetting(key="devices", kind="link", label="Your devices", detail="Where you are authenticated now.", value="", on=false)
+]
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false),
@@ -184,10 +211,12 @@ fn agentTools(): AgentTool[] = [
   // The person's own acts: off, so the ledger refuses them from the agent's door whatever mode a person chooses.
   AgentTool(name="acceptTerms", title="Terms", sentence="Accepts the terms for the person. Never allowed.", floor="off", reach="self", secret=false),
   AgentTool(name="authenticate", title="Authenticate", sentence="Authenticates the person. Never allowed: authenticating is the person's own act.", floor="off", reach="self", secret=false),
-  AgentTool(name="setPeriod", title="Period", sentence="Shows the dashboard's numbers for another period.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="setPeriod", title="Period", sentence="Shows the dashboard's numbers for another period.", floor="recorded", reach="self", secret=false),
+  // Others see a profile's name, and its address is where mail goes: the person accepts each change first.
+  AgentTool(name="changeDetail", title="Profile", sentence="Changes a detail of the person's profile, once the person accepts.", floor="proposed", reach="others", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="picture", value="harbour"),
   Value(key="project", value="harbour")
-].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on")))).concat([Value(key="entry-step", value="terms"), Value(key="entry-authenticated", value="no")]).concat([Value(key="dash-period", value="quarter")])
+].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on")))).concat([Value(key="entry-step", value="terms"), Value(key="entry-authenticated", value="no")]).concat([Value(key="dash-period", value="quarter")]).concat([Value(key="profile-name", value="Ada Lovelace"), Value(key="profile-email", value="ada@studio.example"), Value(key="profile-phone", value="+44 20 7946 0958"), Value(key="profile-language", value="English (UK)")])

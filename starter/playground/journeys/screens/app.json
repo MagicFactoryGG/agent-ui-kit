@@ -114,6 +114,20 @@
             "title": "Period"
           }
         }
+      },
+      "readProfile": {
+        "title": "Read Profile"
+      },
+      "changeDetail": {
+        "title": "Change Detail",
+        "parameters": {
+          "detail": {
+            "title": "Detail"
+          },
+          "value": {
+            "title": "Value"
+          }
+        }
       }
     }
   }
