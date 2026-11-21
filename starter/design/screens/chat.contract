@@ -230,7 +230,7 @@ component ChatScreen
           if reply != "idle"
             ChatActivity(answering=(reply == "answering"), text=(reply == "answering" ? answeringText : thinkingText), stopLabel=stopLabel, stop=stop, pulse=pulse, testId="chat-reply")
           // The composer: one surface with the line round it, the pasted pieces and the text, then mic, plus, send.
-          row testId="chat-composer" role="group" aria-label=composerLabel keycapture=keyed flex-wrap="wrap" align-items="flex-end" column-gap="theme.space.sm" row-gap="theme.space.xs" padding="theme.space.xs" padding-left="theme.space.md" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+          row testId="chat-composer" role="group" aria-label=composerLabel flex-wrap="wrap" align-items="flex-end" column-gap="theme.space.sm" row-gap="theme.space.xs" padding="theme.space.xs" padding-left="theme.space.md" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
             column flex=1 min-width="screens.chat-text-min" gap="theme.space.xs" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
               if parts.length > 0
                 row testId="chat-composer-parts" flex-wrap="wrap" align-items="center" column-gap="theme.space.xs" row-gap="theme.space.sm" min-width=0
@@ -242,8 +242,10 @@ component ChatScreen
                         text p.text overflow-wrap="anywhere" font="theme.type.body" color="theme.color.accent"
                     else
                       text p.text testId=`chat-part-${p.key}` min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
-              Field(id="chat-composer", label="", hint="", error="", outcome="none")
-                textarea id="chat-composer-input" value=draft input=edit rows=1 field-sizing="content" max-height="screens.chat-field-max" placeholder=placeholder aria-label=composerLabel testId="chat-composer-input" width="100%" min-width=0 box-sizing="border-box" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-width=0 background-color="transparent" color="theme.color.ink" font="theme.type.body" resize="none"
+              // Enter sends from the text alone: a focused button or link keeps its own Enter.
+              column keycapture=keyed min-width=0
+                Field(id="chat-composer", label="", hint="", error="", outcome="none")
+                  textarea id="chat-composer-input" value=draft input=edit rows=1 field-sizing="content" max-height="screens.chat-field-max" placeholder=placeholder aria-label=composerLabel testId="chat-composer-input" width="100%" min-width=0 box-sizing="border-box" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-width=0 background-color="transparent" color="theme.color.ink" font="theme.type.body" resize="none"
             row flex-shrink=0 margin-left="auto" gap="theme.space.xs" align-items="center"
               ActionButton(opens="", label=micLabel, kind="plain", interaction="idle", outcome="none", press=voice, testId="chat-mic")
               ActionButton(opens="chat-add-menu", label=addLabel, kind="plain", interaction="idle", outcome="none", press=opened, testId="chat-add")
