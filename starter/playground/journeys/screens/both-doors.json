@@ -715,5 +715,112 @@
       "profileDetails.1.value": "ada@studio.example",
       "profileOpen": false
     }
+  },
+  {
+    "name": "ChatScreen: typing and Send, and sendMessage, send the same message; the agent's is recorded and marked",
+    "person": [
+      "call openScreen {\"screen\":\"ChatScreen\"}",
+      "type chat-composer-input Book the 8pm table for two",
+      "tap chat-send"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"ChatScreen\"}",
+      "call sendMessage {\"text\":\"Book the 8pm table for two\"}"
+    ],
+    "same": [
+      "chatTurns",
+      "book.values",
+      "chatDraft"
+    ],
+    "calls": [
+      [
+        "ok",
+        "ChatScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "chatSent": [
+        "Book the 8pm table for two"
+      ],
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "chat-log",
+      "book.marked": [
+        "chat-log"
+      ]
+    },
+    "expectPerson": {
+      "chatSent": [
+        "Book the 8pm table for two"
+      ],
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "ChatScreen: sendMessage with no words sends nothing, as Send is off while the text is empty",
+    "person": [
+      "call openScreen {\"screen\":\"ChatScreen\"}"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"ChatScreen\"}",
+      "call sendMessage {\"text\":\"  \"}"
+    ],
+    "same": [
+      "chatTurns",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "ChatScreen"
+      ],
+      [
+        "failed",
+        "empty"
+      ]
+    ],
+    "expect": {
+      "chatSent": [],
+      "book.changes.length": 0
+    },
+    "expectPerson": {
+      "chatSent": []
+    }
+  },
+  {
+    "name": "ChatScreen: Undo on the screen takes back the message the agent sent",
+    "person": [
+      "call openScreen {\"screen\":\"ChatScreen\"}"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"ChatScreen\"}",
+      "call sendMessage {\"text\":\"Book the 8pm table for two\"}",
+      "tap chat-undo"
+    ],
+    "same": [
+      "chatTurns",
+      "book.values",
+      "book.marked"
+    ],
+    "calls": [
+      [
+        "ok",
+        "ChatScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "chatSent": [],
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]
