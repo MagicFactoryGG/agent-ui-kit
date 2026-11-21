@@ -91,6 +91,18 @@
             "title": "On"
           }
         }
+      },
+      "readEntry": {
+        "title": "Read Entry"
+      },
+      "openEntry": {
+        "title": "Open Entry"
+      },
+      "acceptTerms": {
+        "title": "Accept Terms"
+      },
+      "signIn": {
+        "title": "Sign In"
       }
     }
   }

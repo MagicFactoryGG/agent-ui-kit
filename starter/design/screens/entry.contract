@@ -1,0 +1,172 @@
+// EntryScreen: the way into a product, in the owner's order: terms first, then authentication, each step taking
+// over the whole surface. The product's TopBar names it; under it, at a readable centred width on a desktop
+// (screens.entry-max) and the full width on a phone, a two-part track says where the person is (the terms, then
+// the way in), so the order is seen before it is lived. Then the step itself:
+//   terms         its title (display type, the page's focal words) and one line, then the terms-capture frame:
+//                 the screen's slot, where the app passes the relying party's live capture page. The screen gives
+//                 it its place (a named region on the surface, at the column's width) and its size (all the
+//                 height the window leaves, never less than screens.entry-frame-min); it draws no terms and no
+//                 checkbox of its own. Under it the step's way on: Accept (the one fill) and, when the app gives
+//                 one, Decline (plain), side by side, wrapping on a phone only if their words need it.
+//   authenticate  the step's title and line where the terms' stood (the heading never jumps between steps), then
+//                 the kit's EntryChoice: the way in (a face check, a passkey: the platform's and the person's act,
+//                 not the screen's), with its busy, error and blocked outcomes passed through; under a hairline, a
+//                 quiet footer for what is behind the person: a tick and `acceptedNote`, and the way back to the
+//                 terms (they wrap under the note on a phone).
+// States: step terms|authenticate (resting first); interaction idle|busy (terms: Accept is sending and holds
+// still; authenticate: the EntryChoice's action waits on the platform; on both a dimmed button alone read as
+// disabled, so `busyText` says what is awaited, role status, beside a dot that pulses); outcome none|error|blocked (terms: the
+// line under the way on, said as an alert, in the status ink on the page; authenticate: the EntryChoice's own
+// outcome line); agent none|waiting (an assistant brought the person here, and waits: accepting the terms and the
+// face check stay the person's, so the agent's note says so once, above the step, marked at its start in the
+// caution hue with a clock, its words in ink so any party's theme holds them).
+// Props: the product's name, each step's words, the EntryChoice's words, the states, and the app's actions
+// (accept, decline, back, authenticate). `busyText` is the app's per step ("Saving your answer…", "Waiting for
+// your device…"). Every word is the app's; every value a Theme token or a screens.* size.
+// A note for later, not built here: inside a chat (the dock), Authenticate sits in the middle of the chat.
+use Words, ActionButton from "__SCOPE__/components"
+use TopBar, EntryChoice from "__SCOPE__/blocks"
+
+// The busy cue pulses, so waiting reads as under way, not as a dimmed control.
+keyframes entryPulse
+  50% opacity=0.25
+
+// A drawn tick: a step done (the track) and the terms accepted (the authenticate step's footer).
+component EntryTick
+  props
+    size: enum<"small", "glyph">
+  view
+    svg viewBox="0 0 12 12" width=(size == "small" ? "screens.entry-tick" : "screens.entry-glyph") height=(size == "small" ? "screens.entry-tick" : "screens.entry-glyph") fill="none" stroke="theme.color.positive" aria-hidden=true flex-shrink=0
+      path d="M2.5 6.5L5 9l4.5-5" stroke-width=1.75 stroke-linecap="round" stroke-linejoin="round"
+
+// One part of the track: a bar (the accent once reached), then its number or a tick, and its name; the step the
+// person is on in ink, the others in muted ink, all in one type style so the two parts keep one line.
+component EntryStepMark
+  props
+    name: string
+    number: number
+    state: enum<"done", "current", "next">
+    testId: string
+  view
+    column role="listitem" aria-label=name aria-current=(state == "current" ? "step" : "false") testId=testId flex=1 min-width=0 gap="theme.space.sm"
+      box height="screens.entry-track" border-radius="theme.radius.pill" background-color=(state == "next" ? "theme.color.fill" : "theme.color.accent") aria-hidden=true
+      row align-items="center" gap="theme.space.sm" min-width=0 aria-hidden=true
+        if state == "done"
+          EntryTick(size="small")
+        else
+          text `${number}` font="theme.type.label" color=(state == "current" ? "theme.color.accent" : "theme.color.ink-muted") font-variant-numeric="tabular-nums"
+        text name flex=1 min-width=0 font="theme.type.label" color=(state == "current" ? "theme.color.ink" : "theme.color.ink-muted")
+
+// What is awaited while the step is busy: a pulsing accent dot and the app's words, said as a status.
+component EntryBusy
+  props
+    text: string
+    testId: string
+  view
+    row testId=testId role="status" align-items="center" gap="theme.space.sm"
+      box width="screens.entry-dot" height="screens.entry-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color="theme.color.accent" aria-hidden=true animation="entryPulse 1.2s ease-in-out infinite"
+      text text testId=`${testId}-text` flex=1 min-width=0 font="theme.type.caption" color="theme.color.ink-muted"
+
+// The step's heading: its title in display type (the page's focal words) and one line under it.
+component EntryHeading
+  props
+    title: string
+    lead: string
+    testId: string
+  view
+    column gap="theme.space.sm"
+      text title testId=`${testId}-title` role="heading" aria-level=2 padding-top="theme.space.xs" padding-bottom="theme.space.xs" text-wrap="balance" overflow-wrap="break-word" font="theme.type.display-compact" letter-spacing="theme.type.display-compact-tracking" color="theme.color.ink"
+      if lead != ""
+        text lead testId=`${testId}-lead` font="theme.type.body" color="theme.color.ink-muted"
+
+component EntryScreen
+  props
+    productName: string
+    stepsLabel: string
+    termsStepName: string
+    authStepName: string
+    termsTitle: string
+    termsLead: string
+    termsFrameLabel: string
+    acceptLabel: string
+    declineLabel: string
+    authTitle: string
+    authLead: string
+    acceptedNote: string
+    backLabel: string
+    choiceTitle: string
+    choiceNote: string
+    choiceActionLabel: string
+    outcomeText: string
+    busyText: string
+    agentNote: string
+    step: enum<"terms", "authenticate">
+    interaction: enum<"idle", "busy">
+    outcome: enum<"none", "error", "blocked">
+    agent: enum<"none", "waiting">
+    accept: action
+    decline: action
+    back: action
+    authenticate: action
+  slot
+  derive busy = interaction == "busy"
+  view
+    column testId="entry" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
+      TopBar(title=productName, agentNote="", agent="none")
+      scroll id="entry-scroll" flex=1 min-height=0
+        column role="main" min-height="100%" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.xl" padding-bottom="theme.space.xxl"
+          column flex=1 width="100%" max-width="screens.entry-max" margin-left="auto" margin-right="auto" gap="theme.space.xl"
+            row role="list" aria-label=stepsLabel testId="entry-steps" gap="theme.space.md"
+              EntryStepMark(name=termsStepName, number=1, state=(step == "terms" ? "current" : "done"), testId="entry-step-terms")
+              EntryStepMark(name=authStepName, number=2, state=(step == "terms" ? "next" : "current"), testId="entry-step-authenticate")
+            if agent == "waiting"
+              row testId="entry-waiting" role="status" gap="theme.space.sm" align-items="flex-start" padding-left="theme.space.md" border-left-width="screens.entry-mark-line" border-left-style="solid" border-left-color="theme.color.caution"
+                svg viewBox="0 0 16 16" width="screens.entry-glyph" height="screens.entry-glyph" margin-top="screens.entry-glyph-top" fill="none" stroke="theme.color.caution" aria-hidden=true flex-shrink=0
+                  circle cx=8 cy=8 r=6 stroke-width=1.5
+                  path d="M8 4.8V8l2.2 1.4" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+                text agentNote testId="entry-waiting-text" flex=1 min-width=0 font="theme.type.body" color="theme.color.ink"
+            column flex=1 gap="theme.space.lg"
+              if step == "terms"
+                EntryHeading(title=termsTitle, lead=termsLead, testId="entry-terms")
+              else
+                column gap="theme.space.xl"
+                  EntryHeading(title=authTitle, lead=authLead, testId="entry-auth")
+                  column gap="theme.space.md"
+                    EntryChoice(title=choiceTitle, note=choiceNote, actionLabel=choiceActionLabel, outcomeText=outcomeText, kind="primary", interaction=interaction, outcome=outcome, press=authenticate, testId="entry-choice")
+                    if busy and busyText != ""
+                      EntryBusy(text=busyText, testId="entry-auth-busy")
+                  row testId="entry-terms-done" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.md" padding-top="theme.space.lg" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+                    row testId="entry-accepted" flex=1 min-width="screens.entry-note-min" align-items="center" gap="theme.space.sm"
+                      EntryTick(size="glyph")
+                      text acceptedNote flex=1 min-width=0 font="theme.type.caption" color="theme.color.ink-muted"
+                    ActionButton(label=backLabel, kind="plain", interaction=(busy ? "disabled" : "idle"), outcome="none", press=back, testId="entry-back")
+              // The terms-capture frame: the slot, placed once on both steps (Exact shows a library's slot always: no
+              // `if`, no display none, no aria-hidden on its way down). On the terms step it is a named region on
+              // the surface with all the height the window leaves; on the way in it drops its frame and takes no
+              // room of its own, and the app passes nothing into it there (the capture page is the terms step's).
+              column role=(step == "terms" ? "region" : "none") aria-label=(step == "terms" ? termsFrameLabel : "") testId="entry-terms-frame" flex=(step == "terms" ? "1 1 auto" : "0 0 auto") min-height=(step == "terms" ? "screens.entry-frame-min" : "0") box-sizing="border-box" background-color=(step == "terms" ? "theme.color.surface" : "transparent") border-radius="theme.radius.card" border-width=(step == "terms" ? "theme.line.width" : "0") border-style="solid" border-color="theme.color.line" overflow="hidden"
+                if step == "terms" and termsFrameLabel != ""
+                  row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line" aria-hidden=true
+                    text termsFrameLabel flex=1 min-width=0 font="theme.type.caption" color="theme.color.ink-muted"
+                column flex=1 min-height=0
+                  children
+              if step == "terms"
+                column gap="theme.space.md"
+                  // wrap-reverse: where the two do not fit one line (a phone), Accept takes the top line, nearest
+                  // the frame, and Decline goes under it.
+                  row flex-wrap="wrap-reverse" gap="theme.space.md"
+                    if declineLabel != ""
+                      column flex=1 min-width="screens.entry-action-min"
+                        ActionButton(label=declineLabel, kind="plain", interaction=(busy ? "disabled" : "idle"), outcome="none", press=decline, testId="entry-decline")
+                    column flex=1 min-width="screens.entry-action-min"
+                      ActionButton(label=acceptLabel, kind="primary", interaction=(busy ? "busy" : "idle"), outcome=outcome, press=accept, testId="entry-accept")
+                  if busy and busyText != ""
+                    EntryBusy(text=busyText, testId="entry-terms-busy")
+                  if outcome != "none"
+                    row role="alert" gap="theme.space.sm" align-items="flex-start"
+                      svg viewBox="0 0 16 16" width="screens.entry-glyph" height="screens.entry-glyph" margin-top="screens.entry-glyph-top" fill="none" stroke=(outcome == "error" ? "theme.color.critical" : "theme.color.caution") aria-hidden=true flex-shrink=0
+                        path d="M8 2.5L14.5 13.5H1.5Z" stroke-width=1.5 stroke-linejoin="round"
+                        path d="M8 6.5v3.2" stroke-width=1.5 stroke-linecap="round"
+                        path d="M8 11.4v0.01" stroke-width=1.5 stroke-linecap="round"
+                      column flex=1 min-width=0
+                        Words(text=outcomeText, kind="body", outcome=outcome, level=0, testId="entry-terms-outcome")

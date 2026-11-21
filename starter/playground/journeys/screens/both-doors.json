@@ -408,5 +408,116 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "EntryScreen: the agent's openEntry and the person's Back both bring the entry to its terms; the agent's is recorded and said",
+    "person": [
+      "call openScreen {\"screen\":\"EntryScreen\"}",
+      "tap entry-accept",
+      "tap entry-back"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"EntryScreen\"}",
+      "tap entry-accept",
+      "call openEntry {}"
+    ],
+    "same": [
+      "shown",
+      "entryStep",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "EntryScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "entryStep": "terms",
+      "entryOpenedByAgent": true,
+      "book.changes.length": 1,
+      "book.changes.0.tool": "openEntry",
+      "book.changes.0.mode": "recorded"
+    },
+    "expectPerson": {
+      "entryStep": "terms",
+      "entryOpenedByAgent": false,
+      "book.changes.length": 0
+    }
+  },
+  {
+    "name": "EntryScreen: the agent's acceptTerms and signIn are refused and the step stays at the terms; the person's Accept moves it on",
+    "person": [
+      "call openScreen {\"screen\":\"EntryScreen\"}",
+      "tap entry-accept"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"EntryScreen\"}",
+      "call acceptTerms {}",
+      "call signIn {}"
+    ],
+    "same": [
+      "shown",
+      "book.changes",
+      "book.marked"
+    ],
+    "calls": [
+      [
+        "ok",
+        "EntryScreen"
+      ],
+      [
+        "failed",
+        "off"
+      ],
+      [
+        "failed",
+        "off"
+      ]
+    ],
+    "expect": {
+      "entryStep": "terms",
+      "book.changes.length": 0,
+      "book.marked": []
+    },
+    "expectPerson": {
+      "entryStep": "authenticate",
+      "book.changes.length": 0
+    }
+  },
+  {
+    "name": "EntryScreen: after the agent's refused acceptTerms, the person's own Accept still goes through",
+    "person": [
+      "call openScreen {\"screen\":\"EntryScreen\"}",
+      "tap entry-accept"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"EntryScreen\"}",
+      "call acceptTerms {}",
+      "tap entry-accept"
+    ],
+    "same": [
+      "entryStep",
+      "book.values",
+      "book.changes"
+    ],
+    "calls": [
+      [
+        "ok",
+        "EntryScreen"
+      ],
+      [
+        "failed",
+        "off"
+      ]
+    ],
+    "expect": {
+      "entryStep": "authenticate",
+      "book.changes.length": 0
+    }
   }
 ]
