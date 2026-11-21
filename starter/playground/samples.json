@@ -2224,6 +2224,75 @@
     { "key": "archive", "group": "Invoices", "label": "Archive paid invoices", "hint": "They stay searchable", "shortcut": "" },
     { "key": "settings", "group": "Go to", "label": "Billing settings", "hint": "Tax, currency and reminders", "shortcut": "⌘," }
   ],
+  "props:ChatScreen": {
+    "title": "Dinner in Lisbon",
+    "settingsLabel": "Settings",
+    "loadingText": "Loading the conversation…",
+    "emptyText": "Ask Atlas anything to start.",
+    "startLabel": "Write a message",
+    "failedText": "This conversation did not load.",
+    "retryLabel": "Try again",
+    "agentMark": "Sent by your assistant",
+    "agentKey": "turn-3",
+    "composerLabel": "Message to Atlas",
+    "placeholder": "Message Atlas",
+    "draft": "and a table by the window, if they have one.",
+    "draft@empty": "",
+    "draft@loading": "",
+    "draft@failed": "",
+    "sendLabel": "Send",
+    "sendLabel@long": "Send",
+    "settingsLabel@long": "Settings",
+    "micLabel@long": "Voice",
+    "addLabel@long": "Add",
+    "undoLabel@long": "Undo",
+    "stopLabel@long": "Stop",
+    "micLabel": "Voice",
+    "addLabel": "Add",
+    "addSearch": "Search what to add",
+    "addQuery": "",
+    "thinkingText": "Atlas is thinking",
+    "answeringText": "Atlas is answering",
+    "stopLabel": "Stop",
+    "changedNote": "Your assistant sent “Book the 8pm table for two” for you.",
+    "undoLabel": "Undo",
+    "proposedNote": "Atlas suggests booking Taberna da Rua at 8pm on Thursday.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "waitingNote": "Atlas waits for you to authenticate before it pays the deposit.",
+    "waitingLabel": "Authenticate"
+  },
+  "ChatTurn:many": [
+    { "key": "turn-1", "author": "You", "mine": true, "text": "A quiet dinner for two on Thursday, near Alfama?", "when": "18:02" },
+    { "key": "turn-2", "author": "Atlas", "mine": false, "text": "Taberna da Rua has a table at 8pm: grilled fish, a small terrace.", "when": "18:02" },
+    { "key": "turn-3", "author": "You", "mine": true, "text": "Book the 8pm table for two.", "when": "18:05" },
+    { "key": "turn-4", "author": "Atlas", "mine": false, "text": "About 35 euros each. They hold it with a 10 euro deposit.", "when": "18:05" }
+  ],
+  "ChatTurn:long": [
+    { "key": "turn-1", "author": "You", "mine": true, "text": "A question that runs on for a long while because the person asking it wanted to give every detail at once, including the dates, the people coming, and the restaurants they already tried and did not like, so nothing is missed.", "when": "Yesterday, 18:02" },
+    { "key": "turn-2", "author": "Atlas, the assistant that plans the evenings out for the whole studio team", "mine": false, "text": "Here is a long reply with a link that has no spaces at all: https://reservations.example/taberna-da-rua/thursday/20-00/two-people/window-table-request-confirmed.\nIt keeps its line breaks, and the bubble wraps every word of it; nothing is cut.", "when": "Yesterday, 18:03" }
+  ],
+  "ChatPart:many": [
+    { "key": "p1", "kind": "text", "text": "This is the one from last spring:", "src": "", "href": "" },
+    { "key": "p2", "kind": "picture", "text": "The terrace of Taberna da Rua", "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2'%3E%3Crect width='2' height='2' fill='%237a8fa6'/%3E%3Ccircle cx='1.45' cy='0.6' r='0.25' fill='%23e8d9a8'/%3E%3Cpath d='M0 2L0.7 1.1l0.5 0.5L1.55 1.2 2 1.7V2Z' fill='%23506477'/%3E%3C/svg%3E", "href": "" },
+    { "key": "p3", "kind": "text", "text": "its menu is at", "src": "", "href": "" },
+    { "key": "p4", "kind": "link", "text": "taberna.example/menu", "src": "", "href": "https://taberna.example/menu" }
+  ],
+  "ChatPart:long": [
+    { "key": "p1", "kind": "text", "text": "A pasted paragraph that is long enough to wrap over several lines in the composer before the picture,", "src": "", "href": "" },
+    { "key": "p2", "kind": "picture", "text": "A picture pasted in the middle of the text", "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2'%3E%3Crect width='2' height='2' fill='%237a8fa6'/%3E%3Ccircle cx='1.45' cy='0.6' r='0.25' fill='%23e8d9a8'/%3E%3Cpath d='M0 2L0.7 1.1l0.5 0.5L1.55 1.2 2 1.7V2Z' fill='%23506477'/%3E%3C/svg%3E", "href": "" },
+    { "key": "p3", "kind": "link", "text": "https://reservations.example/taberna-da-rua/thursday/20-00/two-people/window-table", "src": "", "href": "https://reservations.example/" }
+  ],
+  "MenuItem:many": [
+    { "key": "aloud", "heading": "", "label": "Read replies aloud", "detail": "", "kind": "toggle", "on": false, "enabled": true },
+    { "key": "brief", "heading": "Replies", "label": "Brief", "detail": "A sentence or two", "kind": "choice", "on": true, "enabled": true },
+    { "key": "detailed", "heading": "", "label": "Detailed", "detail": "With the reasons", "kind": "choice", "on": false, "enabled": true },
+    { "key": "export", "heading": "", "label": "Export the conversation", "detail": "", "kind": "act", "on": false, "enabled": true }
+  ],
+  "MenuItem:long": [
+    { "key": "aloud", "heading": "", "label": "Read every reply aloud as soon as it arrives, even while another app is in front", "detail": "Uses the voice chosen in this device's own settings, at the speed set there", "kind": "toggle", "on": true, "enabled": true },
+    { "key": "brief", "heading": "How long the replies should be, when the assistant has a choice", "label": "Brief, a sentence or two", "detail": "", "kind": "choice", "on": true, "enabled": true }
+  ],
   "props:ActivityTimeline": {
     "title": "Activity",
     "summary": "6 events this week, 3 by your assistant",
