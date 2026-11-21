@@ -1,0 +1,318 @@
+// ProfileScreen: a person's own profile. The bar names it (TopBar). Under it the page reads in pairs, the way the
+// kit's SettingsGroup reads, so every card on the page shares one edge: on a desktop a short side column and a card
+// beside it, the whole page held to screens.profile-max and centred; on a phone each pair wraps to one column, the
+// side column above its card. Three pairs, top to bottom:
+//   who        the side column is the person: their Picture and their name in display type (the page's focal
+//              words), the line under it (`about`); the card beside it holds their details, one row each (name, the
+//              address we write to, phone, language: the kit's ValueRow, label and value on one line, each with its
+//              own Edit). Edit opens the row in place: the kit's Field around the platform's own input (or its
+//              select, for a detail with options), then Cancel and Save.
+//   settings   the kit's SettingsGroup, as it is: its title and note beside its card.
+//   session    an empty side column (it holds the card's edge on a desktop and wraps away on a phone), then a quiet
+//              line at the end: what this session is (the kit's TextRow) and End session, plain, never filled.
+// Width, with no breakpoint and no read of the host: each pair is a wrapping row, the side column flex 1 from
+// screens.profile-aside, the card flex 2 from screens.profile-main (SettingsGroup's own least widths), so the
+// three pairs wrap at the same width and share their edges.
+//
+// States, declared once:
+//   data         one | loading | failed. Loading keeps the page's shape: the Picture's fill, two bones where the name
+//                and its line will stand, `loadingText` said as a status beside a pulsing dot, a bone row for each
+//                detail where its row will land (a label, a value, its Edit), and SettingsGroup's own skeleton.
+//                Failed is the kit's StatePanel in the card's place: `failedTitle`, `failedText` and `retryLabel`,
+//                the way back; the settings are not drawn (they came with the profile), and End session stays: a
+//                person is never held in a session by a load that failed.
+//   interaction  idle | focus | busy: the detail `editKey` names. Focus is the row open for editing (its field
+//                holds the person's draft and the focus): the Field, then Cancel and Save, Save the state's one
+//                fill. Busy: Save keeps its words and cannot be pressed, Cancel and the field still, and `busyText`
+//                says what is awaited, as a status, beside a pulsing dot.
+//   outcome      none | success | error, of that same detail's save. Success closes the row and says `savedText`
+//                under it, a tick beside it, in the positive ink on the card's surface. Error keeps the row open
+//                with what the person typed (`draft`, the app's) and the Field says `errorText`, why it was
+//                refused, as an alert; Save is there again.
+//   agent        none | proposed | changed | waiting: an assistant's act on the detail `agentKey` names. Its row
+//                carries the kit's agent mark (ValueRow's own edge line and `markNote` under its value: the accent,
+//                the caution ink while it waits). Proposed asks under the card with the kit's Proposal:
+//                `proposalText` and the two answers, `acceptLabel` and `rejectLabel`; nothing changes until the
+//                person accepts. Changed says `changedText` under the card beside a dot of the accent, with
+//                `undoLabel`, the way back. Waiting says `waitingText` beside a caution dot, with the two answers,
+//                and the bar says `waitingNote` under its title.
+//
+// Both doors: a person's press and an agent's tool reach the same actions, each by key: `startEdit` a detail,
+// `typeDraft` its draft, `save` and `cancel`; `accept`, `reject` and `undo` an assistant's act; SettingsGroup's own
+// `toggle`, `choose`, `open` and `remove`; `retry`. Ending the session (`endSession`) and authenticating are the
+// person's own acts: the screen offers them to the person alone.
+// Every word is the app's; every value a Theme token or a screens.* size.
+use Words, ActionButton, ValueRow, TextRow, Field, Picture from "__SCOPE__/components"
+use TopBar, Proposal, StatePanel, SettingsGroup, Setting from "__SCOPE__/blocks"
+
+// One of the person's details, as a row: its key, its label and its value; `hint` says what it is for under the
+// field while it is open ("" for none); `kind` gives the platform's own field (an address, a phone number, text,
+// or a choice of `options`); `editLabel` is its Edit's own words, so each Edit has a name of its own.
+shape ProfileDetail
+  key: string
+  label: string
+  value: string
+  hint: string
+  kind: enum<"text", "email", "tel", "choice">
+  options: string[]
+  editLabel: string
+
+// One of the person's settings, as SettingsGroup draws it (Setting's fields, one for one).
+shape ProfileSetting
+  key: string
+  kind: enum<"switch", "value", "link", "danger">
+  label: string
+  detail: string
+  value: string
+  on: bool
+
+// The skeleton breathes and the busy dot pulses, so waiting reads as under way, never as a dimmed control.
+keyframes profileBreathe
+  50% opacity=0.6
+keyframes profilePulse
+  50% opacity=0.25
+
+// The agent's ink for a dot or a mark: the accent for what a person can see or answer, caution while it waits.
+fn profileAgentInk(a: string): string = a == "waiting" ? "theme.color.caution" : "theme.color.accent"
+
+// The platform's own field for a detail's kind, and what the platform may fill it from.
+fn profileInputType(kind: string): string = kind == "email" ? "email" : kind == "tel" ? "tel" : "text"
+fn profileFill(kind: string): string = kind == "email" ? "email" : kind == "tel" ? "tel" : "name"
+
+// A bar of the skeleton: the fill at a named length.
+component ProfileBone
+  props
+    width: string
+    height: string
+  view
+    box width=width max-width="100%" height=height flex-shrink=0 border-radius="theme.radius.pill" background-color="theme.color.fill" animation="profileBreathe 1.6s ease-in-out infinite" aria-hidden=true
+
+// What is awaited, said as a status: a pulsing accent dot and the app's words.
+component ProfileBusy
+  props
+    text: string
+    testId: string
+  view
+    row testId=testId role="status" align-items="center" gap="theme.space.sm"
+      box width="screens.profile-dot" height="screens.profile-dot" flex-shrink=0 border-radius="theme.radius.pill" background-color="theme.color.accent" aria-hidden=true animation="profilePulse 1.2s ease-in-out infinite"
+      text text testId=`${testId}-text` flex=1 min-width=0 font="theme.type.caption" color="theme.color.ink-muted"
+
+// The one seam between rows: a hairline inset to the words' edges.
+component ProfileSeam
+  view
+    box height="theme.line.width" flex-shrink=0 background-color="theme.color.line" margin-left="theme.space.lg" margin-right="theme.space.lg" aria-hidden=true
+
+// A detail still loading, in a loaded row's shape: its label, its value and its Edit, where each will land.
+component ProfileBoneRow
+  view
+    row align-items="center" gap="theme.space.md" min-height="screens.profile-row-min" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" border-left-width="screens.profile-mark-line" border-left-style="solid" border-left-color="transparent" aria-hidden=true
+      row flex=1 min-width=0 align-items="center" gap="theme.space.md"
+        ProfileBone(width="screens.profile-bone-label", height="screens.profile-bone")
+        row flex=1 min-width=0
+        ProfileBone(width="screens.profile-bone-value", height="screens.profile-bone")
+      box width="screens.profile-bone-action" height="screens.profile-action-min" flex-shrink=0 border-radius="theme.radius.control" background-color="theme.color.fill" animation="profileBreathe 1.6s ease-in-out infinite"
+
+// What an assistant did, or what waits for the person, said under the card: a dot of the act's ink, its sentence,
+// and the person's answers (`noLabel` plain; `yesLabel` filled, "" for none).
+component ProfileActBand
+  props
+    sentence: string
+    agent: enum<"changed", "waiting">
+    noLabel: string
+    yesLabel: string
+    no: action
+    yes: action
+  view
+    row testId="profile-agent" role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg"
+      row flex=1 min-width="screens.profile-band-min" align-items="flex-start" gap="theme.space.sm"
+        box width="screens.profile-dot" height="screens.profile-dot" margin-top="screens.profile-dot-top" flex-shrink=0 border-radius="theme.radius.pill" background-color=profileAgentInk(agent) aria-hidden=true
+        text sentence testId="profile-agent-text" flex=1 min-width=0 font="theme.type.body" color="theme.color.ink"
+      row role="group" aria-label=sentence flex-wrap="wrap" gap="theme.space.sm" margin-left="auto"
+        ActionButton(opens="", label=noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId="profile-agent-no")
+        if yesLabel != ""
+          ActionButton(opens="", label=yesLabel, kind="primary", interaction="idle", outcome="none", press=yes, testId="profile-agent-yes")
+
+// One detail of the card. At rest: the kit's ValueRow (label and value on one line, the agent's mark at its start)
+// and its Edit beside it; a value too long for the line pushes Edit under it, never over it. Open: the kit's Field
+// around the platform's own field, holding the person's draft, then Cancel and Save; busy stills them and says
+// what is awaited; a refusal keeps the draft and the Field says why. Saved: the row at rest and `savedText` under
+// it.
+component ProfileDetailRow
+  props
+    detail: ProfileDetail
+    open: bool
+    busy: bool
+    saved: bool
+    failed: bool
+    agent: enum<"none", "proposed", "changed", "waiting">
+    markNote: string
+    draft: string
+    errorText: string
+    hintText: string
+    saveLabel: string
+    cancelLabel: string
+    busyText: string
+    savedText: string
+    locked: bool
+    startEdit: action
+    type: action
+    save: action
+    cancel: action
+  view
+    if open
+      column testId=`profile-${detail.key}-open` gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.lg" border-left-width="screens.profile-mark-line" border-left-style="solid" border-left-color=(agent == "none" ? "transparent" : profileAgentInk(agent))
+        if detail.kind == "choice"
+          Field(id=`profile-${detail.key}`, label=detail.label, hint=hintText, error=errorText, outcome=(failed ? "error" : "none"))
+            select value=draft change=type disabled=busy aria-label=detail.label testId=`profile-${detail.key}-input`
+              for o in detail.options key=o
+                option o value=o
+        else
+          Field(id=`profile-${detail.key}`, label=detail.label, hint=hintText, error=errorText, outcome=(failed ? "error" : "none"))
+            input type=profileInputType(detail.kind) autocomplete=profileFill(detail.kind) value=draft input=type submit=save disabled=busy aria-label=detail.label testId=`profile-${detail.key}-input` min-width=0
+        row flex-wrap="wrap" align-items="center" justify-content="flex-end" column-gap="theme.space.md" row-gap="theme.space.sm"
+          if busy and busyText != ""
+            column flex=1 min-width="screens.profile-busy-min"
+              ProfileBusy(text=busyText, testId=`profile-${detail.key}-busy`)
+          row gap="theme.space.sm" margin-left="auto"
+            ActionButton(opens="", label=cancelLabel, kind="plain", interaction=(busy ? "disabled" : "idle"), outcome="none", press=cancel, testId=`profile-${detail.key}-cancel`)
+            ActionButton(opens="", label=saveLabel, kind="primary", interaction=(busy ? "busy" : "idle"), outcome=(failed ? "error" : "none"), press=save, testId=`profile-${detail.key}-save`)
+    else
+      column testId=`profile-${detail.key}-row`
+        row flex-wrap="wrap" align-items="center"
+          column flex="1 1 auto" min-width=0
+            ValueRow(label=detail.label, value=detail.value, agentNote=markNote, outcome="none", agent=agent, testId=`profile-${detail.key}-value`)
+          row margin-left="auto" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
+            ActionButton(opens="", label=detail.editLabel, kind="plain", interaction=(locked ? "disabled" : "idle"), outcome="none", press=startEdit(detail.key), testId=`profile-${detail.key}-edit`)
+        if saved
+          row testId=`profile-${detail.key}-saved` role="status" align-items="flex-start" gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.md" border-left-width="screens.profile-mark-line" border-left-style="solid" border-left-color="transparent"
+            svg viewBox="0 0 16 16" width="screens.profile-glyph" height="screens.profile-glyph" fill="none" stroke="theme.color.positive-text" aria-hidden=true flex-shrink=0
+              path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke-width=1.75 stroke-linecap="round" stroke-linejoin="round"
+            text savedText testId=`profile-${detail.key}-saved-text` flex=1 min-width=0 font="theme.type.caption" color="theme.color.positive-text"
+
+component ProfileScreen
+  props
+    title: string
+    name: string
+    about: string
+    pictureSrc: string
+    pictureLabel: string
+    detailsLabel: string
+    details: ProfileDetail[]
+    editKey: string
+    draft: string
+    saveLabel: string
+    cancelLabel: string
+    busyText: string
+    savedText: string
+    errorText: string
+    agentKey: string
+    markNote: string
+    proposalText: string
+    acceptLabel: string
+    rejectLabel: string
+    changedText: string
+    undoLabel: string
+    waitingText: string
+    waitingNote: string
+    settingsTitle: string
+    settingsNote: string
+    settings: ProfileSetting[]
+    sessionTitle: string
+    sessionDetail: string
+    endSessionLabel: string
+    loadingText: string
+    failedTitle: string
+    failedText: string
+    retryLabel: string
+    data: enum<"one", "loading", "failed">
+    interaction: enum<"idle", "focus", "busy">
+    outcome: enum<"none", "success", "error">
+    agent: enum<"none", "proposed", "changed", "waiting">
+    startEdit: action
+    typeDraft: action
+    save: action
+    cancel: action
+    accept: action
+    reject: action
+    undo: action
+    retry: action
+    endSession: action
+    toggle: action
+    choose: action
+    open: action
+    remove: action
+  // The detail open for editing: while its field is focused or saving, and after a refusal (it keeps the draft).
+  derive openKey = interaction != "idle" or outcome == "error" ? editKey : ""
+  derive busy = interaction == "busy"
+  // A row's doors, passed on: Edit with the row's key, the field with what the person typed.
+  action editRow(key: string)
+    startEdit(key)
+  action typeRow(value: string)
+    typeDraft(value)
+  // SettingsGroup's doors, each passed on with the row's key.
+  action flip(key: string)
+    toggle(key)
+  action chooseRow(key: string)
+    choose(key)
+  action openRow(key: string)
+    open(key)
+  action removeRow(key: string)
+    remove(key)
+  // SettingsGroup asks nothing here: an assistant's act on this screen is about a detail, answered under its card.
+  action quiet
+  view
+    column testId="profile" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
+      TopBar(title=title, agentNote=waitingNote, agent=(agent == "waiting" ? "waiting" : "none"))
+      scroll id="profile-scroll" flex=1 min-height=0
+        column role="main" width="100%" max-width="screens.profile-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.xl" padding-bottom="theme.space.xxl" gap="theme.space.xxl"
+          // Who: the person beside their details.
+          row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.lg"
+            column testId="profile-who" flex=1 min-width="screens.profile-aside" box-sizing="border-box" gap="theme.space.lg" padding-left="theme.space.lg" padding-right="theme.space.lg"
+              row flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.md"
+                Picture(src=pictureSrc, label=pictureLabel, data=data)
+                column flex=1 min-width="screens.profile-name-min" gap="theme.space.xs"
+                  if data == "loading"
+                    column gap="theme.space.sm"
+                      ProfileBone(width="screens.profile-bone-name", height="screens.profile-bone-thick")
+                      ProfileBone(width="screens.profile-bone-about", height="screens.profile-bone")
+                  else
+                    text name testId="profile-name" role="heading" aria-level=2 overflow-wrap="break-word" font="theme.type.display-compact" letter-spacing="theme.type.display-compact-tracking" color="theme.color.ink"
+                    if about != ""
+                      text about testId="profile-about" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
+              if data == "loading"
+                ProfileBusy(text=loadingText, testId="profile-loading")
+            column flex=2 min-width="screens.profile-main" box-sizing="border-box" gap="theme.space.md"
+              if data == "failed"
+                StatePanel(title=failedTitle, message="", failedText=failedText, agentNote="", actionLabel="", retryLabel=retryLabel, data="failed", agent="none", size="full", press=retry, testId="profile-failed")
+              else
+                column testId="profile-details" role="group" aria-label=detailsLabel aria-busy=(data == "loading" or busy) background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+                  if data == "loading"
+                    ProfileBoneRow()
+                    ProfileSeam()
+                    ProfileBoneRow()
+                    ProfileSeam()
+                    ProfileBoneRow()
+                    ProfileSeam()
+                    ProfileBoneRow()
+                  else
+                    for d, i in details key=d.key
+                      if i > 0
+                        ProfileSeam()
+                      ProfileDetailRow(detail=d, open=(d.key == openKey), busy=(busy and d.key == editKey), saved=(outcome == "success" and d.key == editKey), failed=(outcome == "error" and d.key == editKey), agent=(d.key == agentKey ? agent : "none"), markNote=markNote, draft=draft, errorText=errorText, hintText=d.hint, saveLabel=saveLabel, cancelLabel=cancelLabel, busyText=busyText, savedText=savedText, locked=busy, startEdit=editRow, type=typeRow, save=save, cancel=cancel)
+                if data == "one" and agent == "proposed"
+                  Proposal(id="profile", sentence=proposalText, yesLabel=acceptLabel, noLabel=rejectLabel, agent="proposed", yes=accept, no=reject)
+                else if data == "one" and agent == "changed"
+                  ProfileActBand(sentence=changedText, agent="changed", noLabel=undoLabel, yesLabel="", no=undo, yes=undo)
+                else if data == "one" and agent == "waiting"
+                  ProfileActBand(sentence=waitingText, agent="waiting", noLabel=rejectLabel, yesLabel=acceptLabel, no=reject, yes=accept)
+          // Settings: the kit's own group. It came with the profile, so a failed load does not draw it.
+          if data != "failed"
+            SettingsGroup(title=settingsTitle, footer=settingsNote, emptyText="", loadingText=loadingText, failedText="", failedDetail="", retryLabel="", proposalText="", proposalKey="", acceptLabel="", declineLabel="", changedText="", waitingText="", outcomeText="", data=(data == "loading" ? "loading" : settings.length == 0 ? "empty" : "many"), interaction="idle", outcome="none", agent="none", rows=settings.map(s => Setting(key=s.key, kind=s.kind, label=s.label, detail=s.detail, value=s.value, on=s.on)), toggle=flip, choose=chooseRow, open=openRow, remove=removeRow, retry=retry, accept=quiet, decline=quiet, testId="profile-settings")
+          // The session: last, quiet, the person's own act in every state.
+          row flex-wrap="wrap" column-gap="theme.space.xl"
+            box flex=1 min-width="screens.profile-aside" box-sizing="border-box" aria-hidden=true
+            row testId="profile-session" flex=2 min-width="screens.profile-main" box-sizing="border-box" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line" padding-top="theme.space.sm"
+              column flex=1 min-width="screens.profile-session-min"
+                TextRow(title=sessionTitle, detail=sessionDetail, trailing="", outcome="none", testId="profile-session-text")
+              row margin-left="auto" padding-left="theme.space.lg" padding-right="theme.space.lg"
+                ActionButton(opens="", label=endSessionLabel, kind="plain", interaction="idle", outcome="none", press=endSession, testId="profile-end-session")

@@ -11,11 +11,11 @@
 // Keys in the ledger are unique in this app; a screen's own view state stays out of it.
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
-use Ledger, ledger, personSet, valueOf, isOn, isMarked, undoLatest from "@agent-ui-kit/agent"
-use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer, AppShell, SettingsScreen, SettingsScreenGroup, EntryScreen, DashboardScreen from "__SCOPE__/screens"
+use Ledger, ledger, personSet, valueOf, isOn, isMarked, undoLatest, answerKey, waitingId, waitingSentence from "@agent-ui-kit/agent"
+use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer, AppShell, SettingsScreen, SettingsScreenGroup, EntryScreen, DashboardScreen, ProfileScreen, ProfileDetail from "__SCOPE__/screens"
 use Words from "__SCOPE__/components"
 use Message, Setting from "__SCOPE__/blocks"
-use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys, shellFound, shellEntries, settingsSections, settingsGroupsOf, settingsSwitches, settingsSwitchKeys, settingKey, settingKeys, settingSectionOf, dashPeriods, dashStats, dashPoints, dashNote, dashItems from "./model.contract"
+use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys, shellFound, shellEntries, settingsSections, settingsGroupsOf, settingsSwitches, settingsSwitchKeys, settingKey, settingKeys, settingSectionOf, dashPeriods, dashStats, dashPoints, dashNote, dashItems, profileBase, profileDetailKeys, profileKey, profileKeys, profileProblem, profileMessage, profileSettings, profilePicture from "./model.contract"
 
 component App
   members "./tools.contract"
@@ -119,6 +119,49 @@ component App
   action choosePeriodByPerson(key: string)
     book = personSet(book, "dash-period", key)
 
+  // ProfileScreen: the person's own details, each a value in the ledger, so the rows, the person's Save and the
+  // agent's mark all read it. Which row is open and what the person has typed are the person's view (no ledger,
+  // no record) until Save writes the value; a refused Save keeps the draft and says why, in the sentence of the word
+  // the agent's tool would answer.
+  state profileEditing = ""
+  state profileOpen = false
+  state profileDraft = ""
+  state profileOutcome = "none"
+  state profileProblemWord = ""
+  state sessionEnded = false
+  derive profileDetails = profileBase().map(d => ProfileDetail(d, value=valueOf(book, profileKey(d.key))))
+  derive profileWaitKey = profileDetailKeys().filter(k => waitingId(book, profileKey(k)) != "").slice(0, 1).join("")
+  derive profileMarkedKey = profileDetailKeys().filter(k => isMarked(book, profileKey(k))).slice(0, 1).join("")
+  derive profileAgent = profileWaitKey != "" ? "proposed" : profileMarkedKey != "" ? "changed" : "none"
+  derive profileText = profileDetails.map(d => `${d.key}\t${d.label}\t${d.value}${waitingId(book, profileKey(d.key)) != "" ? "\twaiting for the person" : isMarked(book, profileKey(d.key)) ? "\tchanged by you" : ""}`).join("\n")
+  // The person's door: Edit opens a row with its saved value; the field writes the draft; Save writes the value or
+  // keeps the draft and says why; Cancel closes the row; Accept and Not now answer the agent's proposal.
+  action editDetailByPerson(key: string)
+    profileEditing = key
+    profileOpen = true
+    profileDraft = valueOf(book, profileKey(key))
+    profileOutcome = "none"
+    profileProblemWord = ""
+  action typeDetailByPerson(value: string)
+    profileDraft = value
+  action saveDetailByPerson
+    let word = profileProblem(profileEditing, profileDraft)
+    profileProblemWord = word
+    profileOutcome = word == "" ? "success" : "error"
+    profileOpen = word != ""
+    book = word == "" ? personSet(book, profileKey(profileEditing), profileDraft.trim()) : book
+  action cancelDetailByPerson
+    profileOpen = false
+    profileOutcome = "none"
+    profileProblemWord = ""
+  action acceptDetailByPerson
+    book = answerKey(book, profileKey(profileWaitKey), true, "person")
+  action rejectDetailByPerson
+    book = answerKey(book, profileKey(profileWaitKey), false, "person")
+  // Ending the session is the person's own act: no tool reaches it.
+  action endSessionByPerson
+    sessionEnded = true
+
   // A retry and a proposal's answers: this use has none.
   action ignore
     book = book
@@ -126,7 +169,7 @@ component App
     book = book
 
   // The agent's door. Answer words: saved, delayed, proposed, off, unknown-id.
-  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen, OnboardingScreen, AppShell, SettingsScreen or DashboardScreen. Answers its name." = openScreen
+  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen, OnboardingScreen, AppShell, SettingsScreen, EntryScreen, DashboardScreen or ProfileScreen. Answers its name." = openScreen
     returns shown
   tool readAlbum reads "The album's pictures, one per line: id, caption, and shown on the one on screen, tab-separated." = readAlbum
     returns albumText
@@ -179,6 +222,12 @@ component App
     returns book.answer
     fails when book.answer == "off"
 
+  tool readProfile reads "The person's profile, one detail per line: id (name, email, phone or language), label, value, then waiting for the person or changed by you where you acted, tab-separated. Ending the session and authenticating are the person's own." = readProfile
+    returns profileText
+  tool changeDetail writes idempotent closed "Change a detail of the person's profile, by id from readProfile, to a new value; it waits until the person accepts on the screen. Answers proposed, unknown-id, empty, not-an-address, no-country-code or unknown-language." = changeDetail
+    returns book.answer
+    fails when book.answer == "unknown-id" or book.answer == "off" or book.answer == "empty" or book.answer == "not-an-address" or book.answer == "no-country-code" or book.answer == "unknown-language"
+
   view
     main testId="app" width="100%" height="100%"
       if shown == "MediaViewer"
@@ -199,3 +248,5 @@ component App
             Words(text="Northwind terms of service: the relying party's own capture page takes this place in a real app.", kind="body", outcome="none", level=0, testId="entry-terms-page")
       else if shown == "DashboardScreen"
         DashboardScreen(title="Overview", periodLabel="Period", chartTitle="Orders", chartNote=dashNote(dashPeriod), chartLabel="Orders in the period", recentTitle="Recent orders", recentEmptyText="No orders yet.", allLabel="View all", loadingText="", chartLoadingText="", emptyText="", emptyLabel="", failedText="", retryLabel="", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, ["dash-period"]), undoLabel="Undo", periodKey=dashPeriod, periods=dashPeriods(), stats=dashStats(dashPeriod), points=dashPoints(dashPeriod), items=dashItems(), data="many", agent=(isMarked(book, "dash-period") ? "changed" : "none"), choose=choosePeriodByPerson, showAll=ignore, start=ignore, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)
+      else if shown == "ProfileScreen"
+        ProfileScreen(title="Profile", name=valueOf(book, "profile-name"), about="Workspace admin at Northwind", pictureSrc=profilePicture(), pictureLabel=`${valueOf(book, "profile-name")}'s picture`, detailsLabel="Your details", details=profileDetails, editKey=profileEditing, draft=profileDraft, saveLabel="Save", cancelLabel="Cancel", busyText="", savedText="Saved.", errorText=profileMessage(profileProblemWord), agentKey=(profileWaitKey != "" ? profileWaitKey : profileMarkedKey), markNote=(profileAgent == "proposed" ? "Your assistant suggests a change" : "Changed by your assistant"), proposalText=waitingSentence(book, profileKey(profileWaitKey)), acceptLabel="Accept", rejectLabel="Not now", changedText=latestAbout(book, profileKeys()), undoLabel="Undo", waitingText="", waitingNote="", settingsTitle="Preferences", settingsNote="These follow you to every device.", settings=profileSettings(), sessionTitle="This browser", sessionDetail="You authenticated here today at 09:12.", endSessionLabel="End session", loadingText="", failedTitle="", failedText="", retryLabel="", data="one", interaction=(profileOpen ? "focus" : "idle"), outcome=(profileOutcome == "success" ? "success" : profileOutcome == "error" ? "error" : "none"), agent=(profileAgent == "proposed" ? "proposed" : profileAgent == "changed" ? "changed" : "none"), startEdit=editDetailByPerson, typeDraft=typeDetailByPerson, save=saveDetailByPerson, cancel=cancelDetailByPerson, accept=acceptDetailByPerson, reject=rejectDetailByPerson, undo=undoByPerson, retry=ignore, endSession=endSessionByPerson, toggle=ignoreKey, choose=ignoreKey, open=ignoreKey, remove=ignoreKey)

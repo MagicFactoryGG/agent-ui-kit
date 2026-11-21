@@ -2324,5 +2324,17 @@
       "detail": "Every link to the old name still opens the project, and the people who follow it were told once by email.",
       "by": "person"
     }
+  ],
+  "props:ProfileScreen": {"title": "Profile", "name": "Ada Lovelace", "about": "Workspace admin at Northwind", "pictureLabel": "Ada Lovelace's picture", "detailsLabel": "Your details", "editKey": "phone", "draft": "020 7946 0123", "saveLabel": "Save", "cancelLabel": "Cancel", "busyText": "Saving your phone number…", "savedText": "Saved. We use this number only to reach you about your account.", "errorText": "Start with the country code, as in +44 20 7946 0958. Nothing was changed.", "agentKey": "language", "markNote": "Your assistant’s suggestion", "proposalText": "Your assistant suggests Français as your language.", "acceptLabel": "Accept", "rejectLabel": "Not now", "changedText": "Your assistant changed your language to English (UK).", "undoLabel": "Undo", "waitingText": "Your assistant will change your language to Français in 5 seconds.", "waitingNote": "One change to your profile waits for your answer.", "settingsTitle": "Preferences", "settingsNote": "These follow you to every device.", "sessionTitle": "This browser", "sessionDetail": "You authenticated here today at 09:12.", "endSessionLabel": "End session", "loadingText": "Loading your profile…", "failedTitle": "Your profile did not load", "failedText": "Check your connection, then try again. Nothing was changed.", "retryLabel": "Try again"},
+  "ProfileDetail:one": [
+    {"key": "name", "label": "Name", "value": "Ada Lovelace", "hint": "People in your workspace see this name.", "kind": "text", "options": [], "editLabel": "Edit name"},
+    {"key": "email", "label": "Email", "value": "ada@studio.example", "hint": "We write to this address.", "kind": "email", "options": [], "editLabel": "Edit email"},
+    {"key": "phone", "label": "Phone", "value": "+44 20 7946 0958", "hint": "With the country code, as in +44 20 7946 0958.", "kind": "tel", "options": [], "editLabel": "Edit phone"},
+    {"key": "language", "label": "Language", "value": "English (UK)", "hint": "For the app’s words and the mail we send you.", "kind": "choice", "options": ["English (UK)", "English (US)", "Deutsch", "Español", "Français"], "editLabel": "Edit language"}
+  ],
+  "ProfileSetting:one": [
+    {"key": "digest", "kind": "switch", "label": "Weekly digest", "detail": "A summary of your week, each Monday.", "value": "", "on": true},
+    {"key": "time", "kind": "value", "label": "Time zone", "detail": "", "value": "London", "on": false},
+    {"key": "devices", "kind": "link", "label": "Your devices", "detail": "Where you are authenticated now.", "value": "", "on": false}
   ]
 }
