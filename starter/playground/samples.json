@@ -2281,13 +2281,13 @@
   ],
   "ChatPart:many": [
     { "key": "p1", "kind": "text", "text": "This is the one from last spring:", "src": "", "href": "" },
-    { "key": "p2", "kind": "picture", "text": "The terrace of Taberna da Rua", "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Crect width='3' height='2' fill='%237a8fa6'/%3E%3Ccircle cx='2.3' cy='0.6' r='0.3' fill='%23e8d9a8'/%3E%3Cpath d='M0 2L1.1 1l0.7 0.6L2.4 1.1 3 1.6V2Z' fill='%23506477'/%3E%3C/svg%3E", "href": "" },
+    { "key": "p2", "kind": "picture", "text": "The terrace of Taberna da Rua", "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2'%3E%3Crect width='2' height='2' fill='%237a8fa6'/%3E%3Ccircle cx='1.45' cy='0.6' r='0.25' fill='%23e8d9a8'/%3E%3Cpath d='M0 2L0.7 1.1l0.5 0.5L1.55 1.2 2 1.7V2Z' fill='%23506477'/%3E%3C/svg%3E", "href": "" },
     { "key": "p3", "kind": "text", "text": "its menu is at", "src": "", "href": "" },
     { "key": "p4", "kind": "link", "text": "taberna.example/menu", "src": "", "href": "https://taberna.example/menu" }
   ],
   "ChatPart:long": [
     { "key": "p1", "kind": "text", "text": "A pasted paragraph that is long enough to wrap over several lines in the composer before the picture,", "src": "", "href": "" },
-    { "key": "p2", "kind": "picture", "text": "A picture pasted in the middle of the text", "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Crect width='3' height='2' fill='%237a8fa6'/%3E%3Ccircle cx='2.3' cy='0.6' r='0.3' fill='%23e8d9a8'/%3E%3Cpath d='M0 2L1.1 1l0.7 0.6L2.4 1.1 3 1.6V2Z' fill='%23506477'/%3E%3C/svg%3E", "href": "" },
+    { "key": "p2", "kind": "picture", "text": "A picture pasted in the middle of the text", "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2'%3E%3Crect width='2' height='2' fill='%237a8fa6'/%3E%3Ccircle cx='1.45' cy='0.6' r='0.25' fill='%23e8d9a8'/%3E%3Cpath d='M0 2L0.7 1.1l0.5 0.5L1.55 1.2 2 1.7V2Z' fill='%23506477'/%3E%3C/svg%3E", "href": "" },
     { "key": "p3", "kind": "link", "text": "https://reservations.example/taberna-da-rua/thursday/20-00/two-people/window-table", "src": "", "href": "https://reservations.example/" }
   ],
   "MenuItem:many": [
