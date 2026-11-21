@@ -118,9 +118,11 @@ component ActionButton
     interaction: enum<"idle", "hover", "pressed", "focus", "disabled", "busy">
     outcome: enum<"none", "success", "error", "blocked", "cancelled">
     press: action
+    // the Menu this button opens (its menuId, "" for none): Exact's popover, shown and hidden by the button
+    opens: string
     testId: string
   view
-    button press=press testId=testId disabled=(interaction == "disabled" or interaction == "busy") aria-busy=(interaction == "busy") min-height="components.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color=(outcome != "none" ? outcomeFill(outcome) : kind == "primary" ? "theme.color.accent" : "theme.color.line") background-color=(kind == "primary" ? "theme.color.accent" : interaction == "hover" ? "theme.color.hover" : interaction == "pressed" ? "theme.color.fill" : "theme.color.surface") color=(kind == "primary" ? "theme.color.accent-ink" : "theme.color.ink") opacity=(interaction == "disabled" ? 0.5 : interaction == "busy" ? 0.7 : kind == "primary" and interaction == "hover" ? 0.9 : kind == "primary" and interaction == "pressed" ? 0.8 : 1) box-shadow=(interaction == "focus" ? "0 0 0 2px theme.color.focus" : "none")
+    button press=press popovertarget=opens testId=testId disabled=(interaction == "disabled" or interaction == "busy") aria-busy=(interaction == "busy") min-height="components.row-min" padding-left="theme.space.lg" padding-right="theme.space.lg" border-radius="theme.radius.control" border-width="theme.line.width" border-style="solid" border-color=(outcome != "none" ? outcomeFill(outcome) : kind == "primary" ? "theme.color.accent" : "theme.color.line") background-color=(kind == "primary" ? "theme.color.accent" : interaction == "hover" ? "theme.color.hover" : interaction == "pressed" ? "theme.color.fill" : "theme.color.surface") color=(kind == "primary" ? "theme.color.accent-ink" : "theme.color.ink") opacity=(interaction == "disabled" ? 0.5 : interaction == "busy" ? 0.7 : kind == "primary" and interaction == "hover" ? 0.9 : kind == "primary" and interaction == "pressed" ? 0.8 : 1) box-shadow=(interaction == "focus" ? "0 0 0 2px theme.color.focus" : "none")
       :hover
         opacity=0.9
       :active

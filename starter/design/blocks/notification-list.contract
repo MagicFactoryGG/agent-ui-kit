@@ -86,9 +86,9 @@ component NoteRow
         if note.yesLabel != "" or note.noLabel != ""
           row role="group" aria-label=note.title flex-wrap="wrap" gap="theme.space.sm" margin-top="theme.space.sm"
             if note.yesLabel != ""
-              ActionButton(label=note.yesLabel, kind=(focal and note.kind == "agent" ? "primary" : "plain"), interaction="idle", outcome="none", press=yes, testId=`${testId}-yes`)
+              ActionButton(opens="", label=note.yesLabel, kind=(focal and note.kind == "agent" ? "primary" : "plain"), interaction="idle", outcome="none", press=yes, testId=`${testId}-yes`)
             if note.noLabel != ""
-              ActionButton(label=note.noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId=`${testId}-no`)
+              ActionButton(opens="", label=note.noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId=`${testId}-no`)
 
 // A quiet row while the notes load: the real row's grid (mark, a title line with the time at its end, a detail
 // line varied as real lines vary), every word a bar.
@@ -145,7 +145,7 @@ component NotificationList
           if status != ""
             text status testId=`${testId}-status` role=(data == "loading" ? "status" : "none") font="theme.type.caption" color="theme.color.ink-muted"
         if (data == "many" or data == "one" or data == "long") and notes.filter(n => n.unread).length > 0
-          ActionButton(label=markAllLabel, kind="plain", interaction="idle", outcome="none", press=markAll, testId=`${testId}-mark-all`)
+          ActionButton(opens="", label=markAllLabel, kind="plain", interaction="idle", outcome="none", press=markAll, testId=`${testId}-mark-all`)
       if agent != "none"
         // The agent's band, under the header, over the rows: proposed wears the accent border (Proposal's manner)
         // and holds its two answer words; changed is quiet with the accent at its start (LinkRow's manner) and its
@@ -156,10 +156,10 @@ component NotificationList
             text (agent == "proposed" ? proposedNote : changedNote) testId=`${testId}-agent-note` overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
             row flex-wrap="wrap" gap="theme.space.sm"
               if agent == "proposed"
-                ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-agent-accept`)
-                ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-agent-reject`)
+                ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-agent-accept`)
+                ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-agent-reject`)
               else
-                ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-agent-undo`)
+                ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-agent-undo`)
       if data == "failed"
         // The failure is the list's: one band on the card, its severity said once in the critical line at its start
         // and the mark at the line's own start - the copy carries no colour, and the one filled way back is the
@@ -171,7 +171,7 @@ component NotificationList
               text failedText testId=`${testId}-failed-text` overflow-wrap="break-word" hyphens="none" font="theme.type.body" color="theme.color.ink"
               if retryLabel != ""
                 row
-                  ActionButton(label=retryLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+                  ActionButton(opens="", label=retryLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
       else if data == "empty"
         // The tray, where the new group's rows would land: its mark, the line that says what will arrive, and the
         // way on. No group label above it - the zero state is the whole list's, not one group's.
@@ -182,7 +182,7 @@ component NotificationList
               text emptyText testId=`${testId}-empty-text` overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink-muted"
               if emptyActionLabel != ""
                 row
-                  ActionButton(label=emptyActionLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=emptyPress, testId=`${testId}-empty-action`)
+                  ActionButton(opens="", label=emptyActionLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=emptyPress, testId=`${testId}-empty-action`)
       else if data == "loading"
         // Both groups stand in their own shape: a bar at each label's place, then the card of rows, so what arrives
         // lands where the bones stood.

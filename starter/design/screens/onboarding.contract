@@ -157,7 +157,7 @@ component OnboardingScreen
   view
     column testId="onboarding" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
       TopBar(title=productName, agentNote="", agent="none")
-        ActionButton(label=exitLabel, kind="plain", interaction="idle", outcome="none", press=exit, testId="onboarding-exit")
+        ActionButton(opens="", label=exitLabel, kind="plain", interaction="idle", outcome="none", press=exit, testId="onboarding-exit")
       scroll id="onboarding-scroll" flex=1 min-height=0
         column role="main" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.xl" padding-bottom="theme.space.xxl"
           row width="100%" max-width="screens.onboarding-max" margin-left="auto" margin-right="auto" flex-wrap="wrap" column-gap="theme.space.xxl" row-gap="theme.space.xl" justify-content="center" align-items="flex-start"

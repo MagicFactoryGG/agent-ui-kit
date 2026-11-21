@@ -139,7 +139,7 @@ component EntryScreen
                     row testId="entry-accepted" flex=1 min-width="screens.entry-note-min" align-items="center" gap="theme.space.sm"
                       EntryTick(size="glyph")
                       text acceptedNote flex=1 min-width=0 font="theme.type.caption" color="theme.color.ink-muted"
-                    ActionButton(label=backLabel, kind="plain", interaction=(busy ? "disabled" : "idle"), outcome="none", press=back, testId="entry-back")
+                    ActionButton(opens="", label=backLabel, kind="plain", interaction=(busy ? "disabled" : "idle"), outcome="none", press=back, testId="entry-back")
               // The terms-capture frame: the slot, placed once on both steps (Exact shows a library's slot always: no
               // `if`, no display none, no aria-hidden on its way down). On the terms step it is a named region on
               // the surface with all the height the window leaves; on the way in it drops its frame and takes no
@@ -157,9 +157,9 @@ component EntryScreen
                   row flex-wrap="wrap-reverse" gap="theme.space.md"
                     if declineLabel != ""
                       column flex=1 min-width="screens.entry-action-min"
-                        ActionButton(label=declineLabel, kind="plain", interaction=(busy ? "disabled" : "idle"), outcome="none", press=decline, testId="entry-decline")
+                        ActionButton(opens="", label=declineLabel, kind="plain", interaction=(busy ? "disabled" : "idle"), outcome="none", press=decline, testId="entry-decline")
                     column flex=1 min-width="screens.entry-action-min"
-                      ActionButton(label=acceptLabel, kind="primary", interaction=(busy ? "busy" : "idle"), outcome=outcome, press=accept, testId="entry-accept")
+                      ActionButton(opens="", label=acceptLabel, kind="primary", interaction=(busy ? "busy" : "idle"), outcome=outcome, press=accept, testId="entry-accept")
                   if busy and busyText != ""
                     EntryBusy(text=busyText, testId="entry-terms-busy")
                   if outcome != "none"

@@ -114,4 +114,4 @@ component StatePanel
           box aria-hidden=true height="blocks.action-min" width="blocks.bone-action" background-color="theme.color.fill" border-radius="theme.radius.control"
       if data != "loading" and (data == "failed" ? retryLabel : actionLabel) != ""
         column margin-top=(size == "full" ? "theme.space.xl" : "theme.space.md")
-          ActionButton(label=(data == "failed" ? retryLabel : actionLabel), kind=(data == "failed" or agent == "changed" ? "plain" : "primary"), interaction="idle", outcome=(data == "failed" ? "error" : "none"), press=press, testId=`${testId}-action`)
+          ActionButton(opens="", label=(data == "failed" ? retryLabel : actionLabel), kind=(data == "failed" or agent == "changed" ? "plain" : "primary"), interaction="idle", outcome=(data == "failed" ? "error" : "none"), press=press, testId=`${testId}-action`)

@@ -266,7 +266,7 @@ component SideNav
                       path d="M12 16.6 v0.2" stroke-width=1.75 stroke-linecap="round"
                     column flex=1 min-width=0
                       Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-${data}`)
-                  ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
+                  ActionButton(opens="", label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
           else if data == "loading"
             column gap="theme.space.lg"
               row role="status" align-items="center" gap="theme.space.sm" min-height="blocks.nav-row-min" padding-left="theme.space.md" padding-right="theme.space.md"
@@ -296,7 +296,7 @@ component SideNav
               column flex=1 min-width=0 gap="theme.space.md" padding="theme.space.md"
                 Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-${data}`)
                 if emptyLabel != ""
-                  ActionButton(label=emptyLabel, kind="primary", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
+                  ActionButton(opens="", label=emptyLabel, kind="primary", interaction="idle", outcome="none", press=empty, testId=`${testId}-add`)
           else
             column gap="theme.space.lg"
               for g in groups key=g

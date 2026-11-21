@@ -224,7 +224,7 @@ component SettingsGroup
                   text failedDetail testId=`${testId}-failed-detail` font="theme.type.caption" color="theme.color.ink-muted"
                 if retryLabel != ""
                   row margin-top="theme.space.sm"
-                    ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "idle" ? "idle" : "disabled"), outcome="none", press=retry, testId=`${testId}-retry`)
+                    ActionButton(opens="", label=retryLabel, kind="primary", interaction=(interaction == "idle" ? "idle" : "disabled"), outcome="none", press=retry, testId=`${testId}-retry`)
           for r, i in rows key=r.key
             if i > 0
               Seam(apart=(r.kind == "danger"))
@@ -243,8 +243,8 @@ component SettingsGroup
           row testId=`${testId}-proposal` role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.sm" row-gap="theme.space.sm" padding="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" box-sizing="border-box"
             Words(text=proposalText, kind="body", outcome="none", level=0, testId=`${testId}-proposal-text`)
             row flex-wrap="wrap" justify-content="flex-end" column-gap="theme.space.sm" row-gap="theme.space.sm" margin-left="auto" box-sizing="border-box"
-              ActionButton(label=declineLabel, kind="plain", interaction="idle", outcome="none", press=decline, testId=`${testId}-decline`)
-              ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+              ActionButton(opens="", label=declineLabel, kind="plain", interaction="idle", outcome="none", press=decline, testId=`${testId}-decline`)
+              ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
         else if agent == "changed" or agent == "waiting"
           row align-items="center" gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg"
             box width="blocks.agent-dot" height="blocks.agent-dot" border-radius="theme.radius.pill" background-color=(agent == "changed" ? "theme.color.accent" : "theme.color.caution") flex-shrink=0 aria-hidden=true

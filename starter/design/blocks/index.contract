@@ -98,7 +98,7 @@ component EntryChoice
       Words(text=title, kind="label", outcome="none", level=2, testId=`${testId}-title`)
       Words(text=note, kind="caption", outcome="none", level=0, testId=`${testId}-note`)
       children
-      ActionButton(label=actionLabel, kind=(kind == "primary" ? "primary" : "plain"), interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=press, testId=`${testId}-action`)
+      ActionButton(opens="", label=actionLabel, kind=(kind == "primary" ? "primary" : "plain"), interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=press, testId=`${testId}-action`)
       if outcome != "none"
         Words(text=outcomeText, kind="caption", outcome=(outcome == "error" ? "error" : "blocked"), level=0, testId=`${testId}-outcome`)
 
@@ -118,6 +118,6 @@ component Proposal
       row testId=`${id}-proposal` role="status" align-items="center" gap="theme.space.md" padding="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent"
         Words(text=sentence, kind="body", outcome="none", level=0, testId=`${id}-sentence`)
         row flex=1
-        ActionButton(label=noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId=`${id}-no`)
-        ActionButton(label=yesLabel, kind="primary", interaction="idle", outcome="none", press=yes, testId=`${id}-yes`)
+        ActionButton(opens="", label=noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId=`${id}-no`)
+        ActionButton(opens="", label=yesLabel, kind="primary", interaction="idle", outcome="none", press=yes, testId=`${id}-yes`)
 

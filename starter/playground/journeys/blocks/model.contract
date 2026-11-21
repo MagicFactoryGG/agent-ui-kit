@@ -115,6 +115,8 @@ fn sortItems(chosen: string): MenuItem[] = [
   MenuItem(key="oldest", heading="", label=sortName("oldest"), detail="", kind="choice", on=(chosen == "oldest"), enabled=true),
   MenuItem(key="name", heading="", label=sortName("name"), detail="A to Z", kind="choice", on=(chosen == "name"), enabled=true)
 ]
+// The items whose words hold what was typed in the menu's search (all for nothing typed).
+fn sortShown(chosen: string, q: string): MenuItem[] = sortItems(chosen).filter(x => q == "" or x.label.toLowerCase().includes(q.toLowerCase()))
 fn sortAct(key: string): Act = Act(tool="setSort", door="agent", key="sort", title="Order", value=key, did=`Your assistant put the list ${sortName(key).toLowerCase()}.`, asks=`Your assistant suggests putting the list ${sortName(key).toLowerCase()}.`, will=`Your assistant will put the list ${sortName(key).toLowerCase()} in 5 seconds.`)
 fn sortText(chosen: string): string = `${chosen}\t${sortName(chosen)}`
 // Hero: a planning product's landing page; its one act is the primary, Start free trial. The value is the

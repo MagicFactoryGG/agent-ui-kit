@@ -124,7 +124,7 @@ component StatTiles
           column flex=1 min-width=0
             Words(text=failedText, kind="label", outcome="none", level=0, testId=`${testId}-failed`)
           if retryLabel != ""
-            ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+            ActionButton(opens="", label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
       else if data == "loading"
         column gap="theme.space.md"
           row role="status" align-items="center" gap="theme.space.sm"
@@ -141,10 +141,10 @@ component StatTiles
         if agent == "changed" and changedNote != ""
           StatNote(text=changedNote, waiting=false, testId=`${testId}-note`)
             if undoLabel != ""
-              ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+              ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
         else if (agent == "proposed" or agent == "waiting") and agentNote != ""
           StatNote(text=agentNote, waiting=(agent == "waiting"), testId=`${testId}-note`)
             if yesLabel != ""
               row gap="theme.space.sm" flex-shrink=0
-                ActionButton(label=noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId=`${testId}-no`)
-                ActionButton(label=yesLabel, kind="primary", interaction="idle", outcome="none", press=yes, testId=`${testId}-yes`)
+                ActionButton(opens="", label=noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId=`${testId}-no`)
+                ActionButton(opens="", label=yesLabel, kind="primary", interaction="idle", outcome="none", press=yes, testId=`${testId}-yes`)

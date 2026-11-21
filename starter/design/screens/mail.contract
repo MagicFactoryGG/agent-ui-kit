@@ -137,14 +137,14 @@ component MailAgent
   view
     if agent == "proposed"
       MailBand(tone="proposed", sentence=proposedNote, testId="mail-proposal")
-        ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="mail-reject")
-        ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="mail-accept")
+        ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="mail-reject")
+        ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="mail-accept")
     else if agent == "changed"
       MailBand(tone="changed", sentence=changedNote, testId="mail-changed")
-        ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="mail-undo")
+        ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="mail-undo")
     else if agent == "waiting"
       MailBand(tone="waiting", sentence=waitingNote, testId="mail-waiting")
-        ActionButton(label=waitingLabel, kind="plain", interaction="idle", outcome="none", press=review, testId="mail-review")
+        ActionButton(opens="", label=waitingLabel, kind="plain", interaction="idle", outcome="none", press=review, testId="mail-review")
 
 // Flag: the open message's flag, as a toggle that says it is pressed. Flagged, its flag fills in the caution colour
 // (a glyph, never words, takes the status colour) and its outline follows. `compact` draws the flag alone, named by
@@ -188,9 +188,9 @@ component MailReplies
     flag: action
   view
     row flex-wrap="wrap" gap="theme.space.sm"
-      ActionButton(label=replyLabel, kind=(focal ? "primary" : "plain"), interaction="idle", outcome="none", press=reply, testId="mail-reply")
-      ActionButton(label=replyAllLabel, kind="plain", interaction="idle", outcome="none", press=replyAll, testId="mail-reply-all")
-      ActionButton(label=forwardLabel, kind="plain", interaction="idle", outcome="none", press=forward, testId="mail-forward")
+      ActionButton(opens="", label=replyLabel, kind=(focal ? "primary" : "plain"), interaction="idle", outcome="none", press=reply, testId="mail-reply")
+      ActionButton(opens="", label=replyAllLabel, kind="plain", interaction="idle", outcome="none", press=replyAll, testId="mail-reply-all")
+      ActionButton(opens="", label=forwardLabel, kind="plain", interaction="idle", outcome="none", press=forward, testId="mail-forward")
       if showFlag
         MailFlag(label=flagLabel, flagged=flagged, compact=compactFlag, press=flag)
 
@@ -329,7 +329,7 @@ component MailScreen
         scroll id="mail-rail" width="screens.mail-rail" flex-shrink=0 min-height=0 background-color="theme.color.surface"
           box display="grid" grid-template-columns="200%" min-height="100%" overflow="hidden"
             SideNav(productName=title, productMark=mark, navLabel=navLabel, entries=entries, data="many", emptyText="", emptyLabel="", empty=compose, loadingText="", failedText="", retryLabel="", retry=retry, accountName=accountName, accountDetail=accountDetail, agent="none", agentKey="", agentNote="", testId="mail-folders")
-              ActionButton(label=composeLabel, kind=(composeFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=compose, testId="mail-compose")
+              ActionButton(opens="", label=composeLabel, kind=(composeFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=compose, testId="mail-compose")
         scroll id="mail-main" flex=1 min-width=0 min-height=0
           column role="main" padding="theme.space.xl" gap="theme.space.lg"
             if shown
@@ -343,7 +343,7 @@ component MailScreen
     else
       column testId="mail" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
         TopBar(title=title, agentNote="", agent="none")
-          ActionButton(label=composeLabel, kind=(composeFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=compose, testId="mail-compose")
+          ActionButton(opens="", label=composeLabel, kind=(composeFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=compose, testId="mail-compose")
         scroll id="mail-scroll" flex=1 min-height=0
           column role="main" width="100%" max-width="screens.mail-pane-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.xl" gap="theme.space.md"
             if pane == "list"

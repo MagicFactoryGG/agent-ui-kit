@@ -712,8 +712,10 @@
     }
   },
   {
-    "name": "Menu: an order chosen: the Oldest first item and setSort reach the same order; the agent's is recorded",
+    "name": "Menu: an order chosen from the popup, after its search narrows the items: the Oldest first item and setSort reach the same order; the agent's is recorded",
     "person": [
+      "tap sort-open",
+      "type sort-menu-search old",
       "tap sort-menu-oldest"
     ],
     "agent": [

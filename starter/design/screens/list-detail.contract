@@ -178,7 +178,7 @@ component ListDetailPane
             box height="screens.list-detail-line" display="flex" align-items="center" flex-shrink=0 aria-hidden=true
               box width="screens.list-detail-dot" height="screens.list-detail-dot" border-radius="theme.radius.pill" background-color="theme.color.accent"
             text changedNote testId="list-detail-changed-text" flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
-          ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="list-detail-undo")
+          ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="list-detail-undo")
       if found or loading
         DetailPanel(testId="list-detail-panel", title=title, statusLabel=status, status="none", primaryLabel=(asks or loading ? "" : primaryLabel), primaryPress=primaryPress, secondaryLabel=(asks or loading ? primaryLabel : secondaryLabel), secondaryPress=secondary, interaction=(loading ? "disabled" : "idle"), busyNote="", changedNote="", waitingNote="", retryLabel="", retryPress=primaryPress, factsTitle=factsTitle, facts=facts, factsEmptyText=factsEmptyText, notesTitle=notesTitle, notes=notes, activityTitle=activityTitle, events=events, activityEmptyText=activityEmptyText, loadingText=detailLoadingText, failedText="", data=(loading ? "loading" : long ? "long" : "one"), agent="none")
       else

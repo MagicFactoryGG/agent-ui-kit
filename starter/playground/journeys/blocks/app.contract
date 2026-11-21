@@ -22,8 +22,8 @@ use BarChart, NotificationList from "__SCOPE__/blocks"
 use chartRanges, chartNote, chartLabel, chartPoints, chartText, notesRead, inboxNotes, notesText from "./model.contract"
 use StatTiles from "__SCOPE__/blocks"
 use weekStats, statsText from "./model.contract"
-use Menu from "__SCOPE__/components"
-use sortItems, sortText from "./model.contract"
+use Menu, ActionButton from "__SCOPE__/components"
+use sortShown, sortText from "./model.contract"
 
 // The window's width, for the Hero's size (compact under 600 px): an app reads the viewport, a piece cannot.
 shape JourneyViewport
@@ -138,9 +138,14 @@ component App
   action addFeatureByPerson
     book = personSet(book, "features", "sync")
   // A plan's button chooses it; the agent's note's Undo takes its choice back.
-  // An item of the order's Menu chooses it.
+  // An item of the order's Menu chooses it; its search narrows the items (the words typed are this view's own).
   action chooseSortByPerson(key: string)
     book = personSet(book, "sort", key)
+  state sortQuery = ""
+  action findSort(v: string)
+    sortQuery = v
+  // the Order button only opens the menu (its `opens`); a press has nothing more to do
+  action sortOpened
   action choosePlanByPerson(key: string)
     book = personSet(book, "plan", key)
   action undoPlan
@@ -291,5 +296,6 @@ component App
       BarChart(title="Orders", note=chartNote(chartRange), chartLabel=chartLabel(chartRange), points=chartPoints(chartRange), ranges=chartRanges(), range=chartRange, rangeLabel="Show orders by", emptyText="", emptyLabel="", loadingText="", failedText="", retryLabel="", agentKey="", agentNote=latestAbout(book, ["chart-range"]), undoLabel="Undo", proposalText="", acceptLabel="", rejectLabel="", data="many", agent=(chartMarked ? "changed" : "none"), size=(viewport.width < 600 ? "compact" : "wide"), choose=chooseRangeByPerson, add=ignore, retry=ignore, undo=undoRange, accept=ignore, reject=ignore, testId="orders")
       NotificationList(title="Notifications", summary=(notesAllRead ? "All read" : "2 new"), markAllLabel="Mark all read", markAll=markNotesByPerson, newTitle="New", earlierTitle="Earlier", notes=inboxNotes(notesAllRead), answer=ignoreAnswer, loadingText="", emptyTitle="", emptyText="", emptyActionLabel="", emptyPress=ignore, failedTitle="", failedText="", retryLabel="", retry=ignore, proposedNote=notesAsks, acceptLabel="Mark read", rejectLabel="Not now", accept=acceptNotes, reject=rejectNotes, changedNote=latestAbout(book, ["notes"]), undoLabel="Undo", undo=undoNotes, data="many", agent=(notesAsks != "" ? "proposed" : notesMarked ? "changed" : "none"), testId="notes")
       StatTiles(title="This week", stats=(stats == "many" ? weekStats() : []), data=(stats == "many" ? "many" : "failed"), loadingText="", failedText="This week's numbers could not be read.", retryLabel="Try again", retry=loadStatsByPerson, agent=(statsMarked ? "changed" : "none"), agentKey="", agentNote="", yesLabel="", noLabel="", yes=ignore, no=ignore, changedNote=latestAbout(book, ["stats"]), undoLabel="Undo", undo=undoStats, testId="stats")
-      // Menu, in place: the list's order (its popup form is the same container, opened by a button's popovertarget)
-      Menu(menuId="sort-menu", label="Order", items=sortItems(sort), presentation="inline", interaction="idle", choose=chooseSortByPerson, testId="sort-menu")
+      // Menu as a popup, opened by the Order button (ActionButton's `opens`), with a search above its items
+      ActionButton(opens="sort-menu", label="Order", kind="plain", interaction="idle", outcome="none", press=sortOpened, testId="sort-open")
+      Menu(menuId="sort-menu", label="Order", items=sortShown(sort, sortQuery), presentation="popup", interaction="idle", choose=chooseSortByPerson, search="Find an order", query=sortQuery, find=findSort, testId="sort-menu")

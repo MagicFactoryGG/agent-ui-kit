@@ -184,12 +184,12 @@ component SiteFooter
               row testId=`${testId}-proposal` role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.md" padding-top="theme.space.md" padding-bottom="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.md" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" background-color="theme.color.page"
                 text proposedNote testId=`${testId}-agent` flex=1 min-width="blocks.footer-col-min" overflow-wrap="break-word" text-wrap="balance" font="theme.type.body" color="theme.color.ink"
                 row min-width=0 max-width="100%" flex-wrap="wrap" gap="theme.space.sm"
-                  ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
-                  ActionButton(label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+                  ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+                  ActionButton(opens="", label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
             if agent == "changed"
               row testId=`${testId}-changed` role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.sm" padding-left="theme.space.md" border-left-width="blocks.footer-rule" border-left-style="solid" border-left-color="theme.color.accent"
                 text agentNote testId=`${testId}-agent` flex-shrink=1 min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
-                ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+                ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
             if shown
               row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.xl"
                 for g in groups key=g.key
@@ -205,11 +205,11 @@ component SiteFooter
             else if data == "failed"
               FooterNote(text=failedText, kind="failed", testId=`${testId}-failed`)
                 if retryLabel != ""
-                  ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
+                  ActionButton(opens="", label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
             else
               FooterNote(text=emptyText, kind="empty", testId=`${testId}-empty`)
                 if emptyLabel != ""
-                  ActionButton(label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=add, testId=`${testId}-add`)
+                  ActionButton(opens="", label=emptyLabel, kind="plain", interaction="idle", outcome="none", press=add, testId=`${testId}-add`)
         // The bottom row: the legal line under a hairline.
         row padding-top="theme.space.lg" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
           text legal testId=`${testId}-legal` flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"

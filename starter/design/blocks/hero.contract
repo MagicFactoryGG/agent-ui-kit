@@ -136,21 +136,21 @@ component Hero
               text lead testId=`${testId}-lead` max-width="blocks.measure" overflow-wrap="break-word" font="theme.type.body" font-size="blocks.hero-lead" color="theme.color.ink-muted"
           column gap="theme.space.md"
             row flex-wrap="wrap" gap="theme.space.md" align-items="center"
-              ActionButton(label=primaryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=primary, testId=`${testId}-primary`)
+              ActionButton(opens="", label=primaryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=primary, testId=`${testId}-primary`)
               if secondaryLabel != ""
-                ActionButton(label=secondaryLabel, kind="plain", interaction="idle", outcome="none", press=secondary, testId=`${testId}-secondary`)
+                ActionButton(opens="", label=secondaryLabel, kind="plain", interaction="idle", outcome="none", press=secondary, testId=`${testId}-secondary`)
             if outcome == "error"
               text errorText testId=`${testId}-error` role="alert" overflow-wrap="break-word" font="theme.type.caption" color="theme.color.critical-text"
           if agent == "proposed"
             column testId=`${testId}-proposal` role="status" gap="theme.space.md" padding="theme.space.lg" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" background-color="theme.color.surface"
               text proposedNote testId=`${testId}-agent` overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
               row flex-wrap="wrap" gap="theme.space.sm"
-                ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
-                ActionButton(label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+                ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+                ActionButton(opens="", label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
           if agent == "changed"
             row testId=`${testId}-changed` role="status" flex-wrap="wrap" align-items="center" gap="theme.space.md" padding-left="theme.space.md" border-left-width="blocks.mark-line" border-left-style="solid" border-left-color="theme.color.accent"
               text changedNote testId=`${testId}-agent` flex-shrink=1 min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.accent"
-              ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+              ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
         // The panel: a drawn picture, then the rows (or the state that stands in their place).
         column testId=`${testId}-panel` flex=1 min-width="blocks.hero-panel-min" box-sizing="border-box" overflow="hidden" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color=(data == "failed" ? "theme.color.critical" : "theme.color.line")
           box role="img" aria-label=pictureLabel height="blocks.hero-art" background-color="color-mix(in srgb, theme.color.accent 9%, theme.color.surface)" overflow="hidden" animation=(data == "loading" ? "heroBreathe 1.8s ease-in-out infinite" : "none")
@@ -179,6 +179,6 @@ component Hero
             else if data == "failed"
               HeroNote(text=failedText, kind="failed", testId=`${testId}-failed`)
                 if retryLabel != ""
-                  ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
+                  ActionButton(opens="", label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
             else
               HeroNote(text=emptyText, kind="empty", testId=`${testId}-empty`)

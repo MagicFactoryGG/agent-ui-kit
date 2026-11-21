@@ -169,7 +169,7 @@ component StateCluster
           path d="M12 8.2v4.2" stroke="theme.color.critical-ink" stroke-width=1.8 stroke-linecap="round"
           circle cx=12 cy=15.6 r=1 fill="theme.color.critical-ink"
       Words(text=text, kind="title", outcome="none", level=0, testId=testId)
-      ActionButton(label=actionLabel, kind=(kind == "failed" ? "primary" : "plain"), interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
+      ActionButton(opens="", label=actionLabel, kind=(kind == "failed" ? "primary" : "plain"), interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
 
 // One band of the card's chrome: a hairline rule at its top or bottom edge, one line of quiet words centred in
 // the band's own height (`minH`: the card's bar rhythm on a wide window, one slim line on a phone, where the
@@ -292,7 +292,7 @@ component Reader
                 text m.snippet testId=`${testId}-pane-snippet` font="theme.type.body" color="theme.color.ink-muted"
               if openLabel != ""
                 row min-height="blocks.bar-min" box-sizing="border-box" align-items="center" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
-                  ActionButton(label=openLabel, kind="plain", interaction="idle", outcome="none", press=openMessage, testId=`${testId}-pane-open`)
+                  ActionButton(opens="", label=openLabel, kind="plain", interaction="idle", outcome="none", press=openMessage, testId=`${testId}-pane-open`)
           case none
             column flex=1 gap="theme.space.md" align-items="center" justify-content="center" padding="theme.space.xl"
               svg viewBox="0 0 24 24" width="blocks.ml-glyph" height="blocks.ml-glyph" aria-hidden=true
