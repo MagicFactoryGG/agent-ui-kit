@@ -14,11 +14,21 @@
 //
 // Needs Exact (EXACT, else the checkout this kit's apps name) and Bun 1.4.2.
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const KIT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+// A path with its links resolved, even before it exists (the nearest existing folder's real path, then the rest):
+// the playground's package paths are written relative, and a relative path between a link (macOS's /tmp) and the
+// folder it names does not resolve.
+function real(p) {
+  const abs = resolve(p);
+  if (existsSync(abs)) return realpathSync(abs);
+  const up = dirname(abs);
+  return up === abs ? abs : join(real(up), basename(abs));
+}
+
+const KIT = real(resolve(dirname(fileURLToPath(import.meta.url)), '..'));
 const STARTER = join(KIT, 'starter');
 const TOOLS = ['theme.mjs', 'matrix.mjs', 'ui-guard.mjs', 'parity.mjs', 'vendor.mjs'];
 
@@ -88,8 +98,8 @@ function main() {
     console.error('create: no Exact checkout: set EXACT to one (this kit is tested at the commit its README names)');
     return 2;
   }
-  const design = resolve(o.design);
-  const play = resolve(o.playground);
+  const design = real(o.design);
+  const play = real(o.playground);
   const name = o.scope.slice(1);
   const relDesign = relative(play, design) || '.';
   const fill = (t) => t.replaceAll('__SCOPE__', o.scope).replaceAll('__NAME__', name).replaceAll('__TITLE__', o.title).replaceAll('__DESIGN__', relDesign).replaceAll('__KIT__', relative(play, KIT) || '.');
