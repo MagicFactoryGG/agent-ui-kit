@@ -12,10 +12,10 @@
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
 use Ledger, ledger, personSet, valueOf, isOn, isMarked, undoLatest, answerKey, waitingId, waitingSentence from "@agent-ui-kit/agent"
-use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer, AppShell, SettingsScreen, SettingsScreenGroup, EntryScreen, DashboardScreen, ProfileScreen, ProfileDetail from "__SCOPE__/screens"
+use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer, AppShell, SettingsScreen, SettingsScreenGroup, EntryScreen, DashboardScreen, ProfileScreen, ProfileDetail, SearchScreen from "__SCOPE__/screens"
 use Words from "__SCOPE__/components"
 use Message, Setting from "__SCOPE__/blocks"
-use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys, shellFound, shellEntries, settingsSections, settingsGroupsOf, settingsSwitches, settingsSwitchKeys, settingKey, settingKeys, settingSectionOf, dashPeriods, dashStats, dashPoints, dashNote, dashItems, profileBase, profileDetailKeys, profileKey, profileKeys, profileProblem, profileMessage, profileSettings, profilePicture from "./model.contract"
+use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys, shellFound, shellEntries, settingsSections, settingsGroupsOf, settingsSwitches, settingsSwitchKeys, settingKey, settingKeys, settingSectionOf, dashPeriods, dashStats, dashPoints, dashNote, dashItems, profileBase, profileDetailKeys, profileKey, profileKeys, profileProblem, profileMessage, profileSettings, profilePicture, searchFilters, searchValue, searchKindIn, searchDateIn, searchTextIn, searchFound, searchCount, searchScope from "./model.contract"
 
 component App
   members "./tools.contract"
@@ -162,6 +162,31 @@ component App
   action endSessionByPerson
     sessionEnded = true
 
+  // SearchScreen: the whole search (kind, date, words) is one value in the ledger, so the field, the Segments, the
+  // results and the agent's mark all read it, and the agent's runSearch writes the same value.
+  derive searchNow = valueOf(book, "search")
+  derive searchKind = searchKindIn(searchNow)
+  derive searchDate = searchDateIn(searchNow)
+  derive searchQuery = searchTextIn(searchNow)
+  derive searchResults = searchFound(searchNow)
+  derive searchAgent = waitingId(book, "search") != "" ? "proposed" : isMarked(book, "search") ? "changed" : "none"
+  derive searchText = [`kind\t${searchKind}`, `date\t${searchDate}`, `words\t${searchQuery}`].concat(searchResults.map(r => `${r.key}\t${r.title}\t${r.place}`)).join("\n")
+  // The person's door: each change in the field, a Segment's press by key, and the empty state's way on.
+  action searchTypeByPerson(text: string)
+    book = personSet(book, "search", searchValue(searchKindIn(valueOf(book, "search")), searchDateIn(valueOf(book, "search")), text))
+  action searchKindByPerson(key: string)
+    book = personSet(book, "search", searchValue(key, searchDateIn(valueOf(book, "search")), searchTextIn(valueOf(book, "search"))))
+  action searchDateByPerson(key: string)
+    book = personSet(book, "search", searchValue(searchKindIn(valueOf(book, "search")), key, searchTextIn(valueOf(book, "search"))))
+  action searchClearFiltersByPerson
+    book = personSet(book, "search", searchValue("all", "any", searchTextIn(valueOf(book, "search"))))
+  action searchClearByPerson
+    book = personSet(book, "search", searchValue(searchKindIn(valueOf(book, "search")), searchDateIn(valueOf(book, "search")), ""))
+  action searchAcceptByPerson
+    book = answerKey(book, "search", true, "person")
+  action searchRejectByPerson
+    book = answerKey(book, "search", false, "person")
+
   // A retry and a proposal's answers: this use has none.
   action ignore
     book = book
@@ -169,7 +194,7 @@ component App
     book = book
 
   // The agent's door. Answer words: saved, delayed, proposed, off, unknown-id.
-  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen, OnboardingScreen, AppShell, SettingsScreen, EntryScreen, DashboardScreen or ProfileScreen. Answers its name." = openScreen
+  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen, OnboardingScreen, AppShell, SettingsScreen, EntryScreen, DashboardScreen, ProfileScreen or SearchScreen. Answers its name." = openScreen
     returns shown
   tool readAlbum reads "The album's pictures, one per line: id, caption, and shown on the one on screen, tab-separated." = readAlbum
     returns albumText
@@ -228,6 +253,12 @@ component App
     returns book.answer
     fails when book.answer == "unknown-id" or book.answer == "off" or book.answer == "empty" or book.answer == "not-an-address" or book.answer == "no-country-code" or book.answer == "unknown-language"
 
+  tool readSearch reads "The search on the search screen: its kind, its date and its words, then each result it finds, one per line: id, title and where it lives, tab-separated. Kinds: all, pages, files, people; dates: any, week, month." = readSearch
+    returns searchText
+  tool runSearch writes idempotent closed "Search the workspace's pages, files and people for words, narrowed by kind (all, pages, files or people) and by when each last changed (any, week or month); it shows the search screen with the results. Empty text shows all of that kind and date. Answers saved or unknown-filter." = runSearch
+    returns book.answer
+    fails when book.answer == "unknown-filter" or book.answer == "off"
+
   view
     main testId="app" width="100%" height="100%"
       if shown == "MediaViewer"
@@ -250,3 +281,5 @@ component App
         DashboardScreen(title="Overview", periodLabel="Period", chartTitle="Orders", chartNote=dashNote(dashPeriod), chartLabel="Orders in the period", recentTitle="Recent orders", recentEmptyText="No orders yet.", allLabel="View all", loadingText="", chartLoadingText="", emptyText="", emptyLabel="", failedText="", retryLabel="", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, ["dash-period"]), undoLabel="Undo", periodKey=dashPeriod, periods=dashPeriods(), stats=dashStats(dashPeriod), points=dashPoints(dashPeriod), items=dashItems(), data="many", agent=(isMarked(book, "dash-period") ? "changed" : "none"), choose=choosePeriodByPerson, showAll=ignore, start=ignore, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)
       else if shown == "ProfileScreen"
         ProfileScreen(title="Profile", name=valueOf(book, "profile-name"), about="Workspace admin at Northwind", pictureSrc=profilePicture(), pictureLabel=`${valueOf(book, "profile-name")}'s picture`, detailsLabel="Your details", detailsNote="People in your workspace see your name and picture. Only you see the rest.", details=profileDetails, editKey=profileEditing, draft=profileDraft, editLabel="Edit", saveLabel="Save", cancelLabel="Cancel", busyText="", savedText="Saved.", errorText=profileMessage(profileProblemWord), agentKey=(profileWaitKey != "" ? profileWaitKey : profileMarkedKey), markNote=(profileAgent == "proposed" ? "Your assistant suggests a change" : "Changed by your assistant"), proposalText=waitingSentence(book, profileKey(profileWaitKey)), acceptLabel="Accept", rejectLabel="Not now", changedText=latestAbout(book, profileKeys()), undoLabel="Undo", waitingText="", waitingNote="", settingsTitle="Preferences", settingsNote="These follow you to every device.", settings=profileSettings(), sessionTitle="This browser", sessionDetail="You authenticated here today at 09:12.", endSessionLabel="End session", loadingText="", failedTitle="", failedText="", retryLabel="", data="one", interaction=(profileOpen ? "focus" : "idle"), outcome=(profileOutcome == "success" ? "success" : profileOutcome == "error" ? "error" : "none"), agent=(profileAgent == "proposed" ? "proposed" : profileAgent == "changed" ? "changed" : "none"), startEdit=editDetailByPerson, typeDraft=typeDetailByPerson, save=saveDetailByPerson, cancel=cancelDetailByPerson, accept=acceptDetailByPerson, reject=rejectDetailByPerson, undo=undoByPerson, retry=ignore, endSession=endSessionByPerson, toggle=ignoreKey, choose=ignoreKey, open=ignoreKey, remove=ignoreKey)
+      else if shown == "SearchScreen"
+        SearchScreen(title="Search", queryLabel="Search the workspace", queryHint="Words in a title, a page or a file.", placeholder="Pages, files and people", query=searchQuery, filtersLabel="Filters", kindLabel="Kind", dateLabel="Changed", filters=searchFilters(), kindKey=searchKind, dateKey=searchDate, countText=searchCount(searchResults.length, searchQuery), resultsLabel="Results", results=searchResults, loadingText="", emptyTitle="No results", emptyText=(searchQuery.trim() == "" ? `Nothing in ${searchScope(searchKind, searchDate)}.` : `Nothing in ${searchScope(searchKind, searchDate)} matches “${searchQuery.trim()}”.`), clearFiltersLabel="Clear filters", clearSearchLabel="Clear search", failedTitle="", failedText="", retryLabel="", markNote="Searched by your assistant", proposedNote=waitingSentence(book, "search"), changedNote=latestAbout(book, ["search"]), acceptLabel="Search", rejectLabel="Not now", undoLabel="Undo", data=(searchResults.length == 0 ? "empty" : "many"), agent=(searchAgent == "proposed" ? "proposed" : searchAgent == "changed" ? "changed" : "none"), find=searchTypeByPerson, chooseKind=searchKindByPerson, chooseDate=searchDateByPerson, clearFilters=searchClearFiltersByPerson, clearSearch=searchClearByPerson, retry=ignore, accept=searchAcceptByPerson, reject=searchRejectByPerson, undo=undoByPerson)

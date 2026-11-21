@@ -1,7 +1,7 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, ShellRow, SettingsSection, SettingsScreenGroup, DashboardPeriod, DashboardItem, ProfileDetail, ProfileSetting from "__SCOPE__/screens"
+use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, ShellRow, SettingsSection, SettingsScreenGroup, DashboardPeriod, DashboardItem, ProfileDetail, ProfileSetting, SearchFilter, SearchResult from "__SCOPE__/screens"
 use Fact, Message, Step, NavEntry, Setting, Stat, BarPoint from "__SCOPE__/blocks"
 
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -199,6 +199,55 @@ fn profileSettings(): ProfileSetting[] = [
   ProfileSetting(key="devices", kind="link", label="Your devices", detail="Where you are authenticated now.", value="", on=false)
 ]
 
+// SearchScreen: a workspace's pages, files and people, found by their words and narrowed by kind and by when each last
+// changed. The whole search (its kind, its date and its words) is one value in the ledger (`search`, the three joined
+// by tabs), so the person's typing and Segments and the agent's runSearch write the same value, and one Undo takes back
+// the agent's whole search. Each document is data only; `days` is how long ago it changed.
+shape SearchDoc
+  key: string
+  title: string
+  text: string
+  place: string
+  kind: string
+  when: string
+  days: number
+fn searchFilters(): SearchFilter[] = [
+  SearchFilter(key="all", group="kind", label="All"),
+  SearchFilter(key="pages", group="kind", label="Pages"),
+  SearchFilter(key="files", group="kind", label="Files"),
+  SearchFilter(key="people", group="kind", label="People"),
+  SearchFilter(key="any", group="date", label="Any time"),
+  SearchFilter(key="week", group="date", label="Past week"),
+  SearchFilter(key="month", group="date", label="Past month")
+]
+fn searchKindKeys(): string[] = searchFilters().filter(f => f.group == "kind").map(f => f.key)
+fn searchDateKeys(): string[] = searchFilters().filter(f => f.group == "date").map(f => f.key)
+fn searchDocs(): SearchDoc[] = [
+  SearchDoc(key="signage", title="Harbour signage", text="Wayfinding for the harbour front: twelve signs, two maps and the ferry stop's new board.", place="Projects · Northwind studio", kind="pages", when="Nov 18", days=3),
+  SearchDoc(key="cafes", title="Harbour cafés spring campaign", text="Posters for the harbour cafés, a ferry film and a printed map of the quay.", place="Projects · Campaigns", kind="pages", when="Nov 2", days=19),
+  SearchDoc(key="artwork", title="harbour-signage-v3.pdf", text="Final artwork for the harbour signs, sent to the printer on Monday.", place="Files · Signage", kind="files", when="Nov 17", days=4),
+  SearchDoc(key="timetable", title="North Line timetable.pdf", text="Print and screen editions of the spring timetable, with the new night trains.", place="Files · Transit", kind="files", when="Sep 30", days=52),
+  SearchDoc(key="sam", title="Sam Rivera", text="Leads the harbour signage and the North Line timetable.", place="People · Design", kind="people", when="", days=400),
+  SearchDoc(key="maya", title="Maya Okafor", text="Runs the Aurora desk lamp launch and the spring campaign.", place="People · Product", kind="people", when="", days=400)
+]
+fn searchValue(kind: string, date: string, text: string): string = `${kind}\t${date}\t${text}`
+fn searchKindIn(v: string): string = v.split("\t").slice(0, 1).join("")
+fn searchDateIn(v: string): string = v.split("\t").slice(1, 2).join("")
+fn searchTextIn(v: string): string = v.split("\t").slice(2).join("\t")
+fn searchKindWord(kind: string): string = kind == "pages" ? "Page" : kind == "files" ? "File" : "Person"
+fn searchHolds(d: SearchDoc, words: string): bool = words == "" or `${d.title} ${d.text}`.toLowerCase().includes(words)
+fn searchKeeps(d: SearchDoc, kind: string, date: string): bool = (kind == "all" or d.kind == kind) and (date == "any" or d.days <= (date == "week" ? 7 : 31))
+// The excerpt in runs, the words that matched at the odd places: its first two matches, as written.
+fn searchAt(text: string, words: string): number = words == "" ? -1 : text.toLowerCase().indexOf(words)
+fn searchSplit(text: string, words: string): string[] = searchAt(text, words) < 0 ? [text] : [text.slice(0, searchAt(text, words)), text.slice(searchAt(text, words), searchAt(text, words) + words.length), text.slice(searchAt(text, words) + words.length)]
+fn searchRuns(text: string, words: string): string[] = searchSplit(text, words).slice(0, 2).concat(searchSplit(text, words).slice(2).map(rest => searchSplit(rest, words)).flat())
+fn searchFound(v: string): SearchResult[] = searchDocs().filter(d => searchKeeps(d, searchKindIn(v), searchDateIn(v)) and searchHolds(d, searchTextIn(v).trim().toLowerCase())).map(d => SearchResult(key=d.key, title=d.title, excerpt=searchRuns(d.text, searchTextIn(v).trim().toLowerCase()), place=d.place, kind=searchKindWord(d.kind), when=d.when, href="/"))
+// What a search covers, said in words: "files from the past week", "everything".
+fn searchScope(kind: string, date: string): string = `${kind == "all" ? "everything" : kind}${date == "week" ? " from the past week" : date == "month" ? " from the past month" : ""}`
+fn searchFor(words: string): string = words.trim() == "" ? "" : ` for “${words.trim()}”`
+fn searchCount(n: number, words: string): string = `${n} ${n == 1 ? "result" : "results"}${searchFor(words)}`
+fn searchAct(kind: string, date: string, text: string): Act = Act(tool="runSearch", door="agent", key="search", title="Search", value=searchValue(kind, date, text.trim()), did=(text.trim() == "" ? `Your assistant showed ${searchScope(kind, date)}.` : `Your assistant searched ${searchScope(kind, date)} for “${text.trim()}”.`), asks=`Your assistant suggests searching ${searchScope(kind, date)} for “${text.trim()}”.`, will=`Your assistant will search ${searchScope(kind, date)} for “${text.trim()}” in 5 seconds.`)
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false),
@@ -213,10 +262,12 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="authenticate", title="Authenticate", sentence="Authenticates the person. Never allowed: authenticating is the person's own act.", floor="off", reach="self", secret=false),
   AgentTool(name="setPeriod", title="Period", sentence="Shows the dashboard's numbers for another period.", floor="recorded", reach="self", secret=false),
   // Others see a profile's name, and its address is where mail goes: the person accepts each change first.
-  AgentTool(name="changeDetail", title="Profile", sentence="Changes a detail of the person's profile, once the person accepts.", floor="proposed", reach="others", secret=false)
+  AgentTool(name="changeDetail", title="Profile", sentence="Changes a detail of the person's profile, once the person accepts.", floor="proposed", reach="others", secret=false),
+  // A search only this person sees: recorded, with Undo.
+  AgentTool(name="runSearch", title="Search", sentence="Searches the workspace's pages, files and people.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="picture", value="harbour"),
   Value(key="project", value="harbour")
-].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on")))).concat([Value(key="entry-step", value="terms"), Value(key="entry-authenticated", value="no")]).concat([Value(key="dash-period", value="quarter")]).concat([Value(key="profile-name", value="Ada Lovelace"), Value(key="profile-email", value="ada@studio.example"), Value(key="profile-phone", value="+44 20 7946 0958"), Value(key="profile-language", value="English (UK)")])
+].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on")))).concat([Value(key="entry-step", value="terms"), Value(key="entry-authenticated", value="no")]).concat([Value(key="dash-period", value="quarter")]).concat([Value(key="profile-name", value="Ada Lovelace"), Value(key="profile-email", value="ada@studio.example"), Value(key="profile-phone", value="+44 20 7946 0958"), Value(key="profile-language", value="English (UK)")]).concat([Value(key="search", value=searchValue("all", "any", ""))])

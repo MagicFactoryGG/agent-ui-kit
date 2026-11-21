@@ -2336,5 +2336,61 @@
     {"key": "digest", "kind": "switch", "label": "Weekly digest", "detail": "A summary of your week, each Monday.", "value": "", "on": true},
     {"key": "time", "kind": "value", "label": "Time zone", "detail": "", "value": "London", "on": false},
     {"key": "devices", "kind": "link", "label": "Your devices", "detail": "Where you are authenticated now.", "value": "", "on": false}
-  ]
+  ],
+  "SearchFilter:many": [
+    {"key": "all", "group": "kind", "label": "All"},
+    {"key": "pages", "group": "kind", "label": "Pages"},
+    {"key": "files", "group": "kind", "label": "Files"},
+    {"key": "people", "group": "kind", "label": "People"},
+    {"key": "any", "group": "date", "label": "Any time"},
+    {"key": "week", "group": "date", "label": "Past week"},
+    {"key": "month", "group": "date", "label": "Past month"}
+  ],
+  "SearchFilter:empty": [
+    {"key": "all", "group": "kind", "label": "All"},
+    {"key": "pages", "group": "kind", "label": "Pages"},
+    {"key": "files", "group": "kind", "label": "Files"},
+    {"key": "people", "group": "kind", "label": "People"},
+    {"key": "any", "group": "date", "label": "Any time"},
+    {"key": "week", "group": "date", "label": "Past week"},
+    {"key": "month", "group": "date", "label": "Past month"}
+  ],
+  "SearchFilter:loading": [
+    {"key": "all", "group": "kind", "label": "All"},
+    {"key": "pages", "group": "kind", "label": "Pages"},
+    {"key": "files", "group": "kind", "label": "Files"},
+    {"key": "people", "group": "kind", "label": "People"},
+    {"key": "any", "group": "date", "label": "Any time"},
+    {"key": "week", "group": "date", "label": "Past week"},
+    {"key": "month", "group": "date", "label": "Past month"}
+  ],
+  "SearchFilter:failed": [
+    {"key": "all", "group": "kind", "label": "All"},
+    {"key": "pages", "group": "kind", "label": "Pages"},
+    {"key": "files", "group": "kind", "label": "Files"},
+    {"key": "people", "group": "kind", "label": "People"},
+    {"key": "any", "group": "date", "label": "Any time"},
+    {"key": "week", "group": "date", "label": "Past week"},
+    {"key": "month", "group": "date", "label": "Past month"}
+  ],
+  "SearchFilter:long": [
+    {"key": "all", "group": "kind", "label": "Everything in the workspace"},
+    {"key": "pages", "group": "kind", "label": "Pages and their comments"},
+    {"key": "files", "group": "kind", "label": "Files you can open"},
+    {"key": "people", "group": "kind", "label": "People and teams"},
+    {"key": "any", "group": "date", "label": "Any time at all"},
+    {"key": "week", "group": "date", "label": "In the past seven days"},
+    {"key": "month", "group": "date", "label": "In the past thirty days"}
+  ],
+  "SearchResult:many": [
+    {"key": "r1", "title": "Harbour signage", "excerpt": ["Wayfinding for the ", "harbour", " front: twelve signs, two maps and the ferry stop’s new board."], "place": "Projects · Northwind studio", "kind": "Page", "when": "Nov 18", "href": "/"},
+    {"key": "r2", "title": "Harbour cafés spring campaign", "excerpt": ["Posters for the ", "harbour", " cafés, a ferry film and a printed map of the quay."], "place": "Projects · Campaigns", "kind": "Page", "when": "Nov 12", "href": "/"},
+    {"key": "r3", "title": "harbour-signage-v3.pdf", "excerpt": ["Final artwork for the ", "harbour", " signs, sent to the printer on Monday."], "place": "Files · Signage", "kind": "File", "when": "Nov 9", "href": "/"},
+    {"key": "r4", "title": "Sam Rivera", "excerpt": ["Leads the ", "harbour", " signage and the North Line timetable."], "place": "People · Design", "kind": "Person", "when": "", "href": "/"}
+  ],
+  "SearchResult:long": [
+    {"key": "r1", "title": "Harbour signage, the full wayfinding system for the harbour front, the ferry stop and the three car parks along the quay", "excerpt": ["Wayfinding for the ", "harbour", " front: twelve signs, two maps, the ferry stop’s new departure board, and a long note from the council on the colours allowed beside the listed ", "harbour", " wall, with the supplier’s quotes attached."], "place": "Projects · Northwind studio · Wayfinding and environmental graphics · Harbour front, phase two", "kind": "Page", "when": "Nov 18", "href": "/"},
+    {"key": "r2", "title": "harbour-signage-final-artwork-for-print-v3-approved-by-council-2026-11-09.pdf", "excerpt": ["Final artwork for the ", "harbour", " signs."], "place": "Files · Signage · Print-ready artwork", "kind": "File", "when": "Nov 9", "href": "/"}
+  ],
+  "props:SearchScreen": {"title": "Search", "queryLabel": "Search the workspace", "queryHint": "Words in a title, a page or a file.", "placeholder": "Pages, files and people", "query": "harbour", "filtersLabel": "Filters", "kindLabel": "Kind", "kindKey": "all", "dateLabel": "Changed", "dateKey": "any", "countText": "4 results for “harbour”", "resultsLabel": "Results", "loadingText": "Searching for “harbour”…", "emptyTitle": "No results", "emptyText": "Nothing matches “harbour” in Files.", "clearFiltersLabel": "Clear filters", "clearSearchLabel": "Clear search", "failedTitle": "Search did not finish", "failedText": "The workspace did not answer. Your words and filters are kept: try again, or change them.", "retryLabel": "Try again", "markNote": "Searched by your assistant", "proposedNote": "Your assistant suggests searching Files for “harbour signage”.", "changedNote": "Your assistant searched for “harbour” in everything.", "acceptLabel": "Search", "rejectLabel": "Not now", "undoLabel": "Undo", "kindKey@long": "all", "dateKey@long": "any", "kindKey@empty": "files"}
 }

@@ -715,5 +715,136 @@
       "profileDetails.1.value": "ada@studio.example",
       "profileOpen": false
     }
+  },
+  {
+    "name": "SearchScreen: typing words and tapping Files, and runSearch, find the same results; the agent's is recorded and marked",
+    "person": [
+      "call openScreen {\"screen\":\"SearchScreen\"}",
+      "type search-query harbour",
+      "tap search-kind-files"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"SearchScreen\"}",
+      "call runSearch {\"text\":\"harbour\",\"kind\":\"files\",\"date\":\"any\"}"
+    ],
+    "same": [
+      "searchQuery",
+      "searchKind",
+      "searchDate",
+      "searchText",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "SearchScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "searchQuery": "harbour",
+      "searchKind": "files",
+      "searchResults.length": 1,
+      "searchResults.0.key": "artwork",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "search",
+      "book.marked": [
+        "search"
+      ]
+    },
+    "expectPerson": {
+      "searchQuery": "harbour",
+      "searchKind": "files",
+      "searchResults.length": 1,
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "SearchScreen: Clear filters on a search that found nothing reaches what runSearch with no filter finds",
+    "person": [
+      "call openScreen {\"screen\":\"SearchScreen\"}",
+      "type search-query harbour",
+      "tap search-kind-people",
+      "tap search-date-week",
+      "tap search-empty-action"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"SearchScreen\"}",
+      "call runSearch {\"text\":\"harbour\",\"kind\":\"all\",\"date\":\"any\"}"
+    ],
+    "same": [
+      "searchQuery",
+      "searchKind",
+      "searchDate",
+      "searchText",
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "SearchScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "searchKind": "all",
+      "searchDate": "any",
+      "searchResults.length": 4,
+      "book.changes.length": 1,
+      "book.marked": [
+        "search"
+      ]
+    },
+    "expectPerson": {
+      "searchKind": "all",
+      "searchDate": "any",
+      "searchResults.length": 4,
+      "book.changes.length": 0
+    }
+  },
+  {
+    "name": "SearchScreen: Undo on the screen takes back the agent's whole search, its words and its filters",
+    "person": [
+      "call openScreen {\"screen\":\"SearchScreen\"}"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"SearchScreen\"}",
+      "call runSearch {\"text\":\"lighthouse\",\"kind\":\"people\",\"date\":\"week\"}",
+      "tap search-undo"
+    ],
+    "same": [
+      "searchQuery",
+      "searchKind",
+      "searchDate",
+      "searchText",
+      "book.values",
+      "book.marked"
+    ],
+    "calls": [
+      [
+        "ok",
+        "SearchScreen"
+      ],
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "searchQuery": "",
+      "searchKind": "all",
+      "searchDate": "any",
+      "searchResults.length": 6,
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]

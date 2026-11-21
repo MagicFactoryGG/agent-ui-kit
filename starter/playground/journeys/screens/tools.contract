@@ -3,10 +3,10 @@
 // which door called it. A tool's action calls functions only, never another action with arguments (the kit's
 // docs/recipes/exact-workarounds.md, 3).
 use Ledger, act from "@agent-ui-kit/agent"
-use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys, answerAct, setupAnswerKeys, shellSearchAct, settingAct, settingsSwitchKeys, entryOpenAct, entryAcceptAct, entryAuthenticateAct, periodAct, dashPeriodKeys, profileAct, profileDetailKeys, profileProblem from "./model.contract"
+use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys, answerAct, setupAnswerKeys, shellSearchAct, settingAct, settingsSwitchKeys, entryOpenAct, entryAcceptAct, entryAuthenticateAct, periodAct, dashPeriodKeys, profileAct, profileDetailKeys, profileProblem, searchAct, searchKindKeys, searchDateKeys from "./model.contract"
 
 members App
-  action openScreen(screen: enum<"MediaViewer", "ListDetail", "MailScreen", "OnboardingScreen", "AppShell", "SettingsScreen", "EntryScreen", "DashboardScreen", "ProfileScreen">)
+  action openScreen(screen: enum<"MediaViewer", "ListDetail", "MailScreen", "OnboardingScreen", "AppShell", "SettingsScreen", "EntryScreen", "DashboardScreen", "ProfileScreen", "SearchScreen">)
     shown = screen
   action readAlbum
   action showPicture(picture: string)
@@ -47,3 +47,9 @@ members App
   // A detail the person would be refused is refused to the agent with the same word; a good one waits for the person.
   action changeDetail(detail: string, value: string)
     book = not profileDetailKeys().includes(detail) ? Ledger(book, answer="unknown-id") : profileProblem(detail, value) != "" ? Ledger(book, answer=profileProblem(detail, value)) : act(book, profileAct(detail, value.trim()))
+  action readSearch
+  // A search for the person: it shows the search screen with what it found; a kind or date the screen does not offer
+  // is refused, and nothing changes.
+  action runSearch(text: string, kind: string, date: string)
+    book = searchKindKeys().includes(kind) and searchDateKeys().includes(date) ? act(book, searchAct(kind, date, text)) : Ledger(book, answer="unknown-filter")
+    shown = searchKindKeys().includes(kind) and searchDateKeys().includes(date) ? "SearchScreen" : shown
