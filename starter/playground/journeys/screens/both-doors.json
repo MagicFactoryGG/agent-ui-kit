@@ -450,7 +450,7 @@
     }
   },
   {
-    "name": "EntryScreen: the agent's acceptTerms and signIn are refused and the step stays at the terms; the person's Accept moves it on",
+    "name": "EntryScreen: the agent's acceptTerms and authenticate are refused and the step stays at the terms; the person's Accept moves it on",
     "person": [
       "call openScreen {\"screen\":\"EntryScreen\"}",
       "tap entry-accept"
@@ -458,7 +458,7 @@
     "agent": [
       "call openScreen {\"screen\":\"EntryScreen\"}",
       "call acceptTerms {}",
-      "call signIn {}"
+      "call authenticate {}"
     ],
     "same": [
       "shown",

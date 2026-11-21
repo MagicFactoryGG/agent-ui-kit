@@ -3,7 +3,7 @@
 // which door called it. A tool's action calls functions only, never another action with arguments (the kit's
 // docs/recipes/exact-workarounds.md, 3).
 use Ledger, act from "@agent-ui-kit/agent"
-use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys, answerAct, setupAnswerKeys, shellSearchAct, settingAct, settingsSwitchKeys, entryOpenAct, entryAcceptAct, entrySignInAct, periodAct, dashPeriodKeys from "./model.contract"
+use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys, answerAct, setupAnswerKeys, shellSearchAct, settingAct, settingsSwitchKeys, entryOpenAct, entryAcceptAct, entryAuthenticateAct, periodAct, dashPeriodKeys from "./model.contract"
 
 members App
   action openScreen(screen: enum<"MediaViewer", "ListDetail", "MailScreen", "OnboardingScreen", "AppShell", "SettingsScreen", "EntryScreen", "DashboardScreen">)
@@ -38,8 +38,8 @@ members App
   // The person's own acts: their floor is off, so the ledger answers "off" and changes nothing.
   action acceptTerms
     book = act(book, entryAcceptAct())
-  action signIn
-    book = act(book, entrySignInAct())
+  action authenticate
+    book = act(book, entryAuthenticateAct())
   action readPeriods
   action setPeriod(period: string)
     book = dashPeriodKeys().includes(period) ? act(book, periodAct(period)) : Ledger(book, answer="unknown-id")

@@ -101,8 +101,8 @@
       "acceptTerms": {
         "title": "Accept Terms"
       },
-      "signIn": {
-        "title": "Sign In"
+      "authenticate": {
+        "title": "Authenticate"
       },
       "readPeriods": {
         "title": "Read Periods"

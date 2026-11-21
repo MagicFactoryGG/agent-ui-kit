@@ -102,7 +102,7 @@ fn shellSearchAct(text: string): Act = Act(tool="searchProjects", door="agent", 
 // in the app, navigation, not data); each switch is a value in the ledger (`settings-<key>`, on or off), so the
 // switch, the agent's setSetting and the section's dot all read it. The other rows are data only.
 fn settingsSections(): SettingsSection[] = [
-  SettingsSection(key="account", label="Account", detail="Your name, the address we write to, and how you sign in."),
+  SettingsSection(key="account", label="Account", detail="Your name, the address we write to, and how you authenticate."),
   SettingsSection(key="notifications", label="Notifications", detail="What reaches you, and where."),
   SettingsSection(key="privacy", label="Privacy", detail="Who sees what you share.")
 ]
@@ -140,12 +140,12 @@ fn settingAct(key: string, on: bool): Act = Act(tool="setSetting", door="agent",
 
 // EntryScreen: the way in, terms before authentication. The step is a value in the ledger (`entry-step`: terms or
 // authenticate), so the person's Accept and Back and the agent's openEntry move the same value. Opening the entry
-// brings the person to the terms; accepting them and signing in stay the person's own acts, so their tools are
+// brings the person to the terms; accepting them and authenticating stay the person's own acts, so their tools are
 // off (refused by the ledger, answering "off") and only the person's door moves the step on.
 fn entryKeys(): string[] = ["entry-step"]
 fn entryOpenAct(): Act = Act(tool="openEntry", door="agent", key="entry-step", title="Entry", value="terms", did="Your assistant opened the way in, at the terms.", asks="Your assistant suggests opening the way in, at the terms.", will="Your assistant will open the way in, at the terms, in 5 seconds.")
-fn entryAcceptAct(): Act = Act(tool="acceptTerms", door="agent", key="entry-step", title="Terms", value="authenticate", did="Your assistant accepted the terms.", asks="Your assistant suggests accepting the terms.", will="Your assistant will accept the terms in 5 seconds.")
-fn entrySignInAct(): Act = Act(tool="signIn", door="agent", key="entry-signed", title="Sign in", value="yes", did="Your assistant signed you in.", asks="Your assistant suggests signing you in.", will="Your assistant will sign you in in 5 seconds.")
+fn entryAcceptAct(): Act = Act(tool="acceptTerms", door="agent", key="entry-step", title="Terms", value="authenticate", did="Accepting the terms is yours to do; your assistant cannot do it.", asks="Accepting the terms is yours to do; your assistant cannot do it.", will="Accepting the terms is yours to do; your assistant cannot do it.")
+fn entryAuthenticateAct(): Act = Act(tool="authenticate", door="agent", key="entry-authenticated", title="Authenticate", value="yes", did="Authenticating is yours to do; your assistant cannot do it.", asks="Authenticating is yours to do; your assistant cannot do it.", will="Authenticating is yours to do; your assistant cannot do it.")
 // DashboardScreen: a shop's numbers for one period; the period shown is a value in the ledger, by key, so a
 // Segment's tap and the agent's setPeriod write the same value. Each period's numbers are data only.
 fn dashPeriods(): DashboardPeriod[] = [
@@ -183,11 +183,11 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="openEntry", title="Entry", sentence="Opens the way in at its terms.", floor="recorded", reach="self", secret=false),
   // The person's own acts: off, so the ledger refuses them from the agent's door whatever mode a person chooses.
   AgentTool(name="acceptTerms", title="Terms", sentence="Accepts the terms for the person. Never allowed.", floor="off", reach="self", secret=false),
-  AgentTool(name="signIn", title="Sign in", sentence="Signs the person in. Never allowed.", floor="off", reach="self", secret=false),
+  AgentTool(name="authenticate", title="Authenticate", sentence="Authenticates the person. Never allowed: authenticating is the person's own act.", floor="off", reach="self", secret=false),
   AgentTool(name="setPeriod", title="Period", sentence="Shows the dashboard's numbers for another period.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="picture", value="harbour"),
   Value(key="project", value="harbour")
-].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on")))).concat([Value(key="entry-step", value="terms"), Value(key="entry-signed", value="no")]).concat([Value(key="dash-period", value="quarter")])
+].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on")))).concat([Value(key="entry-step", value="terms"), Value(key="entry-authenticated", value="no")]).concat([Value(key="dash-period", value="quarter")])

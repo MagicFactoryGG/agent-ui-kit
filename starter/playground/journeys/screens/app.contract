@@ -101,7 +101,7 @@ component App
     book = personSet(book, settingKey(key), isOn(book, settingKey(key)) ? "off" : "on")
 
   // EntryScreen: the way in, terms before authentication. The step is a value in the ledger (`entry-step`), so the
-  // person's Accept and Back and the agent's openEntry move the same value; the agent's acceptTerms and signIn are
+  // person's Accept and Back and the agent's openEntry move the same value; the agent's acceptTerms and authenticate are
   // off in the tool list, so only the person's door moves it on. While the agent's openEntry stands in the record,
   // the screen says that the assistant brought the person here and waits for their own acts.
   derive entryStep = valueOf(book, "entry-step")
@@ -167,15 +167,15 @@ component App
     returns book.answer
     fails when book.answer == "unknown-id" or book.answer == "off"
 
-  tool readEntry reads "The way in: the step the person is on, terms or authenticate. Accepting the terms and signing in are the person's own." = readEntry
+  tool readEntry reads "The way in: the step the person is on, terms or authenticate. Accepting the terms and authenticating are the person's own." = readEntry
     returns entryStep
-  tool openEntry writes idempotent closed "Open the way in at its terms, for the person to accept them and sign in. Answers saved." = openEntry
+  tool openEntry writes idempotent closed "Open the way in at its terms, for the person to accept them and authenticate. Answers saved." = openEntry
     returns book.answer
     fails when book.answer == "off"
   tool acceptTerms writes idempotent closed "Accept the terms for the person. Always refused: accepting the terms is the person's own act. Answers off." = acceptTerms
     returns book.answer
     fails when book.answer == "off"
-  tool signIn writes idempotent closed "Sign the person in. Always refused: the face check or passkey is the person's own act. Answers off." = signIn
+  tool authenticate writes idempotent closed "Authenticate the person. Always refused: authenticating (the face check or passkey) is the person's own act. Answers off." = authenticate
     returns book.answer
     fails when book.answer == "off"
 
@@ -194,7 +194,7 @@ component App
       else if shown == "SettingsScreen"
         SettingsScreen(title="Settings", navLabel="Settings sections", currentKey=settingsAt, sections=settingsSections(), groups=settingsGroups, groupEmptyText="Nothing to set here yet.", loadingText="", emptyTitle="", emptyText="", addLabel="", failedTitle="", failedText="", retryLabel="", agentSection=settingSectionOf(settingsMarkedKey), agentKey=settingsMarkedKey, proposalText="", acceptLabel="", declineLabel="", changedText=latestAbout(book, settingKeys()), waitingText="", waitingNote="", undoLabel="Undo", data="many", agent=(settingsMarkedKey != "" ? "changed" : "none"), pick=pickSectionByPerson, toggle=toggleSettingByPerson, choose=ignoreKey, open=ignoreKey, remove=ignoreKey, accept=ignore, decline=ignore, retry=ignore, add=ignore, undo=undoByPerson)
       else if shown == "EntryScreen"
-        EntryScreen(productName="Northwind", stepsLabel="Steps to get in", termsStepName="Terms", authStepName="Sign in", termsTitle="Before you start", termsLead="Read Northwind's terms of service. Accepting them is yours to do, and comes before you sign in.", termsFrameLabel="Northwind terms of service", acceptLabel="Accept and continue", declineLabel="Decline", authTitle="Sign in to Northwind", authLead="Use the passkey on this device. Your face, fingerprint or screen lock stays on it.", acceptedNote="You accepted the terms.", backLabel="Read the terms again", choiceTitle="Passkey", choiceNote="This device asks for your face, fingerprint or screen lock.", choiceActionLabel="Sign in with a passkey", outcomeText="", busyText="", agentNote="Your assistant opened this for you. Accepting the terms and signing in are yours alone.", step=(entryStep == "authenticate" ? "authenticate" : "terms"), interaction="idle", outcome="none", agent=(entryOpenedByAgent ? "waiting" : "none"), accept=acceptTermsByPerson, decline=ignore, back=entryBackByPerson, authenticate=ignore)
+        EntryScreen(productName="Northwind", stepsLabel="Steps to get in", termsStepName="Terms", authStepName="Authenticate", termsTitle="Before you start", termsLead="Read Northwind's terms of service. Accepting them is yours to do, and comes before you authenticate.", termsFrameLabel="Northwind terms of service", acceptLabel="Accept and continue", declineLabel="Decline", authTitle="Authenticate to Northwind", authLead="Use the passkey on this device. Your face, fingerprint or screen lock stays on it.", acceptedNote="You accepted the terms.", backLabel="Read the terms again", choiceTitle="Passkey", choiceNote="This device asks for your face, fingerprint or screen lock.", choiceActionLabel="Authenticate with a passkey", outcomeText="", busyText="", agentNote="Your assistant opened this for you. Accepting the terms and authenticating are yours alone.", step=(entryStep == "authenticate" ? "authenticate" : "terms"), interaction="idle", outcome="none", agent=(entryOpenedByAgent ? "waiting" : "none"), accept=acceptTermsByPerson, decline=ignore, back=entryBackByPerson, authenticate=ignore)
           if entryStep == "terms"
             Words(text="Northwind terms of service: the relying party's own capture page takes this place in a real app.", kind="body", outcome="none", level=0, testId="entry-terms-page")
       else if shown == "DashboardScreen"
