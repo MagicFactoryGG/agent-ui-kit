@@ -231,8 +231,10 @@ component ActivityTimeline
     reject: action
     undo: action
     testId: string
+  // The filter's key: "person" or "agent", and any other key is everyone, so an unknown one hides nothing.
+  derive by = filter == "person" or filter == "agent" ? filter : "everyone"
   // The events the filter keeps; the assistant's open ask stays whatever the filter.
-  derive shown = events.filter(e => filter == "everyone" or e.by == filter or (agent == "proposed" and e.key == agentKey))
+  derive shown = events.filter(e => by == "everyone" or e.by == by or (agent == "proposed" and e.key == agentKey))
   derive days = timelineDays(shown.map(e => e.day))
   derive rows = data == "many" or data == "long"
   view
@@ -246,9 +248,9 @@ component ActivityTimeline
             text summary testId=`${testId}-status` overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
         column flex=1 min-width="blocks.timeline-filter-min" max-width="blocks.timeline-filter-max" gap="theme.space.sm"
           row role="group" aria-label=filterLabel testId=`${testId}-filter` gap="theme.space.xs" padding="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.control"
-            Segment(label=everyoneLabel, on=(filter == "everyone"), interaction="idle", press=choose("everyone"), testId=`${testId}-filter-everyone`)
-            Segment(label=youLabel, on=(filter == "person"), interaction="idle", press=choose("person"), testId=`${testId}-filter-person`)
-            Segment(label=agentLabel, on=(filter == "agent"), interaction="idle", press=choose("agent"), testId=`${testId}-filter-agent`)
+            Segment(label=everyoneLabel, on=(by == "everyone"), interaction="idle", press=choose("everyone"), testId=`${testId}-filter-everyone`)
+            Segment(label=youLabel, on=(by == "person"), interaction="idle", press=choose("person"), testId=`${testId}-filter-person`)
+            Segment(label=agentLabel, on=(by == "agent"), interaction="idle", press=choose("agent"), testId=`${testId}-filter-agent`)
           if filterNote != ""
             row align-items="flex-start" gap="theme.space.sm" padding-left="theme.space.sm" padding-right="theme.space.sm"
               TimelineMark(kind="agent", above=false, below=false)
