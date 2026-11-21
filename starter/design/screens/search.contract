@@ -121,7 +121,7 @@ component SearchGhostRow
       SearchBone(width="screens.search-bone-place", height="screens.search-bone")
 
 // One result as a row that opens it. The title (label type) and when it changed share the first line; a long title
-// wraps and pushes when under it. The excerpt is one paragraph of runs: the matched words heavier and in the ink,
+// wraps beside it, and only under screens.search-title-min does when take its own line. The excerpt is one paragraph of runs: the matched words heavier and in the ink,
 // the rest in the muted ink. Last, its kind (the kit's Tag) and its place.
 component SearchRow
   props
@@ -137,7 +137,7 @@ component SearchRow
       :focus-visible
         box-shadow="inset 0 0 0 2px theme.color.focus"
       row flex-wrap="wrap" align-items="baseline" column-gap="theme.space.md" row-gap="theme.space.xs"
-        text result.title testId=`${testId}-title` flex="1 1 auto" min-width=0 overflow-wrap="anywhere" font="theme.type.label" color="theme.color.ink"
+        text result.title testId=`${testId}-title` flex=1 min-width="screens.search-title-min" overflow-wrap="anywhere" font="theme.type.label" color="theme.color.ink"
         if result.when != ""
           text result.when testId=`${testId}-when` margin-left="auto" flex-shrink=0 font="theme.type.caption" font-variant-numeric="tabular-nums" color="theme.color.ink-muted" white-space="nowrap"
       if result.excerpt.length > 0
@@ -147,7 +147,7 @@ component SearchRow
       row flex-wrap="wrap" align-items="center" column-gap="theme.space.sm" row-gap="theme.space.xs" min-width=0
         if result.kind != ""
           Tag(text=result.kind, outcome="none")
-        text result.place testId=`${testId}-place` flex="1 1 auto" min-width=0 overflow-wrap="anywhere" font="theme.type.caption" color="theme.color.ink-muted"
+        text result.place testId=`${testId}-place` flex=1 min-width=0 overflow-wrap="anywhere" font="theme.type.caption" color="theme.color.ink-muted"
 
 // What an assistant asks or did about the search, in one band: its glyph and sentence, then its answers (the slot),
 // which wrap under the sentence when the sentence would fall under its least width. The accent's edge is the kit's
