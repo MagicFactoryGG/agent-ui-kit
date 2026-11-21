@@ -1,7 +1,7 @@
 // SearchScreen: search results as a whole screen. The bar names it (TopBar). Under it, by width:
 //
-// - A desktop (a window at least fn searchWideFrom() wide): the filters in a side panel at the start (each a titled
-//   group of the kit's Segments, one choice a line), and the main column beside it: the query (the kit's Field
+// - A desktop (a window at least fn searchWideFrom() wide): the filters in a side panel at the start (each the kit's
+//   Menu in place: the filter's name, then its choices one a line, a checkmark on the chosen one), and the main column beside it: the query (the kit's Field
 //   around the platform's own search field), the assistant's band when there is one, the count, then the results.
 //   The whole is held to screens.search-max and centred, so the rows read at a measure, not across a wide window.
 // - A phone: one column, the query first, then each filter as a group of Segments on one line, the count, the
@@ -40,7 +40,7 @@
 // The band is drawn here, not the kit's Proposal: Proposal keeps its sentence and its answers on one line, which at a
 // phone's width squeezes a two-word answer onto two lines; here the answers wrap under the sentence instead.
 // Every word is the app's; every value a Theme token or a screens.search-* size.
-use Words, ActionButton, Field, Segment, Tag from "__SCOPE__/components"
+use Words, ActionButton, Field, Segment, Tag, Menu, MenuItem from "__SCOPE__/components"
 use TopBar, StatePanel from "__SCOPE__/blocks"
 
 // One choice of a filter: its key (the tool's argument too), the filter it belongs to (the kind of result, or when
@@ -79,23 +79,36 @@ keyframes searchBreathe
 keyframes searchPulse
   50% opacity=0.25
 
-// One filter: its name over its choices, the kit's Segments in one group on the group's fill, the chosen one raised.
-// `stacked` puts one choice a line (the desktop's side panel); otherwise they share a line and wrap if they must.
+// One filter on a phone: its name over its choices, the kit's Segments in one group on the group's fill, the chosen
+// one raised; the choices share a line and wrap if they must. The group keeps screens.search-filter-min, so two
+// filters share a line once the window holds both.
 component SearchFilterGroup
   props
     label: string
     choices: SearchFilter[]
     chosen: string
-    stacked: bool
     choose: action
     testId: string
   view
-    column flex=(stacked ? "none" : "1") min-width=(stacked ? "0" : "screens.search-filter-min") box-sizing="border-box" gap="theme.space.sm"
-      column padding-left=(stacked ? "theme.space.sm" : "0")
-        Words(text=label, kind="heading", outcome="none", level=0, testId=`${testId}-label`)
-      row role="group" aria-label=label testId=testId flex-direction=(stacked ? "column" : "row") flex-wrap="wrap" gap="theme.space.xs" padding="theme.space.xs" box-sizing="border-box" min-width=0 background-color="theme.color.fill" border-radius="theme.radius.control"
+    column flex=1 min-width="screens.search-filter-min" box-sizing="border-box" gap="theme.space.sm"
+      Words(text=label, kind="heading", outcome="none", level=0, testId=`${testId}-label`)
+      row role="group" aria-label=label testId=testId flex-wrap="wrap" gap="theme.space.xs" padding="theme.space.xs" box-sizing="border-box" min-width=0 background-color="theme.color.fill" border-radius="theme.radius.control"
         for c in choices key=c.key
           Segment(label=c.label, on=(c.key == chosen), interaction="idle", press=choose(c.key), testId=`${testId}-${c.key}`)
+
+// One filter in a desktop's side panel: the kit's Menu in place, its choices one a line (a choice item each, the
+// checkmark on the chosen one) under the filter's name, its section heading. A list of choices reads lighter beside
+// the results than a stack of Segments on the fill, and the Menu's own keys move among them. Each item's testId is
+// the Segment's own (`<testId>-<key>`), so a phone and a desktop are driven alike.
+component SearchFilterList
+  props
+    label: string
+    choices: SearchFilter[]
+    chosen: string
+    choose: action
+    testId: string
+  view
+    Menu(menuId=testId, label=label, items=choices.map((c, i) => MenuItem(key=c.key, heading=(i == 0 ? label : ""), label=c.label, detail="", kind="choice", on=(c.key == chosen), enabled=true)), presentation="inline", interaction="idle", choose=choose, search="", query="", find=choose, testId=testId)
 
 // A bar of a ghost row: the fill at a named length, never wider than its row.
 component SearchBone
@@ -241,8 +254,8 @@ component SearchScreen
           // The side panel: the filters, one choice a line.
           if wide
             column role="group" aria-label=filtersLabel testId="search-filters" width="screens.search-aside" flex-shrink=0 gap="theme.space.xl"
-              SearchFilterGroup(label=kindLabel, choices=kinds, chosen=kindKey, stacked=true, choose=pickKind, testId="search-kind")
-              SearchFilterGroup(label=dateLabel, choices=dates, chosen=dateKey, stacked=true, choose=pickDate, testId="search-date")
+              SearchFilterList(label=kindLabel, choices=kinds, chosen=kindKey, choose=pickKind, testId="search-kind")
+              SearchFilterList(label=dateLabel, choices=dates, chosen=dateKey, choose=pickDate, testId="search-date")
           column flex=1 min-width=0 gap="theme.space.lg"
             // The query: the kit's Field around the platform's search field. An assistant's search marks it.
             column gap="theme.space.sm"
@@ -262,8 +275,8 @@ component SearchScreen
             // A phone's filters: each group on one line, under the query.
             if not wide
               row role="group" aria-label=filtersLabel testId="search-filters" flex-wrap="wrap" column-gap="theme.space.lg" row-gap="theme.space.md"
-                SearchFilterGroup(label=kindLabel, choices=kinds, chosen=kindKey, stacked=false, choose=pickKind, testId="search-kind")
-                SearchFilterGroup(label=dateLabel, choices=dates, chosen=dateKey, stacked=false, choose=pickDate, testId="search-date")
+                SearchFilterGroup(label=kindLabel, choices=kinds, chosen=kindKey, choose=pickKind, testId="search-kind")
+                SearchFilterGroup(label=dateLabel, choices=dates, chosen=dateKey, choose=pickDate, testId="search-date")
             // The count, or what is awaited, said as a status.
             if data == "loading"
               row testId="search-loading" role="status" align-items="center" gap="theme.space.sm" min-height="screens.search-count-min"
