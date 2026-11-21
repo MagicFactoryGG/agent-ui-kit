@@ -112,3 +112,5 @@ theme
   screens.chat-glyph: length = 16px
   screens.chat-glyph-top: length = 2px  // a 16px glyph centred on the body type's first line (21px)
   screens.chat-dot: length = 6px
+  screens.chat-compose-max: length = 240px  // the pasted pieces and the text grow to this, then scroll inside, so the messages keep their room
+  screens.chat-action-max: length = 200px  // a long button label wraps inside this, never across the composer or the bar
