@@ -75,8 +75,7 @@ keyframes profilePulse
 // The agent's ink for a dot or a mark: the accent for what a person can see or answer, caution while it waits.
 fn profileAgentInk(a: string): string = a == "waiting" ? "theme.color.caution" : "theme.color.accent"
 
-// The platform's own field for a detail's kind, and what the platform may fill it from.
-fn profileInputType(kind: string): string = kind == "email" ? "email" : kind == "tel" ? "tel" : "text"
+// What the platform may fill a detail's field from.
 fn profileFill(kind: string): string = kind == "email" ? "email" : kind == "tel" ? "tel" : "name"
 
 // A bar of the skeleton: the fill at a named length.
@@ -168,7 +167,7 @@ component ProfileDetailRow
                 option o value=o
         else
           Field(id=`profile-${detail.key}`, label=detail.label, hint=hintText, error=errorText, outcome=(failed ? "error" : "none"))
-            input type=profileInputType(detail.kind) autocomplete=profileFill(detail.kind) value=draft input=type submit=save disabled=busy aria-label=detail.label testId=`profile-${detail.key}-input` min-width=0
+            input type=(detail.kind == "email" ? "email" : detail.kind == "tel" ? "tel" : "text") autocomplete=profileFill(detail.kind) value=draft input=type submit=save disabled=busy aria-label=detail.label testId=`profile-${detail.key}-input` min-width=0
         row flex-wrap="wrap" align-items="center" justify-content="flex-end" column-gap="theme.space.md" row-gap="theme.space.sm"
           if busy and busyText != ""
             column flex=1 min-width="screens.profile-busy-min"

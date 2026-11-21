@@ -590,5 +590,130 @@
       "book.changes.length": 0,
       "book.marked": []
     }
+  },
+  {
+    "name": "ProfileScreen: Edit, typing and Save, and changeDetail accepted on the screen, reach the same phone number; the agent's is proposed, then marked",
+    "person": [
+      "call openScreen {\"screen\":\"ProfileScreen\"}",
+      "tap profile-phone-edit",
+      "type profile-phone-input +44 20 7946 0123",
+      "tap profile-phone-save"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"ProfileScreen\"}",
+      "call changeDetail {\"detail\":\"phone\",\"value\":\"+44 20 7946 0123\"}",
+      "tap profile-yes"
+    ],
+    "same": [
+      "profileDetails",
+      "book.values",
+      "book.waiting"
+    ],
+    "calls": [
+      [
+        "ok",
+        "ProfileScreen"
+      ],
+      [
+        "ok",
+        "proposed"
+      ]
+    ],
+    "expect": {
+      "profileDetails.2.value": "+44 20 7946 0123",
+      "profileAgent": "changed",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "proposed",
+      "book.changes.0.answeredBy": "person",
+      "book.marked": [
+        "profile-phone"
+      ]
+    },
+    "expectPerson": {
+      "profileDetails.2.value": "+44 20 7946 0123",
+      "profileOutcome": "success",
+      "profileAgent": "none",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "ProfileScreen: a number with no country code is refused at Save and to changeDetail alike, for the same reason, and nothing changes",
+    "person": [
+      "call openScreen {\"screen\":\"ProfileScreen\"}",
+      "tap profile-phone-edit",
+      "type profile-phone-input 020 7946 0123",
+      "tap profile-phone-save"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"ProfileScreen\"}",
+      "call changeDetail {\"detail\":\"phone\",\"value\":\"020 7946 0123\"}"
+    ],
+    "same": [
+      "profileDetails",
+      "book.values",
+      "book.waiting",
+      "book.changes"
+    ],
+    "calls": [
+      [
+        "ok",
+        "ProfileScreen"
+      ],
+      [
+        "failed",
+        "no-country-code"
+      ]
+    ],
+    "expect": {
+      "book.answer": "no-country-code",
+      "book.waiting": []
+    },
+    "expectPerson": {
+      "profileProblemWord": "no-country-code",
+      "profileOutcome": "error",
+      "profileOpen": true,
+      "profileDraft": "020 7946 0123"
+    }
+  },
+  {
+    "name": "ProfileScreen: Cancel, and Not now on the agent's proposal, both leave the address as it was",
+    "person": [
+      "call openScreen {\"screen\":\"ProfileScreen\"}",
+      "tap profile-email-edit",
+      "type profile-email-input ada.king@studio.example",
+      "tap profile-email-cancel"
+    ],
+    "agent": [
+      "call openScreen {\"screen\":\"ProfileScreen\"}",
+      "call changeDetail {\"detail\":\"email\",\"value\":\"ada.king@studio.example\"}",
+      "tap profile-no"
+    ],
+    "same": [
+      "profileDetails",
+      "book.values",
+      "book.waiting",
+      "book.marked",
+      "book.changes"
+    ],
+    "calls": [
+      [
+        "ok",
+        "ProfileScreen"
+      ],
+      [
+        "ok",
+        "proposed"
+      ]
+    ],
+    "expect": {
+      "profileDetails.1.value": "ada@studio.example",
+      "profileAgent": "none",
+      "book.answer": "rejected"
+    },
+    "expectPerson": {
+      "profileDetails.1.value": "ada@studio.example",
+      "profileOpen": false
+    }
   }
 ]
