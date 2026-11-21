@@ -178,7 +178,7 @@ theme
   blocks.timeline-filter-max: length = 400px
   blocks.timeline-day-min: length = 136px  // a day's label column; with the rows' least width it needs 480px, so a phone stacks them
   blocks.timeline-rows-min: length = 320px
-  blocks.timeline-time: length = 52px  // "23:59" or "11:59 PM" in the caption type, tabular
+  blocks.timeline-time: length = 60px  // "23:59" or "11:59 PM" on one line in the caption type, tabular
   blocks.timeline-mark: length = 20px  // the rail's mark: one line of the label type, a hair more
   blocks.timeline-rail: length = 2px
   blocks.timeline-mark-line: length = 3px  // the accent line an open ask or the agent's latest act carries at its start

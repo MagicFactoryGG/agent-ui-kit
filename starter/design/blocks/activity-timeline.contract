@@ -54,14 +54,21 @@ shape TimelineEvent
 fn timelineDays(days: string[]): string[] = days.filter((d, i) => days.indexOf(d) == i)
 
 // The rail's mark: "person" a quiet ring, "agent" the assistant's spark (filled, the accent), "asks" an open ring
-// in the accent (the assistant's ask, not yet done). Drawn on the surface, so the rail stops behind it.
+// in the accent (the assistant's ask, not yet done). `above` and `below` draw the rail's line through the mark's own
+// square, behind it, so the rail runs unbroken; the mark's surface stops it where the ring is.
 component TimelineMark
   props
     kind: string
+    above: bool
+    below: bool
   view
     svg viewBox="0 0 20 20" width="blocks.timeline-mark" height="blocks.timeline-mark" aria-hidden=true flex-shrink=0
+      if above
+        path d="M10 0v10" stroke="theme.color.line" stroke-width=2
+      if below
+        path d="M10 10v10" stroke="theme.color.line" stroke-width=2
       if kind == "agent"
-        circle cx=10 cy=10 r=9.5 fill="theme.color.surface"
+        circle cx=10 cy=10 r=9 fill="theme.color.surface"
         path d="M10 2.2l1.8 5.2 5.2 1.8-5.2 1.8L10 16.2l-1.8-5.2L3 9.2l5.2-1.8Z" fill="theme.color.accent"
       else if kind == "asks"
         circle cx=10 cy=10 r=7 fill="theme.color.surface" stroke="theme.color.accent" stroke-width=2 stroke-dasharray="3 2.5"
@@ -78,7 +85,7 @@ component TimelineRail
   view
     column aria-hidden=true width="blocks.timeline-mark" flex-shrink=0 align-items="center" align-self="stretch"
       box height="theme.space.md" width="blocks.timeline-rail" background-color=(first ? "transparent" : "theme.color.line")
-      TimelineMark(kind=kind)
+      TimelineMark(kind=kind, above=(not first), below=(not last))
       box flex=1 width="blocks.timeline-rail" background-color=(last ? "transparent" : "theme.color.line")
 
 // One event as a row: time, rail, then who, what and the detail; the event `agentKey` names also says its note and
@@ -138,7 +145,7 @@ component TimelineDay
     testId: string
   view
     row testId=testId flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.sm"
-      column flex=1 min-width="blocks.timeline-day-min" padding-top="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" box-sizing="border-box"
+      column flex=1 min-width="blocks.timeline-day-min" padding-top="theme.space.md" box-sizing="border-box"
         Words(text=day, kind="label", outcome="none", level=3, testId=`${testId}-label`)
       column role="list" aria-label=day flex=4 min-width="blocks.timeline-rows-min" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
         for e, i in events key=e.key
@@ -171,7 +178,7 @@ component TimelineState
     press: action
     testId: string
   view
-    row testId=testId role=(tone == "critical" ? "alert" : "status") align-items="flex-start" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-top-width="theme.line.width" border-right-width="theme.line.width" border-bottom-width="theme.line.width" border-left-width=(tone == "critical" ? "blocks.timeline-mark-line" : "theme.line.width") border-style="solid" border-top-color="theme.color.line" border-right-color="theme.color.line" border-bottom-color="theme.color.line" border-left-color=(tone == "critical" ? "theme.color.critical" : "theme.color.line")
+    row testId=testId role=(tone == "critical" ? "alert" : "status") align-items="flex-start" gap="theme.space.lg" padding="theme.space.xl" background-color="theme.color.surface" border-radius="theme.radius.card" border-top-width="theme.line.width" border-right-width="theme.line.width" border-bottom-width="theme.line.width" border-left-width=(tone == "critical" ? "blocks.timeline-mark-line" : "theme.line.width") border-style="solid" border-top-color="theme.color.line" border-right-color="theme.color.line" border-bottom-color="theme.color.line" border-left-color=(tone == "critical" ? "theme.color.critical" : "theme.color.line")
       svg viewBox="0 0 40 40" width="blocks.timeline-glyph" height="blocks.timeline-glyph" aria-hidden=true flex-shrink=0
         if tone == "critical"
           circle cx=20 cy=20 r=20 fill="theme.color.critical"
@@ -181,12 +188,12 @@ component TimelineState
           circle cx=20 cy=20 r=20 fill="theme.color.fill"
           path d="M20 8v6M20 26v6" stroke="theme.color.ink-muted" stroke-width=2 stroke-linecap="round"
           circle cx=20 cy=20 r=5 fill="none" stroke="theme.color.ink-muted" stroke-width=2
-      column flex=1 min-width=0 max-width="blocks.timeline-measure" gap="theme.space.xs"
+      column flex=1 min-width=0 max-width="blocks.timeline-measure" gap="theme.space.sm"
         if title != ""
           text title testId=`${testId}-title` overflow-wrap="break-word" font="theme.type.label" color="theme.color.ink"
         text text testId=`${testId}-text` overflow-wrap="break-word" font="theme.type.body" color=(tone == "critical" ? "theme.color.ink" : "theme.color.ink-muted")
         if actionLabel != ""
-          row margin-top="theme.space.sm"
+          row margin-top="theme.space.xs"
             ActionButton(opens="", label=actionLabel, kind="primary", interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
 
 component ActivityTimeline
@@ -230,7 +237,7 @@ component ActivityTimeline
   derive rows = data == "many" or data == "long"
   view
     column testId=testId width="100%" max-width="blocks.timeline-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.xl" aria-busy=(data == "loading")
-      row flex-wrap="wrap" align-items="flex-end" column-gap="theme.space.xl" row-gap="theme.space.md"
+      row flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.md"
         column flex=1 min-width="blocks.timeline-head-min" gap="theme.space.xs"
           Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
           if data == "loading"
@@ -244,11 +251,11 @@ component ActivityTimeline
             Segment(label=agentLabel, on=(filter == "agent"), interaction="idle", press=choose("agent"), testId=`${testId}-filter-agent`)
           if filterNote != ""
             row align-items="flex-start" gap="theme.space.sm" padding-left="theme.space.sm" padding-right="theme.space.sm"
-              TimelineMark(kind="agent")
+              TimelineMark(kind="agent", above=false, below=false)
               text filterNote testId=`${testId}-filter-note` role="status" flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.caption" color="theme.color.accent"
       if data == "loading"
         row aria-hidden=true testId=`${testId}-loading` flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.sm"
-          column flex=1 min-width="blocks.timeline-day-min" padding-top="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" box-sizing="border-box"
+          column flex=1 min-width="blocks.timeline-day-min" padding-top="theme.space.md" box-sizing="border-box"
             box width="blocks.timeline-ghost-day" height="blocks.timeline-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
           column flex=4 min-width="blocks.timeline-rows-min" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
             for share, i in ["64%", "48%", "56%"] key=share
