@@ -737,5 +737,32 @@
     "expectPerson": {
       "book.changes.length": 0
     }
+  },
+  {
+    "name": "CommandMenu: a command found by its search and chosen, or run by the agent: Export invoices from the menu and runCommand reach the same last command; the agent's is recorded",
+    "person": [
+      "tap commands-open",
+      "type commands-menu-search exp",
+      "tap commands-menu-export"
+    ],
+    "agent": [
+      "call runCommand {\"command\":\"export\"}"
+    ],
+    "same": [
+      "book.values"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded"
+    },
+    "expectPerson": {
+      "book.changes.length": 0
+    }
   }
 ]
