@@ -50,12 +50,17 @@ shape TimelineEvent
   detail: string
   by: string
 
+// The bones breathe while the events load, so the state reads as in progress, not as drawn rows.
+keyframes timeline-breathe
+  50% opacity=0.55
+
 // The days in the order their events come, each once.
 fn timelineDays(days: string[]): string[] = days.filter((d, i) => days.indexOf(d) == i)
 
 // The rail's mark: "person" a quiet ring, "agent" the assistant's spark (filled, the accent), "asks" an open ring
-// in the accent (the assistant's ask, not yet done). `above` and `below` draw the rail's line through the mark's own
-// square, behind it, so the rail runs unbroken; the mark's surface stops it where the ring is.
+// in the accent (the assistant's ask, not yet done), "ghost" a bone's dot while the events load. `above` and
+// `below` draw the rail's line through the mark's own square, behind it, so the rail runs unbroken; the mark's
+// surface stops it where the ring is.
 component TimelineMark
   props
     kind: string
@@ -72,6 +77,8 @@ component TimelineMark
         path d="M10 2.2l1.8 5.2 5.2 1.8-5.2 1.8L10 16.2l-1.8-5.2L3 9.2l5.2-1.8Z" fill="theme.color.accent"
       else if kind == "asks"
         circle cx=10 cy=10 r=7 fill="theme.color.surface" stroke="theme.color.accent" stroke-width=2 stroke-dasharray="3 2.5"
+      else if kind == "ghost"
+        circle cx=10 cy=10 r=5 fill="theme.color.fill"
       else
         circle cx=10 cy=10 r=4.5 fill="theme.color.surface" stroke="theme.color.ink-muted" stroke-width=1.5
 
@@ -161,7 +168,7 @@ component TimelineGhost
     row aria-hidden=true align-items="stretch" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" border-top-width=(first ? "0" : "theme.line.width") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.timeline-mark-line" border-left-style="solid" border-left-color="transparent"
       column width="blocks.timeline-time" flex-shrink=0 padding-top="theme.space.md" box-sizing="border-box"
         box width="70%" height="blocks.timeline-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
-      TimelineRail(kind="person", first=first, last=last)
+      TimelineRail(kind="ghost", first=first, last=last)
       column flex=1 min-width=0 gap="theme.space.sm" padding-top="theme.space.md" padding-bottom="theme.space.md"
         box width="30%" height="blocks.timeline-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
         box width=share height="blocks.timeline-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
@@ -256,7 +263,7 @@ component ActivityTimeline
               TimelineMark(kind="agent", above=false, below=false)
               text filterNote testId=`${testId}-filter-note` role="status" flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.caption" color="theme.color.accent"
       if data == "loading"
-        row aria-hidden=true testId=`${testId}-loading` flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.sm"
+        row aria-hidden=true testId=`${testId}-loading` animation="timeline-breathe 1.8s ease-in-out infinite" flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.sm"
           column flex=1 min-width="blocks.timeline-day-min" padding-top="theme.space.md" box-sizing="border-box"
             box width="blocks.timeline-ghost-day" height="blocks.timeline-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
           column flex=4 min-width="blocks.timeline-rows-min" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
