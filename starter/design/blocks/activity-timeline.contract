@@ -1,0 +1,263 @@
+// ActivityTimeline: what happened here, newest first, grouped by day, and who did it - the person or their
+// assistant - so a person can tell at a glance what their assistant did and answer what it asks.
+//
+// Layout. A header: the title (level 2) and one quiet line under it (the app's `summary`, `loadingText` while it
+// reads), and on its right the filter by who did it (Everyone, You, Your assistant: the kit's Segments in one group,
+// `filterLabel` its name), wrapping under the words on a phone. Then the days, newest first: each day its label and
+// one card of its rows. On a wide window the day's label stands in its own column beside its card, so a desktop's
+// width reads as a calendar's margin; on a phone (the pair cannot both hold their least width) the label wraps above
+// its card and the piece is one column. The whole piece holds to blocks.timeline-max, centred.
+// A row is the event's time (its own narrow column, tabular), a rail, and the words: who did it (a caption: the
+// muted ink for the person, the accent for the assistant), what (the label type, the row's focal line) and a detail
+// that wraps. The rail runs down the day's card through every row's mark and stops at the first and last: the
+// person's mark is a quiet ring, the assistant's is its spark in the accent, so its work shows down the rail without
+// a word read. A list is rows, not cards: the rows of a day share one card (surface, the theme's line, the card's
+// corner; the line holds it in a theme whose page and surface are one colour) and are divided by the one line.
+//
+// States, declared once as axes:
+//   data   many (the days), long (every word wraps inside its own column; nothing is cut), empty (one card where the
+//          rows would be: a quiet disc with the rail's mark, `emptyTitle`, and `emptyText` saying what will appear
+//          here), loading (the header and filter stay, the line under the title says `loadingText` as a status, and a
+//          day stands in bones in the real grid - a label bar, then rows of time, ring and lines - so nothing moves
+//          when the events arrive), failed (one card with the critical line at its start and the critical disc, the
+//          sentence in the ink - status ink is kept for the page and surface - and `retryLabel`, the one filled way
+//          on; role alert). A filter that leaves no event (data many) says `filteredText` on the empty card with
+//          `showAllLabel`, the way back to Everyone.
+//   agent  none; proposed (the event `agentKey` names is the assistant's ask, waiting: its row carries the accent
+//          line at its start and its mark is an open ring, `proposedNote` says it waits, and its two answer words,
+//          `acceptLabel` - the state's one filled button - and `rejectLabel`, sit under it; a filter never hides
+//          it, for what waits for the person stays in sight); changed (the event `agentKey` names is the assistant's
+//          latest act: the accent line at its start, `changedNote`, and `undoLabel`, which takes it back). The
+//          assistant's other events keep their spark only, so the accent line stays the signal of what is open.
+// The person's segment and an agent's tool reach the app's same filter value, and the event's Undo and an agent's
+// tool the same undo (one ledger, two doors: starter/playground/journeys/blocks). Every word is a prop or the
+// event's own; every value a Theme token or a blocks.timeline-* size.
+//
+// Section, Proposal and TopBar live inline in this package's index.contract, which a sibling file cannot import
+// (contract-use-cycle), so the day's card and the agent's answers are drawn here, in their manner.
+use Words, ActionButton, Segment from "__SCOPE__/components"
+
+// One event: its key (an agent names it), the day it belongs to ("Today", "Mon 14 Oct": the app's words, already
+// in newest-first order), its time, who did it (the app's name for them: "You", "Your assistant", "Priya Nair"),
+// what happened, a short detail ("" for none) and by whom: "person" or "agent". Named for the piece: DetailPanel
+// exports its own Event.
+shape TimelineEvent
+  key: string
+  day: string
+  time: string
+  actor: string
+  title: string
+  detail: string
+  by: string
+
+// The days in the order their events come, each once.
+fn timelineDays(days: string[]): string[] = days.filter((d, i) => days.indexOf(d) == i)
+
+// The rail's mark: "person" a quiet ring, "agent" the assistant's spark (filled, the accent), "asks" an open ring
+// in the accent (the assistant's ask, not yet done). Drawn on the surface, so the rail stops behind it.
+component TimelineMark
+  props
+    kind: string
+  view
+    svg viewBox="0 0 20 20" width="blocks.timeline-mark" height="blocks.timeline-mark" aria-hidden=true flex-shrink=0
+      if kind == "agent"
+        circle cx=10 cy=10 r=9.5 fill="theme.color.surface"
+        path d="M10 2.2l1.8 5.2 5.2 1.8-5.2 1.8L10 16.2l-1.8-5.2L3 9.2l5.2-1.8Z" fill="theme.color.accent"
+      else if kind == "asks"
+        circle cx=10 cy=10 r=7 fill="theme.color.surface" stroke="theme.color.accent" stroke-width=2 stroke-dasharray="3 2.5"
+      else
+        circle cx=10 cy=10 r=4.5 fill="theme.color.surface" stroke="theme.color.ink-muted" stroke-width=1.5
+
+// The rail beside a row: a segment above the mark (none on a day's first row), the mark, a segment below it to the
+// row's end (none on the last). The row draws no vertical padding of its own, so the segments meet across rows.
+component TimelineRail
+  props
+    kind: string
+    first: bool
+    last: bool
+  view
+    column aria-hidden=true width="blocks.timeline-mark" flex-shrink=0 align-items="center" align-self="stretch"
+      box height="theme.space.md" width="blocks.timeline-rail" background-color=(first ? "transparent" : "theme.color.line")
+      TimelineMark(kind=kind)
+      box flex=1 width="blocks.timeline-rail" background-color=(last ? "transparent" : "theme.color.line")
+
+// One event as a row: time, rail, then who, what and the detail; the event `agentKey` names also says its note and
+// holds its answers (proposed: accept and reject; changed: undo).
+component TimelineRow
+  props
+    event: TimelineEvent
+    first: bool
+    last: bool
+    open: enum<"none", "proposed", "changed">
+    note: string
+    acceptLabel: string
+    rejectLabel: string
+    undoLabel: string
+    accept: action
+    reject: action
+    undo: action
+    testId: string
+  view
+    row testId=testId role="listitem" align-items="stretch" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" border-top-width=(first ? "0" : "theme.line.width") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.timeline-mark-line" border-left-style="solid" border-left-color=(open != "none" ? "theme.color.accent" : "transparent")
+      text event.time testId=`${testId}-time` width="blocks.timeline-time" flex-shrink=0 padding-top="theme.space.md" padding-bottom="theme.space.md" box-sizing="border-box" overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted" font-variant-numeric="tabular-nums"
+      TimelineRail(kind=(open == "proposed" ? "asks" : event.by == "agent" ? "agent" : "person"), first=first, last=last)
+      column flex=1 min-width=0 gap="theme.space.xs" padding-top="theme.space.md" padding-bottom="theme.space.md"
+        text event.actor testId=`${testId}-actor` overflow-wrap="break-word" font="theme.type.caption" color=(event.by == "agent" ? "theme.color.accent" : "theme.color.ink-muted")
+        text event.title testId=`${testId}-title` overflow-wrap="break-word" font="theme.type.label" color="theme.color.ink"
+        if event.detail != ""
+          text event.detail testId=`${testId}-detail` overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
+        if open != "none"
+          column gap="theme.space.sm" margin-top="theme.space.xs"
+            if note != ""
+              text note testId=`${testId}-note` overflow-wrap="break-word" font="theme.type.caption" color="theme.color.accent"
+            row role="group" aria-label=event.title flex-wrap="wrap" gap="theme.space.sm"
+              if open == "proposed"
+                ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+                ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+              else
+                ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+
+// A day: its label in its own column (beside the card when the window holds both, above it when not), then its
+// rows on one card.
+component TimelineDay
+  props
+    day: string
+    events: TimelineEvent[]
+    agent: enum<"none", "proposed", "changed">
+    agentKey: string
+    proposedNote: string
+    changedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    undoLabel: string
+    accept: action
+    reject: action
+    undo: action
+    testId: string
+  view
+    row testId=testId flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.sm"
+      column flex=1 min-width="blocks.timeline-day-min" padding-top="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" box-sizing="border-box"
+        Words(text=day, kind="label", outcome="none", level=3, testId=`${testId}-label`)
+      column role="list" aria-label=day flex=4 min-width="blocks.timeline-rows-min" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+        for e, i in events key=e.key
+          TimelineRow(event=e, first=(i == 0), last=(i == events.length - 1), open=(agent != "none" and e.key == agentKey ? agent : "none"), note=(agent == "proposed" ? proposedNote : changedNote), acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, accept=accept, reject=reject, undo=undo, testId=`${testId}-${e.key}`)
+
+// A quiet row while the events load: the real row's grid (time, rail and ring, two lines), every word a bar.
+component TimelineGhost
+  props
+    share: string
+    first: bool
+    last: bool
+  view
+    row aria-hidden=true align-items="stretch" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" border-top-width=(first ? "0" : "theme.line.width") border-top-style="solid" border-top-color="theme.color.line" border-left-width="blocks.timeline-mark-line" border-left-style="solid" border-left-color="transparent"
+      column width="blocks.timeline-time" flex-shrink=0 padding-top="theme.space.md" box-sizing="border-box"
+        box width="70%" height="blocks.timeline-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+      TimelineRail(kind="person", first=first, last=last)
+      column flex=1 min-width=0 gap="theme.space.sm" padding-top="theme.space.md" padding-bottom="theme.space.md"
+        box width="30%" height="blocks.timeline-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+        box width=share height="blocks.timeline-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+
+// One card that speaks for the rows' place: a disc with its mark, a title and a sentence, and one way on. "quiet"
+// for empty and a filter with nothing in it (the rail's ring on the fill), "critical" for failed (the critical line
+// at its start and the critical disc; the words stay in the ink).
+component TimelineState
+  props
+    tone: enum<"quiet", "critical">
+    title: string
+    text: string
+    actionLabel: string
+    press: action
+    testId: string
+  view
+    row testId=testId role=(tone == "critical" ? "alert" : "status") align-items="flex-start" gap="theme.space.md" padding="theme.space.lg" background-color="theme.color.surface" border-radius="theme.radius.card" border-top-width="theme.line.width" border-right-width="theme.line.width" border-bottom-width="theme.line.width" border-left-width=(tone == "critical" ? "blocks.timeline-mark-line" : "theme.line.width") border-style="solid" border-top-color="theme.color.line" border-right-color="theme.color.line" border-bottom-color="theme.color.line" border-left-color=(tone == "critical" ? "theme.color.critical" : "theme.color.line")
+      svg viewBox="0 0 40 40" width="blocks.timeline-glyph" height="blocks.timeline-glyph" aria-hidden=true flex-shrink=0
+        if tone == "critical"
+          circle cx=20 cy=20 r=20 fill="theme.color.critical"
+          path d="M20 11v11" stroke="theme.color.critical-ink" stroke-width=3 stroke-linecap="round"
+          circle cx=20 cy=28.5 r=1.9 fill="theme.color.critical-ink"
+        else
+          circle cx=20 cy=20 r=20 fill="theme.color.fill"
+          path d="M20 8v6M20 26v6" stroke="theme.color.ink-muted" stroke-width=2 stroke-linecap="round"
+          circle cx=20 cy=20 r=5 fill="none" stroke="theme.color.ink-muted" stroke-width=2
+      column flex=1 min-width=0 max-width="blocks.timeline-measure" gap="theme.space.xs"
+        if title != ""
+          text title testId=`${testId}-title` overflow-wrap="break-word" font="theme.type.label" color="theme.color.ink"
+        text text testId=`${testId}-text` overflow-wrap="break-word" font="theme.type.body" color=(tone == "critical" ? "theme.color.ink" : "theme.color.ink-muted")
+        if actionLabel != ""
+          row margin-top="theme.space.sm"
+            ActionButton(opens="", label=actionLabel, kind="primary", interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
+
+component ActivityTimeline
+  props
+    title: string
+    summary: string
+    filterLabel: string
+    everyoneLabel: string
+    youLabel: string
+    agentLabel: string
+    // "everyone", "person" or "agent": the events shown, by who did them
+    filter: string
+    // what an agent's change of the filter said ("" when the person set it, or nobody did)
+    filterNote: string
+    events: TimelineEvent[]
+    loadingText: string
+    emptyTitle: string
+    emptyText: string
+    filteredText: string
+    showAllLabel: string
+    failedTitle: string
+    failedText: string
+    retryLabel: string
+    agentKey: string
+    proposedNote: string
+    changedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    undoLabel: string
+    data: enum<"many", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed">
+    choose: action
+    retry: action
+    accept: action
+    reject: action
+    undo: action
+    testId: string
+  // The events the filter keeps; the assistant's open ask stays whatever the filter.
+  derive shown = events.filter(e => filter == "everyone" or e.by == filter or (agent == "proposed" and e.key == agentKey))
+  derive days = timelineDays(shown.map(e => e.day))
+  derive rows = data == "many" or data == "long"
+  view
+    column testId=testId width="100%" max-width="blocks.timeline-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.xl" aria-busy=(data == "loading")
+      row flex-wrap="wrap" align-items="flex-end" column-gap="theme.space.xl" row-gap="theme.space.md"
+        column flex=1 min-width="blocks.timeline-head-min" gap="theme.space.xs"
+          Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+          if data == "loading"
+            text loadingText testId=`${testId}-status` role="status" overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
+          else if rows and summary != ""
+            text summary testId=`${testId}-status` overflow-wrap="break-word" font="theme.type.caption" color="theme.color.ink-muted"
+        column flex=1 min-width="blocks.timeline-filter-min" max-width="blocks.timeline-filter-max" gap="theme.space.sm"
+          row role="group" aria-label=filterLabel testId=`${testId}-filter` gap="theme.space.xs" padding="theme.space.xs" background-color="theme.color.fill" border-radius="theme.radius.control"
+            Segment(label=everyoneLabel, on=(filter == "everyone"), interaction="idle", press=choose("everyone"), testId=`${testId}-filter-everyone`)
+            Segment(label=youLabel, on=(filter == "person"), interaction="idle", press=choose("person"), testId=`${testId}-filter-person`)
+            Segment(label=agentLabel, on=(filter == "agent"), interaction="idle", press=choose("agent"), testId=`${testId}-filter-agent`)
+          if filterNote != ""
+            row align-items="flex-start" gap="theme.space.sm" padding-left="theme.space.sm" padding-right="theme.space.sm"
+              TimelineMark(kind="agent")
+              text filterNote testId=`${testId}-filter-note` role="status" flex=1 min-width=0 overflow-wrap="break-word" font="theme.type.caption" color="theme.color.accent"
+      if data == "loading"
+        row aria-hidden=true testId=`${testId}-loading` flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.sm"
+          column flex=1 min-width="blocks.timeline-day-min" padding-top="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" box-sizing="border-box"
+            box width="blocks.timeline-ghost-day" height="blocks.timeline-bone" background-color="theme.color.fill" border-radius="theme.radius.pill"
+          column flex=4 min-width="blocks.timeline-rows-min" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
+            for share, i in ["64%", "48%", "56%"] key=share
+              TimelineGhost(share=share, first=(i == 0), last=(i == 2))
+      else if data == "failed"
+        TimelineState(tone="critical", title=failedTitle, text=failedText, actionLabel=retryLabel, press=retry, testId=`${testId}-failed`)
+      else if data == "empty" or events.length == 0
+        TimelineState(tone="quiet", title=emptyTitle, text=emptyText, actionLabel="", press=retry, testId=`${testId}-empty`)
+      else if shown.length == 0
+        TimelineState(tone="quiet", title="", text=filteredText, actionLabel=showAllLabel, press=choose("everyone"), testId=`${testId}-filtered`)
+      else
+        column gap="theme.space.xl"
+          for d, n in days key=d
+            TimelineDay(day=d, events=shown.filter(e => e.day == d), agent=agent, agentKey=agentKey, proposedNote=proposedNote, changedNote=changedNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, accept=accept, reject=reject, undo=undo, testId=`${testId}-day-${n}`)

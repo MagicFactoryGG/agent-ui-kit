@@ -172,3 +172,17 @@ theme
   blocks.notes-head-min: length = 160px  // the list's name keeps this much before "Mark all read" wraps under it
   blocks.notes-when: length = 64px  // the time's stand-in while the notes load
   blocks.notes-max: length = 560px  // the list's own measure: rows read at ~64 characters, a side panel's width
+  blocks.timeline-max: length = 960px  // the day column and its card, side by side, at a desktop's reading width
+  blocks.timeline-head-min: length = 200px  // the title keeps this much before the filter wraps under it
+  blocks.timeline-filter-min: length = 288px  // three segments, "Your assistant" the longest, on one line
+  blocks.timeline-filter-max: length = 400px
+  blocks.timeline-day-min: length = 136px  // a day's label column; with the rows' least width it needs 480px, so a phone stacks them
+  blocks.timeline-rows-min: length = 320px
+  blocks.timeline-time: length = 52px  // "23:59" or "11:59 PM" in the caption type, tabular
+  blocks.timeline-mark: length = 20px  // the rail's mark: one line of the label type, a hair more
+  blocks.timeline-rail: length = 2px
+  blocks.timeline-mark-line: length = 3px  // the accent line an open ask or the agent's latest act carries at its start
+  blocks.timeline-glyph: length = 40px
+  blocks.timeline-bone: length = 12px
+  blocks.timeline-ghost-day: length = 72px
+  blocks.timeline-measure: length = 520px  // a state's sentence at about 70 characters a line

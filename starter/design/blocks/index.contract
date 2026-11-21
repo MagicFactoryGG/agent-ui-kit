@@ -18,6 +18,7 @@ use SiteFooter, LinkGroup, FooterLink from "./site-footer.contract"
 use Faq, Question, FaqViewport from "./faq.contract"
 use BarChart, BarPoint, BarRange from "./bar-chart.contract"
 use NotificationList, NotificationNote from "./notification-list.contract"
+use ActivityTimeline, TimelineEvent from "./activity-timeline.contract"
 
 // The bar at the top of a screen: the title, then the slot's actions. While an agent waits for the person,
 // `agentNote` says so under the title.
