@@ -153,6 +153,17 @@
             "title": "Sort"
           }
         }
+      },
+      "readCommands": {
+        "title": "Read Commands"
+      },
+      "runCommand": {
+        "title": "Run Command",
+        "parameters": {
+          "command": {
+            "title": "Command"
+          }
+        }
       }
     }
   }
