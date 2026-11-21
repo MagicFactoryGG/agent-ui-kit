@@ -126,7 +126,7 @@ component ChatActivity
         box width="screens.chat-dot" height="screens.chat-dot" border-radius="theme.radius.pill" background-color="theme.color.accent" opacity=0.7 animation=(answering ? "none" : pulse)
         box width="screens.chat-dot" height="screens.chat-dot" border-radius="theme.radius.pill" background-color="theme.color.accent" opacity=0.4 animation=(answering ? "none" : pulse)
       column flex=1 min-width=0
-        Words(text=text, kind="caption", outcome="none", level=0, testId=`${testId}-text`)
+        Words(text=text, kind="label", outcome="none", level=0, testId=`${testId}-text`)
       if answering
         ActionButton(opens="", label=stopLabel, kind="plain", interaction="idle", outcome="none", press=stop, testId=`${testId}-stop`)
 
@@ -217,16 +217,20 @@ component ChatScreen
   action nothing(q: string)
   view
     column testId="chat" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
-      TopBar(title=title, agentNote="", agent="none")
-        column min-width=0 max-width="screens.chat-action-max" flex-shrink=0
-          ActionButton(opens="chat-settings-menu", label=settingsLabel, kind="plain", interaction="idle", outcome="none", press=opened, testId="chat-settings")
-        Menu(menuId="chat-settings-menu", label=settingsLabel, items=settings, presentation="popup", interaction="idle", choose=chooseSetting, search="", query="", find=nothing, testId="chat-settings-menu")
+      // The bar holds the measure the card and the composer hold: on a desktop its rule spans the card's width and
+      // the title starts where the card's own words start; on a phone it is the window's bar.
+      column width="100%" max-width="screens.chat-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding-left=(wide ? "theme.space.lg" : "0") padding-right=(wide ? "theme.space.lg" : "0")
+        TopBar(title=title, agentNote="", agent="none")
+          column min-width=0 max-width="screens.chat-action-max" flex-shrink=0
+            ActionButton(opens="chat-settings-menu", label=settingsLabel, kind="plain", interaction="idle", outcome="none", press=opened, testId="chat-settings")
+          Menu(menuId="chat-settings-menu", label=settingsLabel, items=settings, presentation="popup", interaction="idle", choose=chooseSetting, search="", query="", find=nothing, testId="chat-settings-menu")
       // The transcript opens at its newest turn: an offset past its end holds at the end.
       scroll id="chat-transcript" flex=1 min-height=0 scrollTop=chatEnd(messages.length)
-        column width="100%" max-width="screens.chat-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(wide ? "theme.space.xl" : "theme.space.md")
+        // A short conversation sits on the composer, as a chat reads from its newest turn up.
+        column width="100%" min-height="100%" justify-content="flex-end" max-width="screens.chat-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top=(wide ? "theme.space.xl" : "theme.space.md") padding-bottom=(wide ? "theme.space.lg" : "theme.space.md")
           MessageList(title=listTitle, unreadLabel=unreadLabel, emptyText=emptyText, failedText=failedText, composeLabel=startLabel, retryLabel=retryLabel, orderLabel=orderLabel, paneLabel=paneLabel, paneEmptyText=paneEmptyText, paneQuietText=paneQuietText, openLabel="", agentNote=agentMark, chosenKey=openedKey, agentKey=agentKey, data=data, agent=(agent == "changed" ? "changed" : "none"), messages=messages.map(t => chatRow(t)), compose=startWriting, retry=retry, openMessage=opened, testId="chat-messages")
-      column flex-shrink=0 background-color="theme.color.page" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
-        column width="100%" max-width="screens.chat-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.sm" padding-left=(wide ? "theme.space.xl" : "theme.space.md") padding-right=(wide ? "theme.space.xl" : "theme.space.md") padding-top="theme.space.sm" padding-bottom="theme.space.md"
+      column flex-shrink=0 background-color="theme.color.page"
+        column width="100%" max-width="screens.chat-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.md"
           if agent == "changed"
             ChatBand(tone="changed", sentence=changedNote, testId="chat-changed")
               ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="chat-undo")
