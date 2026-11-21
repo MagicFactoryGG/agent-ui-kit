@@ -9,6 +9,7 @@ use faqAct from "./model.contract"
 use rangeAct, notesReadAct from "./model.contract"
 use loadStatsAct from "./model.contract"
 use sortAct from "./model.contract"
+use activityFilterAct, undoArchive from "./model.contract"
 use commandAct from "./model.contract"
 
 members App
@@ -60,6 +61,11 @@ members App
   action readSort
   action setSort(sort: enum<"newest", "oldest", "name">)
     book = act(book, sortAct(sort))
+  action readActivity
+  action setActivityFilter(filter: enum<"everyone", "person", "agent">)
+    book = act(book, activityFilterAct(filter))
+  action undoActivity(event: enum<"archive">)
+    book = undoArchive(book)
   action readCommands
   action runCommand(command: enum<"new-invoice", "new-customer", "export", "archive", "settings">)
     book = act(book, commandAct(command))
