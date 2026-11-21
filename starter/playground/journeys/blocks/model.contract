@@ -7,6 +7,7 @@ use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint from 
 use Question from "__SCOPE__/blocks"
 use BarPoint, BarRange, NotificationNote from "__SCOPE__/blocks"
 use Stat from "__SCOPE__/blocks"
+use MenuCommand from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -187,6 +188,25 @@ fn weekStats(): Stat[] = [
 fn statsText(state: string): string = state == "many" ? weekStats().map(s => `${s.key}\t${s.label}\t${s.value}\t${s.change}`).join("\n") : state
 fn loadStatsAct(): Act = Act(tool="loadStats", door="agent", key="stats", title="This week's numbers", value="many", did="Your assistant read this week's numbers again.", asks="Your assistant suggests reading this week's numbers again.", will="Your assistant will read this week's numbers again in 5 seconds.")
 
+// CommandMenu: a billing workspace's commands, found by name in the Commands menu; the last command run is the value
+// both doors set ("none" until one is). A person chooses it in the menu (after its search narrows the commands), the
+// agent's runCommand runs it by key; the agent's run is recorded, marked on the command and said with one Undo.
+fn commandKeys(): string[] = ["new-invoice", "new-customer", "export", "archive", "settings"]
+fn workspaceCommands(): MenuCommand[] = [
+  MenuCommand(key="new-invoice", group="Create", label="New invoice", hint="A draft for one customer", shortcut="⌘N"),
+  MenuCommand(key="new-customer", group="Create", label="New customer", hint="", shortcut="⇧⌘N"),
+  MenuCommand(key="export", group="Invoices", label="Export invoices", hint="This month's, as a CSV file", shortcut="⌘E"),
+  MenuCommand(key="archive", group="Invoices", label="Archive paid invoices", hint="They stay searchable", shortcut=""),
+  MenuCommand(key="settings", group="Go to", label="Billing settings", hint="Tax, currency and reminders", shortcut="⌘,")
+]
+fn commandName(key: string): string = workspaceCommands().filter(c => c.key == key).map(c => c.label).join("")
+// The commands whose name or hint holds what was typed (all for nothing typed).
+fn commandsShown(q: string): MenuCommand[] = workspaceCommands().filter(c => q.trim() == "" or c.label.toLowerCase().includes(q.trim().toLowerCase()) or c.hint.toLowerCase().includes(q.trim().toLowerCase()))
+// What the last command did, in one sentence ("" before any).
+fn commandResult(key: string): string = key == "new-invoice" ? "A draft invoice is open for you to fill in." : key == "new-customer" ? "A new customer card is ready for its details." : key == "export" ? "This month's 24 invoices are ready to download as a CSV file." : key == "archive" ? "18 paid invoices moved to the archive." : key == "settings" ? "Billing settings are open." : ""
+fn commandText(key: string): string = `${key}\t${key == "none" ? "None" : commandName(key)}`
+fn commandAct(key: string): Act = Act(tool="runCommand", door="agent", key="command", title="Commands", value=key, did=`Your assistant ran ${commandName(key)}.`, asks=`Your assistant suggests running ${commandName(key)}.`, will=`Your assistant will run ${commandName(key)} in 5 seconds.`)
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
@@ -204,7 +224,8 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="setChartRange", title="Orders chart", sentence="Shows the orders chart by week or by month.", floor="recorded", reach="self", secret=false),
   AgentTool(name="markNotesRead", title="Notifications", sentence="Marks the new notifications read, as the list's Mark all read does.", floor="recorded", reach="self", secret=false),
   AgentTool(name="loadStats", title="This week's numbers", sentence="Reads this week's numbers again after a failed read, as their Try again does.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="setSort", title="Order", sentence="Puts the list in an order: newest, oldest or name.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="setSort", title="Order", sentence="Puts the list in an order: newest, oldest or name.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="runCommand", title="Commands", sentence="Runs one of the workspace's commands, as choosing it in the Commands menu does.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -223,5 +244,6 @@ fn startValues(): Value[] = [
   Value(key="chart-range", value="week"),
   Value(key="notes", value="unread"),
   Value(key="stats", value="failed"),
-  Value(key="sort", value="newest")
+  Value(key="sort", value="newest"),
+  Value(key="command", value="none")
 ]

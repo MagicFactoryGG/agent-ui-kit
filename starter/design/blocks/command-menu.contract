@@ -1,0 +1,147 @@
+// CommandMenu: every command the app has, found by name and run from one place. A composition only (the lead's
+// rule, 21 Nov): the kit's Menu with its search draws the field and the grouped items, ActionButton's `opens` opens
+// it, and the Menu's shared behaviour is the menu's own - a letter jumps to the next command that starts with it, Up
+// and Down move, Escape and a click outside close the popup, and the focus goes back to the button that opened it.
+// This file draws no list and no input: only the frame around the Menu, its words and the agent's band.
+//
+// - Commands are `MenuCommand`s (key, group, label, hint, shortcut), in their groups' order: each group's name
+//   titles its first command's section, the hint and the shortcut are the item's second line. The app narrows them
+//   by `query` (the words typed are view state; an agent runs a command by key, never by the query).
+// - Opens from a key too: Command-K or Control-K anywhere inside the block toggles the popup (`togglePopover`, its
+//   source the trigger, so it opens beside it); inline, the key puts the focus on the first command. An app that
+//   wants the key from anywhere calls `togglePopover("<testId>-menu", source="<testId>-menu-trigger")` at its root.
+// - presentation: "inline" draws the menu in place, open (a command page on a phone, a side panel on a desktop);
+//   "popup" draws the trigger, and the menu opens over the page from it.
+// - Width: on a desktop the words and the agent's band take the main column and the open menu stands beside them
+//   at the menu's own measure; on a phone they stack, the words first. The whole holds a measure
+//   (blocks.command-menu-max) so it never stretches across a wide window.
+// - One filled element per state: the trigger in a popup's resting state; Run while an agent proposes (the trigger
+//   steps back to plain). Inline, the open menu on its raised ground is the focal point.
+//
+// States:
+//   data   many (the commands), empty (nothing matches the query: the line that says so titles the menu's one way
+//          on, Clear search, which shows every command again), loading (one quiet item says so; nothing to press)
+//   agent  none, proposed (the agent suggests running a command: `proposedNote`, the ledger's asks, with Run and Not
+//          now on the accent-ringed card of Proposal's manner, and the command says `agentMark` in the menu), changed
+//          (the agent ran one: `changedNote`, the ledger's did, with Undo on a quiet card with the accent at its start,
+//          LinkRow's manner, and the mark on its command)
+//
+// Proposal and TopBar live inline in this package's index.contract, which a sibling file cannot import
+// (contract-use-cycle), so the agent's band is drawn here in Proposal's manner.
+use Words, ActionButton, Menu, MenuItem from "__SCOPE__/components"
+
+// One command: its key (the tool's argument too), the group it is listed under, its name, what it does ("" for
+// none) and its keys as the person reads them ("⌘N"; "" for none). Named for the piece: other pieces and packages
+// declare their own Command.
+shape MenuCommand
+  key: string
+  group: string
+  label: string
+  hint: string
+  shortcut: string
+
+// The item's second line: the agent's mark on the command it ran or proposes, else the hint and the keys.
+fn commandMenuDetail(c: MenuCommand, agentKey: string, agentMark: string): string = agentKey != "" and c.key == agentKey ? agentMark : c.hint != "" and c.shortcut != "" ? `${c.hint} · ${c.shortcut}` : `${c.hint}${c.shortcut}`
+// The commands as the Menu's items: a group's name heads its first command.
+fn commandMenuItems(cs: MenuCommand[], agentKey: string, agentMark: string): MenuItem[] = cs.map((c, i) => MenuItem(key=c.key, heading=(cs.slice(i == 0 ? 0 : i - 1, i).map(p => p.group).join("\n") == c.group ? "" : c.group), label=c.label, detail=commandMenuDetail(c, agentKey, agentMark), kind="act", on=false, enabled=true))
+// What the menu holds in each data state: the commands; the empty line over its one way on; the loading line.
+fn commandMenuShown(data: string, cs: MenuCommand[], emptyText: string, clearLabel: string, loadingText: string, agentKey: string, agentMark: string): MenuItem[] = data == "empty" ? [MenuItem(key="clear-search", heading=emptyText, label=clearLabel, detail="", kind="act", on=false, enabled=true)] : data == "loading" ? [MenuItem(key="loading", heading="", label=loadingText, detail="", kind="act", on=false, enabled=false)] : commandMenuItems(cs, agentKey, agentMark)
+fn commandMenuFirst(cs: MenuCommand[]): string = match cs.at(0) { case some(c) => c.key, case none => "" }
+
+component CommandMenu
+  props
+    title: string
+    note: string
+    openLabel: string
+    search: string
+    query: string
+    find: action
+    commands: MenuCommand[]
+    run: action
+    emptyText: string
+    clearLabel: string
+    loadingText: string
+    resultText: string
+    agentKey: string
+    agentMark: string
+    proposedNote: string
+    changedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    undoLabel: string
+    accept: action
+    reject: action
+    undo: action
+    data: enum<"many", "empty", "loading">
+    agent: enum<"none", "proposed", "changed">
+    presentation: enum<"inline", "popup">
+    testId: string
+  derive menuId = `${testId}-menu`
+  // A chosen item runs its command; the empty state's one item clears the search instead.
+  action picked(key: string)
+    if key == "clear-search"
+      find("")
+    else if key != "loading"
+      run(key)
+  // The trigger only opens the menu (its `opens`): a press has nothing more to do.
+  action opened
+  // Command-K or Control-K: the popup opens or closes beside its trigger; inline, the first command takes the focus.
+  action keyed(k: string, e: KeyboardEvent)
+    if (e.metaKey or e.ctrlKey) and k.toLowerCase() == "k"
+      preventDefault()
+      if presentation == "popup"
+        togglePopover(menuId, source=`${menuId}-trigger`)
+      else if data == "many" and commandMenuFirst(commands) != ""
+        focus(`${menuId}-item-${commandMenuFirst(commands)}`)
+  view
+    column testId=testId role="region" aria-label=title keycapture=keyed width="100%" max-width="blocks.command-menu-max" box-sizing="border-box"
+      row flex-wrap="wrap" align-items="flex-start" gap="theme.space.xl"
+        // The main column: what the menu is, how to open it, what the last command did, and the agent's band.
+        column flex=1 min-width="blocks.command-menu-main-min" gap="theme.space.lg"
+          column gap="theme.space.xs"
+            Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+            if note != ""
+              Words(text=note, kind="caption", outcome="none", level=0, testId=`${testId}-note`)
+          if presentation == "popup"
+            row id=`${menuId}-trigger`
+              ActionButton(opens=menuId, label=openLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=opened, testId=`${testId}-open`)
+          if resultText != ""
+            row role="status" align-items="flex-start" gap="theme.space.sm"
+              svg viewBox="0 0 20 20" width="blocks.command-menu-mark" height="blocks.command-menu-mark" aria-hidden=true flex-shrink=0
+                path d="M1.75 10a8.25 8.25 0 1 0 16.5 0a8.25 8.25 0 1 0-16.5 0ZM6.6 10.2l2.3 2.3 4.5-4.7" fill="none" stroke="theme.color.positive" stroke-width=1.6 stroke-linecap="round" stroke-linejoin="round"
+              column flex=1 min-width=0
+                text resultText testId=`${testId}-result` overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+          if agent != "none"
+            CommandMenuAgent(proposed=(agent == "proposed"), sentence=(agent == "proposed" ? proposedNote : changedNote), acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, accept=accept, reject=reject, undo=undo, testId=`${testId}-agent`)
+        if presentation == "inline"
+          column width="blocks.command-menu-panel" max-width="100%" flex-shrink=0
+            Menu(menuId=menuId, label=title, items=commandMenuShown(data, commands, emptyText, clearLabel, loadingText, (agent == "none" ? "" : agentKey), agentMark), presentation="inline", interaction="idle", choose=picked, search=search, query=query, find=find, testId=menuId)
+      if presentation == "popup"
+        Menu(menuId=menuId, label=title, items=commandMenuShown(data, commands, emptyText, clearLabel, loadingText, (agent == "none" ? "" : agentKey), agentMark), presentation="popup", interaction="idle", choose=picked, search=search, query=query, find=find, testId=menuId)
+
+// The agent's band, in the main column: proposed wears the accent ring (Proposal's manner) with Run filled and Not
+// now plain; changed is quiet with the accent at its start (LinkRow's manner) and its Undo. The sentence is the
+// ledger's own, said on the surface in the ink; the spark marks the agent.
+component CommandMenuAgent
+  props
+    proposed: bool
+    sentence: string
+    acceptLabel: string
+    rejectLabel: string
+    undoLabel: string
+    accept: action
+    reject: action
+    undo: action
+    testId: string
+  view
+    row testId=testId role="status" align-items="flex-start" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" background-color="theme.color.surface" border-radius="theme.radius.card" border-top-width="theme.line.width" border-top-style="solid" border-right-width="theme.line.width" border-right-style="solid" border-bottom-width="theme.line.width" border-bottom-style="solid" border-left-width="components.mark-line" border-left-style="solid" border-top-color=(proposed ? "theme.color.accent" : "theme.color.line") border-right-color=(proposed ? "theme.color.accent" : "theme.color.line") border-bottom-color=(proposed ? "theme.color.accent" : "theme.color.line") border-left-color="theme.color.accent"
+      svg viewBox="0 0 20 20" width="blocks.command-menu-mark" height="blocks.command-menu-mark" aria-hidden=true flex-shrink=0
+        path d="M10 1.8l1.9 5.3 5.3 1.9-5.3 1.9L10 16.2l-1.9-5.3L2.8 9l5.3-1.9ZM14.4 16a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0-3.2 0Z" fill="theme.color.accent"
+      column flex=1 min-width=0 gap="theme.space.sm"
+        text sentence testId=`${testId}-note` overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+        row flex-wrap="wrap" gap="theme.space.sm"
+          if proposed
+            ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+            ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+          else
+            ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)

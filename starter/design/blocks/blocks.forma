@@ -172,3 +172,7 @@ theme
   blocks.notes-head-min: length = 160px  // the list's name keeps this much before "Mark all read" wraps under it
   blocks.notes-when: length = 64px  // the time's stand-in while the notes load
   blocks.notes-max: length = 560px  // the list's own measure: rows read at ~64 characters, a side panel's width
+  blocks.command-menu-max: length = 720px  // the block's measure: the main column and the open menu beside it
+  blocks.command-menu-main-min: length = 280px  // the main column keeps this much before the menu wraps under it
+  blocks.command-menu-panel: length = 320px  // the open menu's width inline: the kit's Menu at its widest (components.menu-max)
+  blocks.command-menu-mark: length = 20px  // the result's tick and the agent's spark: one line of body type

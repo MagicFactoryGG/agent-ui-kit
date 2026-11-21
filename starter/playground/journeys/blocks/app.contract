@@ -24,6 +24,8 @@ use StatTiles from "__SCOPE__/blocks"
 use weekStats, statsText from "./model.contract"
 use Menu, ActionButton from "__SCOPE__/components"
 use sortShown, sortText from "./model.contract"
+use CommandMenu from "__SCOPE__/blocks"
+use commandsShown, commandResult, commandText from "./model.contract"
 
 // The window's width, for the Hero's size (compact under 600 px): an app reads the viewport, a piece cannot.
 shape JourneyViewport
@@ -102,6 +104,9 @@ component App
   // then "many". The agent's read is said under the row (changed: what it did), with one Undo.
   derive stats = valueOf(book, "stats")
   derive statsMarked = isMarked(book, "stats")
+  // CommandMenu: the last command run, "none" until one is; the agent's run is marked on its command, with Undo.
+  derive lastCommand = valueOf(book, "command")
+  derive commandMarked = isMarked(book, "command")
 
   // The person's door: the switch says which row; the app flips its own value.
   action toggleByPerson(key: string)
@@ -146,6 +151,16 @@ component App
     sortQuery = v
   // the Order button only opens the menu (its `opens`); a press has nothing more to do
   action sortOpened
+  // A command chosen in the Commands menu runs it (and the search starts empty next time); the menu's search
+  // narrows the commands (the words typed are this view's own); Undo takes the agent's run back.
+  action runCommandByPerson(key: string)
+    book = personSet(book, "command", key)
+    commandQuery = ""
+  state commandQuery = ""
+  action findCommand(v: string)
+    commandQuery = v
+  action undoCommand
+    book = undo(book, latestIdAbout(book, "command"))
   action choosePlanByPerson(key: string)
     book = personSet(book, "plan", key)
   action undoPlan
@@ -277,6 +292,10 @@ component App
     returns sortText(sort)
   tool setSort writes idempotent closed "Put the list in an order, as an item of the Order menu does: newest, oldest or name. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readSort." = setSort
     returns book.answer
+  tool readCommands reads "The last command run: its id (none until one is), then its name, tab-separated." = readCommands
+    returns commandText(lastCommand)
+  tool runCommand writes idempotent closed "Run one of the workspace's commands, as choosing it in the Commands menu does: new-invoice, new-customer, export, archive or settings. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readCommands." = runCommand
+    returns book.answer
     fails when book.answer == "off"
 
   view
@@ -299,3 +318,5 @@ component App
       // Menu as a popup, opened by the Order button (ActionButton's `opens`), with a search above its items
       ActionButton(opens="sort-menu", label="Order", kind="plain", interaction="idle", outcome="none", press=sortOpened, testId="sort-open")
       Menu(menuId="sort-menu", label="Order", items=sortShown(sort, sortQuery), presentation="popup", interaction="idle", choose=chooseSortByPerson, search="Find an order", query=sortQuery, find=findSort, testId="sort-menu")
+      // CommandMenu as a popup from its trigger (and Command-K or Control-K inside it), search first
+      CommandMenu(title="Commands", note="Find any action by name. Command-K or Control-K opens this menu.", openLabel="Open commands", search="Search commands", query=commandQuery, find=findCommand, commands=commandsShown(commandQuery), run=runCommandByPerson, emptyText=`No command matches “${commandQuery}”.`, clearLabel="Clear search", loadingText="", resultText=commandResult(lastCommand), agentKey=lastCommand, agentMark="Run by your assistant", proposedNote="", changedNote=latestAbout(book, ["command"]), acceptLabel="", rejectLabel="", undoLabel="Undo", accept=ignore, reject=ignore, undo=undoCommand, data=(commandsShown(commandQuery).length == 0 ? "empty" : "many"), agent=(commandMarked ? "changed" : "none"), presentation="popup", testId="commands")
