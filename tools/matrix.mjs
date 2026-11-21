@@ -172,7 +172,7 @@ function value(prop, cell, ctx) {
   const long = cell.data === 'long';
   if (t === 'string') {
     const n = prop.name.toLowerCase();
-    if (n === 'testid') return quote(ctx.testId);
+    if (n === 'testid') return testIdOf(ctx.testId);
     if (n.endsWith('href')) return quote('/');
     if (n === 'src' || n.endsWith('image')) return quote(IMAGE);
     if (n === 'share' || n === 'width') return quote('62%');
@@ -231,11 +231,14 @@ function callArity(code, name) {
   return most;
 }
 
+// A testId as written: a literal, or { code } for a template over the loop's variables (`${sc}`).
+const testIdOf = (t, suffix = '') => (typeof t === 'string' ? quote(`${t}${suffix}`) : `\`${t.code}${suffix}\``);
+
 function placement(piece, cell, testId, ctx, indent) {
   const args = piece.props.map((p) => `${p.name}=${value(p, cell, { ...ctx, testId, body: piece.body, piece: piece.name, given: ctx.props?.[`props:${piece.name}`] })}`).join(', ');
   const lines = [`${indent}${piece.name}(${args})`];
   // samples.json "slot:<Piece>": false leaves a slot empty: a layer (an edge drawn around the piece) is not content.
-  if (piece.slot && ctx.props?.[`slot:${piece.name}`] !== false) lines.push(`${indent}  Words(text=${quote(cell.data === 'long' ? LONG : 'What the slot holds')}, kind="body", outcome="none", level=0, testId=${quote(`${testId}-slot`)})`);
+  if (piece.slot && ctx.props?.[`slot:${piece.name}`] !== false) lines.push(`${indent}  Words(text=${quote(cell.data === 'long' ? LONG : 'What the slot holds')}, kind="body", outcome="none", level=0, testId=${testIdOf(testId, '-slot')})`);
   return lines;
 }
 
@@ -304,11 +307,14 @@ export function generate(designDir, playDir, opts = {}) {
   const sampleFile = opts.samples ?? join(playDir, 'samples.json');
   const ctx = { needs: new Set(), shapes: Object.assign({}, ...all.map((p) => p.shapes)), props: existsSync(sampleFile) ? JSON.parse(readFileSync(sampleFile, 'utf8')) : {} };
   const sections = ctx.props.sections ?? {};
+  // A layer is never split by file name to fit a bundle: each piece is written once for each of its states instead
+  // (light and dark through one `for`), which keeps one app per layer small enough.
+  const split = Object.entries(sections).filter(([, v]) => v.match !== undefined).map(([k]) => `samples.json sections.${k}: "match" splits a layer by file name; give the layer one section (each piece is written once per state, so one app holds it)`);
+  if (split.length) return { bad: split };
   const fileOf = (p) => p.at.split(':')[0].split('/').pop();
   // A section names files ("files": ["ias.contract"]) or whole layers ("layers": ["blocks"], less "except": the
-  // layer's own shared pieces, such as its index.contract), so a piece added to a layer joins its section unnamed;
-  // "match" (a pattern on the file name) splits a layer across sections ("^[a-f]"), as one app per layer outgrows a bundle too.
-  const inSection = (p, v) => (v.files ?? []).includes(fileOf(p)) || ((v.layers ?? []).includes(p.layer) && !(v.except ?? []).includes(fileOf(p)) && (!v.match || new RegExp(v.match).test(fileOf(p))));
+  // layer's own shared pieces, such as its index.contract), so a piece added to a layer joins its section unnamed.
+  const inSection = (p, v) => (v.files ?? []).includes(fileOf(p)) || ((v.layers ?? []).includes(p.layer) && !(v.except ?? []).includes(fileOf(p)));
   const sectionOf = (p) => Object.entries(sections).find(([, v]) => inSection(p, v))?.[0] ?? 'main';
   const inPage = (p) => sectionOf(p) === (opts.section ?? 'main');
   const byPkg = new Map();
@@ -419,12 +425,14 @@ export function generate(designDir, playDir, opts = {}) {
         const name = cellName(p, cell);
         const rowId = `${id(p.name)}--${id(name)}`;
         view.push(`          MatrixRow(label=${quote(name)}, testId=${quote(rowId)})`);
-        for (const scheme of ['light', 'dark']) {
-          const cellId = `${rowId}--${scheme}`;
-          view.push(`            if find == "" or ${quote(cellId)}.includes(find)`);
-          view.push(layer === 'screens' ? `              ScreenCell(scheme="${scheme}", testId=${quote(cellId)})` : `              MatrixCell(scheme="${scheme}", testId=${quote(cellId)})`);
-          view.push(...placement(p, cell, `${cellId}-piece`, ctx, '                '));
-        }
+        // Light and dark through one `for`, so the piece is written once for each state: Exact compiles a component's
+        // body in at each place it is written, and writing it once per scheme doubled every page's web build. The
+        // testIds are as before (<row>--light, <row>--dark).
+        const cellId = `\`${rowId}--\${sc}\``;
+        view.push('            for sc in ["light", "dark"] key=sc');
+        view.push(`              if find == "" or ${cellId}.includes(find)`);
+        view.push(`                ${layer === 'screens' ? 'ScreenCell' : 'MatrixCell'}(scheme=(sc == "dark" ? "dark" : "light"), testId=${cellId})`);
+        view.push(...placement(p, cell, { code: `${rowId}--\${sc}-piece` }, ctx, '                  '));
       });
     }
   }

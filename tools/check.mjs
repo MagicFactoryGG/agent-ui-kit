@@ -20,6 +20,7 @@ const steps = [
   ["library-gate", ["bun", "tools/library-gate.mjs"], ROOT],
   ["primitives", ["bun", "tools/primitives.mjs", "check", "starter/design"], ROOT],
   ["primitives tests", ["bun", "test", "tools/primitives.test.mjs"], ROOT],
+  ["matrix tests", ["bun", "test", "tools/matrix.test.mjs"], ROOT],
   ["library-gate tests", ["bun", "exact.mjs", "test", host], resolve(ROOT, "apps/library-gate")],
   ["gallery tests", ["bun", "exact.mjs", "test", host], resolve(ROOT, gallery)],
   ["both-doors", ["bun", "tools/both-doors.mjs", gallery, host], ROOT],
@@ -30,7 +31,7 @@ const steps = [
   ["distiller", ["bun", "test"], resolve(ROOT, "tools/distiller")],
 ];
 
-const ONCE = new Set(["words", "wording", "wording tests", "library-gate", "primitives", "primitives tests", "library-gate tests", "gallery tests", "distiller"]);
+const ONCE = new Set(["words", "wording", "wording tests", "library-gate", "primitives", "primitives tests", "matrix tests", "library-gate tests", "gallery tests", "distiller"]);
 const run = host === "ios" ? steps.filter(([name]) => ONCE.has(name)) : steps;
 for (const [name] of steps.filter((s) => !run.includes(s))) console.log(`check: ${name}: not run on ios (one launch per case; run it on web and macos)`);
 let failed = 0;
