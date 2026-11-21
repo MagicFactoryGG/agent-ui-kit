@@ -2203,6 +2203,7 @@
     "note": "Find any action by name. Command-K or Control-K opens this menu.",
     "openLabel": "Open commands",
     "search": "Search commands",
+    "query": "",
     "query@empty": "refund",
     "emptyText": "No command matches “refund”.",
     "clearLabel": "Clear search",

@@ -13,8 +13,10 @@
 // - presentation: "inline" draws the menu in place, open (a command page on a phone, a side panel on a desktop);
 //   "popup" draws the trigger, and the menu opens over the page from it.
 // - Width: on a desktop the words and the agent's band take the main column and the open menu stands beside them
-//   at the menu's own measure; on a phone they stack, the words first. The whole holds a measure
-//   (blocks.command-menu-max) so it never stretches across a wide window.
+//   at the menu's own measure; on a phone they stack, the words first. Inline, the main column holds the menu's
+//   width too (blocks.command-menu-panel), so on a phone the band's edge and the menu's line up and on a desktop
+//   the two columns are a pair. The whole holds a measure (blocks.command-menu-max) so it never stretches across a
+//   wide window.
 // - One filled element per state: the trigger in a popup's resting state; Run while an agent proposes (the trigger
 //   steps back to plain). Inline, the open menu on its raised ground is the focal point.
 //
@@ -97,7 +99,7 @@ component CommandMenu
     column testId=testId role="region" aria-label=title keycapture=keyed width="100%" max-width="blocks.command-menu-max" box-sizing="border-box"
       row flex-wrap="wrap" align-items="flex-start" gap="theme.space.xl"
         // The main column: what the menu is, how to open it, what the last command did, and the agent's band.
-        column flex=1 min-width="blocks.command-menu-main-min" gap="theme.space.lg"
+        column flex=1 min-width="blocks.command-menu-main-min" max-width=(presentation == "inline" ? "blocks.command-menu-panel" : "none") gap="theme.space.lg"
           column gap="theme.space.xs"
             Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
             if note != ""
