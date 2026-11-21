@@ -2,13 +2,15 @@
 //
 // - The header: the kit's TopBar with the conversation's title, and the conversation's settings at its end (an
 //   ActionButton that opens the kit's Menu). Settings live here, never in the composer.
-// - The messages: the kit's MessageList, in a scroller between the header and the composer. Each turn is one of
-//   its rows (who, when, the turn's first sentence as the row's line and the rest under it, cut to one line); on a
-//   wide window MessageList's own reading pane beside the rows holds the open turn whole (its first sentence as the
-//   pane's title, the rest wrapping under it), so a long reply reads in full without leaving the conversation. On
-//   a phone the rows stand alone and a row's own way in (its href) opens the turn, as the platform composes a list
-//   with its detail. The column holds MessageList's own measure (screens.chat-max), centred, and the composer shares
-//   its edges.
+// - The messages: a transcript, as Exact's chat-thread pattern composes one (docs/start-here.md, "Compose as the
+//   platform does"): one column of bubbles in a list that opens at the newest turn and follows each new one. The
+//   person's turns stand on the end side on the fill, the agent's on the start side on the surface; each turn is
+//   whole (its line breaks kept, a long word or link broken, never cut), the time small under it, and the agent's
+//   name beside its time. The transcript takes the height between the bar and the composer and scrolls; its
+//   bubbles hold a measure (screens.chat-max) centred on a wide window, with the bar's and the composer's edges.
+//   The kit has no bubble and a bubble is not a control, so it is drawn here (ChatBubble) from the Theme's tokens.
+//   (The brief named the kit's MessageList; the coordinator's look of 21 Nov 18:55 held that a chat is a transcript,
+//   not a mailbox: MessageList cuts each turn to a line and repeats the newest in a reading pane.)
 // - The composer (the dock's, the lead's rule of 21 Nov: one way to talk to agents): what was pasted shows inline,
 //   in the order it was pasted (a Picture for a picture, a link as a link in the text), then the text being typed,
 //   in the kit's Field; three 44px buttons follow it, mic, plus and send, left to right, and the text wraps round
@@ -21,14 +23,14 @@
 //   say it, and the kit's ui-guard refuses it on an app's main today.)
 //
 // States:
-//   data   many|empty|loading|failed|long, for the messages: MessageList says each in its own room. empty: the
-//          app's line and its way on (startLabel), which puts the focus in the composer; loading: rows breathe in
-//          the real rows' shape; failed: the app's line and Try again (the state's one fill, so Send steps back to
-//          plain). The composer stays usable in every state. long: every word at length (rows cut, the pane and the
-//          composer wrap).
+//   data   many|empty|loading|failed|long, for the messages, each in the transcript's own place, from its top.
+//          empty: the app's line and its way on (startLabel), which puts the focus in the composer; loading: the app's
+//          line over quiet bubbles on both sides, breathing; failed: the app's line by the error's glyph and Try
+//          again (the state's one fill, so Send steps back to plain). The composer stays usable in every state.
+//          long: every word at length (bubbles and the composer wrap; nothing is cut).
 //   agent  none|proposed|changed|waiting: what the agent did or asks, held in one band over the composer.
-//          changed: it sent a message through its tool (the other door), so that turn carries MessageList's accent
-//          mark and `agentMark`, and the band says the ledger's sentence with Undo; proposed: one sentence and two
+//          changed: it sent a message through its tool (the other door), so that turn's bubble takes the accent's
+//          line and `agentMark` under it, and the band says the ledger's sentence with Undo; proposed: one sentence and two
 //          answer words (Accept is the state's one fill); waiting: the agent waits for the person's own act
 //          (authenticating, accepting terms: no tool does these), with a clock on the caution edge and the way to it,
 //          plain (the person goes when they choose).
@@ -39,17 +41,16 @@
 // Missing primitive (noted for design-system): a 44px square icon button (a symbol with an accessible name). Until
 // it exists, mic, plus and send are ActionButtons with the app's words.
 use Words, ActionButton, Field, Menu, MenuItem, Picture from "__SCOPE__/components"
-use TopBar, MessageList, Message from "__SCOPE__/blocks"
+use TopBar from "__SCOPE__/blocks"
 
-// One turn of the conversation: its key, who said it (the person's own name for their turns, the agent's for its
-// replies), what was said, when, whether the person has not seen it yet, and where it opens on its own.
+// One turn of the conversation: its key, who said it (the agent's name for its replies), whether it is the
+// person's own, what was said, and when.
 shape ChatTurn
   key: string
   author: string
+  mine: bool
   text: string
   when: string
-  unread: bool
-  href: string
 
 // One piece of the message being written, in the order it was pasted: words, a picture (`src`, said as `text`) or
 // a link (`href`, read as `text`).
@@ -65,24 +66,70 @@ shape ChatViewport
   width: number
   prefersReducedMotion: bool
 
-// An offset past the transcript's end (each turn far taller than any row draws), so it opens at the newest.
-fn chatEnd(n: number): number = (n + 1) * 100000
-
-// From this width MessageList draws its reading pane beside the rows (its own 640px split).
-fn chatPaneFrom(): number = 640
-
 // From this width the page takes the desktop's insets.
 fn chatWideFrom(): number = 900
-
-// Where a turn's first sentence ends: after the first ". ", "? " or "! ", else the whole text.
-fn chatAt(t: string, s: string): number = t.indexOf(s) < 0 ? t.length : t.indexOf(s) + 1
-fn chatCut(t: string): number = min(chatAt(t, ". "), min(chatAt(t, "? "), chatAt(t, "! ")))
-// A turn as MessageList's row: the first sentence is its line (the pane's title), the rest its preview.
-fn chatRow(t: ChatTurn): Message = Message(key=t.key, from=t.author, subject=t.text.slice(0, chatCut(t.text)), snippet=t.text.slice(chatCut(t.text)).trim(), when=t.when, unread=t.unread, flagged=false, href=t.href)
 
 // The reply's dots breathe, held still when the person prefers no motion.
 keyframes chatPulse
   50% opacity=0.3
+
+// One turn as a bubble: the person's on the end side on the fill, the agent's on the start side on the surface,
+// each with the line round it (a theme may give the page, the surface and the fill one colour). The words are whole:
+// their line breaks kept, a long word or link broken where it must be. Under it, small, the time (and the agent's
+// name before it); a turn the agent sent for the person takes the accent's line and `mark` in the accent beside the
+// time. The far side keeps a gutter (screens.chat-gutter), so the two voices never share an edge.
+component ChatBubble
+  props
+    turn: ChatTurn
+    marked: bool
+    mark: string
+    testId: string
+  view
+    column testId=testId align-items=(turn.mine ? "flex-end" : "flex-start") gap="theme.space.xs" padding-left=(turn.mine ? "screens.chat-gutter" : "0") padding-right=(turn.mine ? "0" : "screens.chat-gutter")
+      text turn.text testId=`${testId}-text` max-width="screens.chat-bubble-max" min-width=0 box-sizing="border-box" padding-top="theme.space.sm" padding-bottom="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.md" white-space="pre-wrap" overflow-wrap="anywhere" font="theme.type.body" color="theme.color.ink" background-color=(turn.mine ? "theme.color.fill" : "theme.color.surface") border-radius="theme.radius.card" border-width=(marked ? "screens.chat-mark-line" : "theme.line.width") border-style="solid" border-color=(marked ? "theme.color.accent" : "theme.color.line")
+      row flex-wrap="wrap" justify-content=(turn.mine ? "flex-end" : "flex-start") column-gap="theme.space.sm" row-gap="theme.space.xs" padding-left="theme.space.xs" padding-right="theme.space.xs"
+        if not turn.mine
+          text turn.author testId=`${testId}-author` font="theme.type.caption" color="theme.color.ink-muted"
+        text turn.when testId=`${testId}-when` font="theme.type.caption" color="theme.color.ink-muted"
+        if marked
+          text mark testId=`${testId}-mark` font="theme.type.caption" color="theme.color.accent"
+
+// A bubble still coming, while the conversation loads: the bubble's own shape on its side, quiet and breathing.
+component ChatGhost
+  props
+    mine: bool
+    short: bool
+    pulse: string
+  view
+    column align-items=(mine ? "flex-end" : "flex-start") gap="theme.space.xs" padding-left=(mine ? "screens.chat-gutter" : "0") padding-right=(mine ? "0" : "screens.chat-gutter")
+      box width=(short ? "45%" : "75%") max-width="screens.chat-bubble-max" height=(short ? "screens.chat-ghost" : "screens.chat-ghost-tall") background-color="theme.color.fill" border-radius="theme.radius.card" animation=pulse
+      box width="screens.chat-ghost-when" height="screens.chat-ghost-line" background-color="theme.color.fill" border-radius="theme.radius.pill" animation=pulse
+
+// What the transcript says when it has no turns to show, at its top: a glyph, the app's line, and the way on.
+// Empty offers (a plain button that puts the focus in the composer); failed mends (the filled Try again), its
+// colour on its glyph alone, the line in ink on the surface.
+component ChatState
+  props
+    failed: bool
+    text: string
+    actionLabel: string
+    press: action
+    testId: string
+  view
+    row testId=testId role=(failed ? "alert" : "status") flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.md" padding="theme.space.lg" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+      row flex=1 min-width="screens.chat-band-min" align-items="center" gap="theme.space.md"
+        svg viewBox="0 0 24 24" width="screens.chat-state-glyph" height="screens.chat-state-glyph" aria-hidden=true flex-shrink=0
+          if failed
+            circle cx=12 cy=12 r=12 fill="theme.color.critical"
+            path d="M12 6.8v6" stroke="theme.color.critical-ink" stroke-width=2 stroke-linecap="round"
+            circle cx=12 cy=16.6 r=1.2 fill="theme.color.critical-ink"
+          else
+            circle cx=12 cy=12 r=12 fill="theme.color.fill"
+            path d="M6.5 8.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2h-4l-3 2.5v-2.5h0a2 2 0 0 1-2-2Z" fill="none" stroke="theme.color.ink-muted" stroke-width=1.5 stroke-linejoin="round"
+        column flex=1 min-width=0
+          Words(text=text, kind="label", outcome="none", level=0, testId=`${testId}-text`)
+      row
+        ActionButton(opens="", label=actionLabel, kind=(failed ? "primary" : "plain"), interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
 
 // What the agent did, asks or waits for, in one band: its glyph and sentence, then its answers (the slot), which
 // wrap under the sentence when it would fall under screens.chat-band-min. Proposed and changed take the accent's
@@ -136,19 +183,13 @@ component ChatScreen
     settingsLabel: string
     settings: MenuItem[]
     setSetting: action
-    listTitle: string
-    unreadLabel: string
-    orderLabel: string
-    paneLabel: string
-    paneEmptyText: string
-    paneQuietText: string
+    loadingText: string
     emptyText: string
     startLabel: string
     failedText: string
     retryLabel: string
     agentMark: string
     agentKey: string
-    openKey: string
     messages: ChatTurn[]
     composerLabel: string
     placeholder: string
@@ -191,10 +232,6 @@ component ChatScreen
   // One fill per state: Send while there is something to send, unless failed's Try again or the agent's Accept is
   // the state's focal act.
   derive sendFocal = canSend and data != "failed" and agent != "proposed"
-  // The turn the pane opens: the app's, else the newest. Under MessageList's own split (a phone, no pane) no row is
-  // chosen, so the newest is not tinted for a pane that is not there.
-  derive paned = viewport.width >= chatPaneFrom()
-  derive openedKey = not paned ? "" : openKey != "" ? openKey : messages.slice(-1).map(t => t.key).join("")
   action sendNow
     if canSend
       send()
@@ -224,11 +261,27 @@ component ChatScreen
           column min-width=0 max-width="screens.chat-action-max" flex-shrink=0
             ActionButton(opens="chat-settings-menu", label=settingsLabel, kind="plain", interaction="idle", outcome="none", press=opened, testId="chat-settings")
           Menu(menuId="chat-settings-menu", label=settingsLabel, items=settings, presentation="popup", interaction="idle", choose=chooseSetting, search="", query="", find=nothing, testId="chat-settings-menu")
-      // The transcript opens at its newest turn: an offset past its end holds at the end.
-      scroll id="chat-transcript" flex=1 min-height=0 scrollTop=chatEnd(messages.length)
-        // A short conversation sits on the composer, as a chat reads from its newest turn up.
-        column width="100%" min-height="100%" justify-content="flex-end" max-width="screens.chat-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top=(wide ? "theme.space.xl" : "theme.space.md") padding-bottom=(wide ? "theme.space.lg" : "theme.space.md")
-          MessageList(title=listTitle, unreadLabel=unreadLabel, emptyText=emptyText, failedText=failedText, composeLabel=startLabel, retryLabel=retryLabel, orderLabel=orderLabel, paneLabel=paneLabel, paneEmptyText=paneEmptyText, paneQuietText=paneQuietText, openLabel="", agentNote=agentMark, chosenKey=openedKey, agentKey=agentKey, data=data, agent=(agent == "changed" ? "changed" : "none"), messages=messages.map(t => chatRow(t)), compose=startWriting, retry=retry, openMessage=opened, testId="chat-messages")
+      // The transcript: the height between the bar and the composer, opening at the newest turn and following each
+      // new one while the reader is at the end (Exact's chat-thread). No turns: the state's own place, from the top.
+      if data == "many" or data == "long"
+        list id="chat-transcript" appearance="none" virtualized=true scroll-start="end" scrollFollowEnd=true aria-label=title testId="chat-transcript" flex=1 min-height=0
+          for t, i in messages key=t.key
+            column width="100%" max-width="screens.chat-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top=(i == 0 ? (wide ? "theme.space.xl" : "theme.space.lg") : "theme.space.sm") padding-bottom=(i == messages.length - 1 ? "theme.space.lg" : "theme.space.sm")
+              ChatBubble(turn=t, marked=(agent == "changed" and t.key == agentKey), mark=agentMark, testId=`chat-turn-${t.key}`)
+      else
+        scroll id="chat-transcript" flex=1 min-height=0
+          column width="100%" max-width="screens.chat-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.md" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top=(wide ? "theme.space.xl" : "theme.space.lg") padding-bottom="theme.space.lg"
+            if data == "loading"
+              column testId="chat-loading" role="status" aria-busy=true gap="theme.space.md"
+                Words(text=loadingText, kind="caption", outcome="none", level=0, testId="chat-loading-text")
+                ChatGhost(mine=true, short=false, pulse=pulse)
+                ChatGhost(mine=false, short=false, pulse=pulse)
+                ChatGhost(mine=true, short=true, pulse=pulse)
+                ChatGhost(mine=false, short=false, pulse=pulse)
+            else if data == "failed"
+              ChatState(failed=true, text=failedText, actionLabel=retryLabel, press=retry, testId="chat-failed")
+            else
+              ChatState(failed=false, text=emptyText, actionLabel=startLabel, press=startWriting, testId="chat-empty")
       column flex-shrink=0 background-color="theme.color.page"
         column width="100%" max-width="screens.chat-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.sm" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.sm" padding-bottom="theme.space.md"
           if agent == "changed"

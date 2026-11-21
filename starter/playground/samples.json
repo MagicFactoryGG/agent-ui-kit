@@ -2227,19 +2227,13 @@
   "props:ChatScreen": {
     "title": "Dinner in Lisbon",
     "settingsLabel": "Settings",
-    "listTitle": "Atlas",
-    "unreadLabel": "new",
-    "orderLabel": "Today",
-    "paneLabel": "Open message",
-    "paneEmptyText": "Choose a message to read it whole here.",
-    "paneQuietText": "Messages open here once the conversation starts.",
+    "loadingText": "Loading the conversation…",
     "emptyText": "Ask Atlas anything to start.",
     "startLabel": "Write a message",
     "failedText": "This conversation did not load.",
     "retryLabel": "Try again",
     "agentMark": "Sent by your assistant",
-    "agentKey": "turn-4",
-    "openKey": "",
+    "agentKey": "turn-3",
     "composerLabel": "Message to Atlas",
     "placeholder": "Message Atlas",
     "draft": "and a table by the window, if they have one.",
@@ -2269,15 +2263,14 @@
     "waitingLabel": "Authenticate"
   },
   "ChatTurn:many": [
-    { "key": "turn-1", "author": "You", "text": "Find us somewhere for dinner on Thursday. Two people, near Alfama, nothing too loud.", "when": "18:02", "unread": false, "href": "/" },
-    { "key": "turn-2", "author": "Atlas", "text": "Three places have a table at 8pm. Taberna da Rua is the quietest, with grilled fish and a small terrace; O Pátio and Casa Lume are livelier.", "when": "18:02", "unread": false, "href": "/" },
-    { "key": "turn-3", "author": "You", "text": "Taberna da Rua sounds right. What does it cost?", "when": "18:04", "unread": false, "href": "/" },
-    { "key": "turn-4", "author": "You", "text": "Book the 8pm table for two.", "when": "18:05", "unread": false, "href": "/" },
-    { "key": "turn-5", "author": "Atlas", "text": "About 35 euros each without wine. They hold the table with a 10 euro deposit, paid back when you arrive.", "when": "18:05", "unread": true, "href": "/" }
+    { "key": "turn-1", "author": "You", "mine": true, "text": "A quiet dinner for two on Thursday, near Alfama?", "when": "18:02" },
+    { "key": "turn-2", "author": "Atlas", "mine": false, "text": "Taberna da Rua has a table at 8pm: grilled fish, a small terrace.", "when": "18:02" },
+    { "key": "turn-3", "author": "You", "mine": true, "text": "Book the 8pm table for two.", "when": "18:05" },
+    { "key": "turn-4", "author": "Atlas", "mine": false, "text": "About 35 euros each. They hold it with a 10 euro deposit.", "when": "18:05" }
   ],
   "ChatTurn:long": [
-    { "key": "turn-1", "author": "Constance Beauregard-Villeneuve, writing from the regional office", "text": "A question that runs on for a long while because the person asking it wanted to give every detail at once, including the dates, the people coming, and the restaurants they already tried and did not like, so nothing is missed.", "when": "Yesterday, 18:02", "unread": false, "href": "/" },
-    { "key": "turn-2", "author": "Atlas", "text": "Here is a long reply with a link that has no spaces at all: https://reservations.example/taberna-da-rua/thursday/20-00/two-people/window-table-request-confirmed. The reading pane holds all of it, wrapping, and the row cuts it to one line.", "when": "Yesterday, 18:03", "unread": true, "href": "/" }
+    { "key": "turn-1", "author": "You", "mine": true, "text": "A question that runs on for a long while because the person asking it wanted to give every detail at once, including the dates, the people coming, and the restaurants they already tried and did not like, so nothing is missed.", "when": "Yesterday, 18:02" },
+    { "key": "turn-2", "author": "Atlas, the assistant that plans the evenings out for the whole studio team", "mine": false, "text": "Here is a long reply with a link that has no spaces at all: https://reservations.example/taberna-da-rua/thursday/20-00/two-people/window-table-request-confirmed.\nIt keeps its line breaks, and the bubble wraps every word of it; nothing is cut.", "when": "Yesterday, 18:03" }
   ],
   "ChatPart:many": [
     { "key": "p1", "kind": "text", "text": "This is the one from last spring:", "src": "", "href": "" },

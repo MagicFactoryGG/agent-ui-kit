@@ -178,8 +178,8 @@ fn periodAct(key: string): Act = Act(tool="setPeriod", door="agent", key="dash-p
 // follow from it; the text being typed is the person's view, not a value. Authenticating stays the person's own act:
 // there is no tool for it.
 fn chatBase(): ChatTurn[] = [
-  ChatTurn(key="turn-1", author="You", text="Find us somewhere for dinner on Thursday. Two people, near Alfama, nothing too loud.", when="18:02", unread=false, href="/"),
-  ChatTurn(key="turn-2", author="Atlas", text="Taberna da Rua has a table at 8pm. It is the quietest of three, with grilled fish and a small terrace.", when="18:02", unread=false, href="/")
+  ChatTurn(key="turn-1", author="You", mine=true, text="Find us somewhere for dinner on Thursday. Two people, near Alfama, nothing too loud.", when="18:02"),
+  ChatTurn(key="turn-2", author="Atlas", mine=false, text="Taberna da Rua has a table at 8pm. It is the quietest of three, with grilled fish and a small terrace.", when="18:02")
 ]
 fn chatLines(log: string): string[] = log == "" ? [] : log.split("\n")
 fn chatAppend(log: string, text: string): string = log == "" ? text : `${log}\n${text}`
