@@ -157,7 +157,7 @@ component FeatureGrid
           Words(text=lead, kind="body", outcome="cancelled", level=0, testId=`${testId}-lead`)
         if shown and not bare and actionLabel != ""
           column max-width="100%" margin-top="theme.space.sm"
-            ActionButton(label=actionLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
+            ActionButton(opens="", label=actionLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=press, testId=`${testId}-action`)
         if data == "loading" and actionLabel != ""
           box testId=`${testId}-held` aria-hidden=true margin-top="theme.space.sm" height="blocks.feature-grid-action-height" width="blocks.feature-grid-action-width" background-color="theme.color.fill" border-radius="theme.radius.control" animation="feature-grid-breathe 1.8s ease-in-out infinite"
       if agent == "proposed"
@@ -165,9 +165,9 @@ component FeatureGrid
           text proposalText testId=`${testId}-sentence` flex="1 1 blocks.feature-grid-min" min-width=0 font="theme.type.body" color="theme.color.ink"
           row gap="theme.space.sm" flex-wrap="wrap"
             if rejectLabel != ""
-              ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+              ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
             if acceptLabel != ""
-              ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+              ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
       if agent == "changed"
         row testId=`${testId}-changed` role="status"
           row position="relative" max-width="blocks.feature-grid-lead" align-items="baseline" gap="theme.space.sm" min-width=0 padding-left="theme.space.md" padding-right="theme.space.md" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-radius="theme.radius.control"
@@ -194,10 +194,10 @@ component FeatureGrid
           text (data == "failed" ? failedText : emptyText) testId=`${testId}-message` max-width="blocks.feature-grid-lead" font="theme.type.body" color="theme.color.ink"
           if data == "failed" and retryLabel != ""
             column max-width="100%" margin-top="theme.space.sm"
-              ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
+              ActionButton(opens="", label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
           else if data != "failed" and addLabel != ""
             column max-width="100%" margin-top="theme.space.sm"
-              ActionButton(label=addLabel, kind="primary", interaction="idle", outcome="none", press=add, testId=`${testId}-add`)
+              ActionButton(opens="", label=addLabel, kind="primary", interaction="idle", outcome="none", press=add, testId=`${testId}-add`)
       else if lone
         column role="list" testId=`${testId}-list` max-width="blocks.feature-grid-lead" margin-top="theme.space.lg"
           for f in features key=f.key

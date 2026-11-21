@@ -216,9 +216,9 @@ component OnboardingSteps
           text agentNote testId=`${testId}-sentence` font="theme.type.caption" color="theme.color.accent"
           row gap="theme.space.sm" flex-wrap="wrap"
             if rejectLabel != ""
-              ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+              ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
             if acceptLabel != ""
-              ActionButton(label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+              ActionButton(opens="", label=acceptLabel, kind="plain", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
       column
         children
       if data == "loading" and outcome != "error"
@@ -236,23 +236,23 @@ component OnboardingSteps
           if data == "failed"
             row column-gap="theme.space.lg" row-gap="theme.space.md" align-items="center" flex-wrap="wrap"
               if skipLabel != ""
-                ActionButton(label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
+                ActionButton(opens="", label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
               Gutter(share="1000 1 0")
               if retryLabel != ""
                 column flex="1 1 blocks.primary-max"
-                  ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+                  ActionButton(opens="", label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
           else if not hasSteps
             row column-gap="theme.space.lg" row-gap="theme.space.md" align-items="center" flex-wrap="wrap"
               Gutter(share="1000 1 blocks.primary-max")
               column flex="1 1 blocks.primary-max"
-                ActionButton(label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)
+                ActionButton(opens="", label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)
           else
             row column-gap="theme.space.lg" row-gap="theme.space.md" align-items="center" flex-wrap="wrap"
               row gap="theme.space.sm" align-items="center"
                 if at > 0
-                  ActionButton(label=backLabel, kind="plain", interaction="idle", outcome="none", press=back, testId=`${testId}-back`)
+                  ActionButton(opens="", label=backLabel, kind="plain", interaction="idle", outcome="none", press=back, testId=`${testId}-back`)
                 if skipLabel != ""
-                  ActionButton(label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
+                  ActionButton(opens="", label=skipLabel, kind="plain", interaction="idle", outcome="none", press=skip, testId=`${testId}-skip`)
               Gutter(share="1000 1 0")
               column flex="1 1 blocks.primary-max"
-                ActionButton(label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)
+                ActionButton(opens="", label=continueLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=advance, testId=`${testId}-continue`)

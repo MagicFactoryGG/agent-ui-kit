@@ -100,8 +100,8 @@ component FaqAnswers
     testId: string
   view
     row flex-wrap="wrap" column-gap="theme.space.sm" row-gap="theme.space.sm"
-      ActionButton(label=declineLabel, kind="plain", interaction="idle", outcome="none", press=decline, testId=`${testId}-decline`)
-      ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+      ActionButton(opens="", label=declineLabel, kind="plain", interaction="idle", outcome="none", press=decline, testId=`${testId}-decline`)
+      ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
 
 // An agent's proposal with no row here to sit on (the questions are loading, failed or none): under the list's
 // state, so the state is read first: a strip in the list's own frame (surface, line, the card's corner, the rows'
@@ -257,7 +257,7 @@ component FaqContact
         text text testId=`${testId}-contact-text` font="theme.type.caption" color="theme.color.ink-muted"
       if label != ""
         row margin-top="theme.space.sm"
-          ActionButton(label=label, kind="plain", interaction="idle", outcome="none", press=press, testId=`${testId}-contact`)
+          ActionButton(opens="", label=label, kind="plain", interaction="idle", outcome="none", press=press, testId=`${testId}-contact`)
 
 // The list's place: a note with no row to sit on, then the rows, their skeleton, or the state panel, then a
 // proposal with no row to sit on.

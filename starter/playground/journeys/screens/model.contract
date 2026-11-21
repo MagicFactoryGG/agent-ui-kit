@@ -1,8 +1,8 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, ShellRow, SettingsSection, SettingsScreenGroup from "__SCOPE__/screens"
-use Fact, Message, Step, NavEntry, Setting from "__SCOPE__/blocks"
+use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, ShellRow, SettingsSection, SettingsScreenGroup, DashboardPeriod, DashboardItem from "__SCOPE__/screens"
+use Fact, Message, Step, NavEntry, Setting, Stat, BarPoint from "__SCOPE__/blocks"
 
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
 // The newest change on any of the keys, said in one sentence; "" when there is none.
@@ -102,7 +102,7 @@ fn shellSearchAct(text: string): Act = Act(tool="searchProjects", door="agent", 
 // in the app, navigation, not data); each switch is a value in the ledger (`settings-<key>`, on or off), so the
 // switch, the agent's setSetting and the section's dot all read it. The other rows are data only.
 fn settingsSections(): SettingsSection[] = [
-  SettingsSection(key="account", label="Account", detail="Your name, the address we write to, and how you sign in."),
+  SettingsSection(key="account", label="Account", detail="Your name, the address we write to, and how you authenticate."),
   SettingsSection(key="notifications", label="Notifications", detail="What reaches you, and where."),
   SettingsSection(key="privacy", label="Privacy", detail="Who sees what you share.")
 ]
@@ -138,6 +138,40 @@ fn settingLabel(key: string): string = settingsSwitches().filter(r => r.key == k
 fn settingSectionOf(key: string): string = settingsSectionKeys().filter(s => settingsGroupsOf(s).filter(g => g.rows.filter(r => r.key == key).length > 0).length > 0).join("")
 fn settingAct(key: string, on: bool): Act = Act(tool="setSetting", door="agent", key=settingKey(key), title=settingLabel(key), value=(on ? "on" : "off"), did=`Your assistant turned ${settingLabel(key)} ${on ? "on" : "off"}.`, asks=`Your assistant suggests turning ${settingLabel(key)} ${on ? "on" : "off"}.`, will=`Your assistant will turn ${settingLabel(key)} ${on ? "on" : "off"} in 5 seconds.`)
 
+// EntryScreen: the way in, terms before authentication. The step is a value in the ledger (`entry-step`: terms or
+// authenticate), so the person's Accept and Back and the agent's openEntry move the same value. Opening the entry
+// brings the person to the terms; accepting them and authenticating stay the person's own acts, so their tools are
+// off (refused by the ledger, answering "off") and only the person's door moves the step on.
+fn entryKeys(): string[] = ["entry-step"]
+fn entryOpenAct(): Act = Act(tool="openEntry", door="agent", key="entry-step", title="Entry", value="terms", did="Your assistant opened the way in, at the terms.", asks="Your assistant suggests opening the way in, at the terms.", will="Your assistant will open the way in, at the terms, in 5 seconds.")
+fn entryAcceptAct(): Act = Act(tool="acceptTerms", door="agent", key="entry-step", title="Terms", value="authenticate", did="Accepting the terms is yours to do; your assistant cannot do it.", asks="Accepting the terms is yours to do; your assistant cannot do it.", will="Accepting the terms is yours to do; your assistant cannot do it.")
+fn entryAuthenticateAct(): Act = Act(tool="authenticate", door="agent", key="entry-authenticated", title="Authenticate", value="yes", did="Authenticating is yours to do; your assistant cannot do it.", asks="Authenticating is yours to do; your assistant cannot do it.", will="Authenticating is yours to do; your assistant cannot do it.")
+// DashboardScreen: a shop's numbers for one period; the period shown is a value in the ledger, by key, so a
+// Segment's tap and the agent's setPeriod write the same value. Each period's numbers are data only.
+fn dashPeriods(): DashboardPeriod[] = [
+  DashboardPeriod(key="week", label="Week"),
+  DashboardPeriod(key="month", label="Month"),
+  DashboardPeriod(key="quarter", label="Quarter"),
+  DashboardPeriod(key="year", label="Year")
+]
+fn dashPeriodKeys(): string[] = dashPeriods().map(p => p.key)
+fn dashPeriodWord(key: string): string = key == "week" ? "this week" : key == "month" ? "this month" : key == "quarter" ? "this quarter" : "the year"
+fn dashAgainst(key: string): string = key == "week" ? "on last week" : key == "month" ? "on last month" : key == "quarter" ? "on last quarter" : "on last year"
+fn dashStats(key: string): Stat[] = [
+  Stat(key="revenue", label="Revenue", value=(key == "week" ? "$2,140" : key == "month" ? "$9,310" : key == "quarter" ? "$26,480" : "$91,870"), change=`+12.4% ${dashAgainst(key)}`, trend="up"),
+  Stat(key="orders", label="Orders", value=(key == "week" ? "41" : key == "month" ? "176" : key == "quarter" ? "4,812" : "18,204"), change=`+4.1% ${dashAgainst(key)}`, trend="up"),
+  Stat(key="aov", label="Average order value", value="$63.20", change=`-2.1% ${dashAgainst(key)}`, trend="down"),
+  Stat(key="on-time", label="Fulfilled on time", value="96.4%", change="0.0%", trend="flat")
+]
+fn dashPoints(key: string): BarPoint[] = key == "week" ? [BarPoint(key="mon", label="Mon", value="5", share=0.5), BarPoint(key="tue", label="Tue", value="7", share=0.7), BarPoint(key="wed", label="Wed", value="6", share=0.6), BarPoint(key="thu", label="Thu", value="10", share=1), BarPoint(key="fri", label="Fri", value="8", share=0.8), BarPoint(key="sat", label="Sat", value="3", share=0.3), BarPoint(key="sun", label="Sun", value="2", share=0.2)] : key == "month" ? [BarPoint(key="w1", label="Week 1", value="38", share=0.79), BarPoint(key="w2", label="Week 2", value="44", share=0.92), BarPoint(key="w3", label="Week 3", value="48", share=1), BarPoint(key="w4", label="Week 4", value="46", share=0.96)] : key == "quarter" ? [BarPoint(key="apr", label="Apr", value="1,940", share=1), BarPoint(key="may", label="May", value="1,610", share=0.83), BarPoint(key="jun", label="Jun", value="1,350", share=0.7)] : [BarPoint(key="q1", label="Q1", value="4,860", share=1), BarPoint(key="q2", label="Q2", value="4,900", share=1), BarPoint(key="q3", label="Q3", value="4,310", share=0.88), BarPoint(key="q4", label="Q4", value="4,134", share=0.84)]
+fn dashNote(key: string): string = key == "week" ? "Orders placed each day of this week" : key == "month" ? "Orders placed each week of this month" : key == "quarter" ? "Orders placed each month of this quarter" : "Orders placed each quarter of the year"
+fn dashItems(): DashboardItem[] = [
+  DashboardItem(key="o1048", title="Order 1048 · Priya Nair", detail="2 items · 4 minutes ago", trailing="$84.00", tone="none"),
+  DashboardItem(key="o1047", title="Order 1047 · Jonas Weber", detail="1 item · 22 minutes ago", trailing="Paid", tone="success"),
+  DashboardItem(key="o1046", title="Order 1046 · Maya Okafor", detail="3 items · 1 hour ago", trailing="Refunded", tone="cancelled")
+]
+fn periodAct(key: string): Act = Act(tool="setPeriod", door="agent", key="dash-period", title="Period", value=key, did=`Your assistant showed the numbers for ${dashPeriodWord(key)}.`, asks=`Your assistant suggests showing the numbers for ${dashPeriodWord(key)}.`, will=`Your assistant will show the numbers for ${dashPeriodWord(key)} in 5 seconds.`)
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false),
@@ -145,10 +179,15 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="flagMessage", title="Flags", sentence="Flags or unflags a message.", floor="recorded", reach="self", secret=false),
   AgentTool(name="fillAnswer", title="Setup", sentence="Fills in an answer of the workspace setup.", floor="recorded", reach="self", secret=false),
   AgentTool(name="searchProjects", title="Search", sentence="Searches the projects.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="setSetting", title="Settings", sentence="Turns a setting on or off.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="setSetting", title="Settings", sentence="Turns a setting on or off.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="openEntry", title="Entry", sentence="Opens the way in at its terms.", floor="recorded", reach="self", secret=false),
+  // The person's own acts: off, so the ledger refuses them from the agent's door whatever mode a person chooses.
+  AgentTool(name="acceptTerms", title="Terms", sentence="Accepts the terms for the person. Never allowed.", floor="off", reach="self", secret=false),
+  AgentTool(name="authenticate", title="Authenticate", sentence="Authenticates the person. Never allowed: authenticating is the person's own act.", floor="off", reach="self", secret=false),
+  AgentTool(name="setPeriod", title="Period", sentence="Shows the dashboard's numbers for another period.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="picture", value="harbour"),
   Value(key="project", value="harbour")
-].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on"))))
+].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on")))).concat([Value(key="entry-step", value="terms"), Value(key="entry-authenticated", value="no")]).concat([Value(key="dash-period", value="quarter")])

@@ -200,9 +200,9 @@ component BarChart
             text proposalText testId=`${testId}-sentence` min-width=0 font="theme.type.body" color="theme.color.ink"
           row gap="theme.space.sm" flex-wrap="wrap"
             if rejectLabel != ""
-              ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+              ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
             if acceptLabel != ""
-              ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+              ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
       if agent == "changed"
         row testId=`${testId}-changed` role="status" position="relative" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.sm" padding="theme.space.sm" padding-left="theme.space.md" border-radius="theme.radius.control"
           box aria-hidden=true position="absolute" inset=0 background-color="theme.color.accent" opacity=0.1 border-radius="theme.radius.control"
@@ -211,7 +211,7 @@ component BarChart
             text agentNote testId=`${testId}-agent` min-width=0 font="theme.type.body" color="theme.color.ink"
           if undoLabel != ""
             column position="relative"
-              ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+              ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
       if data == "loading"
         column testId=`${testId}-loading` role="status" aria-label=loadingText gap="theme.space.md"
           Words(text=loadingText, kind="caption", outcome="none", level=0, testId=`${testId}-loading-text`)
@@ -243,7 +243,7 @@ component BarChart
             Words(text=failedText, kind="body", outcome="none", level=0, testId=`${testId}-failed-text`)
           if retryLabel != ""
             column max-width="100%" margin-top="theme.space.xs"
-              ActionButton(label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
+              ActionButton(opens="", label=retryLabel, kind="plain", interaction="idle", outcome="error", press=retry, testId=`${testId}-retry`)
       else if data == "empty" or bare
         column testId=`${testId}-empty` role="status"
           column min-height=(wide ? "blocks.bar-chart-plot" : "0px") justify-content="center" align-items="center" text-align="center" gap="theme.space.md" padding="theme.space.lg"
@@ -254,7 +254,7 @@ component BarChart
               Words(text=emptyText, kind="body", outcome="cancelled", level=0, testId=`${testId}-empty-text`)
             if emptyLabel != ""
               column max-width="100%" margin-top="theme.space.xs"
-                ActionButton(label=emptyLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=add, testId=`${testId}-add`)
+                ActionButton(opens="", label=emptyLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=add, testId=`${testId}-add`)
           BarChartBaseline(across=true)
       else if wide
         column min-width=0

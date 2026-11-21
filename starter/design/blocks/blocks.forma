@@ -4,6 +4,15 @@ forma blocks
 theme
   blocks.bar-min: length = 52px
   blocks.sheet-max: length = 480px
+  blocks.stat-max: length = 960px
+  blocks.stat-tile-height: length = 100px
+  blocks.stat-tile-min: length = 160px
+  blocks.stat-trend: length = 12px
+  blocks.stat-spin: length = 16px  // the platform activity mark beside the loading words, square as DetailPanel draws it
+  blocks.stat-ghost-label: length = 96px
+  blocks.stat-ghost-value: length = 128px
+  blocks.stat-ghost-change: length = 72px
+  blocks.stat-note-min: length = 280px  // the agent's sentence keeps this much; on a phone its two answers wrap beneath it
   blocks.detail-max: length = 880px
   blocks.notes-hold: length = 96px
   blocks.stamp: length = 80px
@@ -158,11 +167,8 @@ theme
   blocks.bar-chart-glyph: length = 32px
   blocks.bar-chart-bone: length = 10px  // a ghost label's height, the caption's x-height and air
   blocks.bar-chart-measure: length = 420px  // a state's sentence, held to a short line
-  blocks.command-menu-max: length = 640px  // a command menu's measure on a desktop: a label and its keys in one glance
-  blocks.command-menu-row: length = 44px  // a row's least height (the field's too): the press target the kit holds
-  blocks.command-menu-mark: length = 3px  // the agent's line at a band's start (LinkRow's mark)
-  blocks.command-menu-note-min: length = 200px  // the agent's sentence keeps this much before Undo wraps under it
-  blocks.command-menu-bone: length = 12px
-  blocks.command-menu-ghost: length = 136px
-  blocks.command-menu-ghost-wide: length = 208px
-  blocks.command-menu-ghost-keys: length = 48px
+  blocks.notes-kind-mark: length = 20px  // a notification's kind mark: one line of the title's type
+  blocks.notes-title-min: length = 160px  // a notification's title keeps this much before its time wraps under it
+  blocks.notes-head-min: length = 160px  // the list's name keeps this much before "Mark all read" wraps under it
+  blocks.notes-when: length = 64px  // the time's stand-in while the notes load
+  blocks.notes-max: length = 560px  // the list's own measure: rows read at ~64 characters, a side panel's width

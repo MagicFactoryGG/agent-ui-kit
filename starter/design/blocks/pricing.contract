@@ -212,14 +212,14 @@ component Pricing
                     if agent == "proposed"
                       row flex-wrap="wrap" gap="theme.space.sm"
                         column flex=1
-                          ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
+                          ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId=`${testId}-reject`)
                         column flex=1
-                          ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
+                          ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId=`${testId}-accept`)
                     else if agent == "changed"
-                      ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+                      ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
                     else
-                      ActionButton(label=p.action, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=pick(p.key), testId=`${testId}-choose-${p.key}`)
+                      ActionButton(opens="", label=p.action, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=pick(p.key), testId=`${testId}-choose-${p.key}`)
                 else
-                  ActionButton(label=p.action, kind=((p.featured or lone) and not asks ? "primary" : "plain"), interaction=(p.key == chosenKey and interaction == "busy" ? "busy" : "idle"), outcome="none", press=pick(p.key), testId=`${testId}-choose-${p.key}`)
+                  ActionButton(opens="", label=p.action, kind=((p.featured or lone) and not asks ? "primary" : "plain"), interaction=(p.key == chosenKey and interaction == "busy" ? "busy" : "idle"), outcome="none", press=pick(p.key), testId=`${testId}-choose-${p.key}`)
                 if p.key == chosenKey and outcome != "none"
                   text outcomeText testId=`${testId}-outcome` role=(outcome == "error" ? "alert" : "status") font="theme.type.caption" color=(outcome == "error" ? "theme.color.critical-text" : "theme.color.positive-text")

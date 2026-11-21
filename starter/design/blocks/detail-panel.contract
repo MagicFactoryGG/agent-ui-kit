@@ -154,9 +154,9 @@ component DetailPanel
         if primaryLabel != "" or secondaryLabel != ""
           row flex-wrap="wrap" align-items="center" gap="theme.space.sm"
             if secondaryLabel != ""
-              ActionButton(label=secondaryLabel, kind="plain", interaction=interaction, outcome="none", press=secondaryPress, testId=`${testId}-secondary`)
+              ActionButton(opens="", label=secondaryLabel, kind="plain", interaction=interaction, outcome="none", press=secondaryPress, testId=`${testId}-secondary`)
             if primaryLabel != ""
-              ActionButton(label=primaryLabel, kind="primary", interaction=interaction, outcome="none", press=primaryPress, testId=`${testId}-primary`)
+              ActionButton(opens="", label=primaryLabel, kind="primary", interaction=interaction, outcome="none", press=primaryPress, testId=`${testId}-primary`)
       if data == "failed"
         // The failure is the record's: one block lifted on the surface ground, its severity said the kit's way -
         // a critical mark, the message in the error's ink, a warning triangle at its side - and the way on as a
@@ -170,7 +170,7 @@ component DetailPanel
             Words(text=failedText, kind="body", outcome="error", level=0, testId=`${testId}-failed-text`)
           if retryLabel != ""
             row
-              ActionButton(label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retryPress, testId=`${testId}-retry`)
+              ActionButton(opens="", label=retryLabel, kind="plain", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retryPress, testId=`${testId}-retry`)
       else
         column gap="theme.space.sm"
           if factsTitle != ""

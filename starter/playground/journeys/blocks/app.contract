@@ -18,10 +18,12 @@ use startValues, agentTools, answerWords, onOff, titleOf, detailOf, notifyKeys, 
 
 use Faq from "__SCOPE__/blocks"
 use faqKey, faqLedgerKeys, faqQuestions, faqText, faqMarkedKey from "./model.contract"
-use BarChart from "__SCOPE__/blocks"
-use chartRanges, chartNote, chartLabel, chartPoints, chartText from "./model.contract"
-use CommandMenu from "__SCOPE__/blocks"
-use cmdKey, cmdLedgerKeys, menuCommands, cmdText, cmdMarkedKey from "./model.contract"
+use BarChart, NotificationList from "__SCOPE__/blocks"
+use chartRanges, chartNote, chartLabel, chartPoints, chartText, notesRead, inboxNotes, notesText from "./model.contract"
+use StatTiles from "__SCOPE__/blocks"
+use weekStats, statsText from "./model.contract"
+use Menu, ActionButton from "__SCOPE__/components"
+use sortShown, sortText from "./model.contract"
 
 // The window's width, for the Hero's size (compact under 600 px): an app reads the viewport, a piece cannot.
 shape JourneyViewport
@@ -69,6 +71,8 @@ component App
   derive featuresMarked = isMarked(book, "features")
   // Pricing: the workspace's plan, "none" until one is chosen; the chosen card carries the agent's mark.
   derive plan = valueOf(book, "plan")
+  // Menu: the list's order, "newest" until another is chosen.
+  derive sort = valueOf(book, "sort")
   derive planMarked = isMarked(book, "plan")
   // Hero: the landing page's free trial; its value is "off" until it starts, then "started". An agent's start
   // is marked on the hero (changed, with Undo); one held for the person's answer shows as its proposal.
@@ -88,14 +92,16 @@ component App
   // marked on the chart, with its sentence and Undo.
   derive chartRange = valueOf(book, "chart-range")
   derive chartMarked = isMarked(book, "chart-range")
-  // CommandMenu: the person's query is this use's view state (an agent runs a command by key, never types);
-  // the commands that match it are the menu's results, the first one highlighted. Each command's value is in the
-  // ledger, "off" until it runs; the agent's run is marked on its row and said above the results, with Undo.
-  state cmdQuery: string = ""
-  derive cmdShown = menuCommands(cmdQuery)
-  derive cmdFirst = cmdShown.slice(0, 1).map(c => c.key).join("")
-  derive cmdAgentKey = cmdMarkedKey(book)
-  derive cmdReadText = cmdText(book)
+  // NotificationList: the person's notifications; whether the new ones are read is one value in the ledger. An
+  // agent's mark is shown on the list (changed, with Undo); one held for the person's answer shows as its ask.
+  derive notesAllRead = notesRead(book)
+  derive notesMarked = isMarked(book, "notes")
+  derive notesAsks = waitingSentence(book, "notes")
+  derive notesReadText = notesText(book)
+  // StatTiles: this week's numbers; the row's data state is one value in the ledger, "failed" until read again,
+  // then "many". The agent's read is said under the row (changed: what it did), with one Undo.
+  derive stats = valueOf(book, "stats")
+  derive statsMarked = isMarked(book, "stats")
 
   // The person's door: the switch says which row; the app flips its own value.
   action toggleByPerson(key: string)
@@ -132,6 +138,14 @@ component App
   action addFeatureByPerson
     book = personSet(book, "features", "sync")
   // A plan's button chooses it; the agent's note's Undo takes its choice back.
+  // An item of the order's Menu chooses it; its search narrows the items (the words typed are this view's own).
+  action chooseSortByPerson(key: string)
+    book = personSet(book, "sort", key)
+  state sortQuery = ""
+  action findSort(v: string)
+    sortQuery = v
+  // the Order button only opens the menu (its `opens`); a press has nothing more to do
+  action sortOpened
   action choosePlanByPerson(key: string)
     book = personSet(book, "plan", key)
   action undoPlan
@@ -159,16 +173,24 @@ component App
     book = personSet(book, "chart-range", key)
   action undoRange
     book = undo(book, latestIdAbout(book, "chart-range"))
-  // The command menu: typing narrows the results; a press on a row runs its command; Clear search empties the
-  // query; Undo takes the agent's run back.
-  action searchCommands(text: string)
-    cmdQuery = text
-  action runCommandByPerson(key: string)
-    book = personSet(book, cmdKey(key), "on")
-  action clearCommands
-    cmdQuery = ""
-  action undoCommand
-    book = undo(book, latestIdAbout(book, cmdKey(cmdAgentKey)))
+  // The list's Mark all read marks the new notifications read; the agent's band answers its ask or takes its
+  // change back.
+  action markNotesByPerson
+    book = personSet(book, "notes", "read")
+  action undoNotes
+    book = undo(book, latestIdAbout(book, "notes"))
+  action acceptNotes
+    book = answerKey(book, "notes", true, "person")
+  action rejectNotes
+    book = answerKey(book, "notes", false, "person")
+  // A note's own answers (Manage storage) lead elsewhere in a real app; this use has none.
+  action ignoreAnswer(key: string, yes: bool)
+    book = book
+  // The failed banner's Try again reads the numbers again; the note's Undo takes the agent's read back.
+  action loadStatsByPerson
+    book = personSet(book, "stats", "many")
+  action undoStats
+    book = undo(book, latestIdAbout(book, "stats"))
   // Rows of other kinds, a retry and a proposal's answers: this use has none.
   action ignoreKey(key: string)
     book = book
@@ -241,9 +263,19 @@ component App
   tool setChartRange writes idempotent closed "Show the orders chart by week or by month, as its Weeks and Months switch does: week or month. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readChart." = setChartRange
     returns book.answer
     fails when book.answer == "off"
-  tool readCommands reads "The command menu's commands, one per line: id (focus, mute or pin), its label, then on once it has run or off, tab-separated." = readCommands
-    returns cmdReadText
-  tool runCommand writes idempotent closed "Run a command from the command menu, as a press on its row does: focus (turn on focus mode), mute (pause notifications) or pin (pin this project). Answers saved, or delayed, proposed or off when the person raised its mode. Check with readCommands." = runCommand
+  tool readNotes reads "The notifications, one per line: id, title, then read or unread, tab-separated." = readNotes
+    returns notesReadText
+  tool markNotesRead writes idempotent closed "Mark the new notifications read, as the list's Mark all read does. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readNotes." = markNotesRead
+    returns book.answer
+    fails when book.answer == "off"
+
+  tool readStats reads "This week's numbers, one per line: id, label, value and change, tab-separated; or failed while they could not be read." = readStats
+    returns statsText(stats)
+  tool loadStats writes idempotent closed "Read this week's numbers again after a failed read, as their Try again does. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readStats." = loadStats
+    returns book.answer
+  tool readSort reads "The list's order: its id (newest, oldest or name), then its name, tab-separated." = readSort
+    returns sortText(sort)
+  tool setSort writes idempotent closed "Put the list in an order, as an item of the Order menu does: newest, oldest or name. Answers saved, or delayed, proposed or off when the person raised its mode. Check with readSort." = setSort
     returns book.answer
     fails when book.answer == "off"
 
@@ -262,4 +294,8 @@ component App
       SiteFooter(productName="Acme", productMark="AC", tagline="Deploys you can trust, from the first commit to the last.", navLabel="Footer", groups=(footerLinks == "help" ? helpGroups() : []), legal="© 2026 Acme, Inc. All rights reserved.", emptyText="This footer has no links yet. Add the first column so visitors can find help.", emptyLabel="Add links", loadingText="", failedText="", retryLabel="", agentKey="contact", agentNote=latestAbout(book, ["footer"]), proposedNote="", proposedGroup="", proposedLabel="", acceptLabel="", rejectLabel="", undoLabel="Undo", data=(footerLinks == "help" ? "one" : "empty"), agent=(footerMarked ? "changed" : "none"), add=addFooterLinksByPerson, retry=ignore, accept=ignore, reject=ignore, undo=undoFooter, testId="footer")
       Faq(eyebrow="Help centre", title="Questions, answered", lead="Short answers about orders, delivery and payment. Open a question to read its answer.", contactTitle="", contactText="", contactLabel="", emptyTitle="", emptyText="", failedTitle="", failedText="", loadingText="", retryLabel="", agentKey=faqAgentKey, agentNote=latestAbout(book, faqLedgerKeys()), waitingNote="", proposalText="", acceptLabel="", declineLabel="", data="many", agent=(faqMarked ? "changed" : "none"), questions=faqQuestions(book), toggle=toggleQuestionByPerson, retry=ignore, contact=ignore, accept=ignore, decline=ignore, testId="faq")
       BarChart(title="Orders", note=chartNote(chartRange), chartLabel=chartLabel(chartRange), points=chartPoints(chartRange), ranges=chartRanges(), range=chartRange, rangeLabel="Show orders by", emptyText="", emptyLabel="", loadingText="", failedText="", retryLabel="", agentKey="", agentNote=latestAbout(book, ["chart-range"]), undoLabel="Undo", proposalText="", acceptLabel="", rejectLabel="", data="many", agent=(chartMarked ? "changed" : "none"), size=(viewport.width < 600 ? "compact" : "wide"), choose=chooseRangeByPerson, add=ignore, retry=ignore, undo=undoRange, accept=ignore, reject=ignore, testId="orders")
-      CommandMenu(title="Command menu", searchLabel="Search commands", placeholder="Type a command", query=cmdQuery, hint="Press a command to run it.", commands=cmdShown, highlight=cmdFirst, emptyText=`No commands match “${cmdQuery}”.`, clearLabel="Clear search", loadingText="", failedText="", retryLabel="", agentKey=cmdAgentKey, agentNote=latestAbout(book, cmdLedgerKeys()), undoLabel="Undo", proposalText="", acceptLabel="", rejectLabel="", data=(cmdShown.length == 0 ? "empty" : cmdShown.length == 1 ? "one" : "many"), agent=(cmdAgentKey != "" ? "changed" : "none"), search=searchCommands, run=runCommandByPerson, clear=clearCommands, retry=ignore, undo=undoCommand, accept=ignore, reject=ignore, testId="commands")
+      NotificationList(title="Notifications", summary=(notesAllRead ? "All read" : "2 new"), markAllLabel="Mark all read", markAll=markNotesByPerson, newTitle="New", earlierTitle="Earlier", notes=inboxNotes(notesAllRead), answer=ignoreAnswer, loadingText="", emptyTitle="", emptyText="", emptyActionLabel="", emptyPress=ignore, failedTitle="", failedText="", retryLabel="", retry=ignore, proposedNote=notesAsks, acceptLabel="Mark read", rejectLabel="Not now", accept=acceptNotes, reject=rejectNotes, changedNote=latestAbout(book, ["notes"]), undoLabel="Undo", undo=undoNotes, data="many", agent=(notesAsks != "" ? "proposed" : notesMarked ? "changed" : "none"), testId="notes")
+      StatTiles(title="This week", stats=(stats == "many" ? weekStats() : []), data=(stats == "many" ? "many" : "failed"), loadingText="", failedText="This week's numbers could not be read.", retryLabel="Try again", retry=loadStatsByPerson, agent=(statsMarked ? "changed" : "none"), agentKey="", agentNote="", yesLabel="", noLabel="", yes=ignore, no=ignore, changedNote=latestAbout(book, ["stats"]), undoLabel="Undo", undo=undoStats, testId="stats")
+      // Menu as a popup, opened by the Order button (ActionButton's `opens`), with a search above its items
+      ActionButton(opens="sort-menu", label="Order", kind="plain", interaction="idle", outcome="none", press=sortOpened, testId="sort-open")
+      Menu(menuId="sort-menu", label="Order", items=sortShown(sort, sortQuery), presentation="popup", interaction="idle", choose=chooseSortByPerson, search="Find an order", query=sortQuery, find=findSort, testId="sort-menu")

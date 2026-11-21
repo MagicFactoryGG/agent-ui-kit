@@ -178,7 +178,7 @@ component AppShell
               input type="search" value=searchText input=search placeholder=searchLabel aria-label=searchLabel testId="app-shell-search" width="screens.shell-search" min-width=0 flex-shrink=1
             if data != "empty"
               column max-width="screens.shell-action-max" min-width=0
-                ActionButton(label=actionLabel, kind=(barFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=act, testId="app-shell-action")
+                ActionButton(opens="", label=actionLabel, kind=(barFocal ? "primary" : "plain"), interaction="idle", outcome="none", press=act, testId="app-shell-action")
         column flex=1 min-height=0 position="relative" display="flex" flex-direction="column"
           column flex=1 min-height=0 display="flex" flex-direction="column" inert=sheet
             if not wide
@@ -188,11 +188,11 @@ component AppShell
               column width="100%" max-width="screens.shell-page-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(wide ? "theme.space.xl" : "theme.space.lg") gap="theme.space.lg"
                 if agent == "proposed" and arrived
                   ShellBand(sentence=proposedNote, tone="proposed", testId="app-shell-proposal")
-                    ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="app-shell-no")
-                    ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="app-shell-yes")
+                    ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="app-shell-no")
+                    ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="app-shell-yes")
                 if agent == "changed" and arrived
                   ShellBand(sentence=changedNote, tone="changed", testId="app-shell-changed")
-                    ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="app-shell-undo")
+                    ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="app-shell-undo")
                 column gap="theme.space.sm"
                   Section(title=sectionTitle, footer=(shown ? footer : ""), emptyText=emptyText, loadingText=loadingText, failedText=failedText, data=(data == "long" or data == "failed" ? "many" : data), testId="app-shell-section")
                     if shown
@@ -207,7 +207,7 @@ component AppShell
                         ShellGhost(wide=true)
                     else if data == "empty"
                       row padding-left="theme.space.lg" padding-right="theme.space.lg" padding-bottom="theme.space.lg"
-                        ActionButton(label=actionLabel, kind="primary", interaction="idle", outcome="none", press=act, testId="app-shell-empty-action")
+                        ActionButton(opens="", label=actionLabel, kind="primary", interaction="idle", outcome="none", press=act, testId="app-shell-empty-action")
                     else
                       column role="alert" gap="theme.space.md" padding="theme.space.lg"
                         row align-items="flex-start" gap="theme.space.sm"
@@ -218,7 +218,7 @@ component AppShell
                           column flex=1 min-width=0
                             Words(text=failedText, kind="body", outcome="error", level=0, testId="app-shell-section-failed")
                         row
-                          ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId="app-shell-retry")
+                          ActionButton(opens="", label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId="app-shell-retry")
           if sheet
             row position="absolute" inset=0 align-items="stretch"
               scroll id="app-shell-sheet" width="screens.shell-sheet" flex-shrink=1 min-width=0 background-color="theme.color.surface"

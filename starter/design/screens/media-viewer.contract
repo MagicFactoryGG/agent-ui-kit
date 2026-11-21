@@ -124,17 +124,17 @@ component MediaViewer
                   if agent == "changed"
                     row testId="media-viewer-changed" role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.md" row-gap="theme.space.sm" padding-top="theme.space.xs"
                       text changedNote testId="media-viewer-agent" flex-shrink=1 min-width=0 overflow-wrap="break-word" font="theme.type.caption" color="theme.color.accent"
-                      ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="media-viewer-undo")
+                      ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="media-viewer-undo")
                 if album
                   row role="group" aria-label=positionText gap="theme.space.sm" flex-shrink=0
-                    ActionButton(label=previousLabel, kind="plain", interaction="idle", outcome="none", press=previous, testId="media-viewer-previous")
-                    ActionButton(label=nextLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=next, testId="media-viewer-next")
+                    ActionButton(opens="", label=previousLabel, kind="plain", interaction="idle", outcome="none", press=previous, testId="media-viewer-previous")
+                    ActionButton(opens="", label=nextLabel, kind=(agent == "proposed" ? "plain" : "primary"), interaction="idle", outcome="none", press=next, testId="media-viewer-next")
               if agent == "proposed"
                 row testId="media-viewer-proposal" role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.md" padding="theme.space.lg" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.accent" background-color="theme.color.surface"
                   text proposedNote testId="media-viewer-sentence" flex=1 min-width="screens.media-caption-min" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
                   row flex-wrap="wrap" gap="theme.space.sm" flex-shrink=0
-                    ActionButton(label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="media-viewer-no")
-                    ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="media-viewer-yes")
+                    ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="media-viewer-no")
+                    ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="media-viewer-yes")
             if album
               column gap="theme.space.sm" key=step
                 Words(text=stripTitle, kind="heading", outcome="none", level=2, testId="media-viewer-strip-title")
@@ -167,4 +167,4 @@ component MediaViewer
                     path d="M12 9.5v4.5" stroke-width=1.6 stroke-linecap="round"
                     path d="M12 16.8v0.01" stroke-width=1.8 stroke-linecap="round"
                 text failedText testId="media-viewer-failed" text-align="center" overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
-                ActionButton(label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId="media-viewer-retry")
+                ActionButton(opens="", label=retryLabel, kind="primary", interaction="idle", outcome="none", press=retry, testId="media-viewer-retry")

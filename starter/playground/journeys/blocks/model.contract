@@ -2,10 +2,11 @@
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger, act, valueOf, isMarked from "@agent-ui-kit/agent"
 use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint, LinkGroup, FooterLink from "__SCOPE__/blocks"
+use MenuItem from "__SCOPE__/components"
 use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint from "__SCOPE__/blocks"
 use Question from "__SCOPE__/blocks"
-use BarPoint, BarRange from "__SCOPE__/blocks"
-use Command from "__SCOPE__/blocks"
+use BarPoint, BarRange, NotificationNote from "__SCOPE__/blocks"
+use Stat from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -106,6 +107,18 @@ fn planList(chosen: string): Plan[] = [
 ]
 fn planAct(key: string): Act = Act(tool="choosePlan", door="agent", key="plan", title="Plan", value=key, did=`Your assistant chose the ${planName(key)} plan.`, asks=`Your assistant suggests the ${planName(key)} plan.`, will=`Your assistant will choose the ${planName(key)} plan in 5 seconds.`)
 fn planText(chosen: string): string = `${chosen}\t${planName(chosen)}`
+// Menu: a list's order, chosen from the design's Menu ("newest" until another is chosen). An item chooses
+// it, as the agent's setSort does; the chosen item is checked.
+fn sortName(key: string): string = key == "oldest" ? "Oldest first" : key == "name" ? "By name" : "Newest first"
+fn sortItems(chosen: string): MenuItem[] = [
+  MenuItem(key="newest", heading="Order", label=sortName("newest"), detail="", kind="choice", on=(chosen == "newest"), enabled=true),
+  MenuItem(key="oldest", heading="", label=sortName("oldest"), detail="", kind="choice", on=(chosen == "oldest"), enabled=true),
+  MenuItem(key="name", heading="", label=sortName("name"), detail="A to Z", kind="choice", on=(chosen == "name"), enabled=true)
+]
+// The items whose words hold what was typed in the menu's search (all for nothing typed).
+fn sortShown(chosen: string, q: string): MenuItem[] = sortItems(chosen).filter(x => q == "" or x.label.toLowerCase().includes(q.toLowerCase()))
+fn sortAct(key: string): Act = Act(tool="setSort", door="agent", key="sort", title="Order", value=key, did=`Your assistant put the list ${sortName(key).toLowerCase()}.`, asks=`Your assistant suggests putting the list ${sortName(key).toLowerCase()}.`, will=`Your assistant will put the list ${sortName(key).toLowerCase()} in 5 seconds.`)
+fn sortText(chosen: string): string = `${chosen}\t${sortName(chosen)}`
 // Hero: a planning product's landing page; its one act is the primary, Start free trial. The value is the
 // trial's state ("off", then "started"): the person's tap and the agent's startTrial set the same value, and the
 // agent's is recorded, shown on the hero with one Undo.
@@ -150,26 +163,29 @@ fn chartPoints(key: string): BarPoint[] = key == "month" ? [
 ]
 fn chartText(key: string): string = [key].concat(chartPoints(key).map(p => `${p.label}\t${p.value}`)).join("\n")
 fn rangeAct(key: string): Act = Act(tool="setChartRange", door="agent", key="chart-range", title="Orders chart", value=key, did=`Your assistant switched the orders chart to ${chartRangeName(key)}.`, asks=`Your assistant suggests showing the orders chart in ${chartRangeName(key)}.`, will=`Your assistant will switch the orders chart to ${chartRangeName(key)} in 5 seconds.`)
-
-// CommandMenu: a workspace's command menu. Each command is a tool too (runCommand, by key); running one turns its
-// value on ("off" until then, under "cmd-<key>"). The person types to narrow the list and presses a row; the agent
-// calls runCommand with the same key; both reach the same value, and the agent's is marked on its row and said.
-fn cmdKeys(): string[] = ["focus", "mute", "pin"]
-fn cmdKey(key: string): string = `cmd-${key}`
-fn cmdLedgerKeys(): string[] = cmdKeys().map(k => cmdKey(k))
-fn cmdLabel(key: string): string = key == "focus" ? "Turn on focus mode" : key == "mute" ? "Pause notifications" : key == "pin" ? "Pin this project" : key
-fn cmdGroup(key: string): string = key == "pin" ? "Project" : "Workspace"
-fn cmdHint(key: string): string = key == "focus" ? "Hide everything but the task at hand." : key == "mute" ? "Until tomorrow morning." : key == "pin" ? "Keep it at the top of your projects." : ""
-fn cmdShortcut(key: string): string = key == "focus" ? "⌘ ⇧ F" : key == "mute" ? "⌘ ⇧ N" : key == "pin" ? "⌘ P" : ""
-fn cmdDid(key: string): string = key == "focus" ? "turned on focus mode" : key == "mute" ? "paused notifications" : key == "pin" ? "pinned this project" : key
-fn cmdAsks(key: string): string = key == "focus" ? "turning on focus mode" : key == "mute" ? "pausing notifications" : key == "pin" ? "pinning this project" : key
-fn cmdWill(key: string): string = key == "focus" ? "turn on focus mode" : key == "mute" ? "pause notifications" : key == "pin" ? "pin this project" : key
-// The commands whose label holds the person's query, in the menu's order.
-fn menuCommands(query: string): Command[] = cmdKeys().filter(k => cmdLabel(k).toLowerCase().includes(query.trim().toLowerCase())).map(k => Command(key=k, group=cmdGroup(k), label=cmdLabel(k), hint=cmdHint(k), shortcut=cmdShortcut(k)))
-fn cmdText(l: Ledger): string = cmdKeys().map(k => `${k}\t${cmdLabel(k)}\t${valueOf(l, cmdKey(k))}`).join("\n")
-// The command the agent's mark is on, by key ("" when none).
-fn cmdMarkedKey(l: Ledger): string = cmdKeys().filter(k => isMarked(l, cmdKey(k))).slice(0, 1).join("")
-fn runAct(key: string): Act = Act(tool="runCommand", door="agent", key=cmdKey(key), title=cmdLabel(key), value="on", did=`Your assistant ${cmdDid(key)}.`, asks=`Your assistant suggests ${cmdAsks(key)}.`, will=`Your assistant will ${cmdWill(key)} in 5 seconds.`)
+// NotificationList: a person's notifications; whether the new ones are read is one value in the ledger, "notes":
+// "unread" while two wait, "read" once they are. The header's Mark all read sets it for a person, the agent's
+// markNotesRead for the agent, whose change the list then shows with one Undo (or, held for the person, asks).
+fn notesRead(l: Ledger): bool = valueOf(l, "notes") == "read"
+fn inboxNotes(read: bool): NotificationNote[] = [
+  NotificationNote(key="storage", title="Storage is 90% full", detail="New exports pause once it is full.", when="1 h ago", unread=(not read), kind="warning", yesLabel="Manage storage", noLabel=""),
+  NotificationNote(key="shared", title="Sam Rivera shared “Q3 plan” with you", detail="You can view and comment.", when="3 h ago", unread=(not read), kind="info", yesLabel="", noLabel=""),
+  NotificationNote(key="paid", title="Invoice INV-2041 was paid", detail="Northwind Traders paid €1,240.00.", when="Yesterday", unread=false, kind="success", yesLabel="", noLabel=""),
+  NotificationNote(key="archived", title="Your assistant archived 12 old threads.", detail="They stay in Archive for 30 days.", when="Mon", unread=false, kind="agent", yesLabel="", noLabel="")
+]
+fn notesText(l: Ledger): string = inboxNotes(notesRead(l)).map(n => `${n.key}\t${n.title}\t${n.unread ? "unread" : "read"}`).join("\n")
+fn notesReadAct(): Act = Act(tool="markNotesRead", door="agent", key="notes", title="Notifications", value="read", did="Your assistant marked 2 notifications read.", asks="Your assistant suggests marking 2 notifications read.", will="Your assistant will mark 2 notifications read in 5 seconds.")
+// StatTiles: a shop's numbers for this week, whose last read failed. The row's data state is the value both doors
+// set ("failed", then "many" once read again): the failed banner's Try again for a person, loadStats for the agent,
+// whose read is recorded and said under the row with one Undo.
+fn weekStats(): Stat[] = [
+  Stat(key="revenue", label="Revenue", value="$48,210", change="+12.4% on last week", trend="up"),
+  Stat(key="orders", label="Orders", value="1,864", change="+8.2% on last week", trend="up"),
+  Stat(key="aov", label="Average order", value="$25.86", change="-2.1% on last week", trend="down"),
+  Stat(key="returns", label="Returns", value="3.1%", change="No change", trend="flat")
+]
+fn statsText(state: string): string = state == "many" ? weekStats().map(s => `${s.key}\t${s.label}\t${s.value}\t${s.change}`).join("\n") : state
+fn loadStatsAct(): Act = Act(tool="loadStats", door="agent", key="stats", title="This week's numbers", value="many", did="Your assistant read this week's numbers again.", asks="Your assistant suggests reading this week's numbers again.", will="Your assistant will read this week's numbers again in 5 seconds.")
 
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
@@ -186,7 +202,9 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="addFooterLinks", title="Footer links", sentence="Adds the first column, Help with Contact us, to the footer that has no links.", floor="recorded", reach="self", secret=false),
   AgentTool(name="openQuestion", title="Help questions", sentence="Opens a question on the help page to show its answer, or closes it.", floor="recorded", reach="self", secret=false),
   AgentTool(name="setChartRange", title="Orders chart", sentence="Shows the orders chart by week or by month.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="runCommand", title="Commands", sentence="Runs a command from the command menu: focus mode, pausing notifications or pinning the project.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="markNotesRead", title="Notifications", sentence="Marks the new notifications read, as the list's Mark all read does.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="loadStats", title="This week's numbers", sentence="Reads this week's numbers again after a failed read, as their Try again does.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setSort", title="Order", sentence="Puts the list in an order: newest, oldest or name.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -203,5 +221,7 @@ fn startValues(): Value[] = [
   Value(key="footer", value="empty"),
   Value(key="faq-returns", value="open"), Value(key="faq-delivery", value="closed"), Value(key="faq-change", value="closed"), Value(key="faq-payment", value="closed"),
   Value(key="chart-range", value="week"),
-  Value(key="cmd-focus", value="off"), Value(key="cmd-mute", value="off"), Value(key="cmd-pin", value="off")
+  Value(key="notes", value="unread"),
+  Value(key="stats", value="failed"),
+  Value(key="sort", value="newest")
 ]

@@ -1,6 +1,24 @@
 {
   "$comment": "Real-looking rows for a shape in one data state, keyed \"Shape:data\" (many, one, long). Data only. Without a key, rows are made from the shape's field types. A piece's own words may come as \"props:<Piece>\", data only; a prop for one data state as \"<prop>@<data>\" (\"interaction@failed\": \"disabled\"). \"sections\": a second playground app per group (<playground>/<name>; bun play.mjs web <name>): the blocks in three apps by file name (a-f, g-r, s-z), every screen in one. The main app draws the components, each layer's index.contract pieces and wip/. One app drawing every state of every piece outgrew the web bundle.",
-  "sections": { "blocks-a-f": { "layers": ["blocks"], "except": ["index.contract"], "match": "^[a-f]" }, "blocks-g-r": { "layers": ["blocks"], "except": ["index.contract"], "match": "^[g-r]" }, "blocks-s-z": { "layers": ["blocks"], "except": ["index.contract"], "match": "^[s-z]" }, "screens": { "layers": ["screens"], "except": ["index.contract"] } },
+  "sections": { "blocks-a-f": { "layers": ["blocks"], "except": ["index.contract"], "match": "^[a-f]" }, "blocks-g-r": { "layers": ["blocks"], "except": ["index.contract"], "match": "^[g-r]" }, "blocks-s-z": { "layers": ["blocks"], "except": ["index.contract"], "match": "^[s-z]" }, "screens-a-l": { "layers": ["screens"], "except": ["index.contract"], "match": "^[a-l]" }, "screens-m-z": { "layers": ["screens"], "except": ["index.contract"], "match": "^[m-z]" } },
+  "Stat:many": [
+    { "key": "revenue", "label": "Revenue", "value": "$48,210", "change": "+12.4%", "trend": "up" },
+    { "key": "signups", "label": "New sign-ups", "value": "1,864", "change": "+8.2%", "trend": "up" },
+    { "key": "aov", "label": "Average order value", "value": "$63.20", "change": "-2.1%", "trend": "down" },
+    { "key": "on-time", "label": "Fulfilled on time", "value": "96.4%", "change": "0.0%", "trend": "flat" }
+  ],
+  "props:StatTiles": {
+    "title": "This week",
+    "loadingText": "Reading this week's numbers…",
+    "failedText": "This week's numbers could not be read.",
+    "retryLabel": "Try again",
+    "agentKey": "revenue",
+    "agentNote": "Your assistant suggests setting Revenue to $52,000.",
+    "changedNote": "Your assistant corrected Revenue to $48,210, counting yesterday's late orders.",
+    "yesLabel": "Accept",
+    "noLabel": "Reject",
+    "undoLabel": "Undo"
+  },
   "props:DetailPanel": {
     "title": "Aurora Desk Lamp",
     "statusLabel": "In production",
@@ -628,7 +646,7 @@
       "name": "Business with single sign-on and an audit trail",
       "price": "$2,999.00",
       "period": "per person, per month",
-      "detail": "For organisations whose security review asks for every sign-in to be recorded and kept.",
+      "detail": "For organisations whose security review asks for every authentication to be recorded and kept.",
       "points": [
         "Everything in Team, with the same limits raised for large organisations",
         "Single sign-on through your own identity provider"
@@ -1167,7 +1185,7 @@
     { "key": "assistant", "label": "Assistant", "detail": "What your assistant may do for you." }
   ],
   "SettingsSection:long": [
-    { "key": "account", "label": "Account and sign-in", "detail": "" },
+    { "key": "account", "label": "Account and authentication", "detail": "" },
     { "key": "notifications", "label": "Notifications, reminders and the quiet hours that hold them back", "detail": "Everything that may reach you, on which of your devices, at which hours of the day, and what waits until morning instead of waking you up" },
     { "key": "privacy", "label": "Privacy and data sharing with other people", "detail": "" },
     { "key": "assistant", "label": "Assistant", "detail": "" }
@@ -1846,21 +1864,338 @@
   "BarRange:loading": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
   "BarRange:failed": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
   "BarRange:long": [{ "key": "week", "label": "Weeks" }, { "key": "month", "label": "Months" }, { "key": "quarter", "label": "Quarters" }],
-  "props:CommandMenu": {"title": "Command menu", "searchLabel": "Search commands", "placeholder": "Type a command or search", "query": "", "hint": "Press a command to run it, or use its keys.", "highlight": "new-task", "emptyText": "No commands match “invoices”. Try a shorter word.", "clearLabel": "Clear search", "loadingText": "Loading commands…", "failedText": "The commands did not load. Check your connection, then try again.", "retryLabel": "Try again", "agentKey": "focus", "agentNote": "Your assistant turned on focus mode.", "undoLabel": "Undo", "proposalText": "Your assistant suggests turning on focus mode until your 3 pm meeting.", "acceptLabel": "Run", "rejectLabel": "Not now", "query@empty": "invoices", "highlight@one": "focus", "highlight@long": "share", "agentKey@long": "share"},
-  "Command:many": [
-    {"key": "new-task", "group": "Suggestions", "label": "New task", "hint": "Add a task to this project", "shortcut": "⌘ N"},
-    {"key": "focus", "group": "Suggestions", "label": "Turn on focus mode", "hint": "Hide everything but the task at hand", "shortcut": "⌘ ⇧ F"},
-    {"key": "inbox", "group": "Go to", "label": "Inbox", "hint": "", "shortcut": "G I"},
-    {"key": "calendar", "group": "Go to", "label": "Calendar", "hint": "", "shortcut": "G C"},
-    {"key": "settings", "group": "Go to", "label": "Settings", "hint": "", "shortcut": "⌘ ,"},
-    {"key": "theme", "group": "Preferences", "label": "Switch to dark appearance", "hint": "", "shortcut": ""}
+  "props:NotificationList": {
+    "title": "Notifications",
+    "summary": "2 new",
+    "markAllLabel": "Mark all read",
+    "newTitle": "New",
+    "earlierTitle": "Earlier",
+    "loadingText": "Checking for new notifications…",
+    "emptyTitle": "You're all caught up",
+    "emptyText": "New notifications will appear here as they arrive.",
+    "emptyActionLabel": "Notification settings",
+    "failedTitle": "Couldn't load just now",
+    "failedText": "Check your connection, then try again. Nothing you received is lost.",
+    "retryLabel": "Try again",
+    "proposedNote": "Your assistant suggests marking 2 notifications read.",
+    "acceptLabel": "Mark read",
+    "rejectLabel": "Not now",
+    "changedNote": "Your assistant marked 3 notifications read.",
+    "undoLabel": "Undo",
+    "summary@one": "1 new",
+    "summary@long": "1 new"
+  },
+  "NotificationNote:many": [
+    {
+      "key": "move-review",
+      "title": "Your assistant suggests moving Thursday's review to 15:00.",
+      "detail": "It overlaps the supplier call Priya booked.",
+      "when": "2 min ago",
+      "unread": true,
+      "kind": "agent",
+      "yesLabel": "Accept",
+      "noLabel": "Reject"
+    },
+    {
+      "key": "storage",
+      "title": "Storage is 90% full",
+      "detail": "New exports pause once it is full.",
+      "when": "1 h ago",
+      "unread": true,
+      "kind": "warning",
+      "yesLabel": "Manage storage",
+      "noLabel": ""
+    },
+    {
+      "key": "paid",
+      "title": "Invoice INV-2041 was paid",
+      "detail": "Northwind Traders paid €1,240.00.",
+      "when": "Yesterday",
+      "unread": false,
+      "kind": "success",
+      "yesLabel": "",
+      "noLabel": ""
+    },
+    {
+      "key": "shared",
+      "title": "Sam Rivera shared “Q3 plan” with you",
+      "detail": "You can view and comment.",
+      "when": "Mon",
+      "unread": false,
+      "kind": "info",
+      "yesLabel": "",
+      "noLabel": ""
+    },
+    {
+      "key": "archived",
+      "title": "Your assistant archived 12 old threads.",
+      "detail": "They stay in Archive for 30 days.",
+      "when": "Mon",
+      "unread": false,
+      "kind": "agent",
+      "yesLabel": "",
+      "noLabel": ""
+    }
   ],
-  "Command:one": [
-    {"key": "focus", "group": "Suggestions", "label": "Turn on focus mode", "hint": "Hide everything but the task at hand", "shortcut": "⌘ ⇧ F"}
+  "NotificationNote:one": [
+    {
+      "key": "move-review",
+      "title": "Your assistant suggests moving Thursday's review to 15:00.",
+      "detail": "It overlaps the supplier call Priya booked.",
+      "when": "2 min ago",
+      "unread": true,
+      "kind": "agent",
+      "yesLabel": "Accept",
+      "noLabel": "Reject"
+    }
   ],
-  "Command:long": [
-    {"key": "share", "group": "Sharing and permissions for everyone in this workspace", "label": "Share the spring launch plan with the whole retail and wholesale team, including guests", "hint": "Everyone with the link can comment; guests from partner companies can only read", "shortcut": "⌘ ⌥ ⇧ S"},
-    {"key": "export", "group": "Sharing and permissions for everyone in this workspace", "label": "Export every task, comment and attachment as one archive", "hint": "", "shortcut": "⌘ E"},
-    {"key": "archive", "group": "Housekeeping", "label": "Archive finished tasks older than ninety days", "hint": "They stay searchable", "shortcut": ""}
+  "NotificationNote:long": [
+    {
+      "key": "move-review",
+      "title": "Your assistant suggests moving Thursday's quarterly planning review with the whole regional team to Friday afternoon at 15:00.",
+      "detail": "It overlaps the supplier call Priya booked last week, and three of the seven people invited have already said that Friday afternoon suits them better.",
+      "when": "2 min ago",
+      "unread": true,
+      "kind": "agent",
+      "yesLabel": "Accept",
+      "noLabel": "Reject"
+    },
+    {
+      "key": "export",
+      "title": "The export of every invoice, credit note and receipt from the last financial year finished",
+      "detail": "Northwind_Traders_2025_full_ledger_export_with_attachments_and_audit_trail.zip is ready to download for the next seven days.",
+      "when": "Yesterday, 16:47",
+      "unread": false,
+      "kind": "success",
+      "yesLabel": "Download",
+      "noLabel": ""
+    }
+  ],
+  "props:EntryScreen": {"productName": "Northwind", "stepsLabel": "Steps to get in", "termsStepName": "Terms", "authStepName": "Authenticate", "termsTitle": "Before you start", "termsLead": "Read Northwind's terms of service. Accepting them is yours to do, and comes before you authenticate.", "termsFrameLabel": "Northwind terms of service", "acceptLabel": "Accept and continue", "declineLabel": "Decline", "authTitle": "Authenticate to Northwind", "authLead": "Use the passkey on this device. Your face, fingerprint or screen lock stays on it.", "acceptedNote": "You accepted the terms.", "backLabel": "Read the terms again", "choiceTitle": "Passkey", "choiceNote": "This device asks for your face, fingerprint or screen lock.", "choiceActionLabel": "Authenticate with a passkey", "outcomeText": "That didn't go through. Nothing was saved; try again.", "busyText": "Waiting for an answer from your device…", "agentNote": "Your assistant opened this for you. Accepting the terms and authenticating are yours alone."},
+  "slot:EntryScreen": false,
+  "Stat:empty": [
+    {
+      "key": "revenue",
+      "label": "Revenue",
+      "value": "$0",
+      "change": "No orders yet",
+      "trend": "flat"
+    },
+    {
+      "key": "signups",
+      "label": "New sign-ups",
+      "value": "0",
+      "change": "No visits yet",
+      "trend": "flat"
+    },
+    {
+      "key": "aov",
+      "label": "Average order value",
+      "value": "–",
+      "change": "Needs an order",
+      "trend": "flat"
+    },
+    {
+      "key": "on-time",
+      "label": "Fulfilled on time",
+      "value": "–",
+      "change": "Needs an order",
+      "trend": "flat"
+    }
+  ],
+  "Stat:long": [
+    {
+      "key": "revenue",
+      "label": "Revenue after refunds, taxes and the payment provider’s fees",
+      "value": "$1,284,309.75",
+      "change": "+112.4% on the same months of last year",
+      "trend": "up"
+    },
+    {
+      "key": "signups",
+      "label": "New sign-ups from the spring campaign and the newsletter",
+      "value": "18,642",
+      "change": "+8.2%",
+      "trend": "up"
+    },
+    {
+      "key": "aov",
+      "label": "Average order value",
+      "value": "$63.20",
+      "change": "-2.1% since the price change in April",
+      "trend": "down"
+    },
+    {
+      "key": "on-time",
+      "label": "Fulfilled on time",
+      "value": "96.4%",
+      "change": "0.0%",
+      "trend": "flat"
+    }
+  ],
+  "props:DashboardScreen": {
+    "title": "Overview",
+    "periodLabel": "Period",
+    "chartTitle": "Orders",
+    "chartNote": "Orders placed each month this year, January to June",
+    "chartLabel": "Orders per month",
+    "recentTitle": "Recent orders",
+    "recentEmptyText": "No orders yet. The newest show here as they come in.",
+    "allLabel": "View all",
+    "loadingText": "Loading your shop’s numbers…",
+    "chartLoadingText": "Loading orders…",
+    "emptyText": "No orders this year yet. Share your shop to bring in the first ones.",
+    "emptyLabel": "Share your shop",
+    "failedText": "Your numbers did not load. Check your connection, then try again.",
+    "retryLabel": "Try again",
+    "proposedNote": "Your assistant suggests showing the quarter, to compare it with the last one.",
+    "acceptLabel": "Accept",
+    "rejectLabel": "Not now",
+    "changedNote": "Your assistant switched the period to this year, to compare the months since the spring sale.",
+    "undoLabel": "Undo",
+    "periodKey": "year",
+    "periodKey@long": "year",
+    "allLabel@long": "View all",
+    "retryLabel@long": "Try again",
+    "acceptLabel@long": "Accept",
+    "rejectLabel@long": "Not now",
+    "undoLabel@long": "Undo",
+    "emptyLabel@long": "Share your shop"
+  },
+  "DashboardPeriod:many": [
+    {
+      "key": "week",
+      "label": "Week"
+    },
+    {
+      "key": "month",
+      "label": "Month"
+    },
+    {
+      "key": "quarter",
+      "label": "Quarter"
+    },
+    {
+      "key": "year",
+      "label": "Year"
+    }
+  ],
+  "DashboardPeriod:empty": [
+    {
+      "key": "week",
+      "label": "Week"
+    },
+    {
+      "key": "month",
+      "label": "Month"
+    },
+    {
+      "key": "quarter",
+      "label": "Quarter"
+    },
+    {
+      "key": "year",
+      "label": "Year"
+    }
+  ],
+  "DashboardPeriod:loading": [
+    {
+      "key": "week",
+      "label": "Week"
+    },
+    {
+      "key": "month",
+      "label": "Month"
+    },
+    {
+      "key": "quarter",
+      "label": "Quarter"
+    },
+    {
+      "key": "year",
+      "label": "Year"
+    }
+  ],
+  "DashboardPeriod:failed": [
+    {
+      "key": "week",
+      "label": "Week"
+    },
+    {
+      "key": "month",
+      "label": "Month"
+    },
+    {
+      "key": "quarter",
+      "label": "Quarter"
+    },
+    {
+      "key": "year",
+      "label": "Year"
+    }
+  ],
+  "DashboardPeriod:long": [
+    {
+      "key": "week",
+      "label": "Week"
+    },
+    {
+      "key": "month",
+      "label": "Month"
+    },
+    {
+      "key": "quarter",
+      "label": "Quarter"
+    },
+    {
+      "key": "year",
+      "label": "Year"
+    }
+  ],
+  "DashboardItem:many": [
+    {
+      "key": "o1048",
+      "title": "Order 1048 · Priya Nair",
+      "detail": "2 items · 4 minutes ago",
+      "trailing": "$84.00",
+      "tone": "none"
+    },
+    {
+      "key": "o1047",
+      "title": "Order 1047 · Jonas Weber",
+      "detail": "1 item · 22 minutes ago",
+      "trailing": "Paid",
+      "tone": "success"
+    },
+    {
+      "key": "o1046",
+      "title": "Order 1046 · Maya Okafor",
+      "detail": "3 items · 1 hour ago",
+      "trailing": "Refunded",
+      "tone": "cancelled"
+    },
+    {
+      "key": "o1045",
+      "title": "Order 1045 · Sam Delacroix",
+      "detail": "1 item · 2 hours ago",
+      "trailing": "Payment failed",
+      "tone": "error"
+    }
+  ],
+  "DashboardItem:long": [
+    {
+      "key": "o2001",
+      "title": "Order 2001 · Maximiliana Theodora Featherstonehaugh-Montgomery of the Northern Isles",
+      "detail": "14 items, two of them on back order, sent in three parcels · 4 minutes ago",
+      "trailing": "$1,284.00",
+      "tone": "none"
+    },
+    {
+      "key": "o2000",
+      "title": "Order 2000 · A gift for the whole studio team, wrapped and with a card",
+      "detail": "1 item · yesterday",
+      "trailing": "Waiting for the bank to confirm the payment",
+      "tone": "blocked"
+    }
   ]
 }

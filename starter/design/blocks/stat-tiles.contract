@@ -1,0 +1,150 @@
+// StatTiles: a row of the numbers a person checks first, as many as the app brings. Each tile is one stat on
+// a card of the kit's language — the raised surface with a hairline line and the card's corner, Section's card,
+// not a new idea: its label in the caption ink, the value in the title type with tabular figures (the group's
+// largest words, its one focal point), and the change pinned to the tile's bottom edge beside a drawn glyph in
+// the positive or critical ink the trend names — the sign and the glyph say the direction, a flat line its
+// rest, never the colour alone. The tiles share one rhythm: flex tiles that wrap at blocks.stat-tile-min with
+// box-sizing="border-box" (the responsive-columns pattern without its literal, which a package may not hold),
+// two by two on a phone, four across on a desktop, and the row centres itself at blocks.stat-max — EntryGate's
+// own habit — so a wide window keeps the group composed and an app's column caps the app's way. The group's
+// name, when the app gives one, speaks in the bar's own voice (the title type) above the cards.
+//
+// - data many|loading|failed. Loading keeps the group's shape: the platform's own activity mark (a square of
+//   blocks.stat-spin, as DetailPanel draws it, so it sits right beside its words) and the words as one line
+//   flush with the row's own left edge, above ghost tiles of the resting shape drawn in the fill token and
+//   held to the resting row's own height (blocks.stat-tile-height, measured), so nothing shifts when the
+//   numbers land; hidden from a reader. Failed stands in the tiles' place as one banner of the
+//   tiles' own shell, as wide as the row and as tall as one tile: the words in strong ink under the error's
+//   edge band (role="alert"; the red stays on the band, never on the words), the way on — `retryLabel`'s
+//   bordered button at the end, the banner's raised slab alone carrying the state, so no ghost lies about
+//   numbers that are not coming. No tile lies with a stale number in either state.
+// - agent none|proposed|changed|waiting: `agentKey` names the stat the agent touched, and that tile takes the
+//   kit's mark as an inset band on its left edge (LinkRow's border-line mark, drawn as paint so no tile's
+//   words move a hair's width and no corner is ever clipped — the accent, caution while the person is waited
+//   on). Under the row, once for the group, the agent's sentence in the plain body ink on a row that carries
+//   the same band in the same ink at its own left edge — the marked tile's line continued under the grid, so
+//   the mark and the sentence read as one unit (a voice has no screen; the sentence names the stat itself).
+//   What the sentence says follows the state. Proposed and waiting ask: `agentNote`, answered right there in
+//   its two words (`yesLabel`/`noLabel`, Proposal's shape: accept or reject, now or stop). Changed has already
+//   happened, so it asks nothing: `changedNote` says what the agent did, and the one way back is
+//   `undoLabel`'s plain button (Pricing's and Hero's changed note). The answers are one group that keeps the
+//   sentence's line on a desktop and, under blocks.stat-note-min, wraps beneath it at its own left edge.
+//   Nothing is marked when no key matches.
+//
+// States:
+//   data   many|loading|failed
+//   agent  none|proposed|changed|waiting
+use Words, ActionButton from "__SCOPE__/components"
+
+// One number the person checks: its key, what it is called, the value, the change with its sign, and the trend's
+// way ("up" positive ink, "down" critical ink, "flat" the caption ink).
+shape Stat
+  key: string
+  label: string
+  value: string
+  change: string
+  trend: enum<"up", "down", "flat">
+
+// The change's ink: positive going up, critical going down, muted at flat.
+fn trendInk(t: string): string = t == "up" ? "theme.color.positive-text" : t == "down" ? "theme.color.critical-text" : "theme.color.ink-muted"
+
+// One stat on the card: the label, the value large, the change with its glyph pinned to the bottom edge (a
+// delta is a footnote, and the row of tiles then shares its bottom line). The agent's mark is an inset band
+// on the card's left edge — paint, not layout, so every tile's words start at the same x whether marked or not.
+component StatTile
+  props
+    label: string
+    value: string
+    change: string
+    trend: enum<"up", "down", "flat">
+    marked: bool
+    waiting: bool
+    testId: string
+  view
+    row testId=testId role="listitem" flex=1 min-width="blocks.stat-tile-min" box-sizing="border-box" padding="theme.space.lg" background-color="theme.color.raised" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" box-shadow=(marked ? (waiting ? "inset 3px 0 0 theme.color.caution" : "inset 3px 0 0 theme.color.accent") : "none")
+      column flex=1 min-width=0 gap="theme.space.xs"
+        Words(text=label, kind="caption", outcome="none", level=0, testId=`${testId}-label`)
+        text value testId=`${testId}-value` font="theme.type.title" color="theme.color.ink" font-variant-numeric="tabular-nums"
+        row align-items="center" gap="theme.space.xs" margin-top="auto"
+          svg viewBox="0 0 12 12" width="blocks.stat-trend" height="blocks.stat-trend" fill="none" stroke=trendInk(trend) aria-hidden=true flex-shrink=0
+            path d=(trend == "up" ? "M3 9 L9 3 M5.5 3 H9 V6.5" : trend == "down" ? "M3 3 L9 9 M5.5 9 H9 V5.5" : "M3 6 H9") stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+          text change testId=`${testId}-change` flex=1 min-width=0 font="theme.type.caption" color=trendInk(trend) font-variant-numeric="tabular-nums"
+
+// A tile still coming: the resting shape's card with fill bars where the label, the value and the change will
+// be, held to the resting row's own height so nothing shifts when the numbers land. Drawn in the loading row
+// only, hidden from a reader.
+component StatGhost
+  view
+    column flex=1 min-width="blocks.stat-tile-min" min-height="blocks.stat-tile-height" box-sizing="border-box" gap="theme.space.xs" padding="theme.space.lg" background-color="theme.color.raised" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" aria-hidden=true
+      box width="blocks.stat-ghost-label" height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill"
+      box width="blocks.stat-ghost-value" height="theme.space.xl" background-color="theme.color.fill" border-radius="theme.radius.pill"
+      box width="blocks.stat-ghost-change" height="theme.space.md" background-color="theme.color.fill" border-radius="theme.radius.pill" margin-top="auto"
+
+// The agent's sentence under the row, said once for the group: the marked tile's band continued at its own left
+// edge, in the same ink (caution while the person is waited on), the sentence in the body ink, then the slot's
+// answers, which on a phone wrap beneath the sentence (it keeps blocks.stat-note-min).
+component StatNote
+  props
+    text: string
+    waiting: bool
+    testId: string
+  slot
+  view
+    row role="status" flex-wrap="wrap" align-items="center" gap="theme.space.md" padding-left="theme.space.lg" box-shadow=(waiting ? "inset 3px 0 0 theme.color.caution" : "inset 3px 0 0 theme.color.accent")
+      text text testId=testId flex=1 min-width="blocks.stat-note-min" font="theme.type.body" color="theme.color.ink"
+      children
+
+component StatTiles
+  props
+    title: string
+    stats: Stat[]
+    data: enum<"many", "loading", "failed">
+    loadingText: string
+    failedText: string
+    retryLabel: string
+    retry: action
+    agent: enum<"none", "proposed", "changed", "waiting">
+    agentKey: string
+    agentNote: string
+    yesLabel: string
+    noLabel: string
+    yes: action
+    no: action
+    changedNote: string
+    undoLabel: string
+    undo: action
+    testId: string
+  view
+    column testId=testId gap="theme.space.sm" width="100%" max-width="blocks.stat-max" margin-left="auto" margin-right="auto"
+      if title != ""
+        column margin-bottom="theme.space.sm"
+          Words(text=title, kind="title", outcome="none", level=2, testId=`${testId}-title`)
+      if data == "failed"
+        row role="alert" align-items="center" gap="theme.space.md" min-height="blocks.stat-tile-height" box-sizing="border-box" padding="theme.space.lg" background-color="theme.color.raised" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" box-shadow="inset 3px 0 0 theme.color.critical"
+          column flex=1 min-width=0
+            Words(text=failedText, kind="label", outcome="none", level=0, testId=`${testId}-failed`)
+          if retryLabel != ""
+            ActionButton(opens="", label=retryLabel, kind="plain", interaction="idle", outcome="none", press=retry, testId=`${testId}-retry`)
+      else if data == "loading"
+        column gap="theme.space.md"
+          row role="status" align-items="center" gap="theme.space.sm"
+            progress aria-label=loadingText width="blocks.stat-spin" height="blocks.stat-spin" flex-shrink=0
+            column flex=1 min-width=0
+              Words(text=loadingText, kind="caption", outcome="cancelled", level=0, testId=`${testId}-loading`)
+          row flex-wrap="wrap" gap="theme.space.md" aria-hidden=true
+            for i in [0, 1, 2, 3] key=i
+              StatGhost()
+      else
+        row role="list" flex-wrap="wrap" gap="theme.space.md"
+          for s in stats key=s.key
+            StatTile(label=s.label, value=s.value, change=s.change, trend=s.trend, marked=(agent != "none" and s.key == agentKey), waiting=(agent == "waiting"), testId=`${testId}-${s.key}`)
+        if agent == "changed" and changedNote != ""
+          StatNote(text=changedNote, waiting=false, testId=`${testId}-note`)
+            if undoLabel != ""
+              ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId=`${testId}-undo`)
+        else if (agent == "proposed" or agent == "waiting") and agentNote != ""
+          StatNote(text=agentNote, waiting=(agent == "waiting"), testId=`${testId}-note`)
+            if yesLabel != ""
+              row gap="theme.space.sm" flex-shrink=0
+                ActionButton(opens="", label=noLabel, kind="plain", interaction="idle", outcome="none", press=no, testId=`${testId}-no`)
+                ActionButton(opens="", label=yesLabel, kind="primary", interaction="idle", outcome="none", press=yes, testId=`${testId}-yes`)

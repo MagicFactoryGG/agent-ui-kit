@@ -209,10 +209,10 @@ component SettingsScreen
                         // sharing the width out, and the button had stood 11px off the card's edge.
                         row role="group" aria-label=(agent == "changed" ? changedText : waitingText) flex-wrap="wrap" gap="theme.space.sm" padding-left="theme.space.lg"
                           if agent == "changed"
-                            ActionButton(label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="settings-screen-undo")
+                            ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="settings-screen-undo")
                           else
-                            ActionButton(label=declineLabel, kind="plain", interaction="idle", outcome="none", press=decline, testId="settings-screen-stop")
-                            ActionButton(label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="settings-screen-let")
+                            ActionButton(opens="", label=declineLabel, kind="plain", interaction="idle", outcome="none", press=decline, testId="settings-screen-stop")
+                            ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="settings-screen-let")
             else if data == "loading"
               SettingsGhost(loadingText=loadingText, testId="settings-screen-loading-1")
               SettingsGhost(loadingText=loadingText, testId="settings-screen-loading-2")

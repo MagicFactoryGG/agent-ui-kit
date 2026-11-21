@@ -6,8 +6,9 @@ use act from "@agent-ui-kit/agent"
 use switchAct, statusAct, loadAct, continueFrom, readAct, addHomeAct, pickAct, addFeatureAct, planAct, trialAct, addFooterLinksAct from "./model.contract"
 use switchAct, statusAct, loadAct, continueFrom, readAct, addHomeAct, pickAct, addFeatureAct, planAct, trialAct from "./model.contract"
 use faqAct from "./model.contract"
-use rangeAct from "./model.contract"
-use runAct from "./model.contract"
+use rangeAct, notesReadAct from "./model.contract"
+use loadStatsAct from "./model.contract"
+use sortAct from "./model.contract"
 
 members App
   action readSettings
@@ -49,6 +50,12 @@ members App
   action readChart
   action setChartRange(range: enum<"week", "month">)
     book = act(book, rangeAct(range))
-  action readCommands
-  action runCommand(command: enum<"focus", "mute", "pin">)
-    book = act(book, runAct(command))
+  action readNotes
+  action markNotesRead
+    book = act(book, notesReadAct())
+  action readStats
+  action loadStats
+    book = act(book, loadStatsAct())
+  action readSort
+  action setSort(sort: enum<"newest", "oldest", "name">)
+    book = act(book, sortAct(sort))

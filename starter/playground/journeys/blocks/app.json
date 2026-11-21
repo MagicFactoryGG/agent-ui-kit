@@ -131,14 +131,26 @@
           }
         }
       },
-      "readCommands": {
-        "title": "Read Commands"
+      "readNotes": {
+        "title": "Read Notes"
       },
-      "runCommand": {
-        "title": "Run Command",
+      "markNotesRead": {
+        "title": "Mark Notes Read"
+      },
+      "readStats": {
+        "title": "Read Stats"
+      },
+      "loadStats": {
+        "title": "Load Stats"
+      },
+      "readSort": {
+        "title": "Read Sort"
+      },
+      "setSort": {
+        "title": "Set Sort",
         "parameters": {
-          "command": {
-            "title": "Command"
+          "sort": {
+            "title": "Sort"
           }
         }
       }

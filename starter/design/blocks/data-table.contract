@@ -167,10 +167,10 @@ component DataTable
               Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
               if data == "failed" and retryLabel != ""
                 row
-                  ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+                  ActionButton(opens="", label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
               if data == "empty" and createLabel != ""
                 row
-                  ActionButton(label=createLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=create, testId=`${testId}-create`)
+                  ActionButton(opens="", label=createLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=create, testId=`${testId}-create`)
           else
             if sort != "none"
               row align-items="center" gap="theme.space.xs" padding-left="theme.space.lg" padding-right="theme.space.lg" padding-top="theme.space.md" padding-bottom="theme.space.md" border-bottom-width="theme.line.width" border-bottom-style="solid" border-bottom-color="theme.color.line"
@@ -249,10 +249,10 @@ component DataTable
                       Words(text=note, kind="body", outcome=(data == "failed" ? "error" : "cancelled"), level=0, testId=`${testId}-${data}`)
                       if data == "failed" and retryLabel != ""
                         row
-                          ActionButton(label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
+                          ActionButton(opens="", label=retryLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=retry, testId=`${testId}-retry`)
                       if data == "empty" and createLabel != ""
                         row
-                          ActionButton(label=createLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=create, testId=`${testId}-create`)
+                          ActionButton(opens="", label=createLabel, kind="primary", interaction=(interaction == "busy" ? "busy" : "idle"), outcome="none", press=create, testId=`${testId}-create`)
             else
               tbody
                 for r, i in records key=r.key
