@@ -179,12 +179,12 @@ fn periodAct(key: string): Act = Act(tool="setPeriod", door="agent", key="dash-p
 // so the field's error and the tool's refusal never disagree. Ending the session and authenticating are the person's
 // own acts: there is no tool for either.
 fn profileBase(): ProfileDetail[] = [
-  ProfileDetail(key="name", label="Name", value="", hint="People in your workspace see this name.", kind="text", options=[], editLabel="Edit name"),
-  ProfileDetail(key="email", label="Email", value="", hint="We write to this address.", kind="email", options=[], editLabel="Edit email"),
-  ProfileDetail(key="phone", label="Phone", value="", hint="With the country code, as in +44 20 7946 0958.", kind="tel", options=[], editLabel="Edit phone"),
-  ProfileDetail(key="language", label="Language", value="", hint="For the app's words and the mail we send you.", kind="choice", options=profileLanguages(), editLabel="Edit language")
+  ProfileDetail(key="name", label="Name", value="", hint="People in your workspace see this name.", kind="text", options=[]),
+  ProfileDetail(key="email", label="Email", value="", hint="We write to this address.", kind="email", options=[]),
+  ProfileDetail(key="phone", label="Phone", value="", hint="With the country code, as in +44 20 7946 0958.", kind="tel", options=[]),
+  ProfileDetail(key="language", label="Language", value="", hint="For the app's words and the mail we send you.", kind="choice", options=profileLanguages())
 ]
-fn profilePicture(): string = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect width='1' height='1' fill='slategray'/%3E%3C/svg%3E"
+fn profilePicture(): string = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect width='1' height='1' fill='lightsteelblue'/%3E%3Ccircle cx='0.5' cy='0.41' r='0.18' fill='ghostwhite'/%3E%3Cpath d='M0.15 1c0.04-0.2 0.18-0.3 0.35-0.3s0.31 0.1 0.35 0.3z' fill='ghostwhite'/%3E%3C/svg%3E"
 fn profileLanguages(): string[] = ["English (UK)", "English (US)", "Deutsch", "Español", "Français", "Português"]
 fn profileDetailKeys(): string[] = profileBase().map(d => d.key)
 fn profileKey(key: string): string = `profile-${key}`
