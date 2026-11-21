@@ -1,7 +1,8 @@
 // The journeys' words, their one tool list and their start values. Every word a person reads is here or in the
 // app's view, never in a design package.
 use Value, AgentTool, AnswerWords, Act, Ledger from "@agent-ui-kit/agent"
-use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, ShellRow, SettingsSection, SettingsScreenGroup, DashboardPeriod, DashboardItem from "__SCOPE__/screens"
+use Media, ListDetailItem, MailFolder, MailLetter, OnboardingAnswer, ShellRow, SettingsSection, SettingsScreenGroup, DashboardPeriod, DashboardItem, ChatTurn from "__SCOPE__/screens"
+use MenuItem from "__SCOPE__/components"
 use Fact, Message, Step, NavEntry, Setting, Stat, BarPoint from "__SCOPE__/blocks"
 
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -172,6 +173,29 @@ fn dashItems(): DashboardItem[] = [
 ]
 fn periodAct(key: string): Act = Act(tool="setPeriod", door="agent", key="dash-period", title="Period", value=key, did=`Your assistant showed the numbers for ${dashPeriodWord(key)}.`, asks=`Your assistant suggests showing the numbers for ${dashPeriodWord(key)}.`, will=`Your assistant will show the numbers for ${dashPeriodWord(key)} in 5 seconds.`)
 
+// ChatScreen: a conversation with an assistant. What the person has sent is one value in the ledger (`chat-log`, each
+// message on its own line), so the person's Send and the agent's sendMessage write the same value and the turns
+// follow from it; the text being typed is the person's view, not a value. Authenticating stays the person's own act:
+// there is no tool for it.
+fn chatBase(): ChatTurn[] = [
+  ChatTurn(key="turn-1", author="You", text="Find us somewhere for dinner on Thursday. Two people, near Alfama, nothing too loud.", when="18:02", unread=false, href="/"),
+  ChatTurn(key="turn-2", author="Atlas", text="Taberna da Rua has a table at 8pm. It is the quietest of three, with grilled fish and a small terrace.", when="18:02", unread=false, href="/")
+]
+fn chatLines(log: string): string[] = log == "" ? [] : log.split("\n")
+fn chatAppend(log: string, text: string): string = log == "" ? text : `${log}\n${text}`
+fn chatSettings(): MenuItem[] = [
+  MenuItem(key="aloud", heading="", label="Read replies aloud", detail="", kind="toggle", on=false, enabled=true),
+  MenuItem(key="brief", heading="Replies", label="Brief", detail="", kind="choice", on=true, enabled=true),
+  MenuItem(key="detailed", heading="", label="Detailed", detail="", kind="choice", on=false, enabled=true)
+]
+fn chatAddItems(): MenuItem[] = [
+  MenuItem(key="picture", heading="", label="Picture", detail="From this device", kind="act", on=false, enabled=true),
+  MenuItem(key="file", heading="", label="File", detail="A document or a sheet", kind="act", on=false, enabled=true),
+  MenuItem(key="place", heading="", label="Place", detail="A place on the map", kind="act", on=false, enabled=true)
+]
+fn chatAddFound(query: string): MenuItem[] = chatAddItems().filter(m => m.label.toLowerCase().includes(query.trim().toLowerCase()))
+fn chatSendAct(log: string, text: string): Act = Act(tool="sendMessage", door="agent", key="chat-log", title="Message", value=chatAppend(log, text), did=`Your assistant sent “${text}” for you.`, asks=`Your assistant suggests sending “${text}”.`, will=`Your assistant will send “${text}” in 5 seconds.`)
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="showPicture", title="Album", sentence="Shows a picture of the album.", floor="recorded", reach="self", secret=false),
@@ -184,10 +208,11 @@ fn agentTools(): AgentTool[] = [
   // The person's own acts: off, so the ledger refuses them from the agent's door whatever mode a person chooses.
   AgentTool(name="acceptTerms", title="Terms", sentence="Accepts the terms for the person. Never allowed.", floor="off", reach="self", secret=false),
   AgentTool(name="authenticate", title="Authenticate", sentence="Authenticates the person. Never allowed: authenticating is the person's own act.", floor="off", reach="self", secret=false),
-  AgentTool(name="setPeriod", title="Period", sentence="Shows the dashboard's numbers for another period.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="setPeriod", title="Period", sentence="Shows the dashboard's numbers for another period.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="sendMessage", title="Messages", sentence="Sends a message in the conversation for the person.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
   Value(key="picture", value="harbour"),
   Value(key="project", value="harbour")
-].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on")))).concat([Value(key="entry-step", value="terms"), Value(key="entry-authenticated", value="no")]).concat([Value(key="dash-period", value="quarter")])
+].concat(flagKeys().map(k => Value(key=k, value="off"))).concat([Value(key="setup-step", value="workspace")]).concat(setupKeys().map(k => Value(key=k, value=""))).concat([Value(key="shell-search", value="")]).concat(settingKeys().map(k => Value(key=k, value=(k == "settings-news" or k == "settings-receipts" ? "off" : "on")))).concat([Value(key="entry-step", value="terms"), Value(key="entry-authenticated", value="no")]).concat([Value(key="dash-period", value="quarter")]).concat([Value(key="chat-log", value="")])

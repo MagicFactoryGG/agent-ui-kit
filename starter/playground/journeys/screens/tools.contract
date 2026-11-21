@@ -2,11 +2,11 @@
 // mode comes from the tool list, never from an `if` here. The door is passed as "agent": an action cannot read
 // which door called it. A tool's action calls functions only, never another action with arguments (the kit's
 // docs/recipes/exact-workarounds.md, 3).
-use Ledger, act from "@agent-ui-kit/agent"
-use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys, answerAct, setupAnswerKeys, shellSearchAct, settingAct, settingsSwitchKeys, entryOpenAct, entryAcceptAct, entryAuthenticateAct, periodAct, dashPeriodKeys from "./model.contract"
+use Ledger, act, valueOf from "@agent-ui-kit/agent"
+use pictureAct, albumKeys, projectAct, projectKeys, flagAct, mailKeys, answerAct, setupAnswerKeys, shellSearchAct, settingAct, settingsSwitchKeys, entryOpenAct, entryAcceptAct, entryAuthenticateAct, periodAct, dashPeriodKeys, chatSendAct from "./model.contract"
 
 members App
-  action openScreen(screen: enum<"MediaViewer", "ListDetail", "MailScreen", "OnboardingScreen", "AppShell", "SettingsScreen", "EntryScreen", "DashboardScreen">)
+  action openScreen(screen: enum<"MediaViewer", "ListDetail", "MailScreen", "OnboardingScreen", "AppShell", "SettingsScreen", "EntryScreen", "DashboardScreen", "ChatScreen">)
     shown = screen
   action readAlbum
   action showPicture(picture: string)
@@ -43,3 +43,8 @@ members App
   action readPeriods
   action setPeriod(period: string)
     book = dashPeriodKeys().includes(period) ? act(book, periodAct(period)) : Ledger(book, answer="unknown-id")
+  action readConversation
+  // A message the agent sends for the person: the same value the person's Send writes, recorded and marked. Empty
+  // text sends nothing, as Send is off while the text is empty.
+  action sendMessage(text: string)
+    book = text.trim() == "" ? Ledger(book, answer="empty") : act(book, chatSendAct(valueOf(book, "chat-log"), text.trim()))

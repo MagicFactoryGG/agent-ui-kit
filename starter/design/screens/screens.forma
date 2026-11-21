@@ -103,3 +103,12 @@ theme
   screens.dashboard-mark-line: length = 3px  // the band's start edge: the kit's agent mark (components.mark-line)
   screens.dashboard-glyph: length = 16px
   screens.dashboard-glyph-top: length = 2px  // a 16px glyph centred on the body type's first line (21px)
+  screens.chat-max: length = 1100px  // MessageList's own card width (blocks.mail-max), so the composer shares the card's edges
+  screens.chat-text-min: length = 220px  // the text keeps this beside mic, plus and send; narrower, they wrap under it
+  screens.chat-field-max: length = 160px  // the text grows with its lines up to this, then scrolls inside
+  screens.chat-action: length = 44px  // ActionButton's least height (components.row-min): the reply's line centres on Stop
+  screens.chat-band-min: length = 240px  // under this a band's sentence takes its own line and the answers wrap under it
+  screens.chat-mark-line: length = 3px  // the band's start edge: the kit's agent mark (components.mark-line)
+  screens.chat-glyph: length = 16px
+  screens.chat-glyph-top: length = 2px  // a 16px glyph centred on the body type's first line (21px)
+  screens.chat-dot: length = 6px

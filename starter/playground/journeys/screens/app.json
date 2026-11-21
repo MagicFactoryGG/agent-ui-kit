@@ -114,6 +114,17 @@
             "title": "Period"
           }
         }
+      },
+      "readConversation": {
+        "title": "Read Conversation"
+      },
+      "sendMessage": {
+        "title": "Send Message",
+        "parameters": {
+          "text": {
+            "title": "Text"
+          }
+        }
       }
     }
   }

@@ -1,0 +1,251 @@
+// ChatScreen: a conversation with an agent. Three parts, top to bottom, in one column that fills the window:
+//
+// - The header: the kit's TopBar with the conversation's title, and the conversation's settings at its end (an
+//   ActionButton that opens the kit's Menu). Settings live here, never in the composer.
+// - The messages: the kit's MessageList, in a scroller between the header and the composer. Each turn is one of
+//   its rows (who, when, the turn's first sentence as the row's line and the rest under it, cut to one line); on a
+//   wide window MessageList's own reading pane beside the rows holds the open turn whole (its first sentence as the
+//   pane's title, the rest wrapping under it), so a long reply reads in full without leaving the conversation. On
+//   a phone the rows stand alone and a row's own way in (its href) opens the turn, as the platform composes a list
+//   with its detail. The column holds MessageList's own measure (screens.chat-max), centred, and the composer shares
+//   its edges.
+// - The composer (the dock's, the lead's rule of 21 Nov: one way to talk to agents): what was pasted shows inline,
+//   in the order it was pasted (a Picture for a picture, a link as a link in the text), then the text being typed,
+//   in the kit's Field; three 44px buttons follow it, mic, plus and send, left to right, and the text wraps round
+//   them: beside the text while the text keeps screens.chat-text-min, on their own line under it on a phone. Plus
+//   opens the kit's Menu with its search first (as CommandMenu does): what can be added to the message. Send is off
+//   while there is nothing to send, and Enter sends (Shift-Enter starts a new line). The composer sits outside the
+//   scroller, so with the keyboard up on a phone it stays over the keyboard while the messages shrink, and Send and
+//   the empty state's way on give the focus back to the text, so the keyboard stays up. (On the web Exact reads
+//   interactive-widget="resizes-content" from the app's root alone, as its chat-thread recipe has it; a piece cannot
+//   say it, and the kit's ui-guard refuses it on an app's main today.)
+//
+// States:
+//   data   many|empty|loading|failed|long, for the messages: MessageList says each in its own room. empty: the
+//          app's line and its way on (startLabel), which puts the focus in the composer; loading: rows breathe in
+//          the real rows' shape; failed: the app's line and Try again (the state's one fill, so Send steps back to
+//          plain). The composer stays usable in every state. long: every word at length (rows cut, the pane and the
+//          composer wrap).
+//   agent  none|proposed|changed|waiting: what the agent did or asks, held in one band over the composer.
+//          changed: it sent a message through its tool (the other door), so that turn carries MessageList's accent
+//          mark and `agentMark`, and the band says the ledger's sentence with Undo; proposed: one sentence and two
+//          answer words (Accept is the state's one fill); waiting: the agent waits for the person's own act
+//          (authenticating, accepting terms: no tool does these), with a clock on the caution edge and the way to it,
+//          plain (the person goes when they choose).
+//   reply  idle|thinking|answering: the agent's reply on its way, one quiet line over the composer that a screen
+//          reader hears (role status): thinking breathes three dots; answering says so with Stop beside it.
+// Every word is the app's; every value a Theme token or a screens.chat-* size.
+//
+// Missing primitive (noted for design-system): a 44px square icon button (a symbol with an accessible name). Until
+// it exists, mic, plus and send are ActionButtons with the app's words.
+use Words, ActionButton, Field, Menu, MenuItem, Picture from "__SCOPE__/components"
+use TopBar, MessageList, Message from "__SCOPE__/blocks"
+
+// One turn of the conversation: its key, who said it (the person's own name for their turns, the agent's for its
+// replies), what was said, when, whether the person has not seen it yet, and where it opens on its own.
+shape ChatTurn
+  key: string
+  author: string
+  text: string
+  when: string
+  unread: bool
+  href: string
+
+// One piece of the message being written, in the order it was pasted: words, a picture (`src`, said as `text`) or
+// a link (`href`, read as `text`).
+shape ChatPart
+  key: string
+  kind: enum<"text", "picture", "link">
+  text: string
+  src: string
+  href: string
+
+// The viewport facts the screen reads: its width (the insets) and the person's motion preference (the dots).
+shape ChatViewport
+  width: number
+  prefersReducedMotion: bool
+
+// From this width the page takes the desktop's insets.
+fn chatWideFrom(): number = 900
+
+// Where a turn's first sentence ends: after the first ". ", "? " or "! ", else the whole text.
+fn chatAt(t: string, s: string): number = t.indexOf(s) < 0 ? t.length : t.indexOf(s) + 1
+fn chatCut(t: string): number = min(chatAt(t, ". "), min(chatAt(t, "? "), chatAt(t, "! ")))
+// A turn as MessageList's row: the first sentence is its line (the pane's title), the rest its preview.
+fn chatRow(t: ChatTurn): Message = Message(key=t.key, from=t.author, subject=t.text.slice(0, chatCut(t.text)), snippet=t.text.slice(chatCut(t.text)).trim(), when=t.when, unread=t.unread, flagged=false, href=t.href)
+
+// The reply's dots breathe, held still when the person prefers no motion.
+keyframes chatPulse
+  50% opacity=0.3
+
+// What the agent did, asks or waits for, in one band: its glyph and sentence, then its answers (the slot), which
+// wrap under the sentence when it would fall under screens.chat-band-min. Proposed and changed take the accent's
+// edge (the kit's agent mark, as LinkRow draws it), waiting the caution's edge and a clock. The words are ink on
+// the surface and the frame is the line token, so the band shows on a theme whose page and surface are one colour.
+// (Proposal draws a row that does not wrap, so a phone would squeeze its sentence: the band is drawn here.)
+component ChatBand
+  props
+    tone: enum<"proposed", "changed", "waiting">
+    sentence: string
+    testId: string
+  slot
+  view
+    row testId=testId role="status" flex-wrap="wrap" align-items="center" column-gap="theme.space.lg" row-gap="theme.space.sm" padding-top="theme.space.sm" padding-bottom="theme.space.sm" padding-left="theme.space.md" padding-right="theme.space.sm" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" border-left-width="screens.chat-mark-line" border-left-color=(tone == "waiting" ? "theme.color.caution" : "theme.color.accent")
+      row flex=1 min-width="screens.chat-band-min" align-items="flex-start" gap="theme.space.sm"
+        svg viewBox="0 0 16 16" width="screens.chat-glyph" height="screens.chat-glyph" margin-top="screens.chat-glyph-top" fill="none" aria-hidden=true flex-shrink=0
+          if tone == "waiting"
+            circle cx=8 cy=8 r=6 stroke="theme.color.caution" stroke-width=1.5
+            path d="M8 4.8V8l2.2 1.4" stroke="theme.color.caution" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"
+          else
+            path d="M8 1.5l1.5 4.2 4.2 1.5-4.2 1.5L8 12.9 6.5 8.7 2.3 7.2l4.2-1.5Z" fill="theme.color.accent"
+        column flex=1 min-width=0
+          text sentence testId=`${testId}-sentence` overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+      row flex-wrap="wrap" gap="theme.space.sm" margin-left="auto"
+        children
+
+// The agent's reply on its way: one quiet line over the composer, heard by a screen reader. Thinking breathes three
+// dots in the accent; answering holds them still and offers Stop.
+component ChatActivity
+  props
+    answering: bool
+    text: string
+    stopLabel: string
+    stop: action
+    pulse: string
+    testId: string
+  view
+    row testId=testId role="status" align-items="center" gap="theme.space.sm" min-height="screens.chat-action" padding-left="theme.space.md"
+      row gap="theme.space.xs" aria-hidden=true flex-shrink=0
+        box width="screens.chat-dot" height="screens.chat-dot" border-radius="theme.radius.pill" background-color="theme.color.accent" animation=(answering ? "none" : pulse)
+        box width="screens.chat-dot" height="screens.chat-dot" border-radius="theme.radius.pill" background-color="theme.color.accent" opacity=0.7 animation=(answering ? "none" : pulse)
+        box width="screens.chat-dot" height="screens.chat-dot" border-radius="theme.radius.pill" background-color="theme.color.accent" opacity=0.4 animation=(answering ? "none" : pulse)
+      column flex=1 min-width=0
+        Words(text=text, kind="caption", outcome="none", level=0, testId=`${testId}-text`)
+      if answering
+        ActionButton(opens="", label=stopLabel, kind="plain", interaction="idle", outcome="none", press=stop, testId=`${testId}-stop`)
+
+component ChatScreen
+  props
+    title: string
+    settingsLabel: string
+    settings: MenuItem[]
+    setSetting: action
+    listTitle: string
+    unreadLabel: string
+    orderLabel: string
+    paneLabel: string
+    paneEmptyText: string
+    paneQuietText: string
+    emptyText: string
+    startLabel: string
+    failedText: string
+    retryLabel: string
+    agentMark: string
+    agentKey: string
+    openKey: string
+    messages: ChatTurn[]
+    composerLabel: string
+    placeholder: string
+    draft: string
+    parts: ChatPart[]
+    edit: action
+    send: action
+    sendLabel: string
+    micLabel: string
+    voice: action
+    addLabel: string
+    addSearch: string
+    addQuery: string
+    findAdd: action
+    addItems: MenuItem[]
+    add: action
+    thinkingText: string
+    answeringText: string
+    stopLabel: string
+    stop: action
+    changedNote: string
+    undoLabel: string
+    undo: action
+    proposedNote: string
+    acceptLabel: string
+    rejectLabel: string
+    accept: action
+    reject: action
+    waitingNote: string
+    waitingLabel: string
+    review: action
+    retry: action
+    data: enum<"many", "empty", "loading", "failed", "long">
+    agent: enum<"none", "proposed", "changed", "waiting">
+    reply: enum<"idle", "thinking", "answering">
+  resource viewport = exactViewport() as shape ChatViewport
+  derive wide = viewport.width >= chatWideFrom()
+  derive pulse = viewport.prefersReducedMotion ? "none" : "chatPulse 1.2s ease-in-out infinite"
+  derive canSend = draft.trim() != "" or parts.length > 0
+  // One fill per state: Send while there is something to send, unless failed's Try again or the agent's Accept is
+  // the state's focal act.
+  derive sendFocal = canSend and data != "failed" and agent != "proposed"
+  // The turn the pane opens: the app's, else the newest.
+  derive openedKey = openKey != "" ? openKey : messages.slice(-1).map(t => t.key).join("")
+  action sendNow
+    if canSend
+      send()
+    focus("chat-composer-input")
+  action startWriting
+    focus("chat-composer-input")
+  action keyed(k: string, e: KeyboardEvent)
+    if k == "Enter" and not e.shiftKey
+      preventDefault()
+      if canSend
+        send()
+  // Menu's picks and the add menu's search, passed on to the app's actions with their argument.
+  action chooseSetting(key: string)
+    setSetting(key)
+  action chooseAdd(key: string)
+    add(key)
+  action findAdding(q: string)
+    findAdd(q)
+  action opened
+  action nothing(q: string)
+  view
+    column testId="chat" position="absolute" inset=0 display="flex" flex-direction="column" background-color="theme.color.page" color="theme.color.ink"
+      TopBar(title=title, agentNote="", agent="none")
+        ActionButton(opens="chat-settings-menu", label=settingsLabel, kind="plain", interaction="idle", outcome="none", press=opened, testId="chat-settings")
+        Menu(menuId="chat-settings-menu", label=settingsLabel, items=settings, presentation="popup", interaction="idle", choose=chooseSetting, search="", query="", find=nothing, testId="chat-settings-menu")
+      scroll id="chat-transcript" flex=1 min-height=0
+        column width="100%" max-width="screens.chat-max" margin-left="auto" margin-right="auto" box-sizing="border-box" padding=(wide ? "theme.space.xl" : "theme.space.md")
+          MessageList(title=listTitle, unreadLabel=unreadLabel, emptyText=emptyText, failedText=failedText, composeLabel=startLabel, retryLabel=retryLabel, orderLabel=orderLabel, paneLabel=paneLabel, paneEmptyText=paneEmptyText, paneQuietText=paneQuietText, openLabel="", agentNote=agentMark, chosenKey=openedKey, agentKey=agentKey, data=data, agent=(agent == "changed" ? "changed" : "none"), messages=messages.map(t => chatRow(t)), compose=startWriting, retry=retry, openMessage=opened, testId="chat-messages")
+      column flex-shrink=0 background-color="theme.color.page" border-top-width="theme.line.width" border-top-style="solid" border-top-color="theme.color.line"
+        column width="100%" max-width="screens.chat-max" margin-left="auto" margin-right="auto" box-sizing="border-box" gap="theme.space.sm" padding-left=(wide ? "theme.space.xl" : "theme.space.md") padding-right=(wide ? "theme.space.xl" : "theme.space.md") padding-top="theme.space.sm" padding-bottom="theme.space.md"
+          if agent == "changed"
+            ChatBand(tone="changed", sentence=changedNote, testId="chat-changed")
+              ActionButton(opens="", label=undoLabel, kind="plain", interaction="idle", outcome="none", press=undo, testId="chat-undo")
+          else if agent == "proposed"
+            ChatBand(tone="proposed", sentence=proposedNote, testId="chat-proposal")
+              ActionButton(opens="", label=rejectLabel, kind="plain", interaction="idle", outcome="none", press=reject, testId="chat-reject")
+              ActionButton(opens="", label=acceptLabel, kind="primary", interaction="idle", outcome="none", press=accept, testId="chat-accept")
+          else if agent == "waiting"
+            ChatBand(tone="waiting", sentence=waitingNote, testId="chat-waiting")
+              ActionButton(opens="", label=waitingLabel, kind="plain", interaction="idle", outcome="none", press=review, testId="chat-review")
+          if reply != "idle"
+            ChatActivity(answering=(reply == "answering"), text=(reply == "answering" ? answeringText : thinkingText), stopLabel=stopLabel, stop=stop, pulse=pulse, testId="chat-reply")
+          // The composer: one surface with the line round it, the pasted pieces and the text, then mic, plus, send.
+          row testId="chat-composer" role="group" aria-label=composerLabel keycapture=keyed flex-wrap="wrap" align-items="flex-end" column-gap="theme.space.sm" row-gap="theme.space.xs" padding="theme.space.xs" padding-left="theme.space.md" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line"
+            column flex=1 min-width="screens.chat-text-min" gap="theme.space.xs" padding-top="theme.space.xs" padding-bottom="theme.space.xs"
+              if parts.length > 0
+                row testId="chat-composer-parts" flex-wrap="wrap" align-items="center" column-gap="theme.space.xs" row-gap="theme.space.sm" min-width=0
+                  for p in parts key=p.key
+                    if p.kind == "picture"
+                      Picture(src=p.src, label=p.text, data="one")
+                    else if p.kind == "link"
+                      link href=p.href testId=`chat-part-${p.key}` min-width=0 color="theme.color.accent" text-decoration-line="underline"
+                        text p.text overflow-wrap="anywhere" font="theme.type.body" color="theme.color.accent"
+                    else
+                      text p.text testId=`chat-part-${p.key}` min-width=0 overflow-wrap="break-word" font="theme.type.body" color="theme.color.ink"
+              Field(id="chat-composer", label="", hint="", error="", outcome="none")
+                textarea id="chat-composer-input" value=draft input=edit rows=1 field-sizing="content" max-height="screens.chat-field-max" placeholder=placeholder aria-label=composerLabel testId="chat-composer-input" width="100%" min-width=0 box-sizing="border-box" padding-top="theme.space.sm" padding-bottom="theme.space.sm" border-width=0 background-color="transparent" color="theme.color.ink" font="theme.type.body" resize="none"
+            row flex-shrink=0 margin-left="auto" gap="theme.space.xs" align-items="center"
+              ActionButton(opens="", label=micLabel, kind="plain", interaction="idle", outcome="none", press=voice, testId="chat-mic")
+              ActionButton(opens="chat-add-menu", label=addLabel, kind="plain", interaction="idle", outcome="none", press=opened, testId="chat-add")
+              ActionButton(opens="", label=sendLabel, kind=(sendFocal ? "primary" : "plain"), interaction=(canSend ? "idle" : "disabled"), outcome="none", press=sendNow, testId="chat-send")
+            Menu(menuId="chat-add-menu", label=addLabel, items=addItems, presentation="popup", interaction="idle", choose=chooseAdd, search=addSearch, query=addQuery, find=findAdding, testId="chat-add-menu")

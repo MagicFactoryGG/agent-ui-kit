@@ -12,10 +12,10 @@
 //
 // Members files: tools.contract (the agent's door), model.contract (words, the tool list, start values).
 use Ledger, ledger, personSet, valueOf, isOn, isMarked, undoLatest from "@agent-ui-kit/agent"
-use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer, AppShell, SettingsScreen, SettingsScreenGroup, EntryScreen, DashboardScreen from "__SCOPE__/screens"
+use MediaViewer, Media, ListDetail, MailScreen, OnboardingScreen, OnboardingAnswer, AppShell, SettingsScreen, SettingsScreenGroup, EntryScreen, DashboardScreen, ChatScreen, ChatTurn from "__SCOPE__/screens"
 use Words from "__SCOPE__/components"
 use Message, Setting from "__SCOPE__/blocks"
-use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys, shellFound, shellEntries, settingsSections, settingsGroupsOf, settingsSwitches, settingsSwitchKeys, settingKey, settingKeys, settingSectionOf, dashPeriods, dashStats, dashPoints, dashNote, dashItems from "./model.contract"
+use startValues, agentTools, answerWords, latestAbout, album, albumKeys, stepKey, projects, projectFacts, mailBase, mailKeys, flagKey, flagKeys, mailFolders, mailLetter, setupStepsAt, setupStepKeys, setupStepFrom, setupAnswers, setupStepOf, setupKey, setupKeys, shellFound, shellEntries, settingsSections, settingsGroupsOf, settingsSwitches, settingsSwitchKeys, settingKey, settingKeys, settingSectionOf, dashPeriods, dashStats, dashPoints, dashNote, dashItems, chatBase, chatLines, chatAppend, chatSettings, chatAddFound from "./model.contract"
 
 component App
   members "./tools.contract"
@@ -119,6 +119,26 @@ component App
   action choosePeriodByPerson(key: string)
     book = personSet(book, "dash-period", key)
 
+  // ChatScreen: a conversation; what the person has sent is a value in the ledger (`chat-log`), so the person's
+  // Send and the agent's sendMessage reach the same turns, and the agent's turn carries its mark. The text being
+  // typed and the add menu's search are the person's view (no ledger, no record).
+  state chatDraft = ""
+  state chatAddQuery = ""
+  derive chatLog = valueOf(book, "chat-log")
+  derive chatSent = chatLines(chatLog)
+  derive chatTurns = chatBase().concat(chatSent.map((t, i) => ChatTurn(key=`sent-${i + 1}`, author="You", text=t, when="Now", unread=false, href="/")))
+  derive chatMarked = isMarked(book, "chat-log")
+  derive chatText = chatTurns.map(t => `${t.key}\t${t.author}\t${t.text}`).join("\n")
+  // The person's door: typing is the draft; Send (or Enter) writes the message, as the agent's tool does.
+  action chatEditByPerson(text: string)
+    chatDraft = text
+  action chatSendByPerson
+    if chatDraft.trim() != ""
+      book = personSet(book, "chat-log", chatAppend(valueOf(book, "chat-log"), chatDraft.trim()))
+      chatDraft = ""
+  action chatFindByPerson(text: string)
+    chatAddQuery = text
+
   // A retry and a proposal's answers: this use has none.
   action ignore
     book = book
@@ -126,7 +146,7 @@ component App
     book = book
 
   // The agent's door. Answer words: saved, delayed, proposed, off, unknown-id.
-  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen, OnboardingScreen, AppShell, SettingsScreen or DashboardScreen. Answers its name." = openScreen
+  tool openScreen writes idempotent closed "Show one screen of these journeys: MediaViewer, ListDetail, MailScreen, OnboardingScreen, AppShell, SettingsScreen, DashboardScreen or ChatScreen. Answers its name." = openScreen
     returns shown
   tool readAlbum reads "The album's pictures, one per line: id, caption, and shown on the one on screen, tab-separated." = readAlbum
     returns albumText
@@ -167,6 +187,12 @@ component App
     returns book.answer
     fails when book.answer == "unknown-id" or book.answer == "off"
 
+  tool readConversation reads "The conversation's turns, oldest first, one per line: id, who said it, and what was said, tab-separated." = readConversation
+    returns chatText
+  tool sendMessage writes additive closed "Send a message in the conversation for the person, with the words to send. Answers saved, or empty for no words." = sendMessage
+    returns book.answer
+    fails when book.answer == "empty" or book.answer == "off"
+
   tool readEntry reads "The way in: the step the person is on, terms or authenticate. Accepting the terms and authenticating are the person's own." = readEntry
     returns entryStep
   tool openEntry writes idempotent closed "Open the way in at its terms, for the person to accept them and authenticate. Answers saved." = openEntry
@@ -199,3 +225,5 @@ component App
             Words(text="Northwind terms of service: the relying party's own capture page takes this place in a real app.", kind="body", outcome="none", level=0, testId="entry-terms-page")
       else if shown == "DashboardScreen"
         DashboardScreen(title="Overview", periodLabel="Period", chartTitle="Orders", chartNote=dashNote(dashPeriod), chartLabel="Orders in the period", recentTitle="Recent orders", recentEmptyText="No orders yet.", allLabel="View all", loadingText="", chartLoadingText="", emptyText="", emptyLabel="", failedText="", retryLabel="", proposedNote="", acceptLabel="", rejectLabel="", changedNote=latestAbout(book, ["dash-period"]), undoLabel="Undo", periodKey=dashPeriod, periods=dashPeriods(), stats=dashStats(dashPeriod), points=dashPoints(dashPeriod), items=dashItems(), data="many", agent=(isMarked(book, "dash-period") ? "changed" : "none"), choose=choosePeriodByPerson, showAll=ignore, start=ignore, retry=ignore, accept=ignore, reject=ignore, undo=undoByPerson)
+      else if shown == "ChatScreen"
+        ChatScreen(title="Dinner in Lisbon", settingsLabel="Conversation settings", settings=chatSettings(), setSetting=ignoreKey, listTitle="Atlas", unreadLabel="new", orderLabel="Today", paneLabel="Open message", paneEmptyText="Choose a message to read it whole here.", paneQuietText="Messages open here once the conversation starts.", emptyText="Ask Atlas anything to start.", startLabel="Write a message", failedText="This conversation did not load.", retryLabel="Try again", agentMark="Sent by your assistant", agentKey=(chatMarked ? `sent-${chatSent.length}` : ""), openKey="", messages=chatTurns, composerLabel="Message to Atlas", placeholder="Message Atlas", draft=chatDraft, parts=[], edit=chatEditByPerson, send=chatSendByPerson, sendLabel="Send", micLabel="Voice", voice=ignore, addLabel="Add", addSearch="Search what to add", addQuery=chatAddQuery, findAdd=chatFindByPerson, addItems=chatAddFound(chatAddQuery), add=ignoreKey, thinkingText="Atlas is thinking", answeringText="Atlas is answering", stopLabel="Stop", stop=ignore, changedNote=latestAbout(book, ["chat-log"]), undoLabel="Undo", undo=undoByPerson, proposedNote="", acceptLabel="", rejectLabel="", accept=ignore, reject=ignore, waitingNote="", waitingLabel="", review=ignore, retry=ignore, data="many", agent=(chatMarked ? "changed" : "none"), reply="idle")
