@@ -133,6 +133,8 @@ component TimelineDay
     accept: action
     reject: action
     undo: action
+    // the rows' testIds start with it, so a row is found by its event's key wherever its day falls
+    rowsId: string
     testId: string
   view
     row testId=testId flex-wrap="wrap" align-items="flex-start" column-gap="theme.space.xl" row-gap="theme.space.sm"
@@ -140,7 +142,7 @@ component TimelineDay
         Words(text=day, kind="label", outcome="none", level=3, testId=`${testId}-label`)
       column role="list" aria-label=day flex=4 min-width="blocks.timeline-rows-min" box-sizing="border-box" background-color="theme.color.surface" border-radius="theme.radius.card" border-width="theme.line.width" border-style="solid" border-color="theme.color.line" overflow="hidden"
         for e, i in events key=e.key
-          TimelineRow(event=e, first=(i == 0), last=(i == events.length - 1), open=(agent != "none" and e.key == agentKey ? agent : "none"), note=(agent == "proposed" ? proposedNote : changedNote), acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, accept=accept, reject=reject, undo=undo, testId=`${testId}-${e.key}`)
+          TimelineRow(event=e, first=(i == 0), last=(i == events.length - 1), open=(agent != "none" and e.key == agentKey ? agent : "none"), note=(agent == "proposed" ? proposedNote : changedNote), acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, accept=accept, reject=reject, undo=undo, testId=`${rowsId}-${e.key}`)
 
 // A quiet row while the events load: the real row's grid (time, rail and ring, two lines), every word a bar.
 component TimelineGhost
@@ -260,4 +262,4 @@ component ActivityTimeline
       else
         column gap="theme.space.xl"
           for d, n in days key=d
-            TimelineDay(day=d, events=shown.filter(e => e.day == d), agent=agent, agentKey=agentKey, proposedNote=proposedNote, changedNote=changedNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, accept=accept, reject=reject, undo=undo, testId=`${testId}-day-${n}`)
+            TimelineDay(day=d, events=shown.filter(e => e.day == d), agent=agent, agentKey=agentKey, proposedNote=proposedNote, changedNote=changedNote, acceptLabel=acceptLabel, rejectLabel=rejectLabel, undoLabel=undoLabel, accept=accept, reject=reject, undo=undo, rowsId=testId, testId=`${testId}-day-${n}`)

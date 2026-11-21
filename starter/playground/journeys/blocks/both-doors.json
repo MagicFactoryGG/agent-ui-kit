@@ -737,5 +737,79 @@
     "expectPerson": {
       "book.changes.length": 0
     }
+  },
+  {
+    "name": "ActivityTimeline: the filter by who did it: the Your assistant segment and setActivityFilter reach the same filter; the agent's is recorded and marked on the filter",
+    "person": [
+      "tap activity-filter-agent"
+    ],
+    "agent": [
+      "call setActivityFilter {\"filter\":\"agent\"}"
+    ],
+    "same": [
+      "book.values",
+      "activityFilter"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "activityFilter": "agent",
+      "activityFilterMarked": true,
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "activity-filter",
+      "book.changes.0.was": "everyone",
+      "book.marked": [
+        "activity-filter"
+      ]
+    },
+    "expectPerson": {
+      "activityFilter": "agent",
+      "activityFilterMarked": false,
+      "book.changes.length": 0,
+      "book.marked": []
+    }
+  },
+  {
+    "name": "ActivityTimeline: Undo on the assistant's archive: the event's Undo and undoActivity put the 12 threads back alike; the agent's undo is recorded, marked and can itself be undone",
+    "person": [
+      "tap activity-archive-undo"
+    ],
+    "agent": [
+      "call undoActivity {\"event\":\"archive\"}"
+    ],
+    "same": [
+      "book.values",
+      "threads"
+    ],
+    "calls": [
+      [
+        "ok",
+        "saved"
+      ]
+    ],
+    "expect": {
+      "threads": "kept",
+      "threadsMarked": true,
+      "activityUndoKey": "restore",
+      "book.changes.length": 1,
+      "book.changes.0.mode": "recorded",
+      "book.changes.0.key": "threads",
+      "book.changes.0.was": "archived",
+      "book.marked": [
+        "threads"
+      ]
+    },
+    "expectPerson": {
+      "threads": "kept",
+      "threadsMarked": false,
+      "activityUndoKey": "",
+      "book.changes.length": 0,
+      "book.marked": []
+    }
   }
 ]

@@ -7,6 +7,7 @@ use Fact, Event, Step, Message, NavEntry, Record, Feature, Plan, HeroPoint from 
 use Question from "__SCOPE__/blocks"
 use BarPoint, BarRange, NotificationNote from "__SCOPE__/blocks"
 use Stat from "__SCOPE__/blocks"
+use TimelineEvent from "__SCOPE__/blocks"
 
 fn onOff(on: bool): string = on ? "on" : "off"
 fn answerWords(): AnswerWords = AnswerWords(keep="Keep", undo="Undo", accept="Accept", reject="Reject", now="Now", stop="Stop")
@@ -187,6 +188,25 @@ fn weekStats(): Stat[] = [
 fn statsText(state: string): string = state == "many" ? weekStats().map(s => `${s.key}\t${s.label}\t${s.value}\t${s.change}`).join("\n") : state
 fn loadStatsAct(): Act = Act(tool="loadStats", door="agent", key="stats", title="This week's numbers", value="many", did="Your assistant read this week's numbers again.", asks="Your assistant suggests reading this week's numbers again.", will="Your assistant will read this week's numbers again in 5 seconds.")
 
+// ActivityTimeline: a workspace's activity, newest first. Two values in the ledger: the filter by who did it
+// ("activity-filter": everyone, person or agent), which the person's segments and the agent's setActivityFilter set;
+// and the threads the assistant archived yesterday ("threads": archived, or kept once that is undone), which the
+// event's Undo and the agent's undoActivity take back. The undo is itself an event: by the person, or by the
+// assistant (recorded, so it carries the assistant's mark and its own Undo).
+fn activityFilterName(key: string): string = key == "person" ? "your own events" : key == "agent" ? "your assistant's events" : "everyone's events"
+fn activityEvents(l: Ledger): TimelineEvent[] = (valueOf(l, "threads") == "kept" ? [TimelineEvent(key="restore", day="Today", time="09:52", actor=(isMarked(l, "threads") ? "Your assistant" : "You"), title="Put the 12 archived threads back in the inbox", detail="They show again with their replies.", by=(isMarked(l, "threads") ? "agent" : "person"))] : []).concat([
+  TimelineEvent(key="plan", day="Today", time="09:12", actor="You", title="Changed the plan to Team", detail="Billing moves to 5 seats from the next invoice.", by="person"),
+  TimelineEvent(key="archive", day="Yesterday", time="18:05", actor="Your assistant", title="Archived 12 old threads", detail="Threads with no reply in 90 days. They stay in Archive for 30 days.", by="agent"),
+  TimelineEvent(key="invite", day="Yesterday", time="14:30", actor="You", title="Invited Mei Lin to the workspace", detail="", by="person"),
+  TimelineEvent(key="export", day="Mon 17 Nov", time="08:20", actor="Your assistant", title="Exported October's invoices", detail="18 invoices, sent to the finance folder.", by="agent")
+])
+fn activityText(l: Ledger): string = [valueOf(l, "activity-filter")].concat(activityEvents(l).map(e => `${e.key}\t${e.day}\t${e.time}\t${e.by}\t${e.title}`)).join("\n")
+fn activityFilterAct(key: string): Act = Act(tool="setActivityFilter", door="agent", key="activity-filter", title="Activity filter", value=key, did=`Your assistant showed ${activityFilterName(key)}.`, asks=`Your assistant suggests showing ${activityFilterName(key)}.`, will=`Your assistant will show ${activityFilterName(key)} in 5 seconds.`)
+fn restoreThreadsAct(): Act = Act(tool="undoActivity", door="agent", key="threads", title="Archived threads", value="kept", did="Your assistant put the 12 archived threads back in the inbox.", asks="Your assistant suggests putting the 12 archived threads back in the inbox.", will="Your assistant will put the 12 archived threads back in the inbox in 5 seconds.")
+// The agent undoes the archive only while it stands; once the threads are back it answers not-archived and
+// changes nothing, so a call twice undoes once.
+fn undoArchive(l: Ledger): Ledger = valueOf(l, "threads") == "archived" ? act(l, restoreThreadsAct()) : Ledger(l, answer="not-archived")
+
 // The app's one tool list: each tool's floor (a change only this person sees is recorded).
 fn agentTools(): AgentTool[] = [
   AgentTool(name="setSetting", title="Email notifications", sentence="Turns an email notification on or off.", floor="recorded", reach="self", secret=false),
@@ -204,7 +224,9 @@ fn agentTools(): AgentTool[] = [
   AgentTool(name="setChartRange", title="Orders chart", sentence="Shows the orders chart by week or by month.", floor="recorded", reach="self", secret=false),
   AgentTool(name="markNotesRead", title="Notifications", sentence="Marks the new notifications read, as the list's Mark all read does.", floor="recorded", reach="self", secret=false),
   AgentTool(name="loadStats", title="This week's numbers", sentence="Reads this week's numbers again after a failed read, as their Try again does.", floor="recorded", reach="self", secret=false),
-  AgentTool(name="setSort", title="Order", sentence="Puts the list in an order: newest, oldest or name.", floor="recorded", reach="self", secret=false)
+  AgentTool(name="setSort", title="Order", sentence="Puts the list in an order: newest, oldest or name.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="setActivityFilter", title="Activity filter", sentence="Shows the activity of everyone, only the person's own, or only the assistant's.", floor="recorded", reach="self", secret=false),
+  AgentTool(name="undoActivity", title="Archived threads", sentence="Undoes an event the assistant did, as the event's Undo does: the 12 threads it archived go back to the inbox.", floor="recorded", reach="self", secret=false)
 ]
 
 fn startValues(): Value[] = [
@@ -223,5 +245,7 @@ fn startValues(): Value[] = [
   Value(key="chart-range", value="week"),
   Value(key="notes", value="unread"),
   Value(key="stats", value="failed"),
-  Value(key="sort", value="newest")
+  Value(key="sort", value="newest"),
+  Value(key="activity-filter", value="everyone"),
+  Value(key="threads", value="archived")
 ]
