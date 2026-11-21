@@ -114,3 +114,10 @@ theme
   screens.chat-dot: length = 6px
   screens.chat-compose-max: length = 240px  // the pasted pieces and the text grow to this, then scroll inside, so the messages keep their room
   screens.chat-action-max: length = 200px  // a long button label wraps inside this, never across the composer or the bar
+  screens.chat-bubble-max: length = 560px  // a bubble's widest: near 70 characters of body type, so a long turn reads as lines, not a banner
+  screens.chat-gutter: length = 48px  // the far side's room beside a bubble, so the person's and the agent's never share an edge
+  screens.chat-ghost: length = 40px  // a one-line bubble's height while it loads (sm, a body line, sm, the line round it)
+  screens.chat-ghost-tall: length = 61px  // a two-line bubble's height while it loads
+  screens.chat-ghost-when: length = 40px
+  screens.chat-ghost-line: length = 10px
+  screens.chat-state-glyph: length = 32px
